@@ -69,10 +69,15 @@ parser.add_argument('--enable_mode_switch', action='store_true', default=False, 
 parser.add_argument('--mode_switch_min', type=int, default=1800, help='Minimum mode switch interval (seconds)')
 parser.add_argument('--mode_switch_max', type=int, default=7200, help='Maximum mode switch interval (seconds)')
 parser.add_argument('--max_run_length', type=int, default=20, help='Max run-length H for BeliefTracker')
-parser.add_argument('--hazard_rate', type=float, default=0.02, help='BOCD hazard rate')
+parser.add_argument('--hazard_rate', type=float, default=0.05, help='BOCD hazard rate')
 parser.add_argument('--surprise_ema_alpha', type=float, default=0.3, help='EMA smoothing for surprise signal')
 parser.add_argument('--penalty_decay_rate', type=float, default=0.1, help='Exponential decay rate for penalty schedule')
+parser.add_argument('--penalty_scale', type=float, default=5.0, help='Scale factor for belief-weighted policy conservatism')
 parser.add_argument('--belief_warmup_steps', type=int, default=50, help='Steps at episode start before updating belief')
+# ===== Context-Conditioning 参数 (借鉴 ESCP) =====
+parser.add_argument('--ep_dim', type=int, default=4, help='Context embedding dimension')
+parser.add_argument('--repr_loss_weight', type=float, default=1.0, help='Weight of RMDM representation loss')
+parser.add_argument('--context_warmup_episodes', type=int, default=50, help='Episodes before injecting ep_tensor into actor/critic')
 
 args = parser.parse_args()
 
@@ -86,25 +91,23 @@ class ReplayBuffer:
         self.buffer = []
         self.position = 0
 
-    def push(self, state, action, reward, next_state, done):
+    def push(self, state, action, reward, next_state, done, task_id=0):
         """Add new data to buffer, overwriting old if full"""
         if len(self.buffer) < self.capacity:
             self.buffer.append(None)
         
-        self.buffer[self.position] = (state, action, reward, next_state, done)
+        self.buffer[self.position] = (state, action, reward, next_state, done, task_id)
         self.position = (self.position + 1) % self.capacity
 
     def sample(self, batch_size):
         """Randomly sample batch_size elements in O(1)"""
-        # Optimized sampling: generates random indices instead of copying list
         batch_indices = np.random.randint(0, len(self.buffer), size=batch_size)
         batch = [self.buffer[i] for i in batch_indices]
         
-        # Unzip and convert to numpy
-        states, actions, rewards, next_states, dones = zip(*batch)
+        states, actions, rewards, next_states, dones, task_ids = zip(*batch)
         
         return np.stack(states), np.stack(actions), np.array(rewards, dtype=np.float32), \
-               np.stack(next_states), np.array(dones, dtype=np.float32)
+               np.stack(next_states), np.array(dones, dtype=np.float32), np.array(task_ids, dtype=np.int64)
 
     def __len__(self):
         return len(self.buffer)
@@ -132,6 +135,22 @@ class EmbeddingLayer(nn.Module):
         # Concatenate all embeddings
         embed_tensor = torch.cat(embedding_tensor_group, dim=1)
         return embed_tensor
+
+
+class ContextNetwork(nn.Module):
+    """Lightweight context encoder inspired by ESCP's Environment Probe.
+    Maps state embeddings to a low-dim context vector for mode identification."""
+    def __init__(self, state_with_emb_dim, ep_dim):
+        super(ContextNetwork, self).__init__()
+        self.net = nn.Sequential(
+            nn.Linear(state_with_emb_dim, 64),
+            nn.LayerNorm(64),
+            nn.ReLU(),
+            nn.Linear(64, ep_dim)
+        )
+    def forward(self, state_with_emb):
+        out = self.net(state_with_emb)
+        return out / torch.clamp_min(out.pow(2).sum(dim=-1, keepdim=True).sqrt(), 1e-5)
 
 
 class VectorizedLinear(nn.Module):
@@ -183,36 +202,40 @@ class VectorizedCritic(nn.Module):
 
 # Replace original SoftQNetwork with vectorized version
 class SoftQNetwork(VectorizedCritic):
-    def __init__(self, state_dim, action_dim, hidden_dim, embedding_layer, ensemble_size=10):
-        # compute input dim after embedding
-
+    def __init__(self, state_dim, action_dim, hidden_dim, embedding_layer, ep_dim=0, ensemble_size=10):
+        # state_dim + ep_dim for context-conditioned Q
         super().__init__(
-            state_dim=state_dim,
+            state_dim=state_dim + ep_dim,
             action_dim=action_dim,
             hidden_dim=hidden_dim,
             num_critics=ensemble_size,
             embedding_layer=embedding_layer
         )
-
         self.ensemble_size = ensemble_size
+        self.ep_dim = ep_dim
 
-    def forward(self, state, action):
+    def forward(self, state, action, ep_tensor=None):
         cat_tensor = state[:, :len(self.embedding_layer.cat_cols)]
         num_tensor = state[:, len(self.embedding_layer.cat_cols):]
         embedding = self.embedding_layer(cat_tensor.long())
-        state_with_embeddings = torch.cat([embedding, num_tensor], dim=1)
+        if ep_tensor is not None and self.ep_dim > 0:
+            state_with_embeddings = torch.cat([embedding, num_tensor, ep_tensor], dim=1)
+        else:
+            state_with_embeddings = torch.cat([embedding, num_tensor], dim=1)
         return super().forward(state_with_embeddings, action)
 
 
 class PolicyNetwork(nn.Module):
-    def __init__(self, num_inputs, num_actions, hidden_size, embedding_layer, action_range=1., init_w=3e-3, log_std_min=-20, log_std_max=2):
+    def __init__(self, num_inputs, num_actions, hidden_size, embedding_layer, context_net=None, ep_dim=0, action_range=1., init_w=3e-3, log_std_min=-20, log_std_max=2):
         super(PolicyNetwork, self).__init__()
 
         self.embedding_layer = embedding_layer
+        self.context_net = context_net
+        self.ep_dim = ep_dim
         self.log_std_min = log_std_min
         self.log_std_max = log_std_max
 
-        self.linear1 = nn.Linear(num_inputs, hidden_size)
+        self.linear1 = nn.Linear(num_inputs + ep_dim, hidden_size)
         self.linear2 = nn.Linear(hidden_size, hidden_size)
         self.linear3 = nn.Linear(hidden_size, hidden_size)
         self.linear4 = nn.Linear(hidden_size, hidden_size)
@@ -227,6 +250,7 @@ class PolicyNetwork(nn.Module):
 
         self.action_range = action_range
         self.num_actions = num_actions
+        self._warmup_active = True  # Start in warmup mode
 
     def forward(self, state):
         cat_tensor = state[:, :len(self.embedding_layer.cat_cols)]
@@ -235,13 +259,19 @@ class PolicyNetwork(nn.Module):
         embedding = self.embedding_layer(cat_tensor.long())
         state_with_embeddings = torch.cat([embedding, num_tensor], dim=1)
 
+        # Context conditioning: compute ep_tensor from context_net
+        if self.context_net is not None and self.ep_dim > 0:
+            ep_tensor = self.context_net(state_with_embeddings).detach()
+            if self._warmup_active:
+                ep_tensor = torch.zeros_like(ep_tensor)
+            state_with_embeddings = torch.cat([state_with_embeddings, ep_tensor], dim=1)
+
         x = F.relu(self.linear1(state_with_embeddings))
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
         x = F.relu(self.linear4(x))
 
         mean = (self.mean_linear(x))
-        # mean    = F.leaky_relu(self.mean_linear(x))
         log_std = self.log_std_linear(x)
         log_std = torch.clamp(log_std, self.log_std_min, self.log_std_max)
 
@@ -309,22 +339,27 @@ class SAC_Trainer():
 
         self.replay_buffer = replay_buffer
 
-        self.soft_q_net = SoftQNetwork(state_dim, action_dim, hidden_dim, embedding_layer, ensemble_size=ensemble_size).to(device)
+        self.context_net = ContextNetwork(state_dim, args.ep_dim).to(device)
+        self.soft_q_net = SoftQNetwork(state_dim, action_dim, hidden_dim, embedding_layer, ep_dim=args.ep_dim, ensemble_size=ensemble_size).to(device)
         self.target_soft_q_net = deepcopy(self.soft_q_net)
-        self.policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim, embedding_layer, action_range).to(device)
+        self.policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim, embedding_layer, context_net=self.context_net, ep_dim=args.ep_dim, action_range=action_range).to(device)
+        self.policy_net._warmup_active = True  # Start in warmup mode
         self.log_alpha = torch.zeros(1, dtype=torch.float32, requires_grad=True, device=device)
         print('Soft Q Network: ', self.soft_q_net)
         print('Policy Network: ', self.policy_net)
+        print('Context Network: ', self.context_net)
 
         self.soft_q_criterion = nn.MSELoss()
 
         soft_q_lr = 1e-5
         policy_lr = 1e-5
         alpha_lr = 1e-5
+        context_lr = 1e-4
 
         self.soft_q_optimizer = optim.Adam(self.soft_q_net.parameters(), lr=soft_q_lr)
         self.policy_optimizer = optim.Adam(self.policy_net.parameters(), lr=policy_lr)
         self.alpha_optimizer = optim.Adam([self.log_alpha], lr=alpha_lr)
+        self.context_optimizer = optim.Adam(self.context_net.parameters(), lr=context_lr)
 
         # 初始化RunningMeanStd
         initial_mean = [360., 360., 90.]
@@ -336,12 +371,12 @@ class SAC_Trainer():
         self.reward_scaling = RewardScaling(shape=1, gamma=0.99)
 
     # Q loss computation (original RE-SAC)
-    def compute_q_loss(self, state, action, reward, next_state, done, new_next_action, next_log_prob, reg_norm, gamma):
-        predicted_q_value = self.soft_q_net(state, action)  # shape: [ensemble_size, batch, 1]
-        target_q_next = self.target_soft_q_net(next_state, new_next_action)  # shape: [ensemble_size, batch, 1]
-        next_log_prob = next_log_prob.unsqueeze(0).repeat(self.soft_q_net.num_critics, 1)  # Expand and repeat for ensemble_size
-        reg_norm = reg_norm.unsqueeze(-1).repeat(1, args.batch_size)  # Adjust shape to match target_q_next
-        target_q_next = target_q_next - self.alpha * next_log_prob + args.weight_reg * reg_norm  # shape: [ensemble_size, batch, 1]
+    def compute_q_loss(self, state, action, reward, next_state, done, new_next_action, next_log_prob, reg_norm, gamma, ep_tensor=None, next_ep_tensor=None):
+        predicted_q_value = self.soft_q_net(state, action, ep_tensor)
+        target_q_next = self.target_soft_q_net(next_state, new_next_action, next_ep_tensor)
+        next_log_prob = next_log_prob.unsqueeze(0).repeat(self.soft_q_net.num_critics, 1)
+        reg_norm = reg_norm.unsqueeze(-1).repeat(1, args.batch_size)
+        target_q_next = target_q_next - self.alpha * next_log_prob + args.weight_reg * reg_norm
         target_q_value = reward + (1 - done) * gamma * target_q_next.unsqueeze(-1)
 
         ood_loss = predicted_q_value.std(0).mean()
@@ -349,35 +384,30 @@ class SAC_Trainer():
         loss = q_value_loss + args.beta_ood * ood_loss
         return loss, predicted_q_value, ood_loss
 
-    # ===== BA-PR: Q loss with belief-weighted epistemic penalty =====
+    # ===== BA-PR: Q loss — 不再在 target Q 中加 epistemic penalty =====
     def compute_q_loss_bapr(self, state, action, reward, next_state, done,
                             new_next_action, next_log_prob, reg_norm, gamma,
-                            belief_tracker):
+                            belief_tracker, ep_tensor=None, next_ep_tensor=None):
         """
-        对应 BAPR.lean: T_BAPR = Σ ρ(h) · T_h(Q)
-        通过 belief-weighted penalty 近似实现（见 BAPR_engineering_doc §7）
+        修复: 将 epistemic penalty 移到 policy loss，Q-loss 保持与 RE-SAC 一致。
+        这避免了 penalty 与 OOD loss 冲突导致 Q-std 爆炸的问题。
+        仅计算 weighted_lambda 供 policy loss 使用。
         """
-        predicted_q_value = self.soft_q_net(state, action)
-        target_q_next = self.target_soft_q_net(next_state, new_next_action)
+        predicted_q_value = self.soft_q_net(state, action, ep_tensor)
+        target_q_next = self.target_soft_q_net(next_state, new_next_action, next_ep_tensor)
 
         next_log_prob = next_log_prob.unsqueeze(0).repeat(self.soft_q_net.num_critics, 1)
         reg_norm_expanded = reg_norm.unsqueeze(-1).repeat(1, args.batch_size)
 
-        # === BA-PR 核心：belief-weighted epistemic penalty ===
-        epi_penalty = target_q_next.std(dim=0)  # [batch] — ensemble 标准差
-
-        # penalty schedule: exp(-decay * h)，短 run-length 对应高 penalty
+        # 计算 weighted_lambda（供 policy loss 使用，但不在此处施加 penalty）
         belief = torch.tensor(belief_tracker.belief, dtype=torch.float32, device=device)
         penalty_schedule = torch.exp(-args.penalty_decay_rate * torch.arange(belief_tracker.max_H, dtype=torch.float32, device=device))
-        weighted_lambda = (belief * penalty_schedule).sum()  # 标量
+        weighted_lambda = (belief * penalty_schedule).sum()
 
-        # target Q with BA-PR penalty
-        # reg_norm term: weight_reg * ||W||  (positive, 对应 Lean 的 -κ)
-        # epi_penalty term: weighted_lambda * weight_reg * std(Q)  (减少过度自信)
+        # 标准 target Q（与 RE-SAC 一致，不加 epistemic penalty）
         target_q_next = (target_q_next
                          - self.alpha * next_log_prob
-                         + args.weight_reg * reg_norm_expanded
-                         - weighted_lambda * args.weight_reg * epi_penalty.unsqueeze(0).repeat(self.soft_q_net.num_critics, 1))
+                         + args.weight_reg * reg_norm_expanded)
 
         target_q_value = reward + (1 - done) * gamma * target_q_next.unsqueeze(-1)
 
@@ -387,19 +417,42 @@ class SAC_Trainer():
 
         return loss, predicted_q_value, ood_loss, weighted_lambda.item()
 
-    # Policy loss computation
-    def compute_policy_loss(self, state, action, new_action, log_prob, reg_norm):
+    # Policy loss computation (standard RE-SAC)
+    def compute_policy_loss(self, state, action, new_action, log_prob, reg_norm, ep_tensor=None):
 
-        reg_norm = reg_norm.unsqueeze(-1).repeat(1, args.batch_size)  # Adjust shape to match target_q_next
+        reg_norm = reg_norm.unsqueeze(-1).repeat(1, args.batch_size)
 
-        q_values_dist = self.soft_q_net(state, new_action) + args.weight_reg * reg_norm - self.alpha * log_prob
+        q_values_dist = self.soft_q_net(state, new_action, ep_tensor) + args.weight_reg * reg_norm - self.alpha * log_prob
 
         q_mean = q_values_dist.mean(dim=0)
         q_std = q_values_dist.std(dim=0)
         q_loss = -(q_mean + args.beta * q_std).mean()
 
         bc_loss = F.mse_loss(new_action, action)
-        # smooth_loss = self.get_policy_smooth_loss(state)
+
+        loss = args.beta_bc * bc_loss + q_loss
+
+        return loss, q_loss, q_std
+
+    # ===== BA-PR: Policy loss with belief-weighted conservative penalty =====
+    def compute_policy_loss_bapr(self, state, action, new_action, log_prob, reg_norm, weighted_lambda, ep_tensor=None):
+        """
+        修复: epistemic penalty 在 policy loss 中通过 adaptive beta 实现。
+        belief 越不确定（weighted_lambda 越大）→ effective_beta 越负 → policy 越保守。
+        Q 网络不受影响，避免 ensemble 发散。
+        """
+        reg_norm = reg_norm.unsqueeze(-1).repeat(1, args.batch_size)
+
+        q_values_dist = self.soft_q_net(state, new_action, ep_tensor) + args.weight_reg * reg_norm - self.alpha * log_prob
+
+        q_mean = q_values_dist.mean(dim=0)
+        q_std = q_values_dist.std(dim=0)
+
+        # Adaptive beta: base beta (-2) 进一步被 weighted_lambda 调节
+        effective_beta = args.beta - weighted_lambda * args.penalty_scale
+        q_loss = -(q_mean + effective_beta * q_std).mean()
+
+        bc_loss = F.mse_loss(new_action, action)
 
         loss = args.beta_bc * bc_loss + q_loss
 
@@ -435,16 +488,73 @@ class SAC_Trainer():
         reg_norm = torch.sum(torch.stack(weight_norm), dim=0) + torch.sum(torch.stack(bias_norm[:-1]), dim=0)  # Final shape [10,]
         return reg_norm
 
+    def compute_rmdm_loss(self, ep_tensor, task_ids):
+        """RMDM-style representation loss: consistency within same task + diversity across tasks."""
+        unique_tasks = torch.unique(task_ids)
+        if len(unique_tasks) <= 1:
+            return torch.tensor(0.0, device=device)
+        
+        mean_vectors = []
+        consistency_losses = []
+        for task in unique_tasks:
+            mask = (task_ids == task)
+            task_eps = ep_tensor[mask]
+            if task_eps.shape[0] == 0:
+                continue
+            mean_ep = task_eps.mean(dim=0, keepdim=True)
+            mean_vectors.append(mean_ep)
+            consistency_losses.append(task_eps.std(dim=0).mean())
+            
+        cons_loss = sum(consistency_losses) / len(consistency_losses) if consistency_losses else 0.0
+        
+        repre_tensor = torch.cat(mean_vectors, dim=0)  # [N, ep_dim]
+        # DPP Diversity Loss
+        rbf_radius = 3000.0
+        diff = repre_tensor.unsqueeze(1) - repre_tensor.unsqueeze(0)
+        K = torch.exp(- (diff ** 2).sum(-1) * rbf_radius) + torch.eye(len(mean_vectors), device=device) * 1e-3
+        div_loss = -torch.logdet(K)
+        
+        return cons_loss + div_loss
+
     def update(self, batch_size, training_steps, reward_scale=10., auto_entropy=True, target_entropy=-2, gamma=0.99, soft_tau=1e-2,
-              belief_tracker=None, surprise_computer=None, episode_step=0):
+              belief_tracker=None, surprise_computer=None, episode_step=0, current_episode=0):
         global q_values, reg_norms1, reg_norms2, log_probs, alpha_values, ood_losses, q_stds
         global belief_entropies, effective_windows, surprise_emas, weighted_lambdas
-        state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
+        state, action, reward, next_state, done, task_ids = self.replay_buffer.sample(batch_size)
         state = torch.FloatTensor(state).to(device)
         next_state = torch.FloatTensor(next_state).to(device)
         action = torch.FloatTensor(action).to(device)
         reward = torch.FloatTensor(reward).unsqueeze(1).to(device)
         done = torch.FloatTensor(np.float32(done)).unsqueeze(1).to(device)
+        task_ids = torch.LongTensor(task_ids).to(device)
+
+        # ===== Context Conditioning: compute ep_tensor =====
+        cat_tensor = state[:, :self.num_cat_features]
+        num_tensor = state[:, self.num_cat_features:]
+        embedding = self.soft_q_net.embedding_layer(cat_tensor.long())
+        state_with_embeddings = torch.cat([embedding, num_tensor], dim=1)
+        ep_tensor_with_grad = self.context_net(state_with_embeddings)
+        ep_tensor = ep_tensor_with_grad.detach()
+
+        next_cat_tensor = next_state[:, :self.num_cat_features]
+        next_num_tensor = next_state[:, self.num_cat_features:]
+        next_embedding = self.soft_q_net.embedding_layer(next_cat_tensor.long())
+        next_state_with_embeddings = torch.cat([next_embedding, next_num_tensor], dim=1)
+        next_ep_tensor = self.context_net(next_state_with_embeddings).detach()
+
+        # Train ContextNetwork via RMDM loss (always, even during warmup)
+        rmdm_loss = self.compute_rmdm_loss(ep_tensor_with_grad, task_ids)
+        if isinstance(rmdm_loss, torch.Tensor) and rmdm_loss.requires_grad:
+            self.context_optimizer.zero_grad()
+            (args.repr_loss_weight * rmdm_loss).backward(retain_graph=True)
+            self.context_optimizer.step()
+
+        # DELAYED INJECTION: zero out ep_tensor during warmup so RL trains as pure RE-SAC
+        warmup_active = current_episode < args.context_warmup_episodes
+        if warmup_active:
+            ep_tensor = torch.zeros_like(ep_tensor)
+            next_ep_tensor = torch.zeros_like(next_ep_tensor)
+        self.policy_net._warmup_active = warmup_active
 
         new_action, log_prob, z, mean, log_std = self.policy_net.evaluate(state)
         new_next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
@@ -465,40 +575,37 @@ class SAC_Trainer():
             self.alpha = 1.
             alpha_loss = 0
 
-        # ===== BA-PR: surprise + belief update (BEFORE Q-loss, per frozen-penalty assumption) =====
+        # ===== BA-PR: surprise + belief update =====
         reg_norm = self.compute_reg_norm(self.target_soft_q_net)
         current_reg_norm = self.compute_reg_norm(self.soft_q_net)
 
         if belief_tracker is not None and surprise_computer is not None:
-            # Pre-compute Q-std for surprise signal (before Q-loss modifies it)
             with torch.no_grad():
-                pre_q = self.soft_q_net(state, action)  # [ensemble, batch]
-                q_std_signal = pre_q.std(dim=0)  # [batch]
+                pre_q = self.soft_q_net(state, action, ep_tensor)
+                q_std_signal = pre_q.std(dim=0)
 
-            # Multi-signal surprise: reward z-score + Q-std spike + reg_norm
             surprise = surprise_computer.compute(
                 reward, q_std_signal,
                 reg_norm_current=current_reg_norm, reg_norm_target=reg_norm
             )
-            # Only update belief after warmup period
             if episode_step >= args.belief_warmup_steps:
                 belief_tracker.update(surprise)
-            # BA-PR Q-loss
+            # BA-PR Q-loss with context
             q_value_loss, predicted_q_value, ood_loss, w_lambda = self.compute_q_loss_bapr(
                 state, action, reward, next_state, done,
                 new_next_action, next_log_prob, reg_norm, gamma,
-                belief_tracker
+                belief_tracker, ep_tensor, next_ep_tensor
             )
-            # Log BA-PR specific metrics
+            self._current_weighted_lambda = w_lambda
             belief_entropies.append(belief_tracker.entropy)
             effective_windows.append(belief_tracker.effective_window)
             surprise_emas.append(surprise)
             weighted_lambdas.append(w_lambda)
         else:
-            # Fallback to original RE-SAC Q-loss (no mode switching)
             q_value_loss, predicted_q_value, ood_loss = self.compute_q_loss(
                 state, action, reward, next_state, done,
-                new_next_action, next_log_prob, reg_norm, gamma
+                new_next_action, next_log_prob, reg_norm, gamma,
+                ep_tensor, next_ep_tensor
             )
 
         self.soft_q_optimizer.zero_grad()
@@ -508,14 +615,19 @@ class SAC_Trainer():
         self.soft_q_optimizer.step()
 
         if training_steps % args.critic_actor_ratio == 0:
-            policy_loss, predicted_new_q_value, q_std = self.compute_policy_loss(state, action, new_action, log_prob, reg_norm)
+            # BA-PR: adaptive beta policy loss with context
+            if belief_tracker is not None and hasattr(self, '_current_weighted_lambda'):
+                policy_loss, predicted_new_q_value, q_std = self.compute_policy_loss_bapr(
+                    state, action, new_action, log_prob, reg_norm, self._current_weighted_lambda, ep_tensor)
+            else:
+                policy_loss, predicted_new_q_value, q_std = self.compute_policy_loss(state, action, new_action, log_prob, reg_norm, ep_tensor)
             q_stds.append(q_std.mean().item())
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward(retain_graph=False)
             self.policy_optimizer.step()
 
-        # Target network soft update (AFTER Q-loss, per frozen-penalty assumption)
+        # Target network soft update
         for target_param, param in zip(self.target_soft_q_net.parameters(), self.soft_q_net.parameters()):
             target_param.data.copy_(target_param.data * (1.0 - soft_tau) + param.data * soft_tau)
 
@@ -537,6 +649,7 @@ class SAC_Trainer():
     def save_model(self, path):
         torch.save(self.soft_q_net.state_dict(), path + '_q')
         torch.save(self.policy_net.state_dict(), path + '_policy')
+        torch.save(self.context_net.state_dict(), path + '_context')
         torch.save(self.state_norm, path + '_norm')
 
     def load_model(self, path):
@@ -678,6 +791,7 @@ effective_windows_episode = []
 surprise_emas_episode = []
 weighted_lambdas_episode = []
 mode_switches_episode = []
+mode_id_episode = [] # Mode index at episode end (per episode)
 
 eval_episodes = []
 eval_mean_rewards = []
@@ -729,6 +843,8 @@ if __name__ == '__main__':
                 belief_tracker.reset()
             if surprise_computer is not None:
                 surprise_computer.reset()
+            # Set warmup flag for context injection
+            sac_trainer.policy_net._warmup_active = (eps < args.context_warmup_episodes)
 
             state_dict, reward_dict, _ = env.initialize_state(render=render)
 
@@ -774,7 +890,7 @@ if __name__ == '__main__':
                             else:
                                 reward = reward_dict[key]
 
-                            replay_buffer.push(state, action_dict[key], reward, next_state, done)
+                            replay_buffer.push(state, action_dict[key], reward, next_state, done, env.mode_names.index(env.current_mode_name))
                             if key == 2 and debug:
                                 print('From Algorithm store, Bus id: ', key, ' , station id is: ', state_dict[key][0][1], ' ,current time is: ', env.current_time, ' ,action is: ', action_dict[key], ', reward: ', reward_dict[key],
                                       'value is: ', v_dict[key])
@@ -800,7 +916,7 @@ if __name__ == '__main__':
                     step_trained = step
                     for i in range(update_itr):
                         _ = sac_trainer.update(args.batch_size, training_steps, reward_scale=10., auto_entropy=args.auto_entropy, target_entropy=-1. * action_dim,
-                                              belief_tracker=belief_tracker, surprise_computer=surprise_computer, episode_step=episode_steps)
+                                              belief_tracker=belief_tracker, surprise_computer=surprise_computer, episode_step=episode_steps, current_episode=eps)
                         training_steps += 1
 
                 if done:
@@ -865,8 +981,9 @@ if __name__ == '__main__':
             surprise_emas.clear()
             weighted_lambdas.clear()
 
-            # 记录模式切换次数
+            # 记录模式切换次数和当前模式ID
             mode_switches_episode.append(env.mode_switch_count)
+            mode_id_episode.append(env.mode_names.index(env.current_mode_name) if args.enable_mode_switch else 0)
             # ---------------------------
 
             if eps % args.plot_freq == 0:  # plot and model saving interval
@@ -887,6 +1004,7 @@ if __name__ == '__main__':
                 np.save(os.path.join(logs_path, 'surprise_emas_episode.npy'), surprise_emas_episode)
                 np.save(os.path.join(logs_path, 'weighted_lambdas_episode.npy'), weighted_lambdas_episode)
                 np.save(os.path.join(logs_path, 'mode_switches_episode.npy'), mode_switches_episode)
+                np.save(os.path.join(logs_path, 'mode_id_episode.npy'), mode_id_episode)
                 # -----------------
                 
                 sac_trainer.save_model(os.path.join(model_path, f"checkpoint_episode_{eps}"))
@@ -906,7 +1024,8 @@ if __name__ == '__main__':
                 f"Episode: {eps} | Episode Reward: {episode_reward} | Duration: {episode_duration:.2f}s "
                 f"| CPU Memory: {psutil.Process().memory_info().rss / 1024 ** 2:.2f} MB | "
                 f"GPU Memory Allocated: {torch.cuda.memory_allocated() / 1024 ** 2:.2f} MB | "
-                f"Replay Buffer Usage: {replay_buffer_usage:.2f}%{bapr_info}")
+                f"Replay Buffer Usage: {replay_buffer_usage:.2f}%{bapr_info}"
+                f"{' | [WARMUP]' if eps < args.context_warmup_episodes else ' | [BAPR+CTX ACTIVE]'}")
         sac_trainer.save_model(os.path.join(model_path, "final"))
 
         if args.eval_sigmas:

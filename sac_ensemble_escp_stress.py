@@ -668,6 +668,7 @@ alpha_values_episode = []  # 记录每个 episode 的 alpha 值
 ood_losses_episode = [] # OOD losses (per episode)
 q_stds_episode = [] # Q value standard deviations (per episode)
 mode_switches_episode = [] # Mode switches count (per episode)
+mode_id_episode = [] # Mode index at episode end (per episode)
 
 eval_episodes = []
 eval_mean_rewards = []
@@ -835,6 +836,7 @@ if __name__ == '__main__':
                 q_stds_episode.append(0)
             
             mode_switches_episode.append(env.mode_switch_count)
+            mode_id_episode.append(env.mode_names.index(env.current_mode_name) if args.enable_mode_switch else 0)
             
             # --- CRITICAL MEMORY FIX: Clear lists after aggregation ---
             q_values.clear()
@@ -859,6 +861,7 @@ if __name__ == '__main__':
                 np.save(os.path.join(logs_path, 'ood_losses_episode.npy'), ood_losses_episode)
                 np.save(os.path.join(logs_path, 'q_stds_episode.npy'), q_stds_episode)
                 np.save(os.path.join(logs_path, 'mode_switches_episode.npy'), mode_switches_episode)
+                np.save(os.path.join(logs_path, 'mode_id_episode.npy'), mode_id_episode)
                 # -----------------
                 
                 sac_trainer.save_model(os.path.join(model_path, f"checkpoint_episode_{eps}"))

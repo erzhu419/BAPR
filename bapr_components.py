@@ -17,8 +17,8 @@ class BeliefTracker:
     维护 run-length 后验分布 ρ(h)
     对应 BAPR.lean: update_belief / normalization_const
     """
-    def __init__(self, max_run_length: int = 20, hazard_rate: float = 0.02,
-                 base_variance: float = 1.0, variance_growth: float = 0.1):
+    def __init__(self, max_run_length: int = 20, hazard_rate: float = 0.05,
+                 base_variance: float = 0.1, variance_growth: float = 0.05):
         self.max_H = max_run_length
         self.hazard = hazard_rate
         self.base_var = base_variance
