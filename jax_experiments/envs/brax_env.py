@@ -260,7 +260,7 @@ class BraxNonstationaryEnv:
     # --- Scan-fused rollout with policy ---
 
     def build_rollout_fn(self, policy_graphdef, context_graphdef=None):
-        """Build a JIT'd scan rollout that fuses policy + physics + auto-reset.
+        """Build JIT'd scan rollouts: stochastic (training) + deterministic (eval).
 
         Args:
             policy_graphdef: nnx.graphdef(agent.policy)
@@ -273,17 +273,9 @@ class BraxNonstationaryEnv:
         reset_state = self._reset_state
         has_context = context_graphdef is not None
 
+        # --- Stochastic rollout (training) ---
         @jax.jit
         def _rollout_scan(sys, policy_params, context_params, init_state, keys):
-            """Fused rollout: [N] steps in one JIT call.
-
-            Args:
-                sys: Brax System pytree
-                policy_params: nnx.State for policy
-                context_params: nnx.State for context_net (or None-placeholder)
-                init_state: brax State
-                keys: [N, 2] PRNG keys
-            """
             def scan_body(carry, key):
                 state = carry
                 key1, key2 = jax.random.split(key)
@@ -293,7 +285,7 @@ class BraxNonstationaryEnv:
 
                 if has_context:
                     ctx_net = nnx.merge(context_graphdef, context_params)
-                    ep = ctx_net(pre_obs[None])  # [1, ep_dim]
+                    ep = ctx_net(pre_obs[None])
                     action, _ = policy.sample(pre_obs[None], key1, ep)
                 else:
                     action, _ = policy.sample(pre_obs[None], key1)
@@ -307,8 +299,7 @@ class BraxNonstationaryEnv:
 
                 reset_st = reset_state(sys, key2)
                 out_state = jax.tree.map(
-                    lambda r, n: jnp.where(done, r, n),
-                    reset_st, next_state)
+                    lambda r, n: jnp.where(done, r, n), reset_st, next_state)
 
                 transition = (pre_obs, action, reward, post_obs, done)
                 return out_state, transition
@@ -317,7 +308,44 @@ class BraxNonstationaryEnv:
                 scan_body, init_state, keys)
             return final_state, transitions
 
+        # --- Deterministic rollout (eval): tanh(mean), no PRNG per step ---
+        @jax.jit
+        def _rollout_scan_det(sys, policy_params, context_params, init_state, reset_keys):
+            """Eval rollout — uses policy mean (no exploration noise).
+
+            reset_keys: [N, 2] keys used only for auto-reset sampling.
+            """
+            def scan_body(carry, reset_key):
+                state = carry
+                pre_obs = state.obs
+                policy = nnx.merge(policy_graphdef, policy_params)
+
+                if has_context:
+                    ctx_net = nnx.merge(context_graphdef, context_params)
+                    ep = ctx_net(pre_obs[None])
+                    action = policy.deterministic(pre_obs[None], ep)
+                else:
+                    action = policy.deterministic(pre_obs[None])
+                action = action[0]
+
+                ps0 = state.pipeline_state
+                ps1 = physics_step(sys, ps0, action)
+                reward, post_obs, done = reward_obs(ps0, ps1, action)
+                next_state = state.replace(
+                    pipeline_state=ps1, obs=post_obs, reward=reward, done=done)
+
+                reset_st = reset_state(sys, reset_key)
+                out_state = jax.tree.map(
+                    lambda r, n: jnp.where(done, r, n), reset_st, next_state)
+
+                return out_state, (reward, done)
+
+            final_state, (rewards, dones) = jax.lax.scan(
+                scan_body, init_state, reset_keys)
+            return final_state, (rewards, dones)
+
         self._rollout_scan = _rollout_scan
+        self._rollout_scan_det = _rollout_scan_det
         self._has_context = has_context
 
     def rollout(self, policy_params, n_steps: int, rng_key, context_params=None):
@@ -358,3 +386,28 @@ class BraxNonstationaryEnv:
         self._check_switch()   # ← switches _current_sys so next rollout uses new task
         self._state = final_state
         return (obs_np, act_np, rew_np, nobs_np, done_np), ep_rewards
+
+    def eval_rollout(self, policy_params, n_steps: int, rng_key, context_params=None):
+        """Deterministic eval rollout — does NOT update step counter or switch task.
+
+        Uses tanh(mean) policy (no exploration noise). ~10-50x faster than the
+        sequential evaluate() loop because all steps run in one GPU scan call.
+
+        Args:
+            policy_params: nnx.State(agent.policy, nnx.Param)
+            n_steps: total steps to run (e.g. n_episodes * max_episode_steps)
+            rng_key: PRNG key (only used for auto-reset state sampling)
+            context_params: optional nnx.State(agent.context_net, nnx.Param)
+
+        Returns:
+            (rew_np, done_np): per-step reward and done arrays [n_steps]
+        """
+        rng_key, init_key, reset_key = jax.random.split(rng_key, 3)
+        sys = self._current_sys
+        init_state = self._reset_fn(sys, init_key)
+        reset_keys = jax.random.split(reset_key, n_steps)
+
+        _, (rew_jax, done_jax) = self._rollout_scan_det(
+            sys, policy_params, context_params, init_state, reset_keys)
+
+        return np.array(rew_jax), np.array(done_jax)

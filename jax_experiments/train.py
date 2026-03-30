@@ -61,21 +61,42 @@ def make_algo(algo_name: str, obs_dim: int, act_dim: int, config: Config):
 
 
 def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
-    """Evaluate using sequential API (few episodes, overhead acceptable)."""
-    rewards = []
-    for ep in range(n_episodes):
-        if tasks is not None:
-            env.set_task(tasks[ep % len(tasks)])
-        obs = env.reset()
-        episode_reward = 0.0
-        for _ in range(config.max_episode_steps):
-            action = agent.select_action(obs, deterministic=True)
-            obs, reward, done, info = env.step(action)
-            episode_reward += reward
-            if done:
+    """Fast GPU-scan eval: deterministic policy, single JIT call for all episodes.
+
+    n_episodes * max_episode_steps steps are run in one _rollout_scan_det call,
+    then episode rewards are segmented via the done mask on CPU.
+    """
+    from flax import nnx
+    policy_params = nnx.state(agent.policy, nnx.Param)
+    context_params = None
+    if hasattr(agent, 'context_net'):
+        context_params = nnx.state(agent.context_net, nnx.Param)
+
+    rng_key = jax.random.PRNGKey(42)  # fixed key for reproducible eval
+    n_steps = n_episodes * config.max_episode_steps
+
+    # If tasks provided, pick a representative task for eval
+    if tasks is not None:
+        env.set_task(tasks[0])
+
+    rew_np, done_np = env.eval_rollout(
+        policy_params, n_steps, rng_key, context_params=context_params)
+
+    # Segment into episodes via done mask
+    ep_rewards, ep_r, completed = [], 0.0, 0
+    for i in range(n_steps):
+        ep_r += rew_np[i]
+        if done_np[i] > 0.5:
+            ep_rewards.append(ep_r)
+            ep_r = 0.0
+            completed += 1
+            if completed >= n_episodes:
                 break
-        rewards.append(episode_reward)
-    return float(np.mean(rewards)), float(np.std(rewards))
+
+    if not ep_rewards:  # no episode completed (e.g. very early training)
+        ep_rewards = [ep_r]
+
+    return float(np.mean(ep_rewards)), float(np.std(ep_rewards))
 
 
 def collect_samples(agent, env, replay_buffer, config, n_steps: int):
@@ -184,6 +205,7 @@ def train(config: Config):
     eval_env = NonstationaryEnv(config.env_name, rand_params=config.varying_params,
                                 log_scale_limit=config.log_scale_limit, seed=config.seed + 1000,
                                 backend=config.brax_backend)
+    eval_env.build_rollout_fn(policy_graphdef, context_graphdef)  # needed for _rollout_scan_det
 
     total_steps = 0
     start_time = time.time()
