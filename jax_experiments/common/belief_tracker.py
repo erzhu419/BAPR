@@ -102,5 +102,8 @@ class SurpriseComputer:
             reg_div = float(np.mean(np.abs(reg_norm_current - reg_norm_target)))
 
         # Combined surprise (weighted sum)
+        self.last_surprise_r = float(reward_z)
+        self.last_surprise_q = float(q_std_ratio)
+        self.last_surprise_kappa = float(reg_div)
         surprise = 0.5 * reward_z + 0.3 * q_std_ratio + 0.2 * reg_div
         return float(np.clip(surprise, 0.0, 10.0))

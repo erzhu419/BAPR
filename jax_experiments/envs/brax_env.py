@@ -351,11 +351,19 @@ class BraxNonstationaryEnv:
     def rollout(self, policy_params, n_steps: int, rng_key, context_params=None):
         """Run n_steps using the pre-built scan rollout.
 
+        Returns JAX arrays (stay on GPU) + episode rewards (CPU).
+        The caller (collect_samples) can push JAX arrays directly to the
+        GPU-native replay buffer via push_batch_jax — zero CPU transfer.
+
         Args:
             policy_params: nnx.State(agent.policy, nnx.Param)
             n_steps: number of steps
             rng_key: PRNG key
             context_params: optional nnx.State(agent.context_net, nnx.Param)
+
+        Returns:
+            (obs, act, rew, nobs, done): JAX arrays [n_steps, ...]
+            ep_rewards: list of float (computed on CPU from done mask)
         """
         rng_key, init_key, roll_key = jax.random.split(rng_key, 3)
         init_state = self._reset_fn(self._current_sys, init_key)
@@ -365,14 +373,9 @@ class BraxNonstationaryEnv:
         final_state, (obs, act, rew, nobs, done) = self._rollout_scan(
             self._current_sys, policy_params, context_params, init_state, keys)
 
-        # Single bulk CPU transfer
-        obs_np = np.array(obs)
-        act_np = np.array(act)
+        # Episode rewards need CPU for Python-level segmentation
         rew_np = np.array(rew)
-        nobs_np = np.array(nobs)
         done_np = np.array(done)
-
-        # Episode rewards on CPU
         ep_rewards = []
         ep_r = 0.0
         for i in range(n_steps):
@@ -385,7 +388,8 @@ class BraxNonstationaryEnv:
         self._step_counter += n_steps
         self._check_switch()   # ← switches _current_sys so next rollout uses new task
         self._state = final_state
-        return (obs_np, act_np, rew_np, nobs_np, done_np), ep_rewards
+        # Return JAX arrays (obs, act, rew, nobs, done stay on GPU)
+        return (obs, act, rew, nobs, done), ep_rewards
 
     def eval_rollout(self, policy_params, n_steps: int, rng_key, context_params=None):
         """Deterministic eval rollout — does NOT update step counter or switch task.

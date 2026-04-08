@@ -44,11 +44,12 @@ class RESAC(SACBase):
                     tm = nnx.merge(gd_target, t_p)
                     pm = nnx.merge(gd_policy, p_p)
                     na, nlp = pm.sample(next_obs, k1)
-                    tq = tm(next_obs, na).min(axis=0) - alpha * nlp
-                    tv = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq
+                    # Independent targets: each Q_i uses its own target Q_i
+                    tq_all = tm(next_obs, na) - alpha * nlp  # [K, batch]
+                    tv_all = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq_all
                     cm = nnx.merge(gd_critic, cp)
                     pq = cm(obs, act)
-                    return jnp.mean((pq - tv[None]) ** 2), pq
+                    return jnp.mean((pq - tv_all) ** 2), pq
 
                 (c_loss, pq), c_grads = jax.value_and_grad(
                     critic_loss_fn, has_aux=True)(c_p)

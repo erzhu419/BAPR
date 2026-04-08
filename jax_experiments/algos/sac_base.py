@@ -161,12 +161,12 @@ class SACBase:
         t_p = nnx.state(self.target_critic, nnx.Param)
         p_p = nnx.state(self.policy, nnx.Param)
 
-        # Convert to JAX arrays (one transfer, not 250)
-        obs = jnp.array(stacked_batch["obs"])
-        act = jnp.array(stacked_batch["act"])
-        rew = jnp.array(stacked_batch["rew"])
-        nobs = jnp.array(stacked_batch["next_obs"])
-        done = jnp.array(stacked_batch["done"])
+        # Data is already JAX arrays from GPU-native replay buffer
+        obs = stacked_batch["obs"]
+        act = stacked_batch["act"]
+        rew = stacked_batch["rew"]
+        nobs = stacked_batch["next_obs"]
+        done = stacked_batch["done"]
 
         # Single JIT call for all N gradient steps
         final, metrics = self._scan_update(

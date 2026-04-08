@@ -1,11 +1,19 @@
-"""BAPR: ESCP + BOCD Belief Tracker + Adaptive β + EMA Policy + Perf Gating — scan-fused."""
+"""Unsupervised RMDM variant: uses BOCD-inferred pseudo-labels instead of true mode IDs.
+
+The context network's RMDM loss normally requires ground-truth mode labels (task_id)
+to compute within-mode consistency and cross-mode diversity. This variant replaces
+those with pseudo-labels derived from BOCD change-point detection:
+  - Each segment between two detected change-points gets a unique pseudo-label
+  - The RMDM loss then clusters embeddings by detected segment
+
+This removes the dependency on oracle mode labels during training.
+"""
 import jax
 import jax.numpy as jnp
 import optax
 import numpy as np
 from flax import nnx
 from copy import deepcopy
-from collections import deque
 
 from jax_experiments.networks.policy import GaussianPolicy
 from jax_experiments.networks.ensemble_critic import EnsembleCritic
@@ -13,8 +21,16 @@ from jax_experiments.networks.context_net import ContextNetwork, compute_rmdm_lo
 from jax_experiments.common.belief_tracker import BeliefTracker, SurpriseComputer
 
 
-class BAPR:
-    """BAPR = ESCP + BOCD belief-weighted adaptive conservatism — scan-fused."""
+class BAPRUnsupervised:
+    """BAPR with unsupervised RMDM: BOCD pseudo-labels replace true mode IDs.
+
+    Key difference from BAPR:
+      - Maintains a running pseudo-label counter
+      - When BOCD detects a change-point (weighted_lambda spikes),
+        increments the pseudo-label
+      - Replay buffer transitions are tagged with pseudo-labels instead of task_id
+      - RMDM trains on pseudo-labels
+    """
 
     def __init__(self, obs_dim: int, act_dim: int, config, seed: int = 0):
         self.config = config
@@ -31,10 +47,6 @@ class BAPR:
             obs_dim + config.ep_dim, act_dim, config.hidden_dim,
             ensemble_size=config.ensemble_size, n_layers=3, rngs=self.rngs)
         self.target_critic = deepcopy(self.critic)
-
-        # EMA policy: Polyak-averaged actor for stable evaluation
-        self.ema_policy = deepcopy(self.policy)
-        self.ema_tau = config.ema_tau
 
         self.log_alpha = jnp.array(jnp.log(config.alpha))
         self.target_entropy = -float(act_dim)
@@ -56,15 +68,18 @@ class BAPR:
             variance_growth=config.variance_growth)
         self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
 
-        # Performance gating: eval history for β tightening safety net
-        self._eval_history = deque(maxlen=config.perf_gate_lookback * 2)
-        self._perf_gate_active = False  # True when performance drop detected
-
         self.update_count = 0
         self._current_weighted_lambda = 0.0
+
+        # Pseudo-label tracking
+        self._current_pseudo_label = 0
+        self._changepoint_threshold = 0.3  # λ_w threshold to declare change-point
+        self._last_lambda_was_high = False
+
         self._build_scan_fn()
 
     def _build_scan_fn(self):
+        """Identical to BAPR scan — the only difference is in task_id assignment."""
         gamma = self.config.gamma
         tau = self.config.tau
         beta_base = self.config.beta
@@ -91,7 +106,6 @@ class BAPR:
                          c_opt_state, p_opt_state, x_opt_state, a_opt_state,
                          all_obs, all_act, all_rew, all_next_obs, all_done,
                          all_task_ids, rng_key, warmup, weighted_lambda):
-            """BAPR scan with adaptive beta via weighted_lambda."""
             effective_beta = beta_base - weighted_lambda * penalty_scale
 
             def body_fn(carry, batch_data):
@@ -100,7 +114,7 @@ class BAPR:
                 key, k1, k2 = jax.random.split(key, 3)
                 alpha = jnp.exp(la)
 
-                # === Context RMDM ===
+                # RMDM uses pseudo-labels (passed as task_ids)
                 def ctx_loss_fn(xp):
                     xm = nnx.merge(gd_ctx, xp)
                     return compute_rmdm_loss(xm(obs), tids, rbf_r, cons_w, div_w)
@@ -118,7 +132,6 @@ class BAPR:
                 obs_aug = jnp.concatenate([obs, ep], axis=-1)
                 next_aug = jnp.concatenate([next_obs, next_ep], axis=-1)
 
-                # === Critic ===
                 def critic_loss_fn(cp):
                     tm = nnx.merge(gd_target, t_p)
                     pm = nnx.merge(gd_policy, p_p)
@@ -135,7 +148,6 @@ class BAPR:
                 c_upd, new_c_os = c_opt.update(c_grads, c_os, c_p)
                 new_c_p = optax.apply_updates(c_p, c_upd)
 
-                # === Policy (adaptive β) ===
                 def policy_loss_fn(pp):
                     pm = nnx.merge(gd_policy, pp)
                     cm = nnx.merge(gd_critic, new_c_p)
@@ -150,14 +162,12 @@ class BAPR:
                 p_upd, new_p_os = p_opt.update(p_grads, p_os, p_p)
                 new_p_p = optax.apply_updates(p_p, p_upd)
 
-                # === Alpha ===
                 a_grad = -(lp.mean() + target_entropy)
                 a_upd, new_a_os = a_opt.update(a_grad, a_os, la)
                 new_la = jnp.where(auto_alpha, la + a_upd, la)
                 new_a_os = jax.tree.map(
                     lambda n, o: jnp.where(auto_alpha, n, o), new_a_os, a_os)
 
-                # === Target ===
                 new_t_p = jax.tree.map(
                     lambda tp, cp: tp * (1 - tau) + cp * tau, t_p, new_c_p)
 
@@ -174,7 +184,6 @@ class BAPR:
                        all_task_ids)
             return jax.lax.scan(body_fn, init, batches)
 
-        # JIT'd Q-std computation for surprise (called once per multi_update)
         @jax.jit
         def _compute_q_stats(critic_params, ctx_params, obs, act, warmup):
             cm = nnx.merge(gd_critic, critic_params)
@@ -192,6 +201,10 @@ class BAPR:
     def alpha(self):
         return jnp.exp(self.log_alpha)
 
+    @property
+    def current_pseudo_label(self):
+        return self._current_pseudo_label
+
     def select_action(self, obs, deterministic=False):
         obs_jax = jnp.array(obs)[None] if np.asarray(obs).ndim == 1 else jnp.array(obs)
         ep = self.context_net(obs_jax)
@@ -201,83 +214,32 @@ class BAPR:
         action, _ = self.policy.sample(obs_jax, key, ep)
         return np.array(action[0])
 
-    def select_action_ema(self, obs, deterministic=True):
-        """Select action using EMA policy (for stable evaluation)."""
-        obs_jax = jnp.array(obs)[None] if np.asarray(obs).ndim == 1 else jnp.array(obs)
-        ep = self.context_net(obs_jax)
-        if deterministic:
-            return np.array(self.ema_policy.deterministic(obs_jax, ep)[0])
-        key = self.rngs.params()
-        action, _ = self.ema_policy.sample(obs_jax, key, ep)
-        return np.array(action[0])
-
-    def _update_ema_policy(self):
-        """Soft-update EMA policy params from current policy."""
-        ema_p = nnx.state(self.ema_policy, nnx.Param)
-        cur_p = nnx.state(self.policy, nnx.Param)
-        new_ema = jax.tree.map(
-            lambda e, c: e * (1 - self.ema_tau) + c * self.ema_tau, ema_p, cur_p)
-        nnx.update(self.ema_policy, new_ema)
-
-    def report_eval(self, eval_reward: float):
-        """Called by training loop after each evaluation.
-        Feeds performance gating: detects >threshold drop to tighten β."""
-        self._eval_history.append(eval_reward)
-
-        cfg = self.config
-        if not cfg.perf_gate_enabled:
-            self._perf_gate_active = False
-            return
-
-        lb = cfg.perf_gate_lookback
-        if len(self._eval_history) >= lb * 2:
-            recent = list(self._eval_history)
-            later = np.mean(recent[-lb:])
-            earlier = np.mean(recent[-2*lb:-lb])
-            # Activate gating if performance dropped by threshold fraction
-            self._perf_gate_active = (earlier > 0 and
-                                      later < earlier * (1 - cfg.perf_gate_threshold))
-        else:
-            self._perf_gate_active = False
-
     def reset_episode(self):
         self.belief_tracker.reset()
         self.surprise_computer.reset()
 
     def _compute_weighted_lambda(self):
-        """Compute belief-weighted penalty with baseline subtraction.
-
-        BOCD dynamics: high surprise → belief pushed to high h (high variance
-        explains outliers) → effective_window increases.
-
-        Raw λ_w = ew / H has a non-zero steady state (~0.33), causing BAPR
-        to be unconditionally more conservative than ESCP even when stable.
-
-        Fix: subtract EMA-tracked baseline so stable → ~0, spike → positive.
-        """
         ew = self.belief_tracker.effective_window
         max_h = self.belief_tracker.max_H - 1
         raw_lw = float(np.clip(ew / max_h, 0.0, 1.0))
-
-        # EMA baseline: tracks the steady-state λ_w value
         if not hasattr(self, '_lw_baseline'):
             self._lw_baseline = raw_lw
         else:
             self._lw_baseline = 0.95 * self._lw_baseline + 0.05 * raw_lw
+        return float(np.clip(raw_lw - self._lw_baseline, 0.0, 1.0))
 
-        lw = float(np.clip(raw_lw - self._lw_baseline, 0.0, 1.0))
-
-        # Performance gating: if eval is declining, boost λ_w to tighten β
-        if self._perf_gate_active:
-            lw = max(lw, 0.5)  # floor at 0.5 → β_eff = β_base - 0.5 * penalty_scale
-
-        return lw
+    def _update_pseudo_label(self, weighted_lambda):
+        """Increment pseudo-label when BOCD detects a change-point."""
+        is_high = weighted_lambda > self._changepoint_threshold
+        if is_high and not self._last_lambda_was_high:
+            # Rising edge: new change-point detected
+            self._current_pseudo_label += 1
+        self._last_lambda_was_high = is_high
 
     def multi_update(self, stacked_batch, current_iter=0, recent_rewards=None, **kwargs):
         rng_key = self.rngs.params()
         warmup = jnp.array(current_iter < self.config.context_warmup_iters)
 
-        # Q-std from critic (always from replay batch — evaluates uncertainty)
         # Data is already JAX arrays from GPU-native replay buffer
         last_obs = stacked_batch["obs"][-1]
         last_act = stacked_batch["act"][-1]
@@ -286,8 +248,6 @@ class BAPR:
             nnx.state(self.context_net, nnx.Param),
             last_obs, last_act, warmup)
 
-        # Reward signal: prefer actual rollout episode rewards (direct task signal)
-        # over random replay batch rewards (may be from old tasks)
         if recent_rewards is not None and len(recent_rewards) > 0:
             reward_signal = np.array(recent_rewards, dtype=np.float32)
         else:
@@ -298,7 +258,15 @@ class BAPR:
         weighted_lambda = self._compute_weighted_lambda()
         self._current_weighted_lambda = weighted_lambda
 
-        # Run scan
+        # Update pseudo-label based on BOCD
+        self._update_pseudo_label(weighted_lambda)
+
+        # Override task_ids with pseudo-labels
+        # (the replay buffer still stores original task_ids, but we override here)
+        # This is the key unsupervised modification
+        pseudo_task_ids = np.full_like(
+            stacked_batch["task_id"], self._current_pseudo_label)
+
         c_p = nnx.state(self.critic, nnx.Param)
         t_p = nnx.state(self.target_critic, nnx.Param)
         p_p = nnx.state(self.policy, nnx.Param)
@@ -309,7 +277,7 @@ class BAPR:
         rew = stacked_batch["rew"]
         nobs = stacked_batch["next_obs"]
         done = stacked_batch["done"]
-        tids = stacked_batch["task_id"]
+        tids = jnp.array(pseudo_task_ids)  # PSEUDO-LABELS, not true task_ids (numpy->JAX needed)
 
         final, metrics = self._scan_update(
             c_p, t_p, p_p, x_p, self.log_alpha,
@@ -327,9 +295,6 @@ class BAPR:
         nnx.update(self.context_net, new_x)
         self.log_alpha = new_la
 
-        # EMA policy update (Polyak average of actor for stable eval)
-        self._update_ema_policy()
-
         n = obs.shape[0]
         self.update_count += n
 
@@ -346,10 +311,6 @@ class BAPR:
             "belief_entropy": float(self.belief_tracker.entropy),
             "effective_window": float(self.belief_tracker.effective_window),
             "warmup": bool(warmup),
-            "bocd_belief": np.array(self.belief_tracker.belief),
-            "surprise_r": getattr(self.surprise_computer, 'last_surprise_r', 0.0),
-            "surprise_q": getattr(self.surprise_computer, 'last_surprise_q', 0.0),
-            "surprise_kappa": getattr(self.surprise_computer, 'last_surprise_kappa', 0.0),
+            "pseudo_label": self._current_pseudo_label,
             "context_emb": np.array(ctx_emb),
-            "perf_gate_active": self._perf_gate_active,
         }

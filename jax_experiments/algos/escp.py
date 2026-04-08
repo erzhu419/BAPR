@@ -105,11 +105,12 @@ class ESCP:
                     tm = nnx.merge(gd_target, t_p)
                     pm = nnx.merge(gd_policy, p_p)
                     na, nlp = pm.sample(next_obs, k1, next_ep)
-                    tq = tm(next_aug, na).min(axis=0) - alpha * nlp
-                    tv = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq
+                    # Independent targets: each Q_i uses its own target Q_i
+                    tq_all = tm(next_aug, na) - alpha * nlp  # [K, batch]
+                    tv_all = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq_all
                     cm = nnx.merge(gd_critic, cp)
                     pq = cm(obs_aug, act)
-                    return jnp.mean((pq - tv[None]) ** 2), pq
+                    return jnp.mean((pq - tv_all) ** 2), pq
 
                 (c_loss, pq), c_grads = jax.value_and_grad(
                     critic_loss_fn, has_aux=True)(c_p)
@@ -179,12 +180,13 @@ class ESCP:
         p_p = nnx.state(self.policy, nnx.Param)
         x_p = nnx.state(self.context_net, nnx.Param)
 
-        obs = jnp.array(stacked_batch["obs"])
-        act = jnp.array(stacked_batch["act"])
-        rew = jnp.array(stacked_batch["rew"])
-        nobs = jnp.array(stacked_batch["next_obs"])
-        done = jnp.array(stacked_batch["done"])
-        tids = jnp.array(stacked_batch["task_id"])
+        # Data is already JAX arrays from GPU-native replay buffer
+        obs = stacked_batch["obs"]
+        act = stacked_batch["act"]
+        rew = stacked_batch["rew"]
+        nobs = stacked_batch["next_obs"]
+        done = stacked_batch["done"]
+        tids = stacked_batch["task_id"]
 
         final, metrics = self._scan_update(
             c_p, t_p, p_p, x_p, self.log_alpha,

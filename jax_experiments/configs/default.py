@@ -58,6 +58,14 @@ class Config:
     penalty_scale: float = 5.0      # β_eff = β_base - λ_w × penalty_scale
     belief_warmup_steps: int = 50
 
+    # EMA Policy (Polyak-averaged actor for stable evaluation)
+    ema_tau: float = 0.005          # EMA smoothing coefficient (same as target critic tau)
+
+    # Performance Gating (eval-based β tightening as safety net for BOCD)
+    perf_gate_enabled: bool = True  # enable performance gating
+    perf_gate_threshold: float = 0.1  # tighten β if eval drops >10%
+    perf_gate_lookback: int = 3     # compare last N evals vs previous N
+
     # Logging
     save_root: str = "jax_experiments/results"
     run_name: str = ""

@@ -1,11 +1,15 @@
-"""BAPR: ESCP + BOCD Belief Tracker + Adaptive β + EMA Policy + Perf Gating — scan-fused."""
+"""Bad-BAPR: Q-dependent belief variant that violates the frozen-belief requirement.
+
+This implements the counterexample from the Lean 4 proof: beta_eff depends on
+CURRENT Q-values (not frozen). Theorem predicts divergence when gamma + lambda*Delta >= 1.
+Used to empirically validate the theoretical necessity of frozen beliefs.
+"""
 import jax
 import jax.numpy as jnp
 import optax
 import numpy as np
 from flax import nnx
 from copy import deepcopy
-from collections import deque
 
 from jax_experiments.networks.policy import GaussianPolicy
 from jax_experiments.networks.ensemble_critic import EnsembleCritic
@@ -13,8 +17,15 @@ from jax_experiments.networks.context_net import ContextNetwork, compute_rmdm_lo
 from jax_experiments.common.belief_tracker import BeliefTracker, SurpriseComputer
 
 
-class BAPR:
-    """BAPR = ESCP + BOCD belief-weighted adaptive conservatism — scan-fused."""
+class BadBAPR:
+    """Bad-BAPR: Q-dependent adaptive beta (violates frozen-belief requirement).
+
+    Unlike proper BAPR where weighted_lambda is computed BEFORE the scan and
+    remains constant throughout all N gradient steps, Bad-BAPR recomputes
+    effective_beta INSIDE each scan step based on the current Q-values.
+    This creates the Q-dependent belief coupling that the Lean 4 counterexample
+    proves will break contraction when gamma + lambda*Delta >= 1.
+    """
 
     def __init__(self, obs_dim: int, act_dim: int, config, seed: int = 0):
         self.config = config
@@ -31,10 +42,6 @@ class BAPR:
             obs_dim + config.ep_dim, act_dim, config.hidden_dim,
             ensemble_size=config.ensemble_size, n_layers=3, rngs=self.rngs)
         self.target_critic = deepcopy(self.critic)
-
-        # EMA policy: Polyak-averaged actor for stable evaluation
-        self.ema_policy = deepcopy(self.policy)
-        self.ema_tau = config.ema_tau
 
         self.log_alpha = jnp.array(jnp.log(config.alpha))
         self.target_entropy = -float(act_dim)
@@ -55,10 +62,6 @@ class BAPR:
             base_variance=config.base_variance,
             variance_growth=config.variance_growth)
         self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
-
-        # Performance gating: eval history for β tightening safety net
-        self._eval_history = deque(maxlen=config.perf_gate_lookback * 2)
-        self._perf_gate_active = False  # True when performance drop detected
 
         self.update_count = 0
         self._current_weighted_lambda = 0.0
@@ -90,9 +93,8 @@ class BAPR:
                          ctx_params, log_alpha,
                          c_opt_state, p_opt_state, x_opt_state, a_opt_state,
                          all_obs, all_act, all_rew, all_next_obs, all_done,
-                         all_task_ids, rng_key, warmup, weighted_lambda):
-            """BAPR scan with adaptive beta via weighted_lambda."""
-            effective_beta = beta_base - weighted_lambda * penalty_scale
+                         all_task_ids, rng_key, warmup):
+            """BAD scan: effective_beta depends on Q-values INSIDE the loop."""
 
             def body_fn(carry, batch_data):
                 (c_p, t_p, p_p, x_p, la, c_os, p_os, x_os, a_os, key) = carry
@@ -135,7 +137,20 @@ class BAPR:
                 c_upd, new_c_os = c_opt.update(c_grads, c_os, c_p)
                 new_c_p = optax.apply_updates(c_p, c_upd)
 
-                # === Policy (adaptive β) ===
+                # ====================================================
+                # KEY VIOLATION: compute effective_beta from CURRENT Q
+                # This creates the Q-dependent coupling that breaks
+                # contraction. Proper BAPR freezes this outside the scan.
+                # ====================================================
+                cm_current = nnx.merge(gd_critic, new_c_p)
+                q_current = cm_current(obs_aug, act)
+                q_std_current = q_current.std(axis=0).mean()
+                # Use Q-std as a proxy for "surprise" — higher Q-std =>
+                # more penalty. This couples beta to Q, violating frozen-belief.
+                q_dependent_lambda = jnp.clip(q_std_current / 10.0, 0.0, 1.0)
+                effective_beta = beta_base - q_dependent_lambda * penalty_scale
+
+                # === Policy (Q-dependent adaptive beta — BAD!) ===
                 def policy_loss_fn(pp):
                     pm = nnx.merge(gd_policy, pp)
                     cm = nnx.merge(gd_critic, new_c_p)
@@ -164,7 +179,8 @@ class BAPR:
                 new_carry = (new_c_p, new_t_p, new_p_p, new_x_p, new_la,
                              new_c_os, new_p_os, new_x_os, new_a_os, key)
                 metrics = (c_loss, p_loss, x_loss, jnp.exp(new_la),
-                           pq.mean(), pq.std(axis=0).mean(), lp.mean())
+                           pq.mean(), pq.std(axis=0).mean(), lp.mean(),
+                           q_dependent_lambda)
                 return new_carry, metrics
 
             init = (critic_params, target_params, policy_params,
@@ -174,19 +190,7 @@ class BAPR:
                        all_task_ids)
             return jax.lax.scan(body_fn, init, batches)
 
-        # JIT'd Q-std computation for surprise (called once per multi_update)
-        @jax.jit
-        def _compute_q_stats(critic_params, ctx_params, obs, act, warmup):
-            cm = nnx.merge(gd_critic, critic_params)
-            xm = nnx.merge(gd_ctx, ctx_params)
-            ep = xm(obs)
-            ep = jnp.where(warmup, jnp.zeros_like(ep), ep)
-            oa = jnp.concatenate([obs, ep], axis=-1)
-            pq = cm(oa, act)
-            return pq.std(axis=0).mean(), ep.mean(axis=0)
-
         self._scan_update = _scan_update
-        self._compute_q_stats = _compute_q_stats
 
     @property
     def alpha(self):
@@ -201,109 +205,20 @@ class BAPR:
         action, _ = self.policy.sample(obs_jax, key, ep)
         return np.array(action[0])
 
-    def select_action_ema(self, obs, deterministic=True):
-        """Select action using EMA policy (for stable evaluation)."""
-        obs_jax = jnp.array(obs)[None] if np.asarray(obs).ndim == 1 else jnp.array(obs)
-        ep = self.context_net(obs_jax)
-        if deterministic:
-            return np.array(self.ema_policy.deterministic(obs_jax, ep)[0])
-        key = self.rngs.params()
-        action, _ = self.ema_policy.sample(obs_jax, key, ep)
-        return np.array(action[0])
-
-    def _update_ema_policy(self):
-        """Soft-update EMA policy params from current policy."""
-        ema_p = nnx.state(self.ema_policy, nnx.Param)
-        cur_p = nnx.state(self.policy, nnx.Param)
-        new_ema = jax.tree.map(
-            lambda e, c: e * (1 - self.ema_tau) + c * self.ema_tau, ema_p, cur_p)
-        nnx.update(self.ema_policy, new_ema)
-
-    def report_eval(self, eval_reward: float):
-        """Called by training loop after each evaluation.
-        Feeds performance gating: detects >threshold drop to tighten β."""
-        self._eval_history.append(eval_reward)
-
-        cfg = self.config
-        if not cfg.perf_gate_enabled:
-            self._perf_gate_active = False
-            return
-
-        lb = cfg.perf_gate_lookback
-        if len(self._eval_history) >= lb * 2:
-            recent = list(self._eval_history)
-            later = np.mean(recent[-lb:])
-            earlier = np.mean(recent[-2*lb:-lb])
-            # Activate gating if performance dropped by threshold fraction
-            self._perf_gate_active = (earlier > 0 and
-                                      later < earlier * (1 - cfg.perf_gate_threshold))
-        else:
-            self._perf_gate_active = False
-
     def reset_episode(self):
         self.belief_tracker.reset()
         self.surprise_computer.reset()
-
-    def _compute_weighted_lambda(self):
-        """Compute belief-weighted penalty with baseline subtraction.
-
-        BOCD dynamics: high surprise → belief pushed to high h (high variance
-        explains outliers) → effective_window increases.
-
-        Raw λ_w = ew / H has a non-zero steady state (~0.33), causing BAPR
-        to be unconditionally more conservative than ESCP even when stable.
-
-        Fix: subtract EMA-tracked baseline so stable → ~0, spike → positive.
-        """
-        ew = self.belief_tracker.effective_window
-        max_h = self.belief_tracker.max_H - 1
-        raw_lw = float(np.clip(ew / max_h, 0.0, 1.0))
-
-        # EMA baseline: tracks the steady-state λ_w value
-        if not hasattr(self, '_lw_baseline'):
-            self._lw_baseline = raw_lw
-        else:
-            self._lw_baseline = 0.95 * self._lw_baseline + 0.05 * raw_lw
-
-        lw = float(np.clip(raw_lw - self._lw_baseline, 0.0, 1.0))
-
-        # Performance gating: if eval is declining, boost λ_w to tighten β
-        if self._perf_gate_active:
-            lw = max(lw, 0.5)  # floor at 0.5 → β_eff = β_base - 0.5 * penalty_scale
-
-        return lw
 
     def multi_update(self, stacked_batch, current_iter=0, recent_rewards=None, **kwargs):
         rng_key = self.rngs.params()
         warmup = jnp.array(current_iter < self.config.context_warmup_iters)
 
-        # Q-std from critic (always from replay batch — evaluates uncertainty)
-        # Data is already JAX arrays from GPU-native replay buffer
-        last_obs = stacked_batch["obs"][-1]
-        last_act = stacked_batch["act"][-1]
-        q_std, ctx_emb = self._compute_q_stats(
-            nnx.state(self.critic, nnx.Param),
-            nnx.state(self.context_net, nnx.Param),
-            last_obs, last_act, warmup)
-
-        # Reward signal: prefer actual rollout episode rewards (direct task signal)
-        # over random replay batch rewards (may be from old tasks)
-        if recent_rewards is not None and len(recent_rewards) > 0:
-            reward_signal = np.array(recent_rewards, dtype=np.float32)
-        else:
-            reward_signal = stacked_batch["rew"][-1].flatten()
-
-        surprise = self.surprise_computer.compute(reward_signal, np.array([float(q_std)]))
-        self.belief_tracker.update(surprise)
-        weighted_lambda = self._compute_weighted_lambda()
-        self._current_weighted_lambda = weighted_lambda
-
-        # Run scan
         c_p = nnx.state(self.critic, nnx.Param)
         t_p = nnx.state(self.target_critic, nnx.Param)
         p_p = nnx.state(self.policy, nnx.Param)
         x_p = nnx.state(self.context_net, nnx.Param)
 
+        # Data is already JAX arrays from GPU-native replay buffer
         obs = stacked_batch["obs"]
         act = stacked_batch["act"]
         rew = stacked_batch["rew"]
@@ -315,8 +230,7 @@ class BAPR:
             c_p, t_p, p_p, x_p, self.log_alpha,
             self.critic_opt_state, self.policy_opt_state,
             self.context_opt_state, self.alpha_opt_state,
-            obs, act, rew, nobs, done, tids, rng_key, warmup,
-            jnp.array(weighted_lambda))
+            obs, act, rew, nobs, done, tids, rng_key, warmup)
 
         (new_c, new_t, new_p, new_x, new_la,
          self.critic_opt_state, self.policy_opt_state,
@@ -327,13 +241,10 @@ class BAPR:
         nnx.update(self.context_net, new_x)
         self.log_alpha = new_la
 
-        # EMA policy update (Polyak average of actor for stable eval)
-        self._update_ema_policy()
-
         n = obs.shape[0]
         self.update_count += n
 
-        c_loss, p_loss, x_loss, alpha, qm, qs, lp = metrics
+        c_loss, p_loss, x_loss, alpha, qm, qs, lp, q_dep_lam = metrics
         return {
             "critic_loss": float(c_loss.mean()),
             "policy_loss": float(p_loss.mean()),
@@ -342,14 +253,8 @@ class BAPR:
             "q_mean": float(qm.mean()),
             "q_std_mean": float(qs.mean()),
             "log_prob": float(lp.mean()),
-            "weighted_lambda": weighted_lambda,
-            "belief_entropy": float(self.belief_tracker.entropy),
-            "effective_window": float(self.belief_tracker.effective_window),
+            "weighted_lambda": float(q_dep_lam.mean()),  # Q-dependent lambda
+            "belief_entropy": 0.0,
+            "effective_window": 0.0,
             "warmup": bool(warmup),
-            "bocd_belief": np.array(self.belief_tracker.belief),
-            "surprise_r": getattr(self.surprise_computer, 'last_surprise_r', 0.0),
-            "surprise_q": getattr(self.surprise_computer, 'last_surprise_q', 0.0),
-            "surprise_kappa": getattr(self.surprise_computer, 'last_surprise_kappa', 0.0),
-            "context_emb": np.array(ctx_emb),
-            "perf_gate_active": self._perf_gate_active,
         }

@@ -16,7 +16,7 @@ export XLA_FLAGS="--xla_gpu_enable_triton_gemm=false"
 
 SEED=8
 MAX_ITERS=2000
-SAVE_ROOT="jax_experiments/results"
+SAVE_ROOT="jax_experiments/results_plots_data"
 BACKEND="spring"
 
 ALGOS=("resac" "escp" "bapr")

@@ -42,6 +42,7 @@ from flax import nnx
 from jax_experiments.configs.default import Config
 from jax_experiments.common.replay_buffer import ReplayBuffer
 from jax_experiments.common.logging import Logger
+from jax_experiments.common.checkpoint import save_checkpoint, load_checkpoint, has_checkpoint
 from jax_experiments.envs.brax_env import BraxNonstationaryEnv as NonstationaryEnv
 
 
@@ -56,6 +57,28 @@ def make_algo(algo_name: str, obs_dim: int, act_dim: int, config: Config):
     elif algo_name == "bapr":
         from jax_experiments.algos.bapr import BAPR
         return BAPR(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "sac":
+        from jax_experiments.algos.sac_base import SACBase
+        return SACBase(obs_dim, act_dim, config, seed=config.seed)
+    # --- Ablation variants ---
+    elif algo_name == "bapr_no_bocd":
+        from jax_experiments.algos.bapr_ablations import BAPRNoBocd
+        return BAPRNoBocd(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "bapr_no_rmdm":
+        from jax_experiments.algos.bapr_ablations import BAPRNoRmdm
+        return BAPRNoRmdm(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "bapr_no_adapt_beta":
+        from jax_experiments.algos.bapr_ablations import BAPRNoAdaptBeta
+        return BAPRNoAdaptBeta(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "bapr_fixed_decay":
+        from jax_experiments.algos.bapr_ablations import BAPRFixedDecay
+        return BAPRFixedDecay(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "bad_bapr":
+        from jax_experiments.algos.bad_bapr import BadBAPR
+        return BadBAPR(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "bapr_unsupervised":
+        from jax_experiments.algos.bapr_unsupervised import BAPRUnsupervised
+        return BAPRUnsupervised(obs_dim, act_dim, config, seed=config.seed)
     else:
         raise ValueError(f"Unknown algorithm: {algo_name}")
 
@@ -65,9 +88,15 @@ def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
 
     n_episodes * max_episode_steps steps are run in one _rollout_scan_det call,
     then episode rewards are segmented via the done mask on CPU.
+
+    Uses EMA policy if available (BAPR) for more stable evaluation.
     """
     from flax import nnx
-    policy_params = nnx.state(agent.policy, nnx.Param)
+    # Use EMA policy if available (BAPR), otherwise current policy
+    if hasattr(agent, 'ema_policy'):
+        policy_params = nnx.state(agent.ema_policy, nnx.Param)
+    else:
+        policy_params = nnx.state(agent.policy, nnx.Param)
     context_params = None
     if hasattr(agent, 'context_net'):
         context_params = nnx.state(agent.context_net, nnx.Param)
@@ -103,7 +132,7 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
     """Collect n_steps via GPU scan-fused rollout.
 
     Fuses policy + physics + auto-reset in ONE XLA call.
-    Single bulk CPU transfer at the end.
+    Data stays on GPU: rollout returns JAX arrays -> push_batch_jax -> buffer(GPU).
     """
     is_random = replay_buffer.size < config.start_train_steps
     rng_key = jax.random.PRNGKey(config.seed + replay_buffer.size)
@@ -136,10 +165,10 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
         (obs, act, rew, nobs, done), ep_rewards = env.rollout(
             policy_params, n_steps, rng_key, context_params=context_params)
 
-        # Bulk push to replay buffer (all steps share current task_id)
-        task_ids = np.full(n_steps, env.current_task_id, dtype=np.int32)
-        replay_buffer.push_batch(obs, act, rew.reshape(-1, 1),
-                                 nobs, done.reshape(-1, 1), task_ids)
+        # Zero-copy push: JAX arrays go directly to GPU-native replay buffer
+        task_ids = jnp.full(n_steps, env.current_task_id, dtype=jnp.int32)
+        replay_buffer.push_batch_jax(obs, act, rew.reshape(-1, 1),
+                                     nobs, done.reshape(-1, 1), task_ids)
 
         # Reset belief only when TASK switches (not on every episode end)
         # BOCD handles within-task episode resets naturally via its own dynamics
@@ -198,8 +227,17 @@ def train(config: Config):
     os.makedirs(model_dir, exist_ok=True)
     logger = Logger(log_dir)
 
-    print(f"Logging to: {log_dir}")
-    print(f"Starting training... (first {config.start_train_steps} steps are random exploration)")
+    # --- Checkpoint resume ---
+    start_iteration = 0
+    total_steps = 0
+    ckpt_dir = os.path.join(config.save_root, run_name, "checkpoints")
+    if getattr(config, 'resume', False) and has_checkpoint(ckpt_dir):
+        start_iteration, total_steps = load_checkpoint(
+            ckpt_dir, agent, replay_buffer, logger, config.algo)
+        print(f"Resumed from checkpoint: iter={start_iteration}, steps={total_steps}")
+    else:
+        print(f"Logging to: {log_dir}")
+        print(f"Starting training... (first {config.start_train_steps} steps are random exploration)")
 
     # Separate eval env to avoid polluting training env's state
     eval_env = NonstationaryEnv(config.env_name, rand_params=config.varying_params,
@@ -207,14 +245,20 @@ def train(config: Config):
                                 backend=config.brax_backend)
     eval_env.build_rollout_fn(policy_graphdef, context_graphdef)  # needed for _rollout_scan_det
 
-    total_steps = 0
+    total_steps = total_steps  # from checkpoint or 0
     start_time = time.time()
+    collect_time_total = 0.0
+    train_time_total = 0.0
+    eval_time_total = 0.0
 
-    for iteration in range(config.max_iters):
+    for iteration in range(start_iteration, config.max_iters):
         iter_start = time.time()
 
         # --- Collect samples ---
+        collect_start = time.time()
         ep_rewards = collect_samples(agent, env, replay_buffer, config, config.samples_per_iter)
+        collect_time = time.time() - collect_start
+        collect_time_total += collect_time
         total_steps += config.samples_per_iter
 
         if len(ep_rewards) > 0:
@@ -222,33 +266,54 @@ def train(config: Config):
             logger.log("train_reward_std", float(np.std(ep_rewards)))
 
         # --- Training updates (fused via lax.scan) ---
+        train_start = time.time()
         if replay_buffer.size >= config.start_train_steps:
+            # GPU-native sampling: rng_key ensures fully on-device indexing
+            sample_key = jax.random.PRNGKey(config.seed + iteration)
             stacked = replay_buffer.sample_stacked(
-                config.updates_per_iter, config.batch_size)
-            if config.algo == "bapr":
+                config.updates_per_iter, config.batch_size, rng_key=sample_key)
+            # Dispatch based on algorithm capabilities
+            _algo = config.algo
+            _bapr_like = _algo in ("bapr", "bapr_no_rmdm", "bad_bapr",
+                                    "bapr_unsupervised")
+            _escp_like = _algo in ("escp", "bapr_no_bocd", "bapr_no_adapt_beta",
+                                    "bapr_fixed_decay")
+            if _bapr_like:
                 metrics = agent.multi_update(
                     stacked, current_iter=iteration,
                     recent_rewards=ep_rewards if ep_rewards else None)
-            elif config.algo == "escp":
+            elif _escp_like:
                 metrics = agent.multi_update(
                     stacked, current_iter=iteration)
             else:
                 metrics = agent.multi_update(stacked)
 
             for k, v in metrics.items():
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, float, np.ndarray)):
                     logger.log(k, v)
+        train_time = time.time() - train_start
+        train_time_total += train_time
 
         # --- Evaluation (expensive, only every log_interval) ---
         eval_mean = None
+        eval_start = time.time()
         if iteration % config.log_interval == 0:
             eval_mean, eval_std = evaluate(agent, eval_env, config, test_tasks,
                                            n_episodes=config.eval_episodes)
             logger.log("eval_reward", eval_mean)
             logger.log("eval_reward_std", eval_std)
+            # Feed eval to BAPR for performance gating
+            if hasattr(agent, 'report_eval'):
+                agent.report_eval(eval_mean)
+        eval_time = time.time() - eval_start
+        eval_time_total += eval_time
+
         logger.log("total_steps", total_steps)
         logger.log("iteration", iteration)
         logger.log("mode_id", env.current_task_id)
+        logger.log("iter_time", time.time() - iter_start)
+        logger.log("collect_time", collect_time)
+        logger.log("train_time", train_time)
 
         # --- Always print status ---
         iter_time = time.time() - iter_start
@@ -257,9 +322,9 @@ def train(config: Config):
             q_std_str = f" | Q-std: {metrics.get('q_std_mean', 0):.2f}"
         eval_str = f" | Eval: {eval_mean:.1f}" if eval_mean is not None else ""
         extra = f"TaskID: {env.current_task_id}{q_std_str}{eval_str}"
-        if config.algo == "bapr":
+        if hasattr(agent, '_current_weighted_lambda'):
             extra += f" | λ_w: {agent._current_weighted_lambda:.3f}"
-        if config.algo in ("escp", "bapr"):
+        if hasattr(agent, 'context_net'):
             warmup = iteration < config.context_warmup_iters
             extra += f" | {'[WARMUP]' if warmup else '[ACTIVE]'}"
         extra += f" | {iter_time:.1f}s/iter"
@@ -268,11 +333,19 @@ def train(config: Config):
         # --- Save ---
         if iteration % config.save_interval == 0:
             logger.save()
+            # Save checkpoint for resume
+            save_checkpoint(ckpt_dir, agent, replay_buffer, logger,
+                            iteration, total_steps, config.algo)
 
     # Final save
     logger.save()
+    save_checkpoint(ckpt_dir, agent, replay_buffer, logger,
+                    config.max_iters - 1, total_steps, config.algo)
     elapsed = time.time() - start_time
     print(f"\nTraining complete! Total time: {elapsed:.0f}s ({elapsed/3600:.1f}h)")
+    print(f"  Collect time: {collect_time_total:.0f}s ({collect_time_total/elapsed*100:.1f}%)")
+    print(f"  Train time:   {train_time_total:.0f}s ({train_time_total/elapsed*100:.1f}%)")
+    print(f"  Eval time:    {eval_time_total:.0f}s ({eval_time_total/elapsed*100:.1f}%)")
     print(f"Results saved to: {log_dir}")
     env.close()
 
@@ -280,7 +353,10 @@ def train(config: Config):
 def main():
     parser = argparse.ArgumentParser(description="JAX RL Training")
     parser.add_argument("--algo", type=str, default="resac",
-                        choices=["resac", "escp", "bapr"])
+                        choices=["resac", "escp", "bapr", "sac",
+                                 "bapr_no_bocd", "bapr_no_rmdm",
+                                 "bapr_no_adapt_beta", "bapr_fixed_decay",
+                                 "bad_bapr", "bapr_unsupervised"])
     parser.add_argument("--env", type=str, default="Hopper-v2")
     parser.add_argument("--seed", type=int, default=8)
     parser.add_argument("--max_iters", type=int, default=2000)
@@ -298,6 +374,20 @@ def main():
     parser.add_argument("--backend", type=str, default="spring",
                         choices=["spring", "generalized"],
                         help="Brax physics backend: spring (fast) or generalized (accurate)")
+    parser.add_argument("--log_scale_limit", type=float, default=None,
+                        help="Override log_scale_limit for gravity sampling range")
+    parser.add_argument("--penalty_scale", type=float, default=None,
+                        help="Override BAPR penalty_scale")
+    parser.add_argument("--hazard_rate", type=float, default=None,
+                        help="Override BOCD hazard_rate")
+    parser.add_argument("--changing_period", type=int, default=None,
+                        help="Override task changing_period (env steps per task)")
+    parser.add_argument("--log_interval", type=int, default=None,
+                        help="Eval every N iterations (default: 5)")
+    parser.add_argument("--eval_episodes", type=int, default=None,
+                        help="Number of eval episodes (default: 5)")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume training from latest checkpoint if available")
 
     args = parser.parse_args()
 
@@ -322,6 +412,19 @@ def main():
     if args.context_warmup_iters is not None:
         config.context_warmup_iters = args.context_warmup_iters
     config.brax_backend = args.backend
+    if args.log_scale_limit is not None:
+        config.log_scale_limit = args.log_scale_limit
+    if args.penalty_scale is not None:
+        config.penalty_scale = args.penalty_scale
+    if args.hazard_rate is not None:
+        config.hazard_rate = args.hazard_rate
+    if args.log_interval is not None:
+        config.log_interval = args.log_interval
+    if args.eval_episodes is not None:
+        config.eval_episodes = args.eval_episodes
+    if args.changing_period is not None:
+        config.changing_period = args.changing_period
+    config.resume = args.resume
 
     train(config)
 
