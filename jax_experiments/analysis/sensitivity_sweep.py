@@ -113,44 +113,94 @@ def generate_sweep_scripts(env, output_dir, base_seed=8, max_iters=500):
     print(f"Wrote run script to {script_path}")
 
 
-def plot_sensitivity_heatmap(results_dir, output=None, figsize=(16, 5)):
-    """Plot sensitivity heatmap from completed sweep results."""
-    fig, axes = plt.subplots(1, 3, figsize=figsize)
+def _discover_sensitivity_runs(results_dir):
+    """Auto-discover sensitivity runs from directory naming convention.
 
-    # Load results
+    Finds runs matching pattern: *sens_hr{HR}_ps{PS}* or from sweep_configs.json.
+    """
+    import re
+    import glob as glob_mod
+
+    # Try sweep_configs.json first
     config_path = os.path.join(results_dir, "sweep_configs.json")
     if os.path.exists(config_path):
         with open(config_path) as f:
-            configs = json.load(f)
+            return json.load(f)
+
+    # Auto-discover from directory names: bapr_*_sens_hr{HR}_ps{PS}*
+    pattern = os.path.join(results_dir, "*sens_hr*_ps*/logs")
+    hr_ps_re = re.compile(r'sens_hr([\d.]+)_ps([\d.]+)')
+
+    configs = []
+    for log_dir in sorted(glob_mod.glob(pattern)):
+        run_dir = os.path.dirname(log_dir)
+        run_name = os.path.basename(run_dir)
+        m = hr_ps_re.search(run_name)
+        if m:
+            configs.append({
+                "name": run_name,
+                "hazard_rate": float(m.group(1)),
+                "penalty_scale": float(m.group(2)),
+                "_log_dir": log_dir,
+            })
+
+    # Also discover surprise weight sweeps
+    sw_pattern = os.path.join(results_dir, "*sens_sw*/logs")
+    for log_dir in sorted(glob_mod.glob(sw_pattern)):
+        run_dir = os.path.dirname(log_dir)
+        run_name = os.path.basename(run_dir)
+        # Parse surprise weights from name if possible
+        sw_match = re.search(r'sw(\d+)_wr([\d.]+)_wq([\d.]+)', run_name)
+        if sw_match:
+            wr, wq = float(sw_match.group(2)), float(sw_match.group(3))
+            wk = round(1.0 - wr - wq, 2)
+            configs.append({
+                "name": run_name,
+                "surprise_weights": [wr, wq, wk],
+                "_log_dir": log_dir,
+            })
+
+    return configs
+
+
+def _get_final_perf(results_dir, run_name, log_dir_override=None):
+    """Get final eval performance from a run."""
+    if log_dir_override:
+        eval_path = os.path.join(log_dir_override, "eval_reward.npy")
     else:
-        print(f"No sweep_configs.json found in {results_dir}")
+        eval_path = os.path.join(results_dir, run_name, "logs", "eval_reward.npy")
+    if os.path.exists(eval_path):
+        e = np.load(eval_path)
+        if len(e) > 0:
+            n_last = max(1, len(e) // 5)
+            return float(np.mean(e[-n_last:]))
+    return np.nan
+
+
+def plot_sensitivity_heatmap(results_dir, output=None, figsize=(16, 5)):
+    """Plot sensitivity heatmap from completed sweep results.
+
+    Auto-discovers runs from directory naming convention or sweep_configs.json.
+    """
+    configs = _discover_sensitivity_runs(results_dir)
+    if not configs:
+        print(f"No sensitivity runs found in {results_dir}")
         return
 
+    fig, axes = plt.subplots(1, 3, figsize=figsize)
+
     # 1. Hazard rate × Penalty scale heatmap
-    hr_vals = sorted(set(c.get("hazard_rate", 0) for c in configs if "hazard_rate" in c))
-    ps_vals = sorted(set(c.get("penalty_scale", 0) for c in configs if "penalty_scale" in c))
+    hr_configs = [c for c in configs if "hazard_rate" in c]
+    hr_vals = sorted(set(c["hazard_rate"] for c in hr_configs))
+    ps_vals = sorted(set(c["penalty_scale"] for c in hr_configs))
 
     if hr_vals and ps_vals:
         grid = np.full((len(hr_vals), len(ps_vals)), np.nan)
-        for cfg in configs:
-            if "hazard_rate" not in cfg:
-                continue
-            log_dir = os.path.join(results_dir, cfg["name"], "logs")
-            eval_rew = None
-            eval_path = os.path.join(log_dir, "eval_reward.npy")
-            if os.path.exists(eval_path):
-                eval_rew = np.load(eval_path)
-
-            if eval_rew is not None and len(eval_rew) > 0:
-                # Use last 20% of training as final perf
-                n_last = max(1, len(eval_rew) // 5)
-                final_perf = float(np.mean(eval_rew[-n_last:]))
-            else:
-                final_perf = np.nan
-
+        for cfg in hr_configs:
+            perf = _get_final_perf(results_dir, cfg["name"], cfg.get("_log_dir"))
             i = hr_vals.index(cfg["hazard_rate"])
             j = ps_vals.index(cfg["penalty_scale"])
-            grid[i, j] = final_perf
+            grid[i, j] = perf
 
         im = axes[0].imshow(grid, aspect='auto', origin='lower', cmap='RdYlGn')
         axes[0].set_xticks(range(len(ps_vals)))
@@ -162,7 +212,6 @@ def plot_sensitivity_heatmap(results_dir, output=None, figsize=(16, 5)):
         axes[0].set_title('Final Eval Reward', fontsize=11)
         fig.colorbar(im, ax=axes[0], shrink=0.8)
 
-        # Annotate cells
         for i in range(len(hr_vals)):
             for j in range(len(ps_vals)):
                 if not np.isnan(grid[i, j]):
@@ -172,20 +221,11 @@ def plot_sensitivity_heatmap(results_dir, output=None, figsize=(16, 5)):
     # 2. Surprise weights bar chart
     sw_configs = [c for c in configs if "surprise_weights" in c]
     if sw_configs:
-        labels = []
-        perfs = []
+        labels, perfs = [], []
         for cfg in sw_configs:
             w = cfg["surprise_weights"]
             labels.append(f"r={w[0]}\nq={w[1]}\nκ={w[2]}")
-            log_dir = os.path.join(results_dir, cfg["name"], "logs")
-            eval_path = os.path.join(log_dir, "eval_reward.npy")
-            if os.path.exists(eval_path):
-                e = np.load(eval_path)
-                n_last = max(1, len(e) // 5)
-                perfs.append(float(np.mean(e[-n_last:])))
-            else:
-                perfs.append(0.0)
-
+            perfs.append(_get_final_perf(results_dir, cfg["name"], cfg.get("_log_dir")))
         colors = ['#2196F3' if i == 0 else '#90CAF9' for i in range(len(labels))]
         axes[1].bar(range(len(labels)), perfs, color=colors, edgecolor='black')
         axes[1].set_xticks(range(len(labels)))
@@ -193,17 +233,15 @@ def plot_sensitivity_heatmap(results_dir, output=None, figsize=(16, 5)):
         axes[1].set_ylabel('Final Eval Reward', fontsize=10)
         axes[1].set_title('Surprise Signal Weights', fontsize=11)
 
-    # 3. β_eff trajectory comparison across hazard rates (fixed penalty_scale=5.0)
-    # Shows how different hazard rates affect adaptive conservatism dynamics
+    # 3. λ_w dynamics across hazard rates (fixed penalty_scale=5.0)
     hr_traces = {}
-    for cfg in configs:
-        if "hazard_rate" not in cfg or cfg.get("penalty_scale", 5.0) != 5.0:
+    for cfg in hr_configs:
+        if cfg.get("penalty_scale", 5.0) != 5.0:
             continue
-        log_dir = os.path.join(results_dir, cfg["name"], "logs")
+        log_dir = cfg.get("_log_dir") or os.path.join(results_dir, cfg["name"], "logs")
         lw_path = os.path.join(log_dir, "weighted_lambda.npy")
         if os.path.exists(lw_path):
-            lw = np.load(lw_path)
-            hr_traces[cfg["hazard_rate"]] = lw
+            hr_traces[cfg["hazard_rate"]] = np.load(lw_path)
 
     if hr_traces:
         cmap_hr = plt.cm.get_cmap('viridis', len(hr_traces))

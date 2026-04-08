@@ -83,15 +83,15 @@ def compute_recovery_times(eval_reward, mode_ids, log_interval=5,
     return recovery_data
 
 
-def find_runs(results_root, env, algo_pattern="*"):
+def find_runs(results_root, env, algo):
     """Find all result directories matching algo/env.
 
-    Uses exact algo prefix match (algo_env_seed) to avoid e.g. 'bapr'
-    matching 'bapr_no_bocd'. The pattern expects algo_env_* format.
+    Uses exact algo prefix + numeric seed to avoid e.g. 'bapr'
+    matching 'bapr_no_bocd'.
     """
-    pattern = os.path.join(results_root, f"{algo_pattern}_{env}_*/logs")
-    # Also match exact algo_env (no seed suffix)
-    exact = os.path.join(results_root, f"{algo_pattern}_{env}", "logs")
+    # algo_env_<digit>*/logs — matches algo_env_0, algo_env_8_ablation, etc.
+    pattern = os.path.join(results_root, f"{algo}_{env}_[0-9]*/logs")
+    exact = os.path.join(results_root, f"{algo}_{env}", "logs")
     results = sorted(set(glob.glob(pattern) + glob.glob(exact)))
     return results
 

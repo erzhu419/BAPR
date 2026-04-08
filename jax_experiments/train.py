@@ -289,7 +289,9 @@ def train(config: Config):
                 metrics = agent.multi_update(stacked)
 
             for k, v in metrics.items():
-                if isinstance(v, (int, float, np.ndarray)):
+                # Log scalars (int/float/bool/np scalar) and arrays (np.ndarray)
+                if isinstance(v, (int, float, bool, np.integer, np.floating,
+                                  np.ndarray)):
                     logger.log(k, v)
         train_time = time.time() - train_start
         train_time_total += train_time
@@ -386,6 +388,8 @@ def main():
                         help="Eval every N iterations (default: 5)")
     parser.add_argument("--eval_episodes", type=int, default=None,
                         help="Number of eval episodes (default: 5)")
+    parser.add_argument("--save_interval", type=int, default=None,
+                        help="Save checkpoint every N iterations (default: 50)")
     parser.add_argument("--resume", action="store_true",
                         help="Resume training from latest checkpoint if available")
 
@@ -424,6 +428,8 @@ def main():
         config.eval_episodes = args.eval_episodes
     if args.changing_period is not None:
         config.changing_period = args.changing_period
+    if args.save_interval is not None:
+        config.save_interval = args.save_interval
     config.resume = args.resume
 
     train(config)

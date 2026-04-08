@@ -1,1 +1,5 @@
 bapr_experiments
+jax_experiments/results
+jax_experiments/logs
+jax_experiments/algos/__pycache__
+jax_experiments/common/__pycache__

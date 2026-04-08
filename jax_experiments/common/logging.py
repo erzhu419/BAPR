@@ -6,7 +6,11 @@ from collections import defaultdict
 
 
 class Logger:
-    """Accumulates per-iteration metrics and saves them as .npy files."""
+    """Accumulates per-iteration metrics and saves them as .npy files.
+
+    Handles both scalar metrics (float/int/bool) and array-valued metrics
+    (e.g., BOCD belief vectors, context embeddings) transparently.
+    """
 
     def __init__(self, log_dir: str):
         self.log_dir = log_dir
@@ -14,7 +18,7 @@ class Logger:
         self.data = defaultdict(list)
         self.start_time = time.time()
 
-    def log(self, key: str, value: float):
+    def log(self, key: str, value):
         self.data[key].append(value)
 
     def log_dict(self, d: dict):
@@ -23,7 +27,14 @@ class Logger:
 
     def save(self):
         for key, values in self.data.items():
-            np.save(os.path.join(self.log_dir, f"{key}.npy"), np.array(values))
+            try:
+                arr = np.array(values)
+                np.save(os.path.join(self.log_dir, f"{key}.npy"), arr)
+            except (ValueError, TypeError):
+                # Ragged arrays (e.g., belief vectors of different lengths):
+                # save as object array with allow_pickle
+                arr = np.array(values, dtype=object)
+                np.save(os.path.join(self.log_dir, f"{key}.npy"), arr)
 
     def last(self, key: str, default=0.0):
         vals = self.data.get(key, [])
