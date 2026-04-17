@@ -1,0 +1,18 @@
+# BAPR JAX experiments — pinned to versions tested locally
+# Install: pip install -r requirements.txt
+#
+# For GPU JAX on CUDA 12:
+#   pip install -U "jax[cuda12]==0.9.2"
+# For CPU-only:
+#   pip install -U "jax==0.9.2"
+
+jax==0.9.2
+jaxlib==0.9.2
+flax==0.12.6
+optax==0.2.8
+brax==0.14.2
+
+numpy>=2.0
+scipy>=1.10
+matplotlib>=3.7
+scikit-learn>=1.3

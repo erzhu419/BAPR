@@ -1,5 +1,14 @@
 bapr_experiments
 jax_experiments/results
 jax_experiments/logs
-jax_experiments/algos/__pycache__
-jax_experiments/common/__pycache__
+jax_experiments/**/__pycache__
+jax_experiments/sensitivity_runs
+jax_experiments/jax_experiments
+bapr_server.tar.gz
+paper/*.pdf
+paper/*.png
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.out
+paper/*.synctex.gz
