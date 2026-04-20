@@ -7,18 +7,39 @@
 #   - Shared GPUs with other users (queries free VRAM dynamically)
 #   - Resume on interruption (checkpoint-based)
 #   - Auto-skip already-completed runs
+#   - PID-file lock prevents concurrent scheduler instances
 #
 #  Usage (one-liner):
-#    bash jax_experiments/run_server.sh
+#    bash jax_experiments/run_server_BAPR.sh
 #
 #  Environment overrides:
-#    PER_RUN_MB=1800 bash jax_experiments/run_server.sh   # override mem/run
-#    MAX_PARALLEL=4 bash jax_experiments/run_server.sh    # cap parallelism
-#    SEEDS_OVERRIDE="0 1 2" bash jax_experiments/run_server.sh  # fewer seeds
-#    PHASES="1 2 6" bash jax_experiments/run_server.sh    # partial phases
+#    PER_RUN_MB=1800 bash jax_experiments/run_server_BAPR.sh
+#    MAX_PARALLEL=4 bash jax_experiments/run_server_BAPR.sh
+#    SEEDS_OVERRIDE="0 1 2" bash jax_experiments/run_server_BAPR.sh
+#    PHASES="1 2 6" bash jax_experiments/run_server_BAPR.sh  # partial phases
+#    PHASES="" bash ... is an error (use unset or specific phases)
 # ═══════════════════════════════════════════════════════════════════════════
 set -e
 cd "$(dirname "$0")/.."   # cd to repo root (BAPR/)
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  PID-file lock: prevent multiple scheduler instances from running concurrently
+# ═══════════════════════════════════════════════════════════════════════════
+LOCK_FILE="${LOCK_FILE:-/tmp/bapr_runner.lock}"
+if [ -f "$LOCK_FILE" ]; then
+    OLD_PID=$(cat "$LOCK_FILE" 2>/dev/null || echo "")
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        echo "ERROR: Another scheduler instance (PID $OLD_PID) is already running." >&2
+        echo "       Lock file: $LOCK_FILE" >&2
+        echo "       To force-start: rm $LOCK_FILE && bash $0" >&2
+        exit 1
+    else
+        echo "WARNING: stale lock file (PID $OLD_PID not running). Removing." >&2
+        rm -f "$LOCK_FILE"
+    fi
+fi
+echo $$ > "$LOCK_FILE"
+trap 'rm -f "$LOCK_FILE"' EXIT INT TERM
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Resource detection
@@ -437,7 +458,18 @@ phase6_analysis() {
 # ═══════════════════════════════════════════════════════════════════════════
 #  Dispatch
 # ═══════════════════════════════════════════════════════════════════════════
-PHASES_TO_RUN=${PHASES:-"1 2 3 4 5 6"}
+# PHASES env var:
+#   unset  → default to all phases "1 2 3 4 5 6"
+#   set and non-empty → use as-is (e.g. "1 6", "2")
+#   set but empty "" → explicit no-op, exit cleanly (useful for tests)
+if [ -z "${PHASES+x}" ]; then
+    PHASES_TO_RUN="1 2 3 4 5 6"
+elif [ -z "$PHASES" ] || [ "$PHASES" = " " ]; then
+    echo "PHASES is explicitly empty — exiting without launching any jobs."
+    exit 0
+else
+    PHASES_TO_RUN="$PHASES"
+fi
 
 START_TIME=$(date +%s)
 echo ""
