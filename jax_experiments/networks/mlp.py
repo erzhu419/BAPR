@@ -15,7 +15,7 @@ class MLP(nnx.Module):
             layers.append(nnx.Linear(in_d, hidden_dim, rngs=rngs))
             in_d = hidden_dim
         layers.append(nnx.Linear(in_d, output_dim, rngs=rngs))
-        self.layers = nnx.List(layers)
+        self.layers = layers
         self.n_hidden = n_layers
 
     def __call__(self, x):

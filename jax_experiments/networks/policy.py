@@ -23,7 +23,7 @@ class GaussianPolicy(nnx.Module):
         for _ in range(n_layers):
             layers.append(nnx.Linear(in_d, hidden_dim, rngs=rngs))
             in_d = hidden_dim
-        self.layers = nnx.List(layers)
+        self.layers = layers
         self.n_hidden = n_layers
 
         self.mean_head = nnx.Linear(hidden_dim, act_dim, rngs=rngs)

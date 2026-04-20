@@ -60,7 +60,7 @@ class EnsembleCritic(nnx.Module):
             in_d = hidden_dim
         # Output layer: -> 1
         layers.append(VectorizedLinear(in_d, 1, ensemble_size, rngs=rngs))
-        self.layers = nnx.List(layers)
+        self.layers = layers
 
     def __call__(self, obs, act):
         """Returns [ensemble_size, batch] Q-values."""
