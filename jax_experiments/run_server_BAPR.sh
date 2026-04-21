@@ -94,12 +94,23 @@ detect_gpus
 compute_slots
 echo "Total parallel slots: $TOTAL_SLOTS"
 
-if [ $TOTAL_SLOTS -lt 1 ]; then
-    echo "ERROR: Not enough free GPU memory. Try again later." >&2
-    echo "Current free memory:" >&2
-    nvidia-smi --query-gpu=memory.free --format=csv 2>&1 >&2
-    exit 1
-fi
+# If currently no slots, wait for memory to free up (e.g., other users'
+# jobs finishing) — re-detect every 2 minutes rather than exiting.
+MAX_WAIT_MIN=${MAX_WAIT_MIN:-180}   # give up after 3h if still no memory
+waited=0
+while [ $TOTAL_SLOTS -lt 1 ]; do
+    if [ $waited -ge $((MAX_WAIT_MIN * 60)) ]; then
+        echo "ERROR: Waited ${MAX_WAIT_MIN} min but no GPU memory freed. Giving up." >&2
+        exit 1
+    fi
+    echo "Not enough GPU memory (total slots=0). Waiting 120s and re-checking..."
+    echo "Current free memory:"
+    nvidia-smi --query-gpu=index,memory.free --format=csv,noheader
+    sleep 120
+    waited=$((waited + 120))
+    compute_slots
+    echo "[$(date '+%H:%M:%S')] Re-detected: $TOTAL_SLOTS slots"
+done
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  JAX / Python environment setup
@@ -211,7 +222,8 @@ reap_finished_jobs() {
 }
 
 pick_gpu() {
-    # Return GPU id with most free slots, or -1 if none available
+    # Sets PICKED_GPU global to GPU id with most free slots, or -1 if none.
+    # (Using global instead of stdout-return to avoid subshell state loss.)
     local best=-1 best_free=0
     for i in $(seq 0 $((N_GPUS - 1))); do
         local free=$(( GPU_MAX_SLOTS[$i] - GPU_USED_SLOTS[$i] ))
@@ -219,17 +231,27 @@ pick_gpu() {
             best_free=$free; best=$i
         fi
     done
-    echo $best
+    PICKED_GPU=$best
 }
 
 wait_for_slot() {
+    # Sets PICKED_GPU to an available GPU id. Blocks until slot frees up.
+    # CRITICAL: must run in parent shell, not $(...), so that
+    # reap_finished_jobs persistently updates GPU_USED_SLOTS and JOB_TO_GPU.
+    local poll_count=0
     while true; do
         reap_finished_jobs
-        local gpu
-        gpu=$(pick_gpu)
-        if [ $gpu -ge 0 ]; then
-            echo $gpu
-            return
+        pick_gpu
+        [ $PICKED_GPU -ge 0 ] && return
+        # Every ~3 min (18 polls × 10s), re-detect GPU memory in case more
+        # capacity opened up from external jobs finishing.
+        poll_count=$((poll_count + 1))
+        if [ $((poll_count % 18)) -eq 0 ]; then
+            local old_total=$TOTAL_SLOTS
+            compute_slots
+            if [ $TOTAL_SLOTS -ne $old_total ]; then
+                echo "[$(date '+%H:%M:%S')] Re-detected GPU slots: $old_total → $TOTAL_SLOTS"
+            fi
         fi
         sleep 10
     done
@@ -259,8 +281,14 @@ run_job() {
         fi
     fi
 
-    local gpu
-    gpu=$(wait_for_slot)
+    # Extra safety: don't re-launch if process for this run is already alive
+    if pgrep -f "run_name $NAME " >/dev/null 2>&1; then
+        echo "    [SKIP] $NAME already running (process alive)"
+        return
+    fi
+
+    wait_for_slot   # sets PICKED_GPU in parent shell
+    local gpu=$PICKED_GPU
     GPU_USED_SLOTS[$gpu]=$((GPU_USED_SLOTS[$gpu] + 1))
 
     echo ">>> [GPU $gpu | $(date +%H:%M:%S)] Starting: $NAME"
