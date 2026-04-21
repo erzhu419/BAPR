@@ -96,7 +96,7 @@ echo "Total parallel slots: $TOTAL_SLOTS"
 
 # If currently no slots, wait for memory to free up (e.g., other users'
 # jobs finishing) — re-detect every 2 minutes rather than exiting.
-MAX_WAIT_MIN=${MAX_WAIT_MIN:-180}   # give up after 3h if still no memory
+MAX_WAIT_MIN=${MAX_WAIT_MIN:-720}   # give up after 12h if still no memory
 waited=0
 while [ $TOTAL_SLOTS -lt 1 ]; do
     if [ $waited -ge $((MAX_WAIT_MIN * 60)) ]; then
