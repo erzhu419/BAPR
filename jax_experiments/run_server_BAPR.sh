@@ -190,15 +190,18 @@ fi
 echo "Seeds: ${SEEDS[*]}"
 
 declare -A ENV_PARAMS
+# NOTE: Hopper/Walker2d gravity variation caused <500 rewards (agents never learn
+# to balance). Switched to body_mass with mild log_scale to preserve locomotion
+# physics while still creating non-stationary dynamics.
 ENV_PARAMS["HalfCheetah-v2"]="gravity"
-ENV_PARAMS["Hopper-v2"]="gravity"
-ENV_PARAMS["Walker2d-v2"]="dof_damping body_mass"
+ENV_PARAMS["Hopper-v2"]="body_mass"
+ENV_PARAMS["Walker2d-v2"]="body_mass"
 ENV_PARAMS["Ant-v2"]="gravity"
 
 declare -A ENV_SCALE
 ENV_SCALE["HalfCheetah-v2"]=0.75
-ENV_SCALE["Hopper-v2"]=0.75
-ENV_SCALE["Walker2d-v2"]=1.5
+ENV_SCALE["Hopper-v2"]=0.3       # body_mass: [e^-0.3, e^+0.3] ≈ [0.74×, 1.35×]
+ENV_SCALE["Walker2d-v2"]=0.3     # same rationale
 ENV_SCALE["Ant-v2"]=0.75
 
 ENVS=("HalfCheetah-v2" "Hopper-v2" "Walker2d-v2" "Ant-v2")
