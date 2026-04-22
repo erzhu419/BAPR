@@ -44,8 +44,9 @@ trap 'rm -f "$LOCK_FILE"' EXIT INT TERM
 # ═══════════════════════════════════════════════════════════════════════════
 #  Resource detection
 # ═══════════════════════════════════════════════════════════════════════════
-PER_RUN_MB=${PER_RUN_MB:-1800}   # conservative estimate per JAX process
+PER_RUN_MB=${PER_RUN_MB:-2800}   # realistic per-process after contention observation
 SAFETY_MB=${SAFETY_MB:-1500}     # keep this much free per GPU (buffer)
+# With 12GB GPU, SAFETY=1500: (12288-1500)/2800 = 3 slots per GPU → 6 total
 MAX_PARALLEL_CAP=${MAX_PARALLEL:-16}  # absolute cap (ignore if detected < cap)
 
 detect_gpus() {
