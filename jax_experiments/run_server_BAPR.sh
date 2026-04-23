@@ -190,19 +190,28 @@ fi
 echo "Seeds: ${SEEDS[*]}"
 
 declare -A ENV_PARAMS
-# NOTE: Hopper/Walker2d gravity variation caused <500 rewards (agents never learn
-# to balance). Switched to body_mass with mild log_scale to preserve locomotion
-# physics while still creating non-stationary dynamics.
-ENV_PARAMS["HalfCheetah-v2"]="gravity"
-ENV_PARAMS["Hopper-v2"]="body_mass"
-ENV_PARAMS["Walker2d-v2"]="body_mass"
-ENV_PARAMS["Ant-v2"]="gravity"
+# v5 design: DISCRETE-MODE regimes (sample_tasks samples extremes only, not continuous).
+# Each env's parameters chosen so that log_scale extremes create genuinely different
+# optimal policies (BAPR's piecewise-stationary assumption), not just parameter
+# tolerance within a continuous family (ESCP's sweet spot).
+ENV_PARAMS["HalfCheetah-v2"]="dof_damping body_mass"  # 4 modes: stiff/fluid × light/heavy
+ENV_PARAMS["Hopper-v2"]="gravity"                     # 2 modes: low-g / high-g
+ENV_PARAMS["Walker2d-v2"]="gravity"                   # 2 modes: low-g / high-g
+ENV_PARAMS["Ant-v2"]="gravity body_mass"              # 4 modes: low-g × light_body combos
 
 declare -A ENV_SCALE
-ENV_SCALE["HalfCheetah-v2"]=0.75
-ENV_SCALE["Hopper-v2"]=0.3       # body_mass: [e^-0.3, e^+0.3] ≈ [0.74×, 1.35×]
-ENV_SCALE["Walker2d-v2"]=0.3     # same rationale
-ENV_SCALE["Ant-v2"]=0.75
+# Extremes only (discrete sampling): scale = separation between 2 modes.
+ENV_SCALE["HalfCheetah-v2"]=0.75  # damping ×0.47 vs ×2.12  +  mass ×0.47 vs ×2.12
+ENV_SCALE["Hopper-v2"]=0.3        # gravity ×0.74 vs ×1.35 (mild for stability)
+ENV_SCALE["Walker2d-v2"]=0.3      # gravity ×0.74 vs ×1.35
+ENV_SCALE["Ant-v2"]=0.75          # gravity ×0.47 vs ×2.12  +  mass ×0.47 vs ×2.12
+
+# Per-env physics backend (spring=fast; generalized=accurate, needed for Hopper/Walker)
+declare -A ENV_BACKEND
+ENV_BACKEND["HalfCheetah-v2"]="spring"
+ENV_BACKEND["Hopper-v2"]="generalized"      # spring causes unlearnable dynamics
+ENV_BACKEND["Walker2d-v2"]="generalized"    # same rationale
+ENV_BACKEND["Ant-v2"]="spring"
 
 ENVS=("HalfCheetah-v2" "Hopper-v2" "Walker2d-v2" "Ant-v2")
 MAIN_ALGOS=("bapr" "escp" "resac" "sac")
@@ -266,6 +275,7 @@ run_job() {
     local ALGO=$1 ENV=$2 SEED=$3 TAG=$4 EXTRA=$5
     local PARAMS="${ENV_PARAMS[$ENV]}"
     local SCALE="${ENV_SCALE[$ENV]}"
+    local BACKEND_THIS="${ENV_BACKEND[$ENV]:-$BACKEND}"   # per-env override
     local NAME="${ALGO}_${ENV}_${SEED}"
     [ -n "$TAG" ] && NAME="${NAME}_${TAG}"
 
@@ -305,7 +315,7 @@ run_job() {
             --eval_episodes "$EVAL_EPISODES" \
             --save_interval "$SAVE_INTERVAL" \
             --save_root "$SAVE_ROOT" --run_name "$NAME" \
-            --backend "$BACKEND" \
+            --backend "$BACKEND_THIS" \
             --log_scale_limit "$SCALE" \
             --changing_period "$CHANGING_PERIOD" \
             --varying_params $PARAMS \

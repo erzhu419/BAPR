@@ -190,14 +190,23 @@ class BraxNonstationaryEnv:
         self._current_sys = sys
 
     def sample_tasks(self, n_tasks: int) -> List[Dict]:
+        """Sample piecewise-stationary tasks as DISCRETE MODES (not continuous interp).
+
+        For each task, every parameter is placed at +log_scale_limit or -log_scale_limit
+        (chosen uniformly). This creates 2^n_params distinct regime modes rather than
+        a continuous task manifold, matching BAPR's piecewise-stationary design:
+        - Abrupt switches between modes (BOCD detects meaningful reward/Q-std drops)
+        - Each mode requires a distinct strategy (not just parameter tolerance)
+        """
         tasks = []
         rng = np.random.RandomState(self.seed + 42)
         for _ in range(n_tasks):
             task = {}
             for param in self.rand_params:
                 base = np.array(self._base_values[param])
-                log_scale = rng.uniform(-self.log_scale_limit, self.log_scale_limit,
-                                       size=base.shape)
+                # Discrete extreme sampling: each parameter is either at +limit or -limit
+                sign = rng.choice([-1.0, 1.0], size=base.shape)
+                log_scale = sign * self.log_scale_limit
                 task[param] = base * np.exp(log_scale).astype(np.float32)
             tasks.append(task)
         return tasks
