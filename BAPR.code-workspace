@@ -5,6 +5,21 @@
 		},
 		{
 			"path": "../proof"
+		},
+		{
+			"path": "../TransitDuet"
+		},
+		{
+			"path": "../LSTM-RL"
+		},
+		{
+			"path": "../sumo-rl"
+		},
+		{
+			"path": "../omnisafe"
+		},
+		{
+			"path": "../RE-SAC"
 		}
 	],
 	"settings": {}

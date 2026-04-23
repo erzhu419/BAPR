@@ -1,0 +1,39 @@
+nohup: ignoring input
+bash: /home/erzhu419/anaconda3/lib/libtinfo.so.6: no version information available (required by bash)
+==============================================
+  JAX RL Experiments: 3 algos × 4 envs = 12 runs
+  Seed: 8, Max iters: 2000
+  Mode: SEQUENTIAL (one at a time)
+==============================================
+
+[1/12] Starting: resac on Hopper-v2
+  Log: jax_experiments/logs/resac_Hopper-v2_8.log
+  Time: 2026-03-28 17:53:48
+============================================================
+  Algorithm: RESAC
+  Environment: Hopper-v2
+  Varying: ['gravity']
+  Seed: 8
+  Updates/iter: 250  Samples/iter: 4000
+  Ensemble size: 10  Hidden dim: 256
+E0328 17:53:50.626742   16914 cuda_executor.cc:1743] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+E0328 17:53:50.639734   16776 cuda_executor.cc:1743] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+  JAX devices: [CudaDevice(id=0)]
+============================================================
+Logging to: jax_experiments/results/resac_Hopper-v2_8/logs
+Starting training... (first 10000 steps are random exploration)
+Iter    0 | Reward:     14.2 | Q-std:   0.00 | Time:      2s | TaskID: 0 | 1.6s/iter
+Iter    1 | Reward:     14.4 | Q-std:   0.00 | Time:      3s | TaskID: 0 | 1.0s/iter
+E0328 17:54:09.845051   16937 cuda_timer.cc:87] Delay kernel timed out: measured time has sub-optimal accuracy. There may be a missing warmup execution, please investigate in Nsight Systems.
+Iter    2 | Reward:     36.7 | Q-std:   0.08 | Time:     34s | TaskID: 0 | 31.7s/iter
+Iter    3 | Reward:     46.3 | Q-std:   0.07 | Time:     70s | TaskID: 0 | 35.4s/iter
+Iter    4 | Reward:     76.1 | Q-std:   0.08 | Time:    106s | TaskID: 0 | 36.8s/iter
+Iter    5 | Reward:    112.8 | Q-std:   0.11 | Time:    143s | TaskID: 0 | 36.8s/iter
+Iter    6 | Reward:    151.6 | Q-std:   0.14 | Time:    180s | TaskID: 0 | 36.9s/iter
+Iter    7 | Reward:    171.5 | Q-std:   0.16 | Time:    218s | TaskID: 0 | 37.5s/iter
+Iter    8 | Reward:    193.7 | Q-std:   0.18 | Time:    253s | TaskID: 0 | 35.8s/iter
+Iter    9 | Reward:    184.7 | Q-std:   0.21 | Time:    288s | TaskID: 0 | 34.8s/iter
+Iter   10 | Reward:    176.1 | Q-std:   0.23 | Time:    324s | TaskID: 0 | 35.6s/iter
+Iter   11 | Reward:    162.6 | Q-std:   0.26 | Time:    360s | TaskID: 0 | 36.0s/iter
+Iter   12 | Reward:    154.9 | Q-std:   0.28 | Time:    395s | TaskID: 1 | 35.3s/iter
+Iter   13 | Reward:    151.5 | Q-std:   0.30 | Time:    432s | TaskID: 0 | 36.4s/iter
