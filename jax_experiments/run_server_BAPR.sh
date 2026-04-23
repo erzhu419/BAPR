@@ -200,11 +200,15 @@ ENV_PARAMS["Walker2d-v2"]="gravity"                   # 2 modes: low-g / high-g
 ENV_PARAMS["Ant-v2"]="gravity body_mass"              # 4 modes: low-g × light_body combos
 
 declare -A ENV_SCALE
-# Extremes only (discrete sampling): scale = separation between 2 modes.
-ENV_SCALE["HalfCheetah-v2"]=0.75  # damping ×0.47 vs ×2.12  +  mass ×0.47 vs ×2.12
-ENV_SCALE["Hopper-v2"]=0.3        # gravity ×0.74 vs ×1.35 (mild for stability)
-ENV_SCALE["Walker2d-v2"]=0.3      # gravity ×0.74 vs ×1.35
-ENV_SCALE["Ant-v2"]=0.75          # gravity ×0.47 vs ×2.12  +  mass ×0.47 vs ×2.12
+# v6: moderate discrete modes. Previous 0.75 was too extreme — param jumped
+# 4.5× between modes, no policy could cover all 4 → RESAC's "static conservative"
+# beat BAPR's "detect-and-adapt" (mode gap too large for adaptation to matter).
+# New scale 0.4 → params jump 2.2× between modes: each mode needs a tweak
+# (not a new policy) → BAPR's BOCD should pay off.
+ENV_SCALE["HalfCheetah-v2"]=0.4   # damping ×0.67 vs ×1.49  +  mass ×0.67 vs ×1.49
+ENV_SCALE["Hopper-v2"]=0.4        # gravity ×0.67 vs ×1.49
+ENV_SCALE["Walker2d-v2"]=0.4      # gravity ×0.67 vs ×1.49
+ENV_SCALE["Ant-v2"]=0.4           # gravity ×0.67 vs ×1.49  +  mass ×0.67 vs ×1.49
 
 # Per-env physics backend (spring=fast; generalized=accurate, needed for Hopper/Walker)
 declare -A ENV_BACKEND
