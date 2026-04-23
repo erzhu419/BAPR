@@ -61,10 +61,12 @@ class Config:
     # EMA Policy (Polyak-averaged actor for stable evaluation)
     ema_tau: float = 0.005          # EMA smoothing coefficient (same as target critic tau)
 
-    # Performance Gating (eval-based β tightening as safety net for BOCD)
-    perf_gate_enabled: bool = True  # enable performance gating
-    perf_gate_threshold: float = 0.1  # tighten β if eval drops >10%
-    perf_gate_lookback: int = 3     # compare last N evals vs previous N
+    # Performance Gating — DISABLED (bugged; forced λ_w=0.5 early in training
+    # when eval is naturally noisy, over-conservatively freezing BAPR policy).
+    # Kept for ablation compatibility; always False for production runs.
+    perf_gate_enabled: bool = False
+    perf_gate_threshold: float = 0.1
+    perf_gate_lookback: int = 3
 
     # Logging
     save_root: str = "jax_experiments/results"

@@ -245,33 +245,20 @@ class BAPR:
         self.surprise_computer.reset()
 
     def _compute_weighted_lambda(self):
-        """Compute belief-weighted penalty with baseline subtraction.
+        """Compute belief-weighted penalty (archived v1 version, simple normalization).
 
         BOCD dynamics: high surprise → belief pushed to high h (high variance
-        explains outliers) → effective_window increases.
+        explains outliers) → effective_window increases → λ_w increases.
 
-        Raw λ_w = ew / H has a non-zero steady state (~0.33), causing BAPR
-        to be unconditionally more conservative than ESCP even when stable.
-
-        Fix: subtract EMA-tracked baseline so stable → ~0, spike → positive.
+        Note: prior "improvements" (EMA baseline subtraction + perf_gate floor)
+        destroyed BAPR — EMA tracked raw_lw too fast making λ_w ≈ 0 permanently
+        (killing BOCD signal), and perf_gate floor=0.5 forced over-conservatism
+        in early training when evals are naturally noisy. Restored archived
+        simple version that actually works (HC 15702 reference).
         """
         ew = self.belief_tracker.effective_window
         max_h = self.belief_tracker.max_H - 1
-        raw_lw = float(np.clip(ew / max_h, 0.0, 1.0))
-
-        # EMA baseline: tracks the steady-state λ_w value
-        if not hasattr(self, '_lw_baseline'):
-            self._lw_baseline = raw_lw
-        else:
-            self._lw_baseline = 0.95 * self._lw_baseline + 0.05 * raw_lw
-
-        lw = float(np.clip(raw_lw - self._lw_baseline, 0.0, 1.0))
-
-        # Performance gating: if eval is declining, boost λ_w to tighten β
-        if self._perf_gate_active:
-            lw = max(lw, 0.5)  # floor at 0.5 → β_eff = β_base - 0.5 * penalty_scale
-
-        return lw
+        return float(np.clip(ew / max_h, 0.0, 1.0))
 
     def multi_update(self, stacked_batch, current_iter=0, recent_rewards=None, **kwargs):
         rng_key = self.rngs.params()
