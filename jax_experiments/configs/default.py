@@ -47,6 +47,9 @@ class Config:
     consistency_loss_weight: float = 50.0
     diversity_loss_weight: float = 0.025
     context_warmup_iters: int = 50  # iterations before injecting context
+    bapr_warmup_iters: int = 100    # P0: pure RESAC (λ_w=0) for early iters
+                                     # — BOCD needs valid Q-std + surprise statistics
+                                     # before it can gate policy updates meaningfully
     rnn_fix_length: int = 16  # history window for context (FC mode = no RNN)
 
     max_run_length: int = 20
@@ -55,7 +58,10 @@ class Config:
     variance_growth: float = 0.05   # variance grows with run length
     surprise_ema_alpha: float = 0.3
     # penalty_decay_rate removed: λ_w now = effective_window / H (see bapr.py)
-    penalty_scale: float = 5.0      # β_eff = β_base - λ_w × penalty_scale
+    penalty_scale: float = 2.0      # P1: reduced from 5.0 to avoid over-conservatism
+                                     # β_eff = β_base - λ_w × penalty_scale
+                                     # With β_base=-2, λ_w∈[0,1]: β_eff ∈ [-4, -2]
+                                     # (previously [-7, -2], too aggressive early)
     belief_warmup_steps: int = 50
 
     # EMA Policy (Polyak-averaged actor for stable evaluation)

@@ -227,7 +227,15 @@ class BAPR:
 
         surprise = self.surprise_computer.compute(reward_signal, np.array([float(q_std)]))
         self.belief_tracker.update(surprise)
-        weighted_lambda = self._compute_weighted_lambda()
+
+        # P0: BAPR mechanism warmup — λ_w=0 for first bapr_warmup_iters.
+        # Before this, Q-std and surprise statistics are too noisy for BOCD
+        # to modulate β meaningfully. Running as pure RESAC in early training
+        # lets all seeds reach a stable baseline before BOCD activates.
+        if current_iter < self.config.bapr_warmup_iters:
+            weighted_lambda = 0.0
+        else:
+            weighted_lambda = self._compute_weighted_lambda()
         self._current_weighted_lambda = weighted_lambda
 
         # Run scan
