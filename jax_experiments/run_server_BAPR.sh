@@ -190,31 +190,31 @@ fi
 echo "Seeds: ${SEEDS[*]}"
 
 declare -A ENV_PARAMS
-# v5 design: DISCRETE-MODE regimes (sample_tasks samples extremes only, not continuous).
-# Each env's parameters chosen so that log_scale extremes create genuinely different
-# optimal policies (BAPR's piecewise-stationary assumption), not just parameter
-# tolerance within a continuous family (ESCP's sweet spot).
-ENV_PARAMS["HalfCheetah-v2"]="dof_damping body_mass"  # 4 modes: stiff/fluid × light/heavy
-ENV_PARAMS["Hopper-v2"]="gravity"                     # 2 modes: low-g / high-g
-ENV_PARAMS["Walker2d-v2"]="gravity"                   # 2 modes: low-g / high-g
-ENV_PARAMS["Ant-v2"]="gravity body_mass"              # 4 modes: low-g × light_body combos
+# v7 (final): restored archived design. Single-param gravity with wide
+# continuous log_scale (3.0 → gravity from 0.05g to 20g) — most tasks mild,
+# occasional extreme. Matches reference run that achieved BAPR HC=15702.
+ENV_PARAMS["HalfCheetah-v2"]="gravity"
+ENV_PARAMS["Hopper-v2"]="gravity"
+ENV_PARAMS["Walker2d-v2"]="gravity"
+ENV_PARAMS["Ant-v2"]="gravity"
 
 declare -A ENV_SCALE
-# v6: moderate discrete modes. Previous 0.75 was too extreme — param jumped
-# 4.5× between modes, no policy could cover all 4 → RESAC's "static conservative"
-# beat BAPR's "detect-and-adapt" (mode gap too large for adaptation to matter).
-# New scale 0.4 → params jump 2.2× between modes: each mode needs a tweak
-# (not a new policy) → BAPR's BOCD should pay off.
-ENV_SCALE["HalfCheetah-v2"]=0.4   # damping ×0.67 vs ×1.49  +  mass ×0.67 vs ×1.49
-ENV_SCALE["Hopper-v2"]=0.4        # gravity ×0.67 vs ×1.49
-ENV_SCALE["Walker2d-v2"]=0.4      # gravity ×0.67 vs ×1.49
-ENV_SCALE["Ant-v2"]=0.4           # gravity ×0.67 vs ×1.49  +  mass ×0.67 vs ×1.49
+# Archive reference values (HC=15702 was obtained with log_scale=3.0).
+# wider log_scale + continuous uniform = most tasks mild, tails extreme —
+# BOCD fires on extreme excursions only, policy learns in between.
+ENV_SCALE["HalfCheetah-v2"]=3.0
+ENV_SCALE["Hopper-v2"]=3.0
+ENV_SCALE["Walker2d-v2"]=3.0
+ENV_SCALE["Ant-v2"]=3.0
 
-# Per-env physics backend (spring=fast; generalized=accurate, needed for Hopper/Walker)
+# Also revert Hopper/Walker back to spring (generalized is too slow,
+# and archive used spring for all envs successfully).
+
+# Per-env physics backend. All spring (archive setup, fast).
 declare -A ENV_BACKEND
 ENV_BACKEND["HalfCheetah-v2"]="spring"
-ENV_BACKEND["Hopper-v2"]="generalized"      # spring causes unlearnable dynamics
-ENV_BACKEND["Walker2d-v2"]="generalized"    # same rationale
+ENV_BACKEND["Hopper-v2"]="spring"
+ENV_BACKEND["Walker2d-v2"]="spring"
 ENV_BACKEND["Ant-v2"]="spring"
 
 ENVS=("HalfCheetah-v2" "Hopper-v2" "Walker2d-v2" "Ant-v2")
