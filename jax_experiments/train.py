@@ -152,7 +152,7 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
                 episode_rewards.append(episode_reward)
                 episode_reward = 0.0
                 obs = env.reset()
-        return episode_rewards
+        return episode_rewards, None  # no recent_rollout in random phase
     else:
         # Scan-fused GPU rollout: sys is fixed for the entire 4000-step scan
         # (lax.scan requires static structure). Task switching happens at iter boundary.
@@ -180,7 +180,18 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
         # Removed per GPT-5.5 review (2026-04-26). BOCD now operates in zero-shot
         # mode: it must surface change-points from rewards/Q-std alone.
 
-        return ep_rewards
+        # Return recent rollout dict so BAPR can compute surprise from THIS
+        # rollout (not random replay batches that mix old regimes).
+        recent_rollout = {
+            "obs": obs,
+            "act": act,
+            "rew": rew.reshape(-1, 1),
+            "next_obs": nobs,
+            "done": done.reshape(-1, 1),
+            "task_id": task_ids,
+            "rollout_task_id": int(rollout_task_id),
+        }
+        return ep_rewards, recent_rollout
 
 
 def train(config: Config):
@@ -261,7 +272,8 @@ def train(config: Config):
 
         # --- Collect samples ---
         collect_start = time.time()
-        ep_rewards = collect_samples(agent, env, replay_buffer, config, config.samples_per_iter)
+        ep_rewards, recent_rollout = collect_samples(
+            agent, env, replay_buffer, config, config.samples_per_iter)
         collect_time = time.time() - collect_start
         collect_time_total += collect_time
         total_steps += config.samples_per_iter
@@ -275,18 +287,30 @@ def train(config: Config):
         if replay_buffer.size >= config.start_train_steps:
             # GPU-native sampling: rng_key ensures fully on-device indexing
             sample_key = jax.random.PRNGKey(config.seed + iteration)
-            stacked = replay_buffer.sample_stacked(
-                config.updates_per_iter, config.batch_size, rng_key=sample_key)
-            # Dispatch based on algorithm capabilities
             _algo = config.algo
             _bapr_like = _algo in ("bapr", "bapr_no_rmdm", "bad_bapr",
                                     "bapr_unsupervised")
             _escp_like = _algo in ("escp", "bapr_no_bocd", "bapr_no_adapt_beta",
                                     "bapr_fixed_decay")
+
+            # Change 3: belief-aware replay sampling for BAPR. When BOCD detects
+            # a regime shift (high λ_w), sample more from recent transitions.
+            if _bapr_like and hasattr(replay_buffer, 'sample_stacked_mixed'):
+                prev_lam = float(getattr(agent, "_current_weighted_lambda", 0.0))
+                recent_frac = min(0.8, max(0.0, prev_lam))
+                stacked = replay_buffer.sample_stacked_mixed(
+                    config.updates_per_iter, config.batch_size,
+                    rng_key=sample_key, recent_frac=recent_frac,
+                    recent_window=getattr(config, "recent_replay_window", 50_000))
+            else:
+                stacked = replay_buffer.sample_stacked(
+                    config.updates_per_iter, config.batch_size, rng_key=sample_key)
+
             if _bapr_like:
                 metrics = agent.multi_update(
                     stacked, current_iter=iteration,
-                    recent_rewards=ep_rewards if ep_rewards else None)
+                    recent_rewards=ep_rewards if ep_rewards else None,
+                    recent_rollout=recent_rollout)
             elif _escp_like:
                 metrics = agent.multi_update(
                     stacked, current_iter=iteration)

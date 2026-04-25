@@ -92,9 +92,12 @@ class SurpriseComputer:
         reward_std = max(np.sqrt(self.ema_reward_var), 1e-6)
         reward_z = abs(r_mean - self.ema_reward) / reward_std
 
-        # Q-std spike
+        # Q-std spike — Change 2 (GPT-5.5 v2): only POSITIVE spikes signal a
+        # regime change. Using raw ratio (always > 0) makes Q-std convergence
+        # also count as surprise, contaminating BOCD with false positives.
+        old_q_std = self.ema_q_std
         self.ema_q_std = self.ema_alpha * q_std_mean + (1 - self.ema_alpha) * self.ema_q_std
-        q_std_ratio = q_std_mean / max(self.ema_q_std, 1e-6)
+        q_std_spike = max(q_std_mean / max(old_q_std, 1e-6) - 1.0, 0.0)
 
         # Reg norm divergence
         reg_div = 0.0
@@ -103,7 +106,7 @@ class SurpriseComputer:
 
         # Combined surprise (weighted sum)
         self.last_surprise_r = float(reward_z)
-        self.last_surprise_q = float(q_std_ratio)
+        self.last_surprise_q = float(q_std_spike)
         self.last_surprise_kappa = float(reg_div)
-        surprise = 0.5 * reward_z + 0.3 * q_std_ratio + 0.2 * reg_div
+        surprise = 0.5 * reward_z + 0.3 * q_std_spike + 0.2 * reg_div
         return float(np.clip(surprise, 0.0, 10.0))

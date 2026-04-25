@@ -57,6 +57,13 @@ class Config:
     base_variance: float = 0.1      # variance at h=0 for BOCD likelihood
     variance_growth: float = 0.05   # variance grows with run length
     surprise_ema_alpha: float = 0.3
+    # Change 2 (GPT-5.5 v2): bounded suffix of recent rollout fed to BOCD.
+    # Replay batches mix old regimes — using rollout suffix gives BOCD the
+    # current regime's evidence. 1024 ≈ 1 episode × ¼ for HC.
+    surprise_window: int = 1024
+    # Change 3 (GPT-5.5 v2): when BOCD detects switch, oversample recent
+    # transitions in replay. Window = how far back "recent" reaches.
+    recent_replay_window: int = 50_000
     # penalty_decay_rate removed: λ_w now = effective_window / H (see bapr.py)
     penalty_scale: float = 2.0      # P1: reduced from 5.0 to avoid over-conservatism
                                      # β_eff = β_base - λ_w × penalty_scale

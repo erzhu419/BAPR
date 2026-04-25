@@ -127,6 +127,51 @@ class ReplayBuffer:
             "task_id": self.task_id[idx],    # [N, B]
         }
 
+    def sample_stacked_mixed(self, n_batches: int, batch_size: int,
+                             rng_key=None, recent_frac: float = 0.0,
+                             recent_window: int = 50_000):
+        """Belief-aware sampling: uniform + recent-transitions mixture.
+
+        Change 3 (GPT-5.5 v2). When BOCD detects regime change (high λ_w),
+        BAPR's training loop sets recent_frac proportional to λ_w, biasing
+        replay toward recent transitions. This addresses the "regime
+        staleness" problem the paper claims to solve — without it, replay
+        is uniform and BOCD-driven adaptive β is the only intervention.
+
+        Args:
+            n_batches, batch_size: standard
+            rng_key: JAX PRNGKey
+            recent_frac: fraction of batch from recent_window suffix [0, 0.9]
+            recent_window: how many past samples count as "recent"
+        """
+        if rng_key is None:
+            rng_key = jax.random.PRNGKey(np.random.randint(0, 2**31))
+
+        recent_frac = float(np.clip(recent_frac, 0.0, 0.9))
+        n_recent = int(batch_size * recent_frac)
+        n_uniform = batch_size - n_recent
+
+        k1, k2 = jax.random.split(rng_key)
+        idx_uniform = jax.random.randint(
+            k1, (n_batches, n_uniform), 0, self.size)
+
+        if n_recent > 0:
+            lo = max(0, self.size - recent_window)
+            idx_recent = jax.random.randint(
+                k2, (n_batches, n_recent), lo, self.size)
+            idx = jnp.concatenate([idx_uniform, idx_recent], axis=1)
+        else:
+            idx = idx_uniform
+
+        return {
+            "obs": self.obs[idx],
+            "act": self.act[idx],
+            "rew": self.rew[idx],
+            "next_obs": self.next_obs[idx],
+            "done": self.done[idx],
+            "task_id": self.task_id[idx],
+        }
+
     def sample(self, batch_size: int, rng: np.random.Generator = None):
         """Sample one batch. Returns dict of JAX arrays [B, ...]."""
         key = jax.random.PRNGKey(

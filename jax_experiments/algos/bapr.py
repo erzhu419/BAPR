@@ -206,26 +206,39 @@ class BAPR:
         max_h = self.belief_tracker.max_H - 1
         return float(np.clip(ew / max_h, 0.0, 1.0))
 
-    def multi_update(self, stacked_batch, current_iter=0, recent_rewards=None, **kwargs):
+    def multi_update(self, stacked_batch, current_iter=0, recent_rewards=None,
+                     recent_rollout=None, **kwargs):
         rng_key = self.rngs.params()
         warmup = jnp.array(current_iter < self.config.context_warmup_iters)
 
-        # Q-std from critic (always from replay batch — evaluates uncertainty)
-        last_obs = jnp.array(stacked_batch["obs"][-1])
-        last_act = jnp.array(stacked_batch["act"][-1])
-        q_std = self._compute_q_stats(
-            nnx.state(self.critic, nnx.Param),
-            nnx.state(self.context_net, nnx.Param),
-            last_obs, last_act, warmup)
-
-        # Reward signal: prefer actual rollout episode rewards (direct task signal)
-        # over random replay batch rewards (may be from old tasks)
-        if recent_rewards is not None and len(recent_rewards) > 0:
-            reward_signal = np.array(recent_rewards, dtype=np.float32)
+        # Change 2 (GPT-5.5 v2): compute surprise from MOST RECENT rollout, not
+        # from random replay batch. Random replay mixes old regimes, making
+        # BOCD's changepoint detection unreliable.
+        if recent_rollout is not None:
+            w = getattr(self.config, "surprise_window", 1024)
+            robs = jnp.asarray(recent_rollout["obs"][-w:])
+            ract = jnp.asarray(recent_rollout["act"][-w:])
+            rrew = np.asarray(recent_rollout["rew"][-w:]).reshape(-1)
+            q_std = self._compute_q_stats(
+                nnx.state(self.critic, nnx.Param),
+                nnx.state(self.context_net, nnx.Param),
+                robs, ract, warmup)
+            reward_signal = rrew
         else:
-            reward_signal = stacked_batch["rew"][-1].flatten()
+            # Fallback: replay batch (random exploration phase or compatibility)
+            last_obs = jnp.asarray(stacked_batch["obs"][-1])
+            last_act = jnp.asarray(stacked_batch["act"][-1])
+            q_std = self._compute_q_stats(
+                nnx.state(self.critic, nnx.Param),
+                nnx.state(self.context_net, nnx.Param),
+                last_obs, last_act, warmup)
+            if recent_rewards is not None and len(recent_rewards) > 0:
+                reward_signal = np.array(recent_rewards, dtype=np.float32)
+            else:
+                reward_signal = np.asarray(stacked_batch["rew"][-1]).reshape(-1)
 
-        surprise = self.surprise_computer.compute(reward_signal, np.array([float(q_std)]))
+        surprise = self.surprise_computer.compute(
+            reward_signal, np.asarray([float(q_std)], dtype=np.float32))
         self.belief_tracker.update(surprise)
 
         # P0: BAPR mechanism warmup — λ_w=0 for first bapr_warmup_iters.
