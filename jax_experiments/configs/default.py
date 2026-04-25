@@ -23,6 +23,8 @@ class Config:
     tau: float = 0.005  # soft target update
     alpha: float = 0.2  # SAC entropy weight (initial)
     auto_alpha: bool = True
+    alpha_floor: float = 0.05  # P2: minimum alpha (entropy bonus) — prevents
+                                # entropy collapse when β_eff is very aggressive
     lr: float = 3e-4
     batch_size: int = 256
     replay_size: int = 1_000_000

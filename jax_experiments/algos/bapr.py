@@ -65,6 +65,8 @@ class BAPR:
         rbf_r = self.config.rbf_radius
         cons_w = self.config.consistency_loss_weight
         div_w = self.config.diversity_loss_weight
+        # P2: alpha floor (log space)
+        alpha_floor_log = jnp.log(jnp.array(self.config.alpha_floor))
 
         gd_policy = nnx.graphdef(self.policy)
         gd_critic = nnx.graphdef(self.critic)
@@ -144,6 +146,9 @@ class BAPR:
                 a_grad = -(lp.mean() + target_entropy)
                 a_upd, new_a_os = a_opt.update(a_grad, a_os, la)
                 new_la = jnp.where(auto_alpha, la + a_upd, la)
+                # P2: alpha floor — prevent entropy collapse → preserve exploration
+                # under aggressive β_eff. log(min_alpha) lower bound on log_alpha.
+                new_la = jnp.maximum(new_la, alpha_floor_log)
                 new_a_os = jax.tree.map(
                     lambda n, o: jnp.where(auto_alpha, n, o), new_a_os, a_os)
 
