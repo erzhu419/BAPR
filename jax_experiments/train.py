@@ -161,19 +161,24 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
         if hasattr(agent, 'context_net'):
             context_params = nnx.state(agent.context_net, nnx.Param)
 
-        prev_task_id = env.current_task_id  # record before rollout
+        # Task ID used for the entire scan rollout (env switches at iter boundaries
+        # only, so all transitions in this scan share the same task)
+        rollout_task_id = env.current_task_id
         (obs, act, rew, nobs, done), ep_rewards = env.rollout(
             policy_params, n_steps, rng_key, context_params=context_params)
 
         # Zero-copy push: JAX arrays go directly to GPU-native replay buffer
-        task_ids = jnp.full(n_steps, env.current_task_id, dtype=jnp.int32)
+        task_ids = jnp.full(n_steps, rollout_task_id, dtype=jnp.int32)
         replay_buffer.push_batch_jax(obs, act, rew.reshape(-1, 1),
                                      nobs, done.reshape(-1, 1), task_ids)
 
-        # Reset belief only when TASK switches (not on every episode end)
-        # BOCD handles within-task episode resets naturally via its own dynamics
-        if hasattr(agent, 'reset_episode') and env.current_task_id != prev_task_id:
-            agent.reset_episode()
+        # NOTE: BAPR's BOCD must detect regime changes from observable signals
+        # (reward shifts, Q-std spikes, surprise). The oracle reset that previously
+        # lived here (`if env.current_task_id != prev_task_id: agent.reset_episode()`)
+        # was using PRIVILEGED hidden task IDs and suppressed the very first
+        # post-switch surprise — exactly the signal BAPR needs to detect changes.
+        # Removed per GPT-5.5 review (2026-04-26). BOCD now operates in zero-shot
+        # mode: it must surface change-points from rewards/Q-std alone.
 
         return ep_rewards
 
