@@ -57,6 +57,11 @@ class Config:
     base_variance: float = 0.1      # variance at h=0 for BOCD likelihood
     variance_growth: float = 0.05   # variance grows with run length
     surprise_ema_alpha: float = 0.3
+    # P4: BOCD pessimistic prior — start belief concentrated on h=0
+    # (just-detected change) so λ_w starts near 0, only grows on real surprise.
+    # Uniform init has effective_window ≈ (max_H-1)/2 → λ_w ≈ 0.5 from iter 0.
+    bocd_pessimistic_init: bool = True
+    bocd_init_concentration: float = 0.9  # weight on belief[0]
     # penalty_decay_rate removed: λ_w now = effective_window / H (see bapr.py)
     penalty_scale: float = 2.0      # P1: reduced from 5.0 to avoid over-conservatism
                                      # β_eff = β_base - λ_w × penalty_scale

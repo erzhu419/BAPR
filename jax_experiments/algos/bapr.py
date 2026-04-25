@@ -48,7 +48,9 @@ class BAPR:
             max_run_length=config.max_run_length,
             hazard_rate=config.hazard_rate,
             base_variance=config.base_variance,
-            variance_growth=config.variance_growth)
+            variance_growth=config.variance_growth,
+            pessimistic_init=config.bocd_pessimistic_init,         # P4
+            init_concentration=config.bocd_init_concentration)     # P4
         self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
 
         self.update_count = 0

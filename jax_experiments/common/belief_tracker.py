@@ -10,15 +10,32 @@ class BeliefTracker:
     """
 
     def __init__(self, max_run_length: int = 20, hazard_rate: float = 0.05,
-                 base_variance: float = 0.1, variance_growth: float = 0.05):
+                 base_variance: float = 0.1, variance_growth: float = 0.05,
+                 pessimistic_init: bool = True, init_concentration: float = 0.9):
+        """
+        P4: pessimistic_init — concentrate prior on h=0 (just-changed regime).
+        With uniform init, effective_window = (max_H-1)/2 ≈ 9.5 → λ_w = 0.5
+        immediately, making BAPR over-conservative from iter 0. Pessimistic
+        init starts with belief[0]=0.9 → ew ≈ 0.95 → λ_w ≈ 0.05, almost zero
+        until BOCD actually detects a change.
+        """
         self.max_H = max_run_length
         self.hazard = hazard_rate
         self.base_var = base_variance
         self.var_growth = variance_growth
-        self.belief = np.ones(max_run_length) / max_run_length
+        self.pessimistic_init = pessimistic_init
+        self.init_concentration = init_concentration
+        self.belief = self._initial_belief()
+
+    def _initial_belief(self):
+        if self.pessimistic_init:
+            b = np.full(self.max_H, (1 - self.init_concentration) / max(self.max_H - 1, 1))
+            b[0] = self.init_concentration
+            return b
+        return np.ones(self.max_H) / self.max_H
 
     def reset(self):
-        self.belief = np.ones(self.max_H) / self.max_H
+        self.belief = self._initial_belief()
 
     def update(self, surprise: float):
         likelihoods = self._compute_likelihood(surprise)
