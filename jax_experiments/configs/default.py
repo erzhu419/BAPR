@@ -23,6 +23,7 @@ class Config:
     tau: float = 0.005  # soft target update
     alpha: float = 0.2  # SAC entropy weight (initial)
     auto_alpha: bool = True
+    grad_clip_norm: float = 1.0  # P3: optax.clip_by_global_norm for policy/critic/ctx
     lr: float = 3e-4
     batch_size: int = 256
     replay_size: int = 1_000_000

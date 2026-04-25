@@ -34,10 +34,12 @@ class BAPR:
         self.log_alpha = jnp.array(jnp.log(config.alpha))
         self.target_entropy = -float(act_dim)
 
-        self.policy_opt = optax.adam(config.lr)
-        self.critic_opt = optax.adam(config.lr)
-        self.context_opt = optax.adam(config.lr)
-        self.alpha_opt = optax.adam(config.lr)
+        # P3: gradient clipping by global norm to prevent Q-divergence early
+        gc = config.grad_clip_norm
+        self.policy_opt = optax.chain(optax.clip_by_global_norm(gc), optax.adam(config.lr))
+        self.critic_opt = optax.chain(optax.clip_by_global_norm(gc), optax.adam(config.lr))
+        self.context_opt = optax.chain(optax.clip_by_global_norm(gc), optax.adam(config.lr))
+        self.alpha_opt = optax.adam(config.lr)  # alpha is scalar, clipping not needed
 
         self.policy_opt_state = self.policy_opt.init(nnx.state(self.policy, nnx.Param))
         self.critic_opt_state = self.critic_opt.init(nnx.state(self.critic, nnx.Param))
