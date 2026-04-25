@@ -21,13 +21,21 @@ class BAPR:
         self.act_dim = act_dim
         self.rngs = nnx.Rngs(seed)
 
+        # v15 (GPT-5.5 round 3): belief-conditioned Q. Augment context with the
+        # full BOCD posterior ρ(h) (max_run_length dim). Critic + policy now
+        # operate on (s, a, e ⊕ ρ) — moves BOCD info from scalar λ_w into the
+        # value function itself, addressing the 'scalar collapse' weakness.
+        self.belief_dim = config.max_run_length if getattr(
+            config, 'belief_conditioned', True) else 0
+        self.aug_dim = config.ep_dim + self.belief_dim
+
         self.context_net = ContextNetwork(
             obs_dim, config.ep_dim, hidden_dim=128, rngs=self.rngs)
         self.policy = GaussianPolicy(
             obs_dim, act_dim, config.hidden_dim,
-            ep_dim=config.ep_dim, n_layers=2, rngs=self.rngs)
+            ep_dim=self.aug_dim, n_layers=2, rngs=self.rngs)
         self.critic = EnsembleCritic(
-            obs_dim + config.ep_dim, act_dim, config.hidden_dim,
+            obs_dim + self.aug_dim, act_dim, config.hidden_dim,
             ensemble_size=config.ensemble_size, n_layers=3, rngs=self.rngs)
         self.target_critic = deepcopy(self.critic)
 
@@ -76,13 +84,21 @@ class BAPR:
         x_opt = self.context_opt
         a_opt = self.alpha_opt
 
+        belief_dim = self.belief_dim
+
         @jax.jit
         def _scan_update(critic_params, target_params, policy_params,
                          ctx_params, log_alpha,
                          c_opt_state, p_opt_state, x_opt_state, a_opt_state,
                          all_obs, all_act, all_rew, all_next_obs, all_done,
-                         all_task_ids, rng_key, warmup, weighted_lambda):
-            """BAPR scan with adaptive beta via weighted_lambda."""
+                         all_task_ids, rng_key, warmup, weighted_lambda,
+                         belief_vec):
+            """BAPR scan with adaptive beta + belief-conditioned Q (v15).
+
+            belief_vec: shape (max_run_length,) — current BOCD posterior ρ(h),
+            broadcast to every batch sample. v15's belief-conditioned critic
+            sees [obs, e, ρ] instead of [obs, e].
+            """
             effective_beta = beta_base - weighted_lambda * penalty_scale
 
             def body_fn(carry, batch_data):
@@ -106,14 +122,24 @@ class BAPR:
                 next_ep = ctx_m(next_obs)
                 next_ep = jnp.where(warmup, jnp.zeros_like(next_ep), next_ep)
 
-                obs_aug = jnp.concatenate([obs, ep], axis=-1)
-                next_aug = jnp.concatenate([next_obs, next_ep], axis=-1)
+                # v15: append belief vector ρ to context (broadcast over batch).
+                # When belief_dim==0 (config disabled), this concat is a no-op.
+                if belief_dim > 0:
+                    bcast = jnp.broadcast_to(belief_vec[None, :], (obs.shape[0], belief_dim))
+                    ep_full = jnp.concatenate([ep, bcast], axis=-1)
+                    next_ep_full = jnp.concatenate([next_ep, bcast], axis=-1)
+                else:
+                    ep_full = ep
+                    next_ep_full = next_ep
 
-                # === Critic ===
+                obs_aug = jnp.concatenate([obs, ep_full], axis=-1)
+                next_aug = jnp.concatenate([next_obs, next_ep_full], axis=-1)
+
+                # === Critic (belief-conditioned) ===
                 def critic_loss_fn(cp):
                     tm = nnx.merge(gd_target, t_p)
                     pm = nnx.merge(gd_policy, p_p)
-                    na, nlp = pm.sample(next_obs, k1, next_ep)
+                    na, nlp = pm.sample(next_obs, k1, next_ep_full)
                     tq = tm(next_aug, na).min(axis=0) - alpha * nlp
                     tv = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq
                     cm = nnx.merge(gd_critic, cp)
@@ -125,13 +151,12 @@ class BAPR:
                 c_upd, new_c_os = c_opt.update(c_grads, c_os, c_p)
                 new_c_p = optax.apply_updates(c_p, c_upd)
 
-                # === Policy (adaptive β) ===
+                # === Policy (adaptive β + belief-conditioned) ===
                 def policy_loss_fn(pp):
                     pm = nnx.merge(gd_policy, pp)
                     cm = nnx.merge(gd_critic, new_c_p)
-                    na, lp = pm.sample(obs, k2, ep)
-                    oa = jnp.concatenate([obs, ep], axis=-1)
-                    qv = cm(oa, na)
+                    na, lp = pm.sample(obs, k2, ep_full)
+                    qv = cm(obs_aug, na)
                     lcb = qv.mean(axis=0) + effective_beta * qv.std(axis=0)
                     return (jnp.exp(la) * lp - lcb).mean(), lp
 
@@ -164,14 +189,22 @@ class BAPR:
                        all_task_ids)
             return jax.lax.scan(body_fn, init, batches)
 
-        # JIT'd Q-std computation for surprise (called once per multi_update)
+        # JIT'd Q-std computation for surprise (called once per multi_update).
+        # v15: also takes belief_vec so the critic input shape matches scan's.
         @jax.jit
-        def _compute_q_stats(critic_params, ctx_params, obs, act, warmup):
+        def _compute_q_stats(critic_params, ctx_params, obs, act, warmup,
+                              belief_vec):
             cm = nnx.merge(gd_critic, critic_params)
             xm = nnx.merge(gd_ctx, ctx_params)
             ep = xm(obs)
             ep = jnp.where(warmup, jnp.zeros_like(ep), ep)
-            oa = jnp.concatenate([obs, ep], axis=-1)
+            if belief_dim > 0:
+                bcast = jnp.broadcast_to(
+                    belief_vec[None, :], (obs.shape[0], belief_dim))
+                ep_full = jnp.concatenate([ep, bcast], axis=-1)
+            else:
+                ep_full = ep
+            oa = jnp.concatenate([obs, ep_full], axis=-1)
             pq = cm(oa, act)
             return pq.std(axis=0).mean()
 
@@ -185,6 +218,11 @@ class BAPR:
     def select_action(self, obs, deterministic=False):
         obs_jax = jnp.array(obs)[None] if np.asarray(obs).ndim == 1 else jnp.array(obs)
         ep = self.context_net(obs_jax)
+        # v15: append current belief vector to ep so policy input matches scan
+        if self.belief_dim > 0:
+            belief = jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
+            bcast = jnp.broadcast_to(belief[None, :], (obs_jax.shape[0], self.belief_dim))
+            ep = jnp.concatenate([ep, bcast], axis=-1)
         if deterministic:
             return np.array(self.policy.deterministic(obs_jax, ep)[0])
         key = self.rngs.params()
@@ -214,6 +252,9 @@ class BAPR:
         # Change 2 (GPT-5.5 v2): compute surprise from MOST RECENT rollout, not
         # from random replay batch. Random replay mixes old regimes, making
         # BOCD's changepoint detection unreliable.
+        # v15: current BOCD belief vector (max_run_length-dim) for conditioning
+        belief_jax = jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
+
         if recent_rollout is not None:
             w = getattr(self.config, "surprise_window", 1024)
             robs = jnp.asarray(recent_rollout["obs"][-w:])
@@ -222,7 +263,7 @@ class BAPR:
             q_std = self._compute_q_stats(
                 nnx.state(self.critic, nnx.Param),
                 nnx.state(self.context_net, nnx.Param),
-                robs, ract, warmup)
+                robs, ract, warmup, belief_jax)
             reward_signal = rrew
         else:
             # Fallback: replay batch (random exploration phase or compatibility)
@@ -231,7 +272,7 @@ class BAPR:
             q_std = self._compute_q_stats(
                 nnx.state(self.critic, nnx.Param),
                 nnx.state(self.context_net, nnx.Param),
-                last_obs, last_act, warmup)
+                last_obs, last_act, warmup, belief_jax)
             if recent_rewards is not None and len(recent_rewards) > 0:
                 reward_signal = np.array(recent_rewards, dtype=np.float32)
             else:
@@ -242,14 +283,14 @@ class BAPR:
         self.belief_tracker.update(surprise)
 
         # P0: BAPR mechanism warmup — λ_w=0 for first bapr_warmup_iters.
-        # Before this, Q-std and surprise statistics are too noisy for BOCD
-        # to modulate β meaningfully. Running as pure RESAC in early training
-        # lets all seeds reach a stable baseline before BOCD activates.
         if current_iter < self.config.bapr_warmup_iters:
             weighted_lambda = 0.0
         else:
             weighted_lambda = self._compute_weighted_lambda()
         self._current_weighted_lambda = weighted_lambda
+
+        # v15: refresh belief vector AFTER update so scan uses post-update belief
+        belief_jax = jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
 
         # Run scan
         c_p = nnx.state(self.critic, nnx.Param)
@@ -269,7 +310,7 @@ class BAPR:
             self.critic_opt_state, self.policy_opt_state,
             self.context_opt_state, self.alpha_opt_state,
             obs, act, rew, nobs, done, tids, rng_key, warmup,
-            jnp.array(weighted_lambda))
+            jnp.array(weighted_lambda), belief_jax)
 
         (new_c, new_t, new_p, new_x, new_la,
          self.critic_opt_state, self.policy_opt_state,

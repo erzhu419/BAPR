@@ -108,8 +108,15 @@ def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
     if tasks is not None:
         env.set_task(tasks[0])
 
+    # v15: pass BAPR's belief vector if the agent uses belief-conditioned policy
+    belief_vec = None
+    if hasattr(agent, 'belief_dim') and agent.belief_dim > 0:
+        import jax.numpy as _jnp
+        belief_vec = _jnp.asarray(agent.belief_tracker.belief, dtype=_jnp.float32)
+
     rew_np, done_np = env.eval_rollout(
-        policy_params, n_steps, rng_key, context_params=context_params)
+        policy_params, n_steps, rng_key,
+        context_params=context_params, belief_vec=belief_vec)
 
     # Segment into episodes via done mask
     ep_rewards, ep_r, completed = [], 0.0, 0
@@ -161,11 +168,17 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
         if hasattr(agent, 'context_net'):
             context_params = nnx.state(agent.context_net, nnx.Param)
 
+        # v15: pass BAPR's belief vector if the agent uses belief-conditioned policy
+        belief_vec = None
+        if hasattr(agent, 'belief_dim') and agent.belief_dim > 0:
+            belief_vec = jnp.asarray(agent.belief_tracker.belief, dtype=jnp.float32)
+
         # Task ID used for the entire scan rollout (env switches at iter boundaries
         # only, so all transitions in this scan share the same task)
         rollout_task_id = env.current_task_id
         (obs, act, rew, nobs, done), ep_rewards = env.rollout(
-            policy_params, n_steps, rng_key, context_params=context_params)
+            policy_params, n_steps, rng_key,
+            context_params=context_params, belief_vec=belief_vec)
 
         # Zero-copy push: JAX arrays go directly to GPU-native replay buffer
         task_ids = jnp.full(n_steps, rollout_task_id, dtype=jnp.int32)

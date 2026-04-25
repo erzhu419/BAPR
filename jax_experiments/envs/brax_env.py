@@ -285,8 +285,11 @@ class BraxNonstationaryEnv:
         has_context = context_graphdef is not None
 
         # --- Stochastic rollout (training) ---
+        # v15: optional belief_vec arg lets BAPR feed the BOCD posterior into
+        # the policy alongside context. None → ESCP/RESAC/SAC unchanged path.
         @jax.jit
-        def _rollout_scan(sys, policy_params, context_params, init_state, keys):
+        def _rollout_scan(sys, policy_params, context_params, belief_vec,
+                          init_state, keys):
             def scan_body(carry, key):
                 state = carry
                 key1, key2 = jax.random.split(key)
@@ -297,6 +300,8 @@ class BraxNonstationaryEnv:
                 if has_context:
                     ctx_net = nnx.merge(context_graphdef, context_params)
                     ep = ctx_net(pre_obs[None])
+                    if belief_vec is not None:
+                        ep = jnp.concatenate([ep, belief_vec[None, :]], axis=-1)
                     action, _ = policy.sample(pre_obs[None], key1, ep)
                 else:
                     action, _ = policy.sample(pre_obs[None], key1)
@@ -321,7 +326,8 @@ class BraxNonstationaryEnv:
 
         # --- Deterministic rollout (eval): tanh(mean), no PRNG per step ---
         @jax.jit
-        def _rollout_scan_det(sys, policy_params, context_params, init_state, reset_keys):
+        def _rollout_scan_det(sys, policy_params, context_params, belief_vec,
+                               init_state, reset_keys):
             """Eval rollout — uses policy mean (no exploration noise).
 
             reset_keys: [N, 2] keys used only for auto-reset sampling.
@@ -334,6 +340,8 @@ class BraxNonstationaryEnv:
                 if has_context:
                     ctx_net = nnx.merge(context_graphdef, context_params)
                     ep = ctx_net(pre_obs[None])
+                    if belief_vec is not None:
+                        ep = jnp.concatenate([ep, belief_vec[None, :]], axis=-1)
                     action = policy.deterministic(pre_obs[None], ep)
                 else:
                     action = policy.deterministic(pre_obs[None])
@@ -359,7 +367,8 @@ class BraxNonstationaryEnv:
         self._rollout_scan_det = _rollout_scan_det
         self._has_context = has_context
 
-    def rollout(self, policy_params, n_steps: int, rng_key, context_params=None):
+    def rollout(self, policy_params, n_steps: int, rng_key,
+                context_params=None, belief_vec=None):
         """Run n_steps using the pre-built scan rollout.
 
         Returns JAX arrays (stay on GPU) + episode rewards (CPU).
@@ -382,7 +391,8 @@ class BraxNonstationaryEnv:
 
         # Single JIT call for all N steps
         final_state, (obs, act, rew, nobs, done) = self._rollout_scan(
-            self._current_sys, policy_params, context_params, init_state, keys)
+            self._current_sys, policy_params, context_params, belief_vec,
+            init_state, keys)
 
         # Episode rewards need CPU for Python-level segmentation
         rew_np = np.array(rew)
@@ -402,7 +412,8 @@ class BraxNonstationaryEnv:
         # Return JAX arrays (obs, act, rew, nobs, done stay on GPU)
         return (obs, act, rew, nobs, done), ep_rewards
 
-    def eval_rollout(self, policy_params, n_steps: int, rng_key, context_params=None):
+    def eval_rollout(self, policy_params, n_steps: int, rng_key,
+                     context_params=None, belief_vec=None):
         """Deterministic eval rollout — does NOT update step counter or switch task.
 
         Uses tanh(mean) policy (no exploration noise). ~10-50x faster than the
@@ -423,6 +434,7 @@ class BraxNonstationaryEnv:
         reset_keys = jax.random.split(reset_key, n_steps)
 
         _, (rew_jax, done_jax) = self._rollout_scan_det(
-            sys, policy_params, context_params, init_state, reset_keys)
+            sys, policy_params, context_params, belief_vec,
+            init_state, reset_keys)
 
         return np.array(rew_jax), np.array(done_jax)

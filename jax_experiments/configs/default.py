@@ -57,6 +57,10 @@ class Config:
     base_variance: float = 0.1      # variance at h=0 for BOCD likelihood
     variance_growth: float = 0.05   # variance grows with run length
     surprise_ema_alpha: float = 0.3
+    # v15: belief-conditioned Q. Concat full BOCD posterior ρ(h) (max_run_length
+    # dim) to context vector e fed to actor + critic. When False, BAPR uses
+    # only the scalar λ_w pathway (= v14 behavior).
+    belief_conditioned: bool = True
     # Change 2 (GPT-5.5 v2): bounded suffix of recent rollout fed to BOCD.
     # Replay batches mix old regimes — using rollout suffix gives BOCD the
     # current regime's evidence. 1024 ≈ 1 episode × ¼ for HC.
