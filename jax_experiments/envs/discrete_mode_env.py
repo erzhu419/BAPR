@@ -173,11 +173,24 @@ class DiscreteModePiecewiseEnv(BraxNonstationaryEnv):
     def sample_tasks(self, n_tasks: int) -> List[Dict]:
         """Returns K mode descriptors (n_tasks arg ignored).
 
-        These are placeholder dicts since the actual sys is pre-computed in
-        _mode_sys. Returned for API compat with train.py.
+        Each dict carries only numeric fields so train.py's set_task path
+        does not choke on string values via jnp.array. Use mode_id (int) as
+        the canonical handle; mode_name is recoverable via self.mode_keys.
         """
-        return [{'mode_id': i, 'mode_name': self.mode_keys[i],
-                 **self.modes[i]} for i in range(self.K)]
+        return [{'mode_id': i, **self.modes[i]} for i in range(self.K)]
+
+    def set_task(self, task: Dict):
+        """Switch to a pre-computed mode by mode_id.
+
+        Overrides BraxNonstationaryEnv.set_task to bypass jnp.array on
+        param multipliers (modes are pre-baked in _mode_sys).
+        """
+        if 'mode_id' in task:
+            mode_id = int(task['mode_id'])
+        else:
+            mode_id = 0  # default to first mode if unspecified
+        self.current_task_id = mode_id
+        self._set_sys(self._mode_sys[mode_id])
 
     def set_nonstationary_para(self, tasks, changing_period=None,
                                 changing_interval=None):
