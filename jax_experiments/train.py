@@ -108,13 +108,17 @@ def make_algo(algo_name: str, obs_dim: int, act_dim: int, config: Config):
 def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
     """Fast GPU-scan eval: deterministic policy, single JIT call for all episodes.
 
-    n_episodes * max_episode_steps steps are run in one _rollout_scan_det call,
-    then episode rewards are segmented via the done mask on CPU.
+    Behavior depends on `tasks`:
+      - None or len(tasks)==1: single task (legacy behavior)
+      - len(tasks) <= 10 (e.g. discrete_mode K modes): rotate through ALL
+        tasks, run n_episodes per task, average across all → measures
+        cross-mode generalization (BAPR's design target).
+      - len(tasks) > 10 (continuous, 40 tasks): use first task only
+        (full sweep too expensive every eval).
 
     Uses EMA policy if available (BAPR) for more stable evaluation.
     """
     from flax import nnx
-    # Use EMA policy if available (BAPR), otherwise current policy
     if hasattr(agent, 'ema_policy'):
         policy_params = nnx.state(agent.ema_policy, nnx.Param)
     else:
@@ -126,35 +130,40 @@ def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
     rng_key = jax.random.PRNGKey(42)  # fixed key for reproducible eval
     n_steps = n_episodes * config.max_episode_steps
 
-    # If tasks provided, pick a representative task for eval
-    if tasks is not None:
-        env.set_task(tasks[0])
+    # Decide which tasks to eval over
+    if tasks is None or len(tasks) == 0:
+        eval_tasks = [None]
+    elif len(tasks) <= 10:
+        eval_tasks = tasks  # rotate through all (discrete_mode case)
+    else:
+        eval_tasks = [tasks[0]]  # representative only (continuous case)
 
-    # v15: pass BAPR's belief vector if the agent uses belief-conditioned policy
     belief_vec = None
     if hasattr(agent, 'belief_dim') and agent.belief_dim > 0:
         import jax.numpy as _jnp
         belief_vec = _jnp.asarray(agent.belief_tracker.belief, dtype=_jnp.float32)
 
-    rew_np, done_np = env.eval_rollout(
-        policy_params, n_steps, rng_key,
-        context_params=context_params, belief_vec=belief_vec)
+    all_rewards = []
+    for task in eval_tasks:
+        if task is not None:
+            env.set_task(task)
+        rew_np, done_np = env.eval_rollout(
+            policy_params, n_steps, rng_key,
+            context_params=context_params, belief_vec=belief_vec)
+        ep_rewards, ep_r, completed = [], 0.0, 0
+        for i in range(n_steps):
+            ep_r += rew_np[i]
+            if done_np[i] > 0.5:
+                ep_rewards.append(ep_r)
+                ep_r = 0.0
+                completed += 1
+                if completed >= n_episodes:
+                    break
+        if not ep_rewards:
+            ep_rewards = [ep_r]
+        all_rewards.extend(ep_rewards)
 
-    # Segment into episodes via done mask
-    ep_rewards, ep_r, completed = [], 0.0, 0
-    for i in range(n_steps):
-        ep_r += rew_np[i]
-        if done_np[i] > 0.5:
-            ep_rewards.append(ep_r)
-            ep_r = 0.0
-            completed += 1
-            if completed >= n_episodes:
-                break
-
-    if not ep_rewards:  # no episode completed (e.g. very early training)
-        ep_rewards = [ep_r]
-
-    return float(np.mean(ep_rewards)), float(np.std(ep_rewards))
+    return float(np.mean(all_rewards)), float(np.std(all_rewards))
 
 
 def collect_samples(agent, env, replay_buffer, config, n_steps: int):
