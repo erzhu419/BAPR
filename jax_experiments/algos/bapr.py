@@ -1,4 +1,11 @@
-"""BAPR: ESCP + BOCD Belief Tracker + Adaptive β — scan-fused."""
+"""BAPR: ESCP + BOCD Belief Tracker + Adaptive β — scan-fused.
+
+Two belief modes (toggle via config.use_regime_belief):
+  False (default, legacy): scalar BOCD ρ(h), Q sees [s, a, e, ρ] (20-dim belief)
+  True  (Minimum redesign): joint b(h, z), Q sees [s, a, e, ρ, μ]
+        (max_run_length + num_regimes dim; default 20+4=24)
+        See common/regime_belief_tracker.py + GPT55_REVIEW_v3.md for theory.
+"""
 import jax
 import jax.numpy as jnp
 import optax
@@ -10,6 +17,7 @@ from jax_experiments.networks.policy import GaussianPolicy
 from jax_experiments.networks.ensemble_critic import EnsembleCritic
 from jax_experiments.networks.context_net import ContextNetwork, compute_rmdm_loss
 from jax_experiments.common.belief_tracker import BeliefTracker, SurpriseComputer
+from jax_experiments.common.regime_belief_tracker import RegimeBeliefTracker
 
 
 class BAPR:
@@ -21,12 +29,17 @@ class BAPR:
         self.act_dim = act_dim
         self.rngs = nnx.Rngs(seed)
 
-        # v15 (GPT-5.5 round 3): belief-conditioned Q. Augment context with the
-        # full BOCD posterior ρ(h) (max_run_length dim). Critic + policy now
-        # operate on (s, a, e ⊕ ρ) — moves BOCD info from scalar λ_w into the
-        # value function itself, addressing the 'scalar collapse' weakness.
-        self.belief_dim = config.max_run_length if getattr(
-            config, 'belief_conditioned', True) else 0
+        # Belief conditioning (3 modes):
+        #   use_regime_belief=True : Q sees [s, a, e, ρ, μ] — joint b(h, z)
+        #   belief_conditioned=True : Q sees [s, a, e, ρ]    — scalar BOCD (v15)
+        #   both False              : Q sees [s, a, e]       — pre-v15 BAPR
+        self.use_regime_belief = bool(getattr(config, 'use_regime_belief', False))
+        if self.use_regime_belief:
+            self.belief_dim = config.max_run_length + config.num_regimes
+        elif getattr(config, 'belief_conditioned', True):
+            self.belief_dim = config.max_run_length
+        else:
+            self.belief_dim = 0
         self.aug_dim = config.ep_dim + self.belief_dim
 
         self.context_net = ContextNetwork(
@@ -52,12 +65,34 @@ class BAPR:
         self.context_opt_state = self.context_opt.init(nnx.state(self.context_net, nnx.Param))
         self.alpha_opt_state = self.alpha_opt.init(self.log_alpha)
 
+        # Both trackers always exist: legacy belief_tracker provides the scalar
+        # λ_w (effective_window-based) used by the adaptive β path. The new
+        # regime_tracker (when enabled) provides the joint b(h, z) used to
+        # build the belief vector fed to Q/π.
         self.belief_tracker = BeliefTracker(
             max_run_length=config.max_run_length,
             hazard_rate=config.hazard_rate,
             base_variance=config.base_variance,
             variance_growth=config.variance_growth)
         self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
+
+        if self.use_regime_belief:
+            self.regime_tracker = RegimeBeliefTracker(
+                max_run_length=config.max_run_length,
+                num_regimes=config.num_regimes,
+                hazard_rate=config.regime_hazard_rate,
+                warmup_samples=config.regime_warmup_samples,
+                ewma_alpha=config.regime_ewma_alpha,
+                obs_dim=config.regime_obs_dim,
+                seed=seed + 7919)
+            # Per-chunk reward EMA → reward_z channel of y. Lives on BAPR
+            # because it needs to span multiple iters; tracker itself is
+            # regime-conditional and shouldn't carry global reward stats.
+            self._chunk_rew_ema_mean: float = None
+            self._chunk_rew_ema_var: float = None
+            self._chunk_rew_ema_alpha: float = 0.05
+        else:
+            self.regime_tracker = None
 
         self.update_count = 0
         self._current_weighted_lambda = 0.0
@@ -208,8 +243,67 @@ class BAPR:
             pq = cm(oa, act)
             return pq.std(axis=0).mean()
 
+        # ── Minimum BAPR redesign: chunked observable signals ─────────────
+        # Splits a full rollout into n_chunks pieces, returns per-chunk
+        # (q_std, td_resid) for the RegimeBeliefTracker. y_3 = (reward_mean,
+        # q_std, td_resid) — reward_mean is computed in numpy outside.
+        # n_chunks_static is closure-captured from config so reshape works
+        # inside JIT (must be Python int, not traced).
+        n_chunks_static = self.config.regime_chunks_per_iter
+
+        @jax.jit
+        def _compute_chunked_signals(critic_params, target_params, policy_params,
+                                       ctx_params, full_obs, full_act, full_rew,
+                                       full_next_obs, full_done, warmup,
+                                       belief_vec):
+            cm = nnx.merge(gd_critic, critic_params)
+            tm = nnx.merge(gd_target, target_params)
+            pm = nnx.merge(gd_policy, policy_params)
+            xm = nnx.merge(gd_ctx, ctx_params)
+
+            obs_c = full_obs.reshape((n_chunks_static, -1, full_obs.shape[-1]))
+            act_c = full_act.reshape((n_chunks_static, -1, full_act.shape[-1]))
+            rew_c = full_rew.reshape((n_chunks_static, -1))
+            nobs_c = full_next_obs.reshape((n_chunks_static, -1, full_next_obs.shape[-1]))
+            done_c = full_done.reshape((n_chunks_static, -1))
+
+            def per_chunk(obs, act, rew, next_obs, done):
+                ep = xm(obs)
+                ep = jnp.where(warmup, jnp.zeros_like(ep), ep)
+                ep_next = xm(next_obs)
+                ep_next = jnp.where(warmup, jnp.zeros_like(ep_next), ep_next)
+                if belief_dim > 0:
+                    bcast = jnp.broadcast_to(
+                        belief_vec[None, :], (obs.shape[0], belief_dim))
+                    ep_full = jnp.concatenate([ep, bcast], axis=-1)
+                    ep_next_full = jnp.concatenate([ep_next, bcast], axis=-1)
+                else:
+                    ep_full = ep
+                    ep_next_full = ep_next
+
+                # Q-std (ensemble disagreement). EnsembleCritic returns (E, B)
+                # — already squeezed the per-critic 1-dim head.
+                oa = jnp.concatenate([obs, ep_full], axis=-1)
+                pq = cm(oa, act)                              # (E, B)
+                q_std = pq.std(axis=0).mean()                 # scalar
+                q_pred_mean = pq.mean(axis=0)                 # (B,)
+
+                # TD residual: |r + γ(1-d) Q_target(s', π_det(s')) - Q̄(s, a)|
+                # Deterministic policy for the bootstrap action — avoids extra
+                # sampling overhead and gives a stable signal channel.
+                next_act = pm.deterministic(next_obs, ep_next_full)
+                noa = jnp.concatenate([next_obs, ep_next_full], axis=-1)
+                tq = tm(noa, next_act).mean(axis=0)           # (B,)
+                td_target = rew + gamma * (1.0 - done) * tq
+                td_err = jnp.abs(td_target - q_pred_mean).mean()
+
+                return jnp.stack([q_std, td_err])             # (2,)
+
+            return jax.vmap(per_chunk)(obs_c, act_c, rew_c, nobs_c, done_c)
+
         self._scan_update = _scan_update
         self._compute_q_stats = _compute_q_stats
+        self._compute_chunked_signals = _compute_chunked_signals
 
     @property
     def alpha(self):
@@ -218,9 +312,10 @@ class BAPR:
     def select_action(self, obs, deterministic=False):
         obs_jax = jnp.array(obs)[None] if np.asarray(obs).ndim == 1 else jnp.array(obs)
         ep = self.context_net(obs_jax)
-        # v15: append current belief vector to ep so policy input matches scan
+        # Append current belief vector to ep so policy input matches scan.
+        # Format selected by _build_belief_jax (use_regime_belief vs legacy).
         if self.belief_dim > 0:
-            belief = jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
+            belief = self._build_belief_jax()
             bcast = jnp.broadcast_to(belief[None, :], (obs_jax.shape[0], self.belief_dim))
             ep = jnp.concatenate([ep, bcast], axis=-1)
         if deterministic:
@@ -232,6 +327,62 @@ class BAPR:
     def reset_episode(self):
         self.belief_tracker.reset()
         self.surprise_computer.reset()
+        if self.regime_tracker is not None:
+            self.regime_tracker.reset()
+
+    def _build_belief_jax(self):
+        """Build the belief vector to feed Q/π based on current mode.
+
+        - use_regime_belief=True: concat([ρ(h), μ(z)]) — H+K dim
+        - belief_conditioned=True: ρ(h) — H dim (legacy v15)
+        - both False: empty (legacy pre-v15)
+        """
+        if self.use_regime_belief:
+            rho = self.regime_tracker.rho
+            mu = self.regime_tracker.mu_marginal
+            return jnp.asarray(np.concatenate([rho, mu]), dtype=jnp.float32)
+        return jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
+
+    def _observe_chunked_rollout(self, recent_rollout, warmup_jax, belief_jax):
+        """Split recent_rollout into N chunks; feed (r_z, q_std, td_resid)
+        per chunk to the regime tracker. Runs once per multi_update."""
+        full_obs = jnp.asarray(recent_rollout["obs"])         # (rollout_len, obs_dim)
+        full_act = jnp.asarray(recent_rollout["act"])
+        full_rew = jnp.asarray(recent_rollout["rew"]).reshape(-1)
+        full_nobs = jnp.asarray(recent_rollout["next_obs"])
+        full_done = jnp.asarray(recent_rollout["done"]).reshape(-1)
+
+        signals = self._compute_chunked_signals(              # (n_chunks, 2)
+            nnx.state(self.critic, nnx.Param),
+            nnx.state(self.target_critic, nnx.Param),
+            nnx.state(self.policy, nnx.Param),
+            nnx.state(self.context_net, nnx.Param),
+            full_obs, full_act, full_rew, full_nobs, full_done,
+            warmup_jax, belief_jax)
+        signals_np = np.asarray(signals)                       # (n_chunks, 2)
+
+        n_chunks = self.config.regime_chunks_per_iter
+        chunk_size = full_rew.shape[0] // n_chunks
+        rew_per_chunk = np.asarray(full_rew).reshape(n_chunks, chunk_size).mean(axis=1)
+
+        a = self._chunk_rew_ema_alpha
+        for i in range(n_chunks):
+            r_mean = float(rew_per_chunk[i])
+            if self._chunk_rew_ema_mean is None:
+                self._chunk_rew_ema_mean = r_mean
+                self._chunk_rew_ema_var = 1.0
+                r_z = 0.0
+            else:
+                old_mean = self._chunk_rew_ema_mean
+                self._chunk_rew_ema_mean = a * r_mean + (1 - a) * old_mean
+                self._chunk_rew_ema_var = a * (r_mean - old_mean) ** 2 \
+                                          + (1 - a) * self._chunk_rew_ema_var
+                std = max(float(np.sqrt(self._chunk_rew_ema_var)), 1e-3)
+                r_z = abs(r_mean - self._chunk_rew_ema_mean) / std
+
+            y = np.array([r_z, float(signals_np[i, 0]), float(signals_np[i, 1])],
+                         dtype=np.float32)
+            self.regime_tracker.observe(y)
 
     def _compute_weighted_lambda(self):
         """Compute belief-weighted penalty.
@@ -252,8 +403,9 @@ class BAPR:
         # Change 2 (GPT-5.5 v2): compute surprise from MOST RECENT rollout, not
         # from random replay batch. Random replay mixes old regimes, making
         # BOCD's changepoint detection unreliable.
-        # v15: current BOCD belief vector (max_run_length-dim) for conditioning
-        belief_jax = jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
+        # belief_jax is the conditioning vector for Q/π — _build_belief_jax
+        # picks the right format (legacy 20-dim ρ vs new 24-dim concat[ρ;μ]).
+        belief_jax = self._build_belief_jax()
 
         if recent_rollout is not None:
             w = getattr(self.config, "surprise_window", 1024)
@@ -282,6 +434,13 @@ class BAPR:
             reward_signal, np.asarray([float(q_std)], dtype=np.float32))
         self.belief_tracker.update(surprise)
 
+        # ── Minimum redesign: feed chunked observations to regime tracker.
+        # Uses the PRE-update belief_jax (Q-net was conditioned on this for
+        # the chunked Q-std / TD computations); fine because the new tracker
+        # state is built from this iter's data and read back below.
+        if self.use_regime_belief and recent_rollout is not None:
+            self._observe_chunked_rollout(recent_rollout, warmup, belief_jax)
+
         # P0: BAPR mechanism warmup — λ_w=0 for first bapr_warmup_iters.
         if current_iter < self.config.bapr_warmup_iters:
             weighted_lambda = 0.0
@@ -289,8 +448,9 @@ class BAPR:
             weighted_lambda = self._compute_weighted_lambda()
         self._current_weighted_lambda = weighted_lambda
 
-        # v15: refresh belief vector AFTER update so scan uses post-update belief
-        belief_jax = jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
+        # Refresh belief vector AFTER update so scan uses post-update belief.
+        # Format depends on flags: see _build_belief_jax docstring.
+        belief_jax = self._build_belief_jax()
 
         # Run scan
         c_p = nnx.state(self.critic, nnx.Param)

@@ -140,8 +140,13 @@ def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
 
     belief_vec = None
     if hasattr(agent, 'belief_dim') and agent.belief_dim > 0:
-        import jax.numpy as _jnp
-        belief_vec = _jnp.asarray(agent.belief_tracker.belief, dtype=_jnp.float32)
+        # Use the agent's own _build_belief_jax if available — it knows whether
+        # to emit ρ(h) (legacy) or concat([ρ, μ]) (Minimum redesign).
+        if hasattr(agent, '_build_belief_jax'):
+            belief_vec = agent._build_belief_jax()
+        else:
+            import jax.numpy as _jnp
+            belief_vec = _jnp.asarray(agent.belief_tracker.belief, dtype=_jnp.float32)
 
     all_rewards = []
     for task in eval_tasks:
@@ -199,10 +204,15 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
         if hasattr(agent, 'context_net'):
             context_params = nnx.state(agent.context_net, nnx.Param)
 
-        # v15: pass BAPR's belief vector if the agent uses belief-conditioned policy
+        # v15+: pass BAPR's belief vector if the agent is belief-conditioned.
+        # _build_belief_jax encapsulates the format choice (legacy ρ vs new
+        # concat([ρ, μ])); fall back to raw legacy belief for compat.
         belief_vec = None
         if hasattr(agent, 'belief_dim') and agent.belief_dim > 0:
-            belief_vec = jnp.asarray(agent.belief_tracker.belief, dtype=jnp.float32)
+            if hasattr(agent, '_build_belief_jax'):
+                belief_vec = agent._build_belief_jax()
+            else:
+                belief_vec = jnp.asarray(agent.belief_tracker.belief, dtype=jnp.float32)
 
         # Task ID used for the entire scan rollout (env switches at iter boundaries
         # only, so all transitions in this scan share the same task)
@@ -467,6 +477,9 @@ def main():
                              "(K=4 semantic modes, exp dwell — BAPR sweet spot)")
     parser.add_argument("--mean_dwell_iters", type=int, default=None,
                         help="discrete_mode: avg iters per mode dwell (default 60)")
+    parser.add_argument("--use_regime_belief", action="store_true",
+                        help="BAPR Minimum redesign: use joint regime belief "
+                             "b(h, z) — Q sees [s, a, e, ρ, μ] (24-dim belief).")
 
     args = parser.parse_args()
 
@@ -509,6 +522,8 @@ def main():
         config.changing_period = args.changing_period
     if args.save_interval is not None:
         config.save_interval = args.save_interval
+    if args.use_regime_belief:
+        config.use_regime_belief = True
     config.resume = args.resume
 
     train(config)
