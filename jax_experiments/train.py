@@ -44,6 +44,28 @@ from jax_experiments.common.replay_buffer import ReplayBuffer
 from jax_experiments.common.logging import Logger
 from jax_experiments.common.checkpoint import save_checkpoint, load_checkpoint, has_checkpoint
 from jax_experiments.envs.brax_env import BraxNonstationaryEnv as NonstationaryEnv
+from jax_experiments.envs.discrete_mode_env import DiscreteModePiecewiseEnv
+
+
+def make_env(config, seed_offset=0):
+    """Build training or eval env based on config.env_type.
+
+    env_type='continuous': original ESCP-style continuous task family
+    env_type='discrete_mode': K=4 discrete semantic modes (BAPR sweet spot)
+    """
+    if getattr(config, 'env_type', 'continuous') == 'discrete_mode':
+        return DiscreteModePiecewiseEnv(
+            env_name=config.env_name,
+            mean_dwell_iters=config.discrete_mean_dwell_iters,
+            steps_per_iter=config.samples_per_iter,
+            dwell_distribution=config.discrete_dwell_distribution,
+            reward_shaping=config.discrete_reward_shaping,
+            seed=config.seed + seed_offset,
+            backend=config.brax_backend)
+    return NonstationaryEnv(
+        config.env_name, rand_params=config.varying_params,
+        log_scale_limit=config.log_scale_limit,
+        seed=config.seed + seed_offset, backend=config.brax_backend)
 
 
 def make_algo(algo_name: str, obs_dim: int, act_dim: int, config: Config):
@@ -220,10 +242,8 @@ def train(config: Config):
     print(f"  JAX devices: {jax.devices()}")
     print(f"{'='*60}")
 
-    # Create environment
-    env = NonstationaryEnv(config.env_name, rand_params=config.varying_params,
-                           log_scale_limit=config.log_scale_limit, seed=config.seed,
-                           backend=config.brax_backend)
+    # Create environment (continuous or discrete-mode based on config.env_type)
+    env = make_env(config, seed_offset=0)
     obs_dim = env.obs_dim
     act_dim = env.act_dim
 
@@ -268,10 +288,8 @@ def train(config: Config):
         print(f"Logging to: {log_dir}")
         print(f"Starting training... (first {config.start_train_steps} steps are random exploration)")
 
-    # Separate eval env to avoid polluting training env's state
-    eval_env = NonstationaryEnv(config.env_name, rand_params=config.varying_params,
-                                log_scale_limit=config.log_scale_limit, seed=config.seed + 1000,
-                                backend=config.brax_backend)
+    # Separate eval env (offset seed by 1000 for different mode-switch RNG)
+    eval_env = make_env(config, seed_offset=1000)
     eval_env.build_rollout_fn(policy_graphdef, context_graphdef)  # needed for _rollout_scan_det
 
     total_steps = total_steps  # from checkpoint or 0
@@ -434,6 +452,12 @@ def main():
                         help="Save checkpoint every N iterations (default: 50)")
     parser.add_argument("--resume", action="store_true",
                         help="Resume training from latest checkpoint if available")
+    parser.add_argument("--env_type", type=str, default=None,
+                        choices=["continuous", "discrete_mode"],
+                        help="continuous (ESCP-style 40 tasks) or discrete_mode "
+                             "(K=4 semantic modes, exp dwell — BAPR sweet spot)")
+    parser.add_argument("--mean_dwell_iters", type=int, default=None,
+                        help="discrete_mode: avg iters per mode dwell (default 60)")
 
     args = parser.parse_args()
 
@@ -468,6 +492,10 @@ def main():
         config.log_interval = args.log_interval
     if args.eval_episodes is not None:
         config.eval_episodes = args.eval_episodes
+    if args.env_type is not None:
+        config.env_type = args.env_type
+    if args.mean_dwell_iters is not None:
+        config.discrete_mean_dwell_iters = args.mean_dwell_iters
     if args.changing_period is not None:
         config.changing_period = args.changing_period
     if args.save_interval is not None:

@@ -16,6 +16,15 @@ class Config:
     changing_period: int = 20000  # task switches every THIS many env steps (~5 iters)
     changing_interval: int = 4000  # align with samples_per_iter (one check per rollout)
 
+    # Env type selector — see jax_experiments/envs/discrete_mode_env.py
+    #   'continuous': original ESCP-style continuous task family (uniform log_scale)
+    #   'discrete_mode': K=4 semantic modes, exp dwell, random next-mode (BAPR sweet spot)
+    env_type: str = "continuous"
+    # discrete_mode-specific:
+    discrete_mean_dwell_iters: int = 60       # dwell time per mode in iters
+    discrete_dwell_distribution: str = "exponential"  # 'exponential' or 'fixed'
+    discrete_reward_shaping: bool = False     # Property D explicit penalty
+
     # Algorithm
     algo: str = "resac"  # resac | escp | bapr
     seed: int = 8
