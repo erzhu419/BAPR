@@ -62,10 +62,27 @@ class Config:
     rnn_fix_length: int = 16  # history window for context (FC mode = no RNN)
 
     max_run_length: int = 20
-    hazard_rate: float = 0.05
+    hazard_rate: float = 0.05       # legacy BOCD (scalar ρ(h)) — preserved for backcompat
     base_variance: float = 0.1      # variance at h=0 for BOCD likelihood
     variance_growth: float = 0.05   # variance grows with run length
     surprise_ema_alpha: float = 0.3
+
+    # ── Minimum BAPR redesign (joint regime belief b(h, z)) ──────────────
+    # Replaces scalar BOCD ρ(h) with joint b(h, z) over (run-length, regime).
+    # Toggle with use_regime_belief=True; legacy scalar BOCD stays the default.
+    use_regime_belief: bool = False
+    num_regimes: int = 4              # K — regime cluster count
+    # Per-CHUNK observation (rollout split into chunks_per_iter pieces).
+    # 4000-step rollout / 16 chunks = 250 env steps per chunk → reward + q-std
+    # signal per chunk. Warmup samples: 100 iter × 16 chunks = 1600 obs for
+    # k-means seeding (vs 100 obs if per-iter).
+    regime_chunks_per_iter: int = 16
+    regime_warmup_samples: int = 1600  # 100 iter × 16 chunks
+    regime_ewma_alpha: float = 0.05   # EMA rate for online (mu_z, var_z) refresh
+    regime_obs_dim: int = 3           # 3-channel y: (r_resid, q_std_spike, td_resid)
+    # Per-chunk hazard rate. discrete_mode env mean dwell = 60 iter × 16 chunks
+    # = 960 chunks → per-chunk hazard ≈ 1/960 ≈ 0.001. Override per env.
+    regime_hazard_rate: float = 0.001
     # v15: belief-conditioned Q. Concat full BOCD posterior ρ(h) (max_run_length
     # dim) to context vector e fed to actor + critic. When False, BAPR uses
     # only the scalar λ_w pathway (= v14 behavior).
