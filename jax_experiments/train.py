@@ -171,7 +171,8 @@ def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
     return float(np.mean(all_rewards)), float(np.std(all_rewards))
 
 
-def collect_samples(agent, env, replay_buffer, config, n_steps: int):
+def collect_samples(agent, env, replay_buffer, config, n_steps: int,
+                     current_iter: int = 0):
     """Collect n_steps via GPU scan-fused rollout.
 
     Fuses policy + physics + auto-reset in ONE XLA call.
@@ -217,14 +218,28 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int):
         # Task ID used for the entire scan rollout (env switches at iter boundaries
         # only, so all transitions in this scan share the same task)
         rollout_task_id = env.current_task_id
+        # GPT-5.5 advice #3: warmup-consistent rollout — when training-side
+        # would zero out context for the first context_warmup_iters, also
+        # zero it on the rollout side so the data we collect was generated
+        # by the same policy class the critic is being trained against.
+        rollout_warmup = current_iter < config.context_warmup_iters
         (obs, act, rew, nobs, done), ep_rewards = env.rollout(
             policy_params, n_steps, rng_key,
-            context_params=context_params, belief_vec=belief_vec)
+            context_params=context_params, belief_vec=belief_vec,
+            warmup=rollout_warmup)
 
         # Zero-copy push: JAX arrays go directly to GPU-native replay buffer
         task_ids = jnp.full(n_steps, rollout_task_id, dtype=jnp.int32)
+        # GPT-5.5 advice #2: store the belief that produced this rollout.
+        # If warmup is on, we also stored zero context — store zero belief
+        # so the critic sees a consistent (zero ctx, zero belief) input.
+        if rollout_warmup and belief_vec is not None:
+            stored_belief = jnp.zeros_like(belief_vec)
+        else:
+            stored_belief = belief_vec
         replay_buffer.push_batch_jax(obs, act, rew.reshape(-1, 1),
-                                     nobs, done.reshape(-1, 1), task_ids)
+                                     nobs, done.reshape(-1, 1), task_ids,
+                                     belief=stored_belief)
 
         # NOTE: BAPR's BOCD must detect regime changes from observable signals
         # (reward shifts, Q-std spikes, surprise). The oracle reset that previously
@@ -285,7 +300,11 @@ def train(config: Config):
     print(f"  Built scan-fused rollout for {config.env_name} (context={'yes' if context_graphdef else 'no'})")
 
     # Replay buffer
-    replay_buffer = ReplayBuffer(obs_dim, act_dim, capacity=config.replay_size)
+    # GPT-5.5 advice #2: replay buffer needs belief_dim so it can store
+    # per-transition belief vectors (zero-width when belief_conditioning off).
+    belief_dim_for_buffer = getattr(agent, 'belief_dim', 0)
+    replay_buffer = ReplayBuffer(obs_dim, act_dim, capacity=config.replay_size,
+                                  belief_dim=belief_dim_for_buffer)
 
     # Logging
     run_name = config.run_name or f"{config.algo}_{config.env_name}_{config.seed}"
@@ -323,7 +342,8 @@ def train(config: Config):
         # --- Collect samples ---
         collect_start = time.time()
         ep_rewards, recent_rollout = collect_samples(
-            agent, env, replay_buffer, config, config.samples_per_iter)
+            agent, env, replay_buffer, config, config.samples_per_iter,
+            current_iter=iteration)
         collect_time = time.time() - collect_start
         collect_time_total += collect_time
         total_steps += config.samples_per_iter
@@ -480,6 +500,11 @@ def main():
     parser.add_argument("--use_regime_belief", action="store_true",
                         help="BAPR Minimum redesign: use joint regime belief "
                              "b(h, z) — Q sees [s, a, e, ρ, μ] (24-dim belief).")
+    parser.add_argument("--critic_target_mode", type=str, default=None,
+                        choices=["min", "independent"],
+                        help='BAPR critic target operator: "min" (legacy LCB, '
+                             'collapses ensemble) or "independent" (each Q_i '
+                             'learns own target, ESCP-like). GPT-5.5 advice #4.')
 
     args = parser.parse_args()
 
@@ -524,6 +549,8 @@ def main():
         config.save_interval = args.save_interval
     if args.use_regime_belief:
         config.use_regime_belief = True
+    if args.critic_target_mode is not None:
+        config.critic_target_mode = args.critic_target_mode
     config.resume = args.resume
 
     train(config)

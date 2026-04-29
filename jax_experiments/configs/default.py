@@ -72,6 +72,11 @@ class Config:
     # Toggle with use_regime_belief=True; legacy scalar BOCD stays the default.
     use_regime_belief: bool = False
     num_regimes: int = 4              # K — regime cluster count
+    # Critic target operator: "min" (LCB target, BAPR original — collapses
+    # ensemble) or "independent" (each Q_i learns its own target Q_i,
+    # ESCP-like, preserves ensemble disagreement). GPT-5.5 advice #4: the
+    # "min" choice was a confound in the BAPR vs ESCP comparison.
+    critic_target_mode: str = "min"   # legacy default for backward compat
     # Per-CHUNK observation (rollout split into chunks_per_iter pieces).
     # 4000-step rollout / 16 chunks = 250 env steps per chunk → reward + q-std
     # signal per chunk. Warmup samples: 100 iter × 16 chunks = 1600 obs for

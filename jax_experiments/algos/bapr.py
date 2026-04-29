@@ -103,6 +103,7 @@ class BAPR:
         tau = self.config.tau
         beta_base = self.config.beta
         penalty_scale = self.config.penalty_scale
+        target_mode = getattr(self.config, "critic_target_mode", "min")
         auto_alpha = self.config.auto_alpha
         target_entropy = jnp.array(self.target_entropy)
         rbf_r = self.config.rbf_radius
@@ -127,18 +128,21 @@ class BAPR:
                          c_opt_state, p_opt_state, x_opt_state, a_opt_state,
                          all_obs, all_act, all_rew, all_next_obs, all_done,
                          all_task_ids, rng_key, warmup, weighted_lambda,
-                         belief_vec):
-            """BAPR scan with adaptive beta + belief-conditioned Q (v15).
+                         belief_vec, all_beliefs):
+            """BAPR scan with adaptive beta + belief-conditioned Q.
 
-            belief_vec: shape (max_run_length,) — current BOCD posterior ρ(h),
-            broadcast to every batch sample. v15's belief-conditioned critic
-            sees [obs, e, ρ] instead of [obs, e].
+            belief_vec: shape (belief_dim,) — current BOCD posterior, used as
+              fallback when per-transition belief is unavailable (e.g.
+              random exploration phase).
+            all_beliefs: shape (n_iters, batch_size, belief_dim) — per-
+              transition belief stored at rollout time (GPT-5.5 advice #2).
+              When belief_dim==0 this is a zero-width tensor and unused.
             """
             effective_beta = beta_base - weighted_lambda * penalty_scale
 
             def body_fn(carry, batch_data):
                 (c_p, t_p, p_p, x_p, la, c_os, p_os, x_os, a_os, key) = carry
-                (obs, act, rew, next_obs, done, tids) = batch_data
+                (obs, act, rew, next_obs, done, tids, b) = batch_data
                 key, k1, k2 = jax.random.split(key, 3)
                 alpha = jnp.exp(la)
 
@@ -157,12 +161,13 @@ class BAPR:
                 next_ep = ctx_m(next_obs)
                 next_ep = jnp.where(warmup, jnp.zeros_like(next_ep), next_ep)
 
-                # v15: append belief vector ρ to context (broadcast over batch).
-                # When belief_dim==0 (config disabled), this concat is a no-op.
+                # GPT-5.5 advice #2: per-transition belief from replay buffer.
+                # `b` is [B, belief_dim] holding the belief active when each
+                # transition was generated, not the current iter's belief.
+                # When belief_dim==0, b is zero-width and the concat is a no-op.
                 if belief_dim > 0:
-                    bcast = jnp.broadcast_to(belief_vec[None, :], (obs.shape[0], belief_dim))
-                    ep_full = jnp.concatenate([ep, bcast], axis=-1)
-                    next_ep_full = jnp.concatenate([next_ep, bcast], axis=-1)
+                    ep_full = jnp.concatenate([ep, b], axis=-1)
+                    next_ep_full = jnp.concatenate([next_ep, b], axis=-1)
                 else:
                     ep_full = ep
                     next_ep_full = next_ep
@@ -171,15 +176,26 @@ class BAPR:
                 next_aug = jnp.concatenate([next_obs, next_ep_full], axis=-1)
 
                 # === Critic (belief-conditioned) ===
+                # GPT-5.5 advice #4: target_mode = "min" (legacy BAPR LCB —
+                # ensemble collapses to lowest member) or "independent" (each
+                # Q_i learns own target — ESCP-like, preserves disagreement).
                 def critic_loss_fn(cp):
                     tm = nnx.merge(gd_target, t_p)
                     pm = nnx.merge(gd_policy, p_p)
                     na, nlp = pm.sample(next_obs, k1, next_ep_full)
-                    tq = tm(next_aug, na).min(axis=0) - alpha * nlp
-                    tv = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq
-                    cm = nnx.merge(gd_critic, cp)
-                    pq = cm(obs_aug, act)
-                    return jnp.mean((pq - tv[None]) ** 2), pq
+                    tq_all = tm(next_aug, na)              # [K, B]
+                    if target_mode == "min":
+                        tq = tq_all.min(axis=0) - alpha * nlp
+                        tv = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq
+                        cm = nnx.merge(gd_critic, cp)
+                        pq = cm(obs_aug, act)
+                        return jnp.mean((pq - tv[None]) ** 2), pq
+                    else:                                    # "independent"
+                        tv_all = (rew.squeeze(-1) + gamma * (1 - done.squeeze(-1))
+                                  * (tq_all - alpha * nlp))   # [K, B]
+                        cm = nnx.merge(gd_critic, cp)
+                        pq = cm(obs_aug, act)
+                        return jnp.mean((pq - tv_all) ** 2), pq
 
                 (c_loss, pq), c_grads = jax.value_and_grad(
                     critic_loss_fn, has_aux=True)(c_p)
@@ -221,7 +237,7 @@ class BAPR:
                     ctx_params, log_alpha,
                     c_opt_state, p_opt_state, x_opt_state, a_opt_state, rng_key)
             batches = (all_obs, all_act, all_rew, all_next_obs, all_done,
-                       all_task_ids)
+                       all_task_ids, all_beliefs)
             return jax.lax.scan(body_fn, init, batches)
 
         # JIT'd Q-std computation for surprise (called once per multi_update).
@@ -464,13 +480,23 @@ class BAPR:
         nobs = jnp.array(stacked_batch["next_obs"])
         done = jnp.array(stacked_batch["done"])
         tids = jnp.array(stacked_batch["task_id"])
+        # GPT-5.5 advice #2: per-transition belief from replay
+        if "belief" in stacked_batch:
+            beliefs = jnp.array(stacked_batch["belief"])
+        else:
+            # Fallback: broadcast current belief_jax to scan shape
+            n_iters, batch_size = obs.shape[0], obs.shape[1]
+            beliefs = jnp.broadcast_to(
+                belief_jax[None, None, :],
+                (n_iters, batch_size, self.belief_dim)) if self.belief_dim > 0 \
+                else jnp.zeros((n_iters, batch_size, 0), dtype=jnp.float32)
 
         final, metrics = self._scan_update(
             c_p, t_p, p_p, x_p, self.log_alpha,
             self.critic_opt_state, self.policy_opt_state,
             self.context_opt_state, self.alpha_opt_state,
             obs, act, rew, nobs, done, tids, rng_key, warmup,
-            jnp.array(weighted_lambda), belief_jax)
+            jnp.array(weighted_lambda), belief_jax, beliefs)
 
         (new_c, new_t, new_p, new_x, new_la,
          self.critic_opt_state, self.policy_opt_state,

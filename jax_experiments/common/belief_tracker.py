@@ -90,7 +90,12 @@ class SurpriseComputer:
         self.ema_reward_var = (self.ema_alpha * (r_mean - old_ema_reward) ** 2
                                + (1 - self.ema_alpha) * self.ema_reward_var)
         reward_std = max(np.sqrt(self.ema_reward_var), 1e-6)
-        reward_z = abs(r_mean - self.ema_reward) / reward_std
+        # GPT-5.5 advice #5: ONE-SIDED reward surprise.  Reward going *up*
+        # is good news, not a regime-change signal; using abs() makes BAPR
+        # become more conservative when reward improves, hurting HC-style
+        # smooth-improvement environments.  We trigger surprise only on
+        # downward deviations from the running mean.
+        reward_z = max(self.ema_reward - r_mean, 0.0) / reward_std
 
         # Q-std spike — Change 2 (GPT-5.5 v2): only POSITIVE spikes signal a
         # regime change. Using raw ratio (always > 0) makes Q-std convergence
