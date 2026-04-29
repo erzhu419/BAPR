@@ -12,3 +12,4 @@ paper/*.log
 paper/*.bbl
 paper/*.out
 paper/*.synctex.gz
+jax_experiments/archive_paper/
