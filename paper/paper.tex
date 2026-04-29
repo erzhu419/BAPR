@@ -562,7 +562,24 @@ We additionally empirically validate the frozen-belief counterexample (Theorem~\
 
 We evaluate sensitivity to: (i) surprise signal weights $(w_r, w_q, w_\kappa)$, (ii) BOCD hazard rate $H_{\text{hazard}}$, (iii) penalty scale $c_{\text{penalty}}$, and (iv) context embedding dimension $d_e$.
 
-\textbf{Penalty scale $c_{\text{penalty}}$.} The effective conservatism coefficient $\beta_{\text{eff}} = \beta_{\text{base}} - \lambda_w \cdot c_{\text{penalty}}$ has two failure modes at the extremes of $c_{\text{penalty}}$. With $c_{\text{penalty}}=0$, the BOCD pathway is silenced: $\beta$ never adapts, and the critic ensemble collapses to near-zero disagreement (Q-std $\approx 0.10$ vs $0.34$ at $c_{\text{penalty}}=0.5$ in our HC discrete-mode runs), losing the ensemble's effective uncertainty estimate and plateauing in performance. With $c_{\text{penalty}}=2$, the actor becomes too conservative immediately after a regime switch ($\beta_{\text{eff}}$ as low as $-3$ at $\lambda_w \approx 0.5$), so post-switch recovery is delayed by tens of iterations. Our experiments use $c_{\text{penalty}}=0.5$, which yields healthy ensemble disagreement while keeping post-switch recovery responsive. We caution that this sweet spot may be environment-dependent; the appendix reports the full sweep.
+\textbf{Penalty scale $c_{\text{penalty}}$.} The effective conservatism coefficient $\beta_{\text{eff}} = \beta_{\text{base}} - \lambda_w \cdot c_{\text{penalty}}$ has two failure modes at the extremes of $c_{\text{penalty}}$. We swept $c_{\text{penalty}} \in \{0.0, 0.5, 2.0\}$ on HalfCheetah discrete-mode (seed~$0$, BAPR with joint $b(h,z)$). Table~\ref{tab:cpen_sweep} reports the iter-$300$ snapshot, capturing the early-training regime where the differences between settings are most visible.
+
+\begin{table}[H]
+\caption{Penalty-scale sweep on HalfCheetah discrete-mode (seed~$0$, evaluation return at iteration $300$). $c_{\text{penalty}}=0.5$ is the sweet spot.}
+\label{tab:cpen_sweep}
+\centering
+\begin{tabular}{cccccc}
+\toprule
+$c_{\text{penalty}}$ & Eval @ iter $300$ & Q-std @ iter $300$ & Behavior \\
+\midrule
+$0.0$ & $5\,771$           & $\approx 0.10$ & ensemble collapse, plateau \\
+$\mathbf{0.5}$ & $\mathbf{12\,936}$ & $\approx 0.34$ & healthy ensemble, fast recovery \\
+$2.0$ & $7\,100$           & $\approx 0.16$ & over-conservative post-switch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With $c_{\text{penalty}}=0$, the BOCD pathway is silenced: $\beta$ never adapts and the critic ensemble collapses to near-zero disagreement, losing the effective uncertainty estimate that LCB relies on, so the policy plateaus. With $c_{\text{penalty}}=2$, the actor becomes too conservative immediately after a regime switch ($\beta_{\text{eff}}$ as low as $-3$ at $\lambda_w \approx 0.5$), and post-switch recovery is delayed by tens of iterations. Our main experiments use $c_{\text{penalty}}=0.5$, which yields healthy ensemble disagreement while keeping post-switch recovery responsive. We caution that this sweet spot may be environment-dependent; per-environment retuning is left to future work.
 
 \textbf{Other sensitivities.} \textit{(Heatmaps over $w$, $H_{\text{hazard}}$, and $d_e$ to be inserted.)}
 
