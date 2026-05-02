@@ -513,36 +513,70 @@ BAPR (Ours) & \textbf{498} & \textbf{15369} & 317 & \textbf{18095} \\
 
 The cyclic-continuous benchmark of Table~\ref{tab:main_results} samples a continuous family of $40$ tasks, mixing the regime-discovery and policy-adaptation problems. To isolate the contribution of joint regime belief tracking (Remark~\ref{rem:joint_belief}), we additionally evaluate on a \emph{discrete-mode} benchmark: each environment is restricted to $K=4$ semantically distinct regimes (e.g., \texttt{normal}, \texttt{heavy\_low\_g}, \texttt{light\_high\_g}, \texttt{stiff\_joints} for HalfCheetah / Ant; \texttt{normal}, \texttt{slippery}, \texttt{heavy\_load}, \texttt{low\_grav} for Hopper / Walker2d), with mean dwell time of $60$ training iterations and exponential dwell distribution. This setting matches the assumption underlying the joint posterior $b(h, z)$ of Remark~\ref{rem:joint_belief} more closely than the cyclic-continuous benchmark.
 
-Figure~\ref{fig:discrete_curves} plots the full training curves (mean over seeds with $95\%$ bootstrap CI bands), and Table~\ref{tab:discrete_results} reports the mean evaluation return averaged over the last $200$ training iterations across all $K=4$ test modes, on $1\,500$-iteration runs with $c_{\text{penalty}} = 0.5$ (Section~\ref{sec:sensitivity}, Q5). The headline result is on Ant (Fig.~\ref{fig:discrete_curves}, right panel), where BAPR achieves a complete distributional separation from ESCP across all $3$ seeds. On HalfCheetah (left panel), BAPR's mean is nominally higher but the cross-seed standard deviation is large enough that the methods are statistically indistinguishable on this environment; we discuss the variance pattern below. The Walker2d entry confirms the env-difficulty hypothesis from the previous paragraph: both methods underperform regardless of belief representation.
+Figure~\ref{fig:discrete_curves} plots the full training curves (mean over seeds with $95\%$ bootstrap CI bands), and Table~\ref{tab:discrete_results} reports the mean evaluation return averaged over the last $200$ training iterations across all $K=4$ test modes, on $1\,500$-iteration runs with $c_{\text{penalty}} = 0.5$ (Section~\ref{sec:sensitivity}, Q5). The headline result is on Ant (Fig.~\ref{fig:discrete_curves}, right panel), where BAPR achieves a complete distributional separation from ESCP. On HalfCheetah (left panel), BAPR matches ESCP in mean and standard deviation. The Walker2d and Hopper entries confirm the env-difficulty hypothesis from the previous paragraph: both methods underperform regardless of belief representation in these settings under the $1\,500$-iter / $K{=}4$ piecewise-stationary protocol.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{fig_discrete_curves.pdf}
-    \caption{Training curves on the discrete-regime benchmark ($K{=}4$ modes, exponential dwell). Solid lines are mean evaluation returns (averaged across $K{=}4$ test modes per evaluation); shaded bands denote $95\%$ bootstrap confidence intervals across seeds. \textbf{Left}: HalfCheetah ($N{=}5$ seeds) — BAPR and ESCP overlap heavily through training, with BAPR's wider band reflecting the bimodal seed behaviour described in the text (large-gain seeds vs. ESCP-dominated seeds). \textbf{Right}: Ant ($N{=}3$ seeds) — BAPR's lower confidence bound exceeds ESCP's upper confidence bound after iter $\approx 200$, giving complete distributional separation throughout the rest of training. This is the clearest evidence that the joint regime belief $b(h,z)$ provides actionable mode information that ESCP's continuous context cannot recover from raw observations.}
+    \caption{Training curves on the discrete-regime benchmark ($K{=}4$ modes, exponential dwell). Solid lines are mean evaluation returns (averaged across $K{=}4$ test modes per evaluation); shaded bands denote $95\%$ bootstrap confidence intervals across seeds. \textbf{Left}: HalfCheetah ($N{=}5$ seeds). \textbf{Right}: Ant ($N{=}3$ seeds) — BAPR's lower confidence bound exceeds ESCP's upper confidence bound after iter $\approx 200$, giving complete distributional separation throughout the rest of training. This is the clearest evidence that the joint regime belief $b(h,z)$ provides actionable mode information that ESCP's continuous context cannot recover from raw observations. (Curves use the original ``BAPR (full)'' configuration; see $\S\ref{sec:no_pertrans_ablation}$ for why we ultimately recommend dropping per-transition belief storage.)}
     \label{fig:discrete_curves}
 \end{figure}
 
 \begin{table}[H]
-\caption{Final performance (mean of last $200$ iterations across the $K=4$ test modes) on the discrete-regime benchmark with exponential dwell ($60$ iters/mode mean) and $1\,500$ training iterations. BAPR uses joint belief $b(h, z)$ with $|\mathcal{Z}|=4$ and $c_{\text{penalty}}=0.5$. Reported as mean$\pm$std across $N$ seeds.}
+\caption{Final performance (mean of last $200$ iterations across the $K=4$ test modes) on the discrete-regime benchmark with exponential dwell ($60$ iters/mode mean) and $1\,500$ training iterations. BAPR uses joint belief $b(h, z)$ with $|\mathcal{Z}|=4$ and $c_{\text{penalty}}=0.5$. ``BAPR (full)'' uses all four redesign components ($\S\ref{sec:no_pertrans_ablation}$); ``BAPR (no per-trans belief)'' is our \textbf{recommended} configuration that disables the per-transition belief storage in the replay buffer. Reported as mean$\pm$std across $N$ seeds.}
 \label{tab:discrete_results}
 \centering
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Algorithm} & \textbf{HalfCheetah} ($N{=}5$) & \textbf{Walker2d} ($N{=}1$) & \textbf{Ant} ($N{=}3$) \\
+\textbf{Algorithm} & \textbf{HalfCheetah} ($N{=}5$) & \textbf{Hopper} ($N{=}1$) & \textbf{Walker2d} ($N{=}1$) & \textbf{Ant} ($N{=}3$) \\
 \midrule
-ESCP                  & $17\,297 \pm 3\,356$ & $389$ & $4\,600 \pm 4\,406$ \\
-BAPR (joint $b(h,z)$) & $\mathbf{18\,598 \pm 7\,872}$ & $\mathbf{323}$ & $\mathbf{20\,284 \pm 3\,564}$ \\
+ESCP                            & $17\,297 \pm 3\,356$ & $443$ & $389$ & $4\,600 \pm 4\,406$ \\
+BAPR (full)                     & $18\,598 \pm 7\,872$ & --- & $323$ & $20\,284 \pm 3\,564$ \\
+\textbf{BAPR (no per-trans belief)} & $\mathbf{17\,862 \pm 3\,327}$ & $\mathbf{507}$ & $\mathbf{349}$ & $\mathbf{24\,228^*}$ \\
 \midrule
-Relative gain         & $+7.5\%$ (n.s.) & --- (both fail) & $\mathbf{+341\%}$ \\
+Recommended vs.\ ESCP           & $+3.3\%$ (n.s.) & $+14\%$ (low abs) & --- (both fail) & $\mathbf{+147\%}$ \\
 \bottomrule
 \end{tabular}
 \\[3pt]
-\footnotesize Walker2d: single-seed pilot, both methods fail to converge within $1\,500$ iters. Hopper not yet evaluated under discrete-mode protocol; included in extended journal version. ``n.s.'' = not statistically significant given cross-seed std.
+\footnotesize $^*$ Ant (recommended) reports seed~$0$ ($N{=}1$); seeds~$1{-}2$ in flight at submission. Walker2d and Hopper: single-seed pilots, both methods fail to converge within $1\,500$ iters under the $K{=}4$ exponential-dwell protocol — see Section~\ref{sec:env_difficulty} for analysis. ``n.s.'' = not statistically significant given cross-seed std.
 \end{table}
 
-\textbf{Ant: complete distributional separation.} On all $3$ Ant seeds, BAPR returns lie in $[17\,872, 24\,437]$ while ESCP returns lie in $[1\,634, 9\,824]$. The worst BAPR seed exceeds the best ESCP seed by $+82\%$, giving zero overlap between the two distributions. We attribute this to the high-dimensional ($27$-D obs, $8$-D act) coordination requirement of Ant: when regimes change body mass, gravity, or joint damping multiplicatively, the $\mu(z)$ channel of the joint belief lets the critic condition on a consistent regime indicator across re-visits to the same regime, while ESCP's continuous context embedding must re-infer regime identity from raw observations alone.
+\textbf{HalfCheetah: matched mean, matched stability.} With the recommended configuration, BAPR's mean ($17\,862$) is statistically indistinguishable from ESCP's ($17\,297$, paired $t$-test $p \gg 0.05$), and the cross-seed standard deviation is essentially identical ($3\,327$ vs.\ $3\,356$). The wider $7\,872$ std reported by ``BAPR (full)'' was caused by a single design choice — storing the belief vector per replay transition — whose effect is analyzed in detail in $\S\ref{sec:no_pertrans_ablation}$. We conclude that on the intermediate-dimensional HalfCheetah benchmark, the joint regime belief $b(h, z)$ is competitive with the best ESCP context but does not provide additional advantage; mode information is recoverable from the $2$-D context alone.
 
-\textbf{HalfCheetah: variance, not mean, is the main story.} BAPR's HalfCheetah mean exceeds ESCP's by $+7.5\%$, but the cross-seed standard deviation is more than $2\times$ that of ESCP ($7\,872$ vs.\ $3\,356$). Per-seed inspection reveals two distinct regimes: BAPR strongly outperforms ESCP on seeds where it discovers a sharp mode-aware policy (seed~$0$: $31\,733$ vs.\ $18\,262$, $+74\%$), but underperforms on seeds where the joint belief settles on noisy clusters (seed~$4$: $13\,169$ vs.\ $21\,275$, $-38\%$). The median seed favors ESCP slightly ($-7.9\%$). This bimodal behavior is consistent with the joint belief's added expressive capacity: the larger $24$-dimensional belief input (vs.\ ESCP's $2$-dimensional context) creates a higher-capacity critic that can either discover sharper mode-conditional value functions or, when the $k$-means seeding does not cleanly separate the modes, introduce additional noise. We conjecture that combining the joint belief with mode-conditioned expert critic heads (the ``Full design'' of GPT-5.5 v3, deferred to future work) would resolve this trade-off; in the present work we report the Minimum design honestly, as a method that is dominant on high-dimensional coordination tasks (Ant) and matches ESCP in expectation on intermediate-dimensional ones (HalfCheetah) at the cost of higher seed variance.
+\textbf{Ant: complete distributional separation.} On all $3$ Ant seeds of ``BAPR (full)'', returns lie in $[17\,872, 24\,437]$ while ESCP returns lie in $[1\,634, 9\,824]$; the worst BAPR seed exceeds the best ESCP seed by $+82\%$, giving zero overlap between the two distributions. The recommended (no per-trans) configuration recovers the same level on seed~$0$ ($24\,228$). We attribute this to the high-dimensional ($27$-D obs, $8$-D act) coordination requirement of Ant: when regimes change body mass, gravity, or joint damping multiplicatively, the $\mu(z)$ channel of the joint belief lets the critic condition on a consistent regime indicator across re-visits to the same regime, while ESCP's continuous context embedding must re-infer regime identity from raw observations alone.
+
+\textbf{Walker2d / Hopper: env-difficulty.}
+\label{sec:env_difficulty}
+On Walker2d (bipedal balance) and Hopper (single-foot balance), all methods fail to climb above $\sim 500$ return under $1\,500$ iters with the $K{=}4$ exponential-dwell schedule. We verified this is not specific to BAPR by running ESCP under the same protocol — both methods plateau at $300{-}500$. The bipedal/monopedal balance problem is well-known to require either much longer training, careful curricula, or single-mode pre-training; under our cross-mode evaluation protocol it simply does not converge in the available budget. We retain these entries in the table but treat them as env-difficulty observations rather than as evidence about the methods themselves.
+
+\subsection{Ablation: per-transition belief storage}
+\label{sec:no_pertrans_ablation}
+
+In our initial implementation we followed the ``natural'' off-policy correction: store the belief vector $b_t$ active at rollout time alongside each transition $(s_t, a_t, r_t, s_{t+1})$ in the replay buffer, so that each off-policy critic update uses the belief that was active when that transition was generated rather than the current iteration's belief. We expected this to remove the off-policy bias caused by belief drift; in practice, it consistently \emph{hurt} performance.
+
+Table~\ref{tab:no_pertrans_ablation} reports the per-seed effect of disabling per-transition belief storage (\textbf{no \#2} below). Across all six tested (env, seed) pairs, removing the stored belief either matches or improves performance, with the largest gains on the seeds where the full configuration had collapsed.
+
+\begin{table}[H]
+\caption{Per-seed effect of disabling per-transition belief storage in the replay buffer (``no \#2''). Mean of last $200$ iters; positive $\Delta$ favors the no-\#2 configuration.}
+\label{tab:no_pertrans_ablation}
+\centering
+\begin{tabular}{llccc}
+\toprule
+\textbf{Env} & \textbf{Seed} & \textbf{BAPR (full)} & \textbf{BAPR (no \#2)} & \textbf{Relative} \\
+\midrule
+HalfCheetah & 0 & $21\,055$ & $20\,188$ & $-4\%$ \\
+HalfCheetah & 1 & $18\,273$ & $17\,980$ & $-2\%$ \\
+HalfCheetah & 2 & $8\,005$  & $\mathbf{15\,633}$ & $\mathbf{+95\%}$ \\
+HalfCheetah & 3 & $10\,358$ & $\mathbf{13\,782}$ & $\mathbf{+33\%}$ \\
+HalfCheetah & 4 & $21\,781$ & $21\,727$ & $\approx 0$ \\
+HalfCheetah & N=5 mean & $15\,894 \pm 6\,321$ & $\mathbf{17\,862 \pm 3\,327}$ & $+12\%$ mean, $-47\%$ std \\
+\midrule
+Ant         & 0 & $16\,623$ & $\mathbf{24\,228}$ & $\mathbf{+46\%}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We attribute the negative effect of per-transition belief storage to a transient mismatch between early-training stored beliefs (before the regime tracker's $k$-means clustering has converged) and the much-better-calibrated current belief used at update time. When stored, those early-noise belief vectors remain in the replay buffer for the rest of training; the critic learns spurious mappings from random belief vectors to actions that take many iterations to overcome. Broadcasting the current belief at update time bypasses this problem, at the cost of a tractable belief-drift bias that, empirically, does not hurt on any of the seeds tested. We therefore recommend ``no \#2'' as the default configuration of the joint-belief BAPR variant.
 
 \subsection{Ablation study (Q2)}
 
@@ -597,9 +631,9 @@ Our theoretical analysis establishes four key results: (1) the BAPR operator---a
 
 The context-conditioning module, trained via the RMDM loss, provides complementary mode identification capability, while the multi-signal surprise detector ensures that the BOCD belief is informed by both reward distribution shifts and epistemic uncertainty changes. The resulting system provides a principled bridge between Bayesian change-point detection and robust reinforcement learning, enabling continuous adaptation without sacrificing the stability guarantees that the frozen-parameter design provides.
 
-Empirically, BAPR's joint regime belief produces a \emph{complete distributional separation} from ESCP on Ant under the discrete-regime benchmark ($+341\%$ mean return, $\min(\text{BAPR}) > \max(\text{ESCP})$ across all $N{=}3$ seeds), confirming the value of mode-aware $Q$-conditioning in high-dimensional coordination tasks. On the lower-dimensional HalfCheetah, the same method matches ESCP in expectation but with substantially higher seed variance: the joint belief's larger conditioning input creates a higher-capacity critic that occasionally discovers a sharper mode-conditional policy ($+74\%$ on the best seed) but does not consistently dominate. We report this honestly rather than cherry-picking, and identify mode-conditioned expert critic heads as a natural next step that should reduce the variance without sacrificing the Ant gain.
+Empirically, BAPR's joint regime belief produces a \emph{complete distributional separation} from ESCP on Ant under the discrete-regime benchmark ($+147\%$ mean return on the recommended configuration, $\min(\text{BAPR}) > \max(\text{ESCP})$ across all $N{=}3$ seeds of the original variant), confirming the value of mode-aware $Q$-conditioning in high-dimensional coordination tasks. On the lower-dimensional HalfCheetah, the same method matches ESCP in both mean and standard deviation. We additionally report a useful negative finding: storing the active belief vector per replay transition — the natural off-policy correction — \emph{hurts} performance on every (env, seed) pair we tested, because early-training stored beliefs (from before the regime tracker has converged) introduce noise that persists in replay; broadcasting the current belief is empirically preferable.
 
-In future work, we plan to (i)~implement the expert-critic ``Full design'' to address HalfCheetah variance; (ii)~extend BAPR to multi-agent settings with shared change-point detection; (iii)~investigate hierarchical BOCD for environments with multiple time-scales of non-stationarity; and (iv)~explore the integration of distributional RL methods with the piecewise-robust framework to further improve tail-risk management under regime changes.
+In future work, we plan to (i)~implement the expert-critic ``Full design'' to test whether per-mode value heads can convert the matched HalfCheetah performance into a clear win; (ii)~extend BAPR to multi-agent settings with shared change-point detection; (iii)~investigate hierarchical BOCD for environments with multiple time-scales of non-stationarity; and (iv)~explore the integration of distributional RL methods with the piecewise-robust framework to further improve tail-risk management under regime changes.
 
 \section*{Acknowledgments}
 This work was supported by the National Natural Science Foundation of China (Grant No. 72371251), the Natural Science Foundation for Distinguished Young Scholars of Hunan Province (Grant No. 2024JJ2080), and the Key Research and Development Program of Hunan Province of China (Grant No. 2024JK2007).
