@@ -532,18 +532,18 @@ Figure~\ref{fig:discrete_curves} plots the full training curves (mean over seeds
 \midrule
 ESCP                            & $17\,297 \pm 3\,356$ & $443$ & $389$ & $4\,600 \pm 4\,406$ \\
 BAPR (full)                     & $18\,598 \pm 7\,872$ & --- & $323$ & $20\,284 \pm 3\,564$ \\
-\textbf{BAPR (no per-trans belief)} & $\mathbf{17\,862 \pm 3\,327}$ & $\mathbf{507}$ & $\mathbf{349}$ & $\mathbf{24\,228^*}$ \\
+\textbf{BAPR (no per-trans belief)} & $\mathbf{17\,862 \pm 3\,327}$ & $\mathbf{507}$ & $\mathbf{349}$ & $\mathbf{20\,679 \pm 3\,402}$ \\
 \midrule
-Recommended vs.\ ESCP           & $+3.3\%$ (n.s.) & $+14\%$ (low abs) & --- (both fail) & $\mathbf{+147\%}$ \\
+Recommended vs.\ ESCP           & $+3.3\%$ (n.s.) & $+14\%$ (low abs) & --- (both fail) & $\mathbf{+349\%}$ \\
 \bottomrule
 \end{tabular}
 \\[3pt]
-\footnotesize $^*$ Ant (recommended) reports seed~$0$ ($N{=}1$); seeds~$1{-}2$ in flight at submission. Walker2d and Hopper: single-seed pilots, both methods fail to converge within $1\,500$ iters under the $K{=}4$ exponential-dwell protocol — see Section~\ref{sec:env_difficulty} for analysis. ``n.s.'' = not statistically significant given cross-seed std.
+\footnotesize Walker2d and Hopper: single-seed pilots, both methods fail to converge within $1\,500$ iters under the $K{=}4$ exponential-dwell protocol — see Section~\ref{sec:env_difficulty} for analysis. ``n.s.'' = not statistically significant given cross-seed std.
 \end{table}
 
 \textbf{HalfCheetah: matched mean, matched stability.} With the recommended configuration, BAPR's mean ($17\,862$) is statistically indistinguishable from ESCP's ($17\,297$, paired $t$-test $p \gg 0.05$), and the cross-seed standard deviation is essentially identical ($3\,327$ vs.\ $3\,356$). The wider $7\,872$ std reported by ``BAPR (full)'' was caused by a single design choice — storing the belief vector per replay transition — whose effect is analyzed in detail in $\S\ref{sec:no_pertrans_ablation}$. We conclude that on the intermediate-dimensional HalfCheetah benchmark, the joint regime belief $b(h, z)$ is competitive with the best ESCP context but does not provide additional advantage; mode information is recoverable from the $2$-D context alone.
 
-\textbf{Ant: complete distributional separation.} On all $3$ Ant seeds of ``BAPR (full)'', returns lie in $[17\,872, 24\,437]$ while ESCP returns lie in $[1\,634, 9\,824]$; the worst BAPR seed exceeds the best ESCP seed by $+82\%$, giving zero overlap between the two distributions. The recommended (no per-trans) configuration recovers the same level on seed~$0$ ($24\,228$). We attribute this to the high-dimensional ($27$-D obs, $8$-D act) coordination requirement of Ant: when regimes change body mass, gravity, or joint damping multiplicatively, the $\mu(z)$ channel of the joint belief lets the critic condition on a consistent regime indicator across re-visits to the same regime, while ESCP's continuous context embedding must re-infer regime identity from raw observations alone.
+\textbf{Ant: complete distributional separation.} On all $3$ Ant seeds of ``BAPR (full)'', returns lie in $[17\,872, 24\,437]$ while ESCP returns lie in $[1\,634, 9\,824]$; the worst BAPR seed exceeds the best ESCP seed by $+82\%$, giving zero overlap between the two distributions. The recommended (no per-trans) configuration matches ``BAPR (full)'' within seed noise (mean $20\,679 \pm 3\,402$ vs.\ $20\,284 \pm 3\,564$, $N{=}3$), and exceeds the best ESCP seed on every Ant seed tested. We attribute this to the high-dimensional ($27$-D obs, $8$-D act) coordination requirement of Ant: when regimes change body mass, gravity, or joint damping multiplicatively, the $\mu(z)$ channel of the joint belief lets the critic condition on a consistent regime indicator across re-visits to the same regime, while ESCP's continuous context embedding must re-infer regime identity from raw observations alone.
 
 \textbf{Walker2d / Hopper: env-difficulty.}
 \label{sec:env_difficulty}
@@ -572,6 +572,9 @@ HalfCheetah & 4 & $21\,781$ & $21\,727$ & $\approx 0$ \\
 HalfCheetah & N=5 mean & $15\,894 \pm 6\,321$ & $\mathbf{17\,862 \pm 3\,327}$ & $+12\%$ mean, $-47\%$ std \\
 \midrule
 Ant         & 0 & $16\,623$ & $\mathbf{24\,228}$ & $\mathbf{+46\%}$ \\
+Ant         & 1 & --- & $17\,447$ & --- \\
+Ant         & 2 & --- & $20\,363$ & --- \\
+Ant         & N=3 mean & $20\,284 \pm 3\,564$ & $20\,679 \pm 3\,402$ & $+2\%$ mean, $-5\%$ std \\
 \bottomrule
 \end{tabular}
 \end{table}
