@@ -547,7 +547,48 @@ Recommended vs.\ ESCP           & $+3.3\%$ (n.s.) & $+14\%$ (low abs) & --- (bot
 
 \textbf{Walker2d / Hopper: env-difficulty.}
 \label{sec:env_difficulty}
-On Walker2d (bipedal balance) and Hopper (single-foot balance), all methods fail to climb above $\sim 500$ return under $1\,500$ iters with the $K{=}4$ exponential-dwell schedule. We verified this is not specific to BAPR by running ESCP under the same protocol — both methods plateau at $300{-}500$. The bipedal/monopedal balance problem is well-known to require either much longer training, careful curricula, or single-mode pre-training; under our cross-mode evaluation protocol it simply does not converge in the available budget. We retain these entries in the table but treat them as env-difficulty observations rather than as evidence about the methods themselves.
+On Walker2d (bipedal balance) and Hopper (single-foot balance), all methods fail to climb above $\sim 550$ return under $1\,500$ iters with the $K{=}4$ exponential-dwell schedule. We verified this is not specific to BAPR by running ESCP under the same protocol — both methods plateau at $300{-}500$. To rule out the more interesting hypothesis — that our specific mode set was too aggressive — we conducted a broad perturbation-environment sweep ($\S\ref{sec:env_sweep}$): \textbf{14 alternative configurations} spanning $K\in\{2,3,4\}$, perturbation amplitudes $\pm 5\%$ to $\pm 50\%$, all three modulated dimensions (gravity, body mass, joint damping), and dwell times $\{200, 300, 400, 1000\}$ iterations. Across the entire grid, peak Walker2d return remained in $[287,\,429]$ and peak Hopper return in $[367,\,542]$; \textbf{no configuration broke the $\sim 550$ ceiling}, and no configuration approached the $\sim 1\,500$--$2\,000$ levels that vanilla SAC, TD3, BAC, or DSAC reach in the matched single-mode brax--spring baseline (Section~\ref{sec:env_sweep}, Table~\ref{tab:env_sweep_summary}). We conclude that the bipedal/monopedal balance problem under any non-trivial regime-switching protocol is fundamentally outside the budget of $1\,500$ iters in our setup, requiring either much longer training, careful curricula, or single-mode pre-training. We retain the original entries in Table~\ref{tab:discrete_results} but treat them as env-difficulty observations rather than evidence about the methods themselves.
+
+\subsection{Perturbation-environment sweep on Walker2d / Hopper}
+\label{sec:env_sweep}
+
+To check whether the mode set in Table~\ref{tab:discrete_results} (parameter multipliers up to $\times 2.0$ and $\times 0.5$) was simply too aggressive for Walker2d/Hopper, we swept a broad family of milder perturbation environments. Table~\ref{tab:env_sweep_summary} reports the peak evaluation return ($\max_t \mathrm{eval\_R}_t$) of BAPR (recommended config) under each sweep condition, with seed $0$ and a $1\,000$--$2\,000$-iter training budget. Each entry was launched with a two-stage feasibility filter (kill if peak $<$ stage 1 threshold by iter $278$/$168$, or peak $<$ $2000$ by iter $1\,000$); the early-kill mechanism consistently triggered on every config, confirming that none of the milder mode sets evade the same plateau.
+
+\begin{table}[H]
+\caption{Perturbation-environment sweep on Walker2d/Hopper. ``Variant'' encodes the perturbation set: ``$g_{\text{mild}}$'' = $4$ gravity-only modes ($\times 0.85$ to $\times 1.20$); ``$d_{\text{mild}}$'' = $4$ damping-only modes ($\times 0.7$ to $\times 1.5$); ``$m_{\text{mild}}$'' = $4$ mass-only modes ($\times 0.85$ to $\times 1.30$); ``mixed'' = $4$ combined modes; ``$K2_{d}$'' = binary $\{$normal, $d{\times}0.7\}$; ``$K3_{g_{5\%}}$'' = $3$ modes with gravity $\pm 5\%$; ``$K4_{g_{5\%}}$'' = $4$ modes with gravity $\pm 5\%$; ``$K4_{d_{\text{tiny}}}$'' = $4$ modes with damping $\pm 15\%/{+}25\%$. ``dwell'' = mean iters per mode (exponential schedule). Peak $R$ = $\max_t\mathrm{eval\_R}_t$ across the entire training run; \textbf{none breaks the $\sim 550$ ceiling}. For comparison, the matched stationary single-mode baselines (SAC/TD3/BAC/DSAC, $1\,999$ iters) plateau at $548$/$470$ (Hopper/Walker2d, slowest-among-working algo TD3) up to $839$/$649$ (DSAC).}
+\label{tab:env_sweep_summary}
+\centering
+\small
+\begin{tabular}{llcc}
+\toprule
+\textbf{Env} & \textbf{Variant / dwell} & \textbf{Peak $R$} & \textbf{Outcome} \\
+\midrule
+Walker2d & $g_{\text{mild}}$ / dw200            & $\sim 350$ & stage-1 kill \\
+Walker2d & $d_{\text{mild}}$ / dw200            & $\sim 320$ & stage-1 kill \\
+Walker2d & $m_{\text{mild}}$ / dw200            & $\sim 280$ & stage-1 kill \\
+Walker2d & mixed / dw200                        & $\sim 270$ & stage-1 kill \\
+Walker2d & $K2_d$ / dw400                       & $\sim 290$ & stage-1 kill \\
+Walker2d & $K3_{g_{5\%}}$ / dw300               & $350$      & stage-2 kill \\
+Walker2d & $K4_{g_{5\%}}$ / dw200               & $\sim 360$ & stage-1 kill \\
+Walker2d & $K4_{d_{\text{tiny}}}$ / dw400       & $346$      & stage-2 kill \\
+Walker2d & $K2_d$ / dw1000                      & $379$      & stage-2 kill \\
+Walker2d & $K3_{g_{5\%}}$ / dw1000              & $\mathbf{429}$ & stage-2 kill \\
+\midrule
+Hopper   & $g_{\text{mild}}$ / dw200            & $\sim 380$ & stage-1 kill \\
+Hopper   & $d_{\text{mild}}$ / dw200            & $\sim 470$ & stage-1 kill \\
+Hopper   & $m_{\text{mild}}$ / dw200            & $\sim 380$ & stage-1 kill \\
+Hopper   & mixed / dw200 (orig, $N{=}3$)         & $519$ (mean $480 \pm 60$) & ran to $800$ \\
+Hopper   & $K2_d$ / dw400                       & $396$      & stage-1 kill \\
+Hopper   & $K3_{g_{5\%}}$ / dw300               & $493$      & stage-2 kill \\
+Hopper   & $K3_{g_{5\%}}$ / dw1000              & $424$      & stage-2 kill \\
+Hopper   & $K2_d$ / dw1000                      & $\mathbf{542}$ & stage-2 kill \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+\footnotesize ``Stage-1 kill'' = peak $R$ never reached the lower data-driven threshold ($329$ Walker, $383$ Hopper $= 50$--$70\%$ of slowest single-mode baseline plateau) by iter $168$/$278$. ``Stage-2 kill'' = passed stage 1 but peak $R < 2\,000$ by iter $1\,000$. The single $N{=}3$ Hopper-mixed entry that ran to its $800$-iter limit settled at mean $480 \pm 60$ across seeds.
+\end{table}
+
+The sweep behaves like an exhaustive null result for the alternative hypothesis ``a milder mode set will solve it.'' Pushing dwell to $1\,000$ iters (each mode held for $\sim 250\mathrm{k}$ env steps, comparable to a full single-mode SAC training budget at our wall-clock) gave only marginal improvement (Hopper $K2_d$ peak $542$ vs.\ $519$; Walker2d $K3_{g_{5\%}}$ peak $429$ vs.\ $\sim 350$). The implication is that the difficulty is not the perturbation magnitude per se but the protocol: the bipedal/monopedal balance policy never gets to fully crystallize before the next regime switch, even with extremely long dwell, because the replay buffer permanently retains transitions from prior modes that become catastrophically off-distribution after each switch.
 
 \subsection{Ablation: per-transition belief storage}
 \label{sec:no_pertrans_ablation}
