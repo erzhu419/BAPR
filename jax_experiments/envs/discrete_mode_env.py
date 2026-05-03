@@ -53,6 +53,83 @@ MODE_DEFINITIONS: Dict[str, Dict[str, Dict[str, float]]] = {
 }
 
 
+# Milder variant presets for environments where the default modes are too
+# extreme (e.g. Hopper/Walker2d under low_grav g*0.5 / slippery d*0.3 cause
+# uniform plateau ~300-500 across all algos — see paper sec:env_difficulty).
+# Each variant is keyed by env_name and provides 4 alternative modes.
+# Selected via train.py --mode_variant <name>; default 'orig' = MODE_DEFINITIONS.
+MODE_VARIANTS: Dict[str, Dict[str, Dict[str, Dict[str, float]]]] = {
+    'Hopper-v2': {
+        'g_mild': {
+            'normal':    {},
+            'g_low':     {'gravity': 0.85},
+            'g_high':    {'gravity': 1.15},
+            'g_higher':  {'gravity': 1.20},
+        },
+        'd_mild': {
+            'normal':    {},
+            'd_low':     {'dof_damping': 0.7},
+            'd_high':    {'dof_damping': 1.3},
+            'd_higher':  {'dof_damping': 1.5},
+        },
+        'm_mild': {
+            'normal':    {},
+            'm_low':     {'body_mass': 0.85},
+            'm_high':    {'body_mass': 1.15},
+            'm_higher':  {'body_mass': 1.30},
+        },
+        'mixed_mild': {
+            'normal':       {},
+            'g_low_d_high': {'gravity': 0.9, 'dof_damping': 1.1},
+            'g_high_d_low': {'gravity': 1.1, 'dof_damping': 0.9},
+            'm_high':       {'body_mass': 1.20},
+        },
+    },
+    'Walker2d-v2': {
+        'g_mild': {
+            'normal':    {},
+            'g_low':     {'gravity': 0.85},
+            'g_high':    {'gravity': 1.15},
+            'g_higher':  {'gravity': 1.20},
+        },
+        'd_mild': {
+            'normal':    {},
+            'd_low':     {'dof_damping': 0.7},
+            'd_high':    {'dof_damping': 1.3},
+            'd_higher':  {'dof_damping': 1.5},
+        },
+        'm_mild': {
+            'normal':    {},
+            'm_low':     {'body_mass': 0.85},
+            'm_high':    {'body_mass': 1.15},
+            'm_higher':  {'body_mass': 1.30},
+        },
+        'mixed_mild': {
+            'normal':       {},
+            'g_low_d_high': {'gravity': 0.9, 'dof_damping': 1.1},
+            'g_high_d_low': {'gravity': 1.1, 'dof_damping': 0.9},
+            'm_high':       {'body_mass': 1.20},
+        },
+    },
+}
+
+
+def _resolve_mode_definitions(env_name: str, variant: str = 'orig'):
+    """Return the {mode_name: param_dict} dict for the (env, variant) pair.
+
+    variant='orig' → MODE_DEFINITIONS[env_name] (back-compat)
+    otherwise     → MODE_VARIANTS[env_name][variant]
+    """
+    if variant == 'orig' or variant is None:
+        return MODE_DEFINITIONS.get(env_name)
+    if env_name not in MODE_VARIANTS:
+        raise ValueError(f"No MODE_VARIANTS for env={env_name!r}")
+    if variant not in MODE_VARIANTS[env_name]:
+        raise ValueError(f"variant {variant!r} not in MODE_VARIANTS[{env_name!r}]; "
+                         f"available: {list(MODE_VARIANTS[env_name].keys())}")
+    return MODE_VARIANTS[env_name][variant]
+
+
 class DiscreteModePiecewiseEnv(BraxNonstationaryEnv):
     """Piecewise-stationary brax env with K discrete semantic modes.
 
@@ -71,7 +148,8 @@ class DiscreteModePiecewiseEnv(BraxNonstationaryEnv):
                  expected_rewards: Dict[str, float] = None,
                  reward_floor_frac: float = 0.3,
                  reward_floor_penalty: float = -50.0,
-                 seed: int = 0, backend: str = 'spring'):
+                 seed: int = 0, backend: str = 'spring',
+                 mode_variant: str = 'orig'):
         """
         Args:
             env_name: brax env name (e.g. 'HalfCheetah-v2')
@@ -91,12 +169,13 @@ class DiscreteModePiecewiseEnv(BraxNonstationaryEnv):
         super().__init__(env_name, rand_params=all_params,
                          log_scale_limit=0.0, seed=seed, backend=backend)
 
-        # Resolve modes for this env
-        env_modes = MODE_DEFINITIONS.get(env_name)
+        # Resolve modes for this env (variant='orig' falls back to MODE_DEFINITIONS)
+        env_modes = _resolve_mode_definitions(env_name, mode_variant)
         if env_modes is None:
             raise ValueError(
-                f"No mode definitions for env_name={env_name}. "
-                f"Add to MODE_DEFINITIONS in discrete_mode_env.py.")
+                f"No mode definitions for env_name={env_name}, "
+                f"variant={mode_variant!r}.")
+        self.mode_variant = mode_variant
         if mode_keys is None:
             mode_keys = list(env_modes.keys())
         for k in mode_keys:

@@ -61,7 +61,8 @@ def make_env(config, seed_offset=0):
             dwell_distribution=config.discrete_dwell_distribution,
             reward_shaping=config.discrete_reward_shaping,
             seed=config.seed + seed_offset,
-            backend=config.brax_backend)
+            backend=config.brax_backend,
+            mode_variant=getattr(config, 'discrete_mode_variant', 'orig'))
     return NonstationaryEnv(
         config.env_name, rand_params=config.varying_params,
         log_scale_limit=config.log_scale_limit,
@@ -406,6 +407,16 @@ def train(config: Config):
             # Feed eval to BAPR for performance gating
             if hasattr(agent, 'report_eval'):
                 agent.report_eval(eval_mean)
+            # Sweep feasibility filter: bail out early if config is too hard
+            if (getattr(config, 'early_kill_iter', None) is not None
+                    and getattr(config, 'early_kill_reward', None) is not None
+                    and iteration >= config.early_kill_iter
+                    and eval_mean < config.early_kill_reward):
+                print(f"[EARLY KILL] iter={iteration} eval_reward={eval_mean:.1f} "
+                      f"< threshold {config.early_kill_reward} at iter "
+                      f"{config.early_kill_iter}; exiting with code 99.")
+                logger.save()
+                sys.exit(99)
         eval_time = time.time() - eval_start
         eval_time_total += eval_time
 
@@ -505,6 +516,21 @@ def main():
                         help='BAPR critic target operator: "min" (legacy LCB, '
                              'collapses ensemble) or "independent" (each Q_i '
                              'learns own target, ESCP-like). GPT-5.5 advice #4.')
+    parser.add_argument("--no_per_trans_belief", action="store_true",
+                        help='Ablation toggle for GPT-5.5 advice #2: when set, '
+                             'critic broadcasts current belief instead of using '
+                             'per-transition stored belief.')
+    parser.add_argument("--mode_variant", type=str, default=None,
+                        help="discrete_mode mode set selector. 'orig' (default) "
+                             "uses MODE_DEFINITIONS; e.g. 'g_mild', 'd_mild', "
+                             "'m_mild', 'mixed_mild' use milder MODE_VARIANTS "
+                             "presets. See discrete_mode_env.MODE_VARIANTS.")
+    parser.add_argument("--early_kill_iter", type=int, default=None,
+                        help="Sweep feasibility filter: if eval_reward stays "
+                             "below --early_kill_reward through this iter, "
+                             "exit with code 99 (config too hard).")
+    parser.add_argument("--early_kill_reward", type=float, default=None,
+                        help="Reward threshold paired with --early_kill_iter.")
 
     args = parser.parse_args()
 
@@ -543,6 +569,12 @@ def main():
         config.env_type = args.env_type
     if args.mean_dwell_iters is not None:
         config.discrete_mean_dwell_iters = args.mean_dwell_iters
+    if args.mode_variant is not None:
+        config.discrete_mode_variant = args.mode_variant
+    if args.early_kill_iter is not None:
+        config.early_kill_iter = args.early_kill_iter
+    if args.early_kill_reward is not None:
+        config.early_kill_reward = args.early_kill_reward
     if args.changing_period is not None:
         config.changing_period = args.changing_period
     if args.save_interval is not None:
@@ -551,6 +583,8 @@ def main():
         config.use_regime_belief = True
     if args.critic_target_mode is not None:
         config.critic_target_mode = args.critic_target_mode
+    if args.no_per_trans_belief:
+        config.use_per_transition_belief = False
     config.resume = args.resume
 
     train(config)

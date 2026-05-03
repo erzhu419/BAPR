@@ -480,11 +480,12 @@ class BAPR:
         nobs = jnp.array(stacked_batch["next_obs"])
         done = jnp.array(stacked_batch["done"])
         tids = jnp.array(stacked_batch["task_id"])
-        # GPT-5.5 advice #2: per-transition belief from replay
-        if "belief" in stacked_batch:
+        # GPT-5.5 advice #2: per-transition belief from replay (toggle).
+        use_per_trans = getattr(self.config, "use_per_transition_belief", True)
+        if use_per_trans and "belief" in stacked_batch:
             beliefs = jnp.array(stacked_batch["belief"])
         else:
-            # Fallback: broadcast current belief_jax to scan shape
+            # Fallback / legacy: broadcast current belief_jax to scan shape
             n_iters, batch_size = obs.shape[0], obs.shape[1]
             beliefs = jnp.broadcast_to(
                 belief_jax[None, None, :],

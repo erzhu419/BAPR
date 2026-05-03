@@ -77,6 +77,11 @@ class Config:
     # ESCP-like, preserves ensemble disagreement). GPT-5.5 advice #4: the
     # "min" choice was a confound in the BAPR vs ESCP comparison.
     critic_target_mode: str = "min"   # legacy default for backward compat
+    # GPT-5.5 advice #2 toggle: when True, off-policy critic update uses the
+    # belief stored at rollout time (replay's "belief" field). When False, it
+    # broadcasts the current iter's belief — the v15 (pre-Phase 2) behavior.
+    # Toggle exists so we can ablate which advice item helps which env.
+    use_per_transition_belief: bool = True
     # Per-CHUNK observation (rollout split into chunks_per_iter pieces).
     # 4000-step rollout / 16 chunks = 250 env steps per chunk → reward + q-std
     # signal per chunk. Warmup samples: 100 iter × 16 chunks = 1600 obs for
