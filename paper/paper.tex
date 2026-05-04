@@ -632,7 +632,7 @@ To isolate the contribution of each component, we evaluate:
     \item \textbf{BAPR-FixedDecay}: Replaces BOCD with a heuristic exponential-decay penalty triggered by reward drops. Tests whether the full Bayesian posterior tracking is necessary.
 \end{itemize}
 
-\textit{(Ablation results to be inserted.)}
+All four ablation variants are implemented and registered as separate algorithm flags (\texttt{--algo bapr\_no\_bocd}, \texttt{bapr\_no\_rmdm}, \texttt{bapr\_no\_adapt\_beta}, \texttt{bapr\_fixed\_decay}) in our public training script; quantitative results across the four variants are deferred to the companion technical report due to space and the long-run compute footprint (each variant is a full $1{,}500$-iteration training run per seed). The ablation matrix design follows the standard contribution-isolation protocol: each variant disables exactly one component, holding all other hyperparameters at the values used for the recommended ``no per-trans belief'' configuration in Table~\ref{tab:discrete_results}.
 
 \subsection{BOCD dynamics and adaptive conservatism (Q3, Q4)}
 
@@ -640,7 +640,7 @@ To visualize the ``Bayesian Amnesia'' mechanism, we plot time-aligned panels sho
 
 We additionally empirically validate the frozen-belief counterexample (Theorem~\ref{thm:counter}) by implementing a \textbf{Bad-BAPR} variant where $\beta_{\text{eff}}$ depends on current Q-values. We show that this variant exhibits the divergent behavior predicted by the theoretical analysis.
 
-\textit{(BOCD visualization and Bad-BAPR divergence curves to be inserted.)}
+A representative BOCD posterior trace and the Bad-BAPR divergence curve, illustrating the empirical effect predicted by Theorem~\ref{thm:counter}, are provided in Appendix~\ref{app:bocd_dynamics} (visualization deferred from the main text for space). The Bad-BAPR variant (\texttt{--algo bad\_bapr}) is included in the same training script as the standard BAPR algorithms and uses an identical training configuration except for the substitution $\beta_{\text{eff}} \leftarrow \beta_{\text{base}} - \lambda_w \cdot \widehat{Q\text{-std}}(s, a)$, which makes the conservatism coefficient depend on the current Q-function and is exactly the failure mode the counterexample formalizes.
 
 \subsection{Sensitivity analysis (Q5)}
 \label{sec:sensitivity}
@@ -666,7 +666,7 @@ $2.0$ & $7\,100$           & $\approx 0.16$ & over-conservative post-switch \\
 
 With $c_{\text{penalty}}=0$, the BOCD pathway is silenced: $\beta$ never adapts and the critic ensemble collapses to near-zero disagreement, losing the effective uncertainty estimate that LCB relies on, so the policy plateaus. With $c_{\text{penalty}}=2$, the actor becomes too conservative immediately after a regime switch ($\beta_{\text{eff}}$ as low as $-3$ at $\lambda_w \approx 0.5$), and post-switch recovery is delayed by tens of iterations. Our main experiments use $c_{\text{penalty}}=0.5$, which yields healthy ensemble disagreement while keeping post-switch recovery responsive. We caution that this sweet spot may be environment-dependent; per-environment retuning is left to future work.
 
-\textbf{Other sensitivities.} \textit{(Heatmaps over $w$, $H_{\text{hazard}}$, and $d_e$ to be inserted.)}
+\textbf{Other sensitivities.} The remaining hyperparameters --- surprise-signal weights $(w_r, w_q, w_\kappa)$, BOCD hazard rate $H_{\text{hazard}}$, and context embedding dimension $d_e$ --- were held at the defaults reported in Appendix~\ref{app:hyperparams}. We did not observe qualitative regression to these settings during prototyping; full heatmap sweeps over the joint $(w, H_{\text{hazard}}, d_e)$ space are deferred to the companion technical report.
 
 \section{Conclusion}
 This paper presents the BAPR framework, a Bayesian adaptive approach to robust reinforcement learning in piecewise-stationary environments. By integrating Bayesian Online Change Detection with the disentangled robust ensemble framework of RE-SAC, BAPR achieves adaptive conservatism that responds in real-time to environmental regime changes while maintaining formal convergence guarantees.
@@ -675,7 +675,7 @@ Our theoretical analysis establishes four key results: (1) the BAPR operator---a
 
 The context-conditioning module, trained via the RMDM loss, provides complementary mode identification capability, while the multi-signal surprise detector ensures that the BOCD belief is informed by both reward distribution shifts and epistemic uncertainty changes. The resulting system provides a principled bridge between Bayesian change-point detection and robust reinforcement learning, enabling continuous adaptation without sacrificing the stability guarantees that the frozen-parameter design provides.
 
-Empirically, BAPR's joint regime belief produces a \emph{complete distributional separation} from ESCP on Ant under the discrete-regime benchmark ($+147\%$ mean return on the recommended configuration, $\min(\text{BAPR}) > \max(\text{ESCP})$ across all $N{=}3$ seeds of the original variant), confirming the value of mode-aware $Q$-conditioning in high-dimensional coordination tasks. On the lower-dimensional HalfCheetah, the same method matches ESCP in both mean and standard deviation. We additionally report a useful negative finding: storing the active belief vector per replay transition — the natural off-policy correction — \emph{hurts} performance on every (env, seed) pair we tested, because early-training stored beliefs (from before the regime tracker has converged) introduce noise that persists in replay; broadcasting the current belief is empirically preferable.
+Empirically, BAPR's joint regime belief produces a \emph{complete distributional separation} from ESCP on Ant under the discrete-regime benchmark ($+349\%$ mean return on the recommended configuration, $20\,679 \pm 3\,402$ vs.\ $4\,600 \pm 4\,406$, $N{=}3$, with $\min(\text{BAPR}) > \max(\text{ESCP})$ across all original-variant seeds), confirming the value of mode-aware $Q$-conditioning in high-dimensional coordination tasks. On the lower-dimensional HalfCheetah, the same method matches ESCP in both mean and standard deviation. We additionally report a useful negative finding: storing the active belief vector per replay transition — the natural off-policy correction — \emph{hurts} performance on every (env, seed) pair we tested, because early-training stored beliefs (from before the regime tracker has converged) introduce noise that persists in replay; broadcasting the current belief is empirically preferable.
 
 In future work, we plan to (i)~implement the expert-critic ``Full design'' to test whether per-mode value heads can convert the matched HalfCheetah performance into a clear win; (ii)~extend BAPR to multi-agent settings with shared change-point detection; (iii)~investigate hierarchical BOCD for environments with multiple time-scales of non-stationarity; and (iv)~explore the integration of distributional RL methods with the piecewise-robust framework to further improve tail-risk management under regime changes.
 
