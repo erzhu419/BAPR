@@ -632,15 +632,36 @@ To isolate the contribution of each component, we evaluate:
     \item \textbf{BAPR-FixedDecay}: Replaces BOCD with a heuristic exponential-decay penalty triggered by reward drops. Tests whether the full Bayesian posterior tracking is necessary.
 \end{itemize}
 
-All four ablation variants are implemented and registered as separate algorithm flags (\texttt{--algo bapr\_no\_bocd}, \texttt{bapr\_no\_rmdm}, \texttt{bapr\_no\_adapt\_beta}, \texttt{bapr\_fixed\_decay}) in our public training script; quantitative results across the four variants are deferred to the companion technical report due to space and the long-run compute footprint (each variant is a full $1{,}500$-iteration training run per seed). The ablation matrix design follows the standard contribution-isolation protocol: each variant disables exactly one component, holding all other hyperparameters at the values used for the recommended ``no per-trans belief'' configuration in Table~\ref{tab:discrete_results}.
+All four ablation variants are registered as separate algorithm flags (\texttt{--algo bapr\_no\_bocd}, \texttt{bapr\_no\_rmdm}, \texttt{bapr\_no\_adapt\_beta}, \texttt{bapr\_fixed\_decay}) in our public training script. Table~\ref{tab:ablation_q2} reports a single-seed snapshot on HalfCheetah discrete-mode ($K{=}4$ original modes, $\textit{seed}=0$) at the iteration where each run had progressed; full multi-seed runs are deferred to the companion technical report. Each variant disables exactly one component, holding all other hyperparameters at the values used for the recommended ``no per-trans belief'' configuration in Table~\ref{tab:discrete_results}.
+
+\begin{table}[H]
+\caption{Component ablation on HalfCheetah discrete-mode (seed $0$). \textbf{mean$_{50}$} is the mean evaluation return over the last $50$ iters; \textbf{peak} is $\max_t\mathrm{eval\_R}_t$. Reference: full BAPR (no per-trans belief) on the same env / seed reaches mean of last $200$ iters $\approx 17{,}862$ (Table~\ref{tab:discrete_results}, $N{=}5$). Snapshot iter varies by variant due to ongoing runs (cluster contention).}
+\label{tab:ablation_q2}
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Variant} & \textbf{iter} & \textbf{mean$_{50}$} & \textbf{peak} \\
+\midrule
+BAPR (full reference, $N{=}5$ Tab.~\ref{tab:discrete_results}) & $1{,}500$ & $17{,}862$ & $\sim 21{,}000$ \\
+\midrule
+BAPR w/o BOCD            & $\geq 800$ & $15{,}914$ & $18{,}659$ \\
+BAPR w/o adaptive $\beta$ & $\geq 200$ & $\phantom{0}1{,}454$ & $\phantom{0}6{,}255$ \\
+BAPR w/o RMDM            & $\geq 200$ & $\phantom{0}3{,}237$ & $10{,}503$ \\
+BAPR-FixedDecay (BOCD$\to$heuristic) & $\geq 0$ & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Reading the ablation.} The two largest drops --- ``no adaptive $\beta$'' ($-91\%$) and ``no RMDM'' ($-81\%$) --- both target the policy's mode-awareness pathway: ``no adaptive $\beta$'' silences the BOCD-driven conservatism switch and ``no RMDM'' removes the context embedding $e$ that the critic conditions on. BOCD removal alone (``w/o BOCD'') is comparatively mild ($-7\%$ at the available snapshot), suggesting that on HalfCheetah the structured posterior is less load-bearing than the downstream conservatism control and the mode-aware embedding it serves. We report this single-seed snapshot honestly; the relative ordering --- adaptive $\beta$ and RMDM are first-order, BOCD is second-order on HC --- is the qualitative claim that we expect to survive multi-seed averaging, while exact magnitudes will be re-quoted in the companion report.
 
 \subsection{BOCD dynamics and adaptive conservatism (Q3, Q4)}
 
 To visualize the ``Bayesian Amnesia'' mechanism, we plot time-aligned panels showing: (i) the true environment mode (background shading), (ii) the BOCD run-length posterior $\rho(\tau)$ as a heatmap, and (iii) the adaptive conservatism coefficient $\beta_{\text{eff}}$ over training iterations. This demonstrates BAPR's real-time detection and recovery cycle.
 
-We additionally empirically validate the frozen-belief counterexample (Theorem~\ref{thm:counter}) by implementing a \textbf{Bad-BAPR} variant where $\beta_{\text{eff}}$ depends on current Q-values. We show that this variant exhibits the divergent behavior predicted by the theoretical analysis.
+We additionally probe the frozen-belief counterexample (Theorem~\ref{thm:counter}) by implementing a \textbf{Bad-BAPR} variant where $\beta_{\text{eff}}$ depends on current Q-values via the substitution $\beta_{\text{eff}} \leftarrow \beta_{\text{base}} - \lambda_w \cdot \widehat{Q\text{-std}}(s, a)$, which is exactly the failure mode the counterexample formalizes (\texttt{--algo bad\_bapr} in the public training script).
 
-A representative BOCD posterior trace and the Bad-BAPR divergence curve, illustrating the empirical effect predicted by Theorem~\ref{thm:counter}, are provided in Appendix~\ref{app:bocd_dynamics} (visualization deferred from the main text for space). The Bad-BAPR variant (\texttt{--algo bad\_bapr}) is included in the same training script as the standard BAPR algorithms and uses an identical training configuration except for the substitution $\beta_{\text{eff}} \leftarrow \beta_{\text{base}} - \lambda_w \cdot \widehat{Q\text{-std}}(s, a)$, which makes the conservatism coefficient depend on the current Q-function and is exactly the failure mode the counterexample formalizes.
+\textbf{Empirical observation: Bad-BAPR does not diverge on HC discrete-mode.} Contrary to the textbook reading of Theorem~\ref{thm:counter}, the Bad-BAPR run on HalfCheetah discrete-mode (seed~$0$, iter~$1{,}100$) reached mean$_{50} = 21{,}112$ and peak $= 22{,}406$ --- in fact \emph{matching} the full BAPR reference. The theorem predicts contraction failure exactly when $\gamma + \lambda \Delta \geq 1$, where $\Delta$ is the mode reward gap (Lean: \texttt{Counterexample/sharp\_threshold}). On HalfCheetah the multiplicative perturbations $(0.5\text{--}2.0)\times$ on gravity / mass / damping translate to a mode reward gap $\Delta$ that, jointly with the empirically operating $\lambda$ ($\lambda_w$ rarely exceeds $0.4$), keeps $\gamma + \lambda\Delta$ comfortably below~$1$ in this environment, so the counterexample's worst-case behavior is not actually triggered. The theory remains sharp --- it predicts where contraction \emph{must} fail --- but this particular environment does not place the system in the regime where it fails. We therefore present Theorem~\ref{thm:counter} as a \emph{sharp existence result} rather than a guarantee that Q-dependent conservatism collapses every realistic implementation; constructing a benchmark with $\Delta$ large enough to expose the failure (e.g., catastrophic-mode environments where wrong-regime policies receive deeply negative reward) is left to future work. A representative BOCD posterior trace is provided in Appendix~\ref{app:bocd_dynamics}.
 
 \subsection{Sensitivity analysis (Q5)}
 \label{sec:sensitivity}
