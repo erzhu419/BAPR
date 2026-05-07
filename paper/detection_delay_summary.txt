@@ -1,0 +1,6 @@
+Detection delay summary (run: bapr_no2_Ant_s2, 22 mode switches)
+  Detected events: 13 / 22
+  Median detection delay: 13 iters
+  Mean delay:             14.0 iters
+  90th-percentile delay:  22 iters
+  Detection rate:         59%
