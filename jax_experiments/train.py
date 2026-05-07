@@ -407,16 +407,31 @@ def train(config: Config):
             # Feed eval to BAPR for performance gating
             if hasattr(agent, 'report_eval'):
                 agent.report_eval(eval_mean)
-            # Sweep feasibility filter: bail out early if config is too hard
-            if (getattr(config, 'early_kill_iter', None) is not None
-                    and getattr(config, 'early_kill_reward', None) is not None
-                    and iteration >= config.early_kill_iter
-                    and eval_mean < config.early_kill_reward):
-                print(f"[EARLY KILL] iter={iteration} eval_reward={eval_mean:.1f} "
-                      f"< threshold {config.early_kill_reward} at iter "
-                      f"{config.early_kill_iter}; exiting with code 99.")
-                logger.save()
-                sys.exit(99)
+            # 2-stage feasibility filter (peak_R based):
+            #   stage 1 (early_kill_iter / early_kill_reward): must show signal
+            #   stage 2 (stage2_kill_iter / stage2_kill_reward): must show real learning
+            #   pass both → train to max_iters
+            if not hasattr(config, '_peak_eval_reward'):
+                config._peak_eval_reward = -float('inf')
+            if eval_mean > config._peak_eval_reward:
+                config._peak_eval_reward = float(eval_mean)
+            for stage_name, kit, krew in [
+                ("STAGE 1",
+                 getattr(config, 'early_kill_iter', None),
+                 getattr(config, 'early_kill_reward', None)),
+                ("STAGE 2",
+                 getattr(config, 'stage2_kill_iter', None),
+                 getattr(config, 'stage2_kill_reward', None)),
+            ]:
+                if (kit is not None and krew is not None
+                        and iteration >= kit
+                        and config._peak_eval_reward < krew):
+                    print(f"[EARLY KILL {stage_name}] iter={iteration} "
+                          f"peak_eval_reward={config._peak_eval_reward:.1f} "
+                          f"(current={eval_mean:.1f}) < threshold {krew} "
+                          f"at iter {kit}; exiting with code 99.")
+                    logger.save()
+                    sys.exit(99)
         eval_time = time.time() - eval_start
         eval_time_total += eval_time
 
@@ -531,6 +546,13 @@ def main():
                              "exit with code 99 (config too hard).")
     parser.add_argument("--early_kill_reward", type=float, default=None,
                         help="Reward threshold paired with --early_kill_iter.")
+    parser.add_argument("--stage2_kill_iter", type=int, default=None,
+                        help="Stage 2 kill checkpoint (e.g. 1000). At this iter "
+                             "or later, kill if peak_R < --stage2_kill_reward.")
+    parser.add_argument("--stage2_kill_reward", type=float, default=None,
+                        help="Stage 2 reward threshold (e.g. 2000). Pairs with "
+                             "--stage2_kill_iter; intent is 'must demonstrate "
+                             "real learning by this iter'.")
 
     args = parser.parse_args()
 
@@ -575,6 +597,10 @@ def main():
         config.early_kill_iter = args.early_kill_iter
     if args.early_kill_reward is not None:
         config.early_kill_reward = args.early_kill_reward
+    if args.stage2_kill_iter is not None:
+        config.stage2_kill_iter = args.stage2_kill_iter
+    if args.stage2_kill_reward is not None:
+        config.stage2_kill_reward = args.stage2_kill_reward
     if args.changing_period is not None:
         config.changing_period = args.changing_period
     if args.save_interval is not None:

@@ -110,7 +110,40 @@ MODE_VARIANTS: Dict[str, Dict[str, Dict[str, Dict[str, float]]]] = {
             'g_high_d_low': {'gravity': 1.1, 'dof_damping': 0.9},
             'm_high':       {'body_mass': 1.20},
         },
+        # Round 2: K=2/3 + tinier amplitudes + designed for longer dwell
+        'K2_d_low': {
+            'normal':    {},
+            'd_low':     {'dof_damping': 0.7},
+        },
+        'K3_g5pct': {
+            'normal':    {},
+            'g_low':     {'gravity': 0.95},
+            'g_high':    {'gravity': 1.05},
+        },
+        'K4_g5pct': {
+            'normal':    {},
+            'g_low':     {'gravity': 0.95},
+            'g_high':    {'gravity': 1.05},
+            'g_lower':   {'gravity': 0.93},
+        },
+        'K4_d_tiny': {
+            'normal':    {},
+            'd_low':     {'dof_damping': 0.85},
+            'd_high':    {'dof_damping': 1.15},
+            'd_higher':  {'dof_damping': 1.25},
+        },
     },
+}
+
+# Mirror Round-2 K=2 / K=3 small-amplitude variants for Hopper-v2
+MODE_VARIANTS['Hopper-v2']['K2_d_low'] = {
+    'normal':    {},
+    'd_low':     {'dof_damping': 0.7},
+}
+MODE_VARIANTS['Hopper-v2']['K3_g5pct'] = {
+    'normal':    {},
+    'g_low':     {'gravity': 0.95},
+    'g_high':    {'gravity': 1.05},
 }
 
 
