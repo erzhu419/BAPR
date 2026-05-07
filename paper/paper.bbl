@@ -1,0 +1,97 @@
+% Generated bibliography for BAPR paper (manual reconstruction)
+\begin{thebibliography}{99}
+\providecommand{\url}[1]{#1}
+\csname url@samestyle\endcsname
+\providecommand{\newblock}{\relax}
+\providecommand{\bibinfo}[2]{#2}
+\providecommand{\BIBdecl}{\relax}
+\BIBdecl
+
+\bibitem{Adams2007BOCD}
+{Adams Ryan P.} and {MacKay David J.C.}, ``Bayesian online changepoint detection,'' \emph{arXiv preprint arXiv:0710.3742}, 2007.
+
+\bibitem{Benjamins2021CARL}
+{Benjamins Carolin}, {Eimer Theresa}, {Schubert Frederik}, {Biedenkapp Andr\'e}, {Rosenhahn Bodo}, {Hutter Frank}, and {Lindauer Marius}, ``CARL: A benchmark for contextual and adaptive reinforcement learning,'' \emph{NeurIPS Workshop on Ecological Theory of RL}, 2021.
+
+\bibitem{Chen2021ContextAware}
+{Chen Baiming}, {Liu Zuxin}, {Zhu Jiacheng}, {Xu Mengdi}, {Ding Wenhao}, {Li Liang}, and {Zhao Ding}, ``Context-aware safe reinforcement learning for non-stationary environments,'' in \emph{Proc. IEEE Int. Conf. Robotics and Automation (ICRA)}, 2021, pp. 10\,689--10\,695.
+
+\bibitem{Doshi-Velez2016HiPMDP}
+{Doshi-Velez Finale} and {Konidaris George}, ``Hidden parameter Markov decision processes: A semiparametric regression approach for discovering latent task parametrizations,'' in \emph{Proc. Int. Joint Conf. Artificial Intelligence (IJCAI)}, 2016, pp. 1432--1440.
+
+\bibitem{Finn2017MAML}
+{Finn Chelsea}, {Abbeel Pieter}, and {Levine Sergey}, ``Model-agnostic meta-learning for fast adaptation of deep networks,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2017, pp. 1126--1135.
+
+\bibitem{GarivierMoulines2011}
+{Garivier Aur\'elien} and {Moulines Eric}, ``On upper-confidence bound policies for switching bandit problems,'' in \emph{Proc. Algorithmic Learning Theory (ALT)}, 2011, pp. 174--188.
+
+\bibitem{Haarnoja2018SAC}
+{Haarnoja Tuomas}, {Zhou Aurick}, {Abbeel Pieter}, and {Levine Sergey}, ``Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2018, pp. 1856--1865.
+
+\bibitem{Hadoux2014Sequential}
+{Hadoux Emmanuel}, {Beynier Aur\'elie}, and {Weng Paul}, ``Sequential decision-making under non-stationary environments via sequential change-point detection,'' in \emph{ECML/PKDD Workshop on Learning over Multiple Contexts}, 2014.
+
+\bibitem{Iyengar2005RobustDP}
+{Iyengar Garud N.}, ``Robust dynamic programming,'' \emph{Mathematics of Operations Research}, vol.~30, no.~2, pp. 257--280, 2005.
+
+\bibitem{Khetarpal2020ContinualRL}
+{Khetarpal Khimya}, {Riemer Matthew}, {Rish Irina}, and {Precup Doina}, ``Towards continual reinforcement learning: A review and perspectives,'' \emph{Journal of Artificial Intelligence Research}, vol.~75, pp. 1401--1476, 2022.
+
+\bibitem{Killick2012Changepoint}
+{Killick Rebecca}, {Fearnhead Paul}, and {Eckley Idris A.}, ``Optimal detection of changepoints with a linear computational cost,'' \emph{Journal of the American Statistical Association}, vol.~107, no.~500, pp. 1590--1598, 2012.
+
+\bibitem{Lecarpentier2019NonStationary}
+{Lecarpentier Erwan} and {Rachelson Emmanuel}, ``Non-stationary Markov decision processes: A worst-case approach using model-based reinforcement learning,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~32, 2019, pp. 7214--7223.
+
+\bibitem{Lee2020ESCP}
+{Luo Fan-Ming}, {Jiang Shengyi}, {Yu Yang}, {Zhang Zongzhang}, and {Zhang Yi-Feng}, ``Adapt to environment sudden changes by learning a context sensitive policy,'' in \emph{Proc. AAAI Conf. Artificial Intelligence}, 2022, pp. 7637--7646.
+
+\bibitem{Mellor2013Thompson}
+{Mellor Joseph} and {Shapiro Jonathan}, ``Thompson sampling in switching environments with Bayesian online change detection,'' in \emph{Proc. Int. Conf. Artificial Intelligence and Statistics (AISTATS)}, 2013, pp. 442--450.
+
+\bibitem{Nagabandi2019MAML}
+{Nagabandi Anusha}, {Clavera Ignasi}, {Liu Simin}, {Fearing Ronald S.}, {Abbeel Pieter}, {Levine Sergey}, and {Finn Chelsea}, ``Learning to adapt in dynamic, real-world environments through meta-reinforcement learning,'' in \emph{Proc. Int. Conf. Learning Representations (ICLR)}, 2019.
+
+\bibitem{Osogami2012Robustness}
+{Osogami Takayuki}, ``Robustness and risk-sensitivity in Markov decision processes,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~25, 2012, pp. 233--241.
+
+\bibitem{Padakandla2020Survey}
+{Padakandla Sindhu}, ``A survey of reinforcement learning algorithms for dynamically varying environments,'' \emph{ACM Computing Surveys}, vol.~54, no.~6, pp. 1--25, 2021.
+
+\bibitem{Panaganti2024RobustF}
+{Panaganti Kishan}, {Wierman Adam}, and {Mazumdar Eric}, ``Model-free robust $\phi$-divergence reinforcement learning using both offline and online data,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2024.
+
+\bibitem{Rakelly2019PEARL}
+{Rakelly Kate}, {Zhou Aurick}, {Finn Chelsea}, {Levine Sergey}, and {Quillen Deirdre}, ``Efficient off-policy meta-reinforcement learning via probabilistic context variables,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2019, pp. 5331--5340.
+
+\bibitem{Sodhani2021MultiTaskRL}
+{Sodhani Shagun}, {Zhang Amy}, and {Pineau Joelle}, ``Multi-task reinforcement learning with context-based representations,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2021, pp. 9767--9779.
+
+\bibitem{Wiesemann2013RobustMDP}
+{Wiesemann Wolfram}, {Kuhn Daniel}, and {Rustem Ber\c c}, ``Robust Markov decision processes,'' \emph{Mathematics of Operations Research}, vol.~38, no.~1, pp. 153--183, 2013.
+
+\bibitem{Xu2009RobustLasso}
+{Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robust regression and Lasso,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~21, 2009, pp. 1801--1808.
+
+\bibitem{Xu2009RobustSVM}
+{Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robustness and regularization of support vector machines,'' \emph{Journal of Machine Learning Research}, vol.~10, pp. 1485--1510, 2009.
+
+\bibitem{Zhang2025RESAC}
+{Zhang Yifan}, {He Sunyou}, {Wei Hui}, and {Liu Wei}, ``RE-SAC: Disentangled robust ensemble soft actor-critic for non-stationary continuous control,'' \emph{arXiv preprint}, 2025.
+
+\bibitem{Zhang2025SingleAgentBus}
+{Zhang Yifan}, {He Sunyou}, and {Liu Wei}, ``Single-agent bus holding control via reinforcement learning,'' \emph{arXiv preprint}, 2025.
+
+\bibitem{Zhou2023NaturalActorCritic}
+{Zhou Ruida}, {Liu Tao}, {Cheng Min}, {Kalathil Dileep}, {Kumar P. R.}, and {Tian Chao}, ``Natural actor-critic for robust reinforcement learning with function approximation,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~36, 2023.
+
+\bibitem{Zintgraf2020VariBAD}
+{Zintgraf Luisa}, {Shiarlis Kyriacos}, {Igl Maximilian}, {Schulze Sebastian}, {Gal Yarin}, {Hofmann Katja}, and {Whiteson Shimon}, ``VariBAD: A very good method for Bayes-adaptive deep RL via meta-learning,'' in \emph{Proc. Int. Conf. Learning Representations (ICLR)}, 2020.
+
+\bibitem{Fei2020RiskSensitive}
+{Fei Yingjie}, {Yang Zhuoran}, {Chen Yudong}, {Wang Zhaoran}, and {Xie Qiaomin}, ``Risk-sensitive reinforcement learning: Near-optimal risk-sample tradeoff in regret,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~33, 2020, pp. 22\,384--22\,395.
+
+\bibitem{Blackwell1965DiscountedDP}
+{Blackwell David}, ``Discounted dynamic programming,'' \emph{The Annals of Mathematical Statistics}, vol.~36, no.~1, pp. 226--235, 1965.
+
+\end{thebibliography}
