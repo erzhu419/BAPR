@@ -533,7 +533,7 @@ Following the same analysis as RE-SAC~\cite{Zhang2025RESAC}:
 \begin{equation}
     Q^*_{\text{BAPR}}(s,a) = Q^*(s,a) - \frac{\gamma \cdot \Delta_{\text{penalty}}}{1-\gamma},
 \end{equation}
-where $\Delta_{\text{penalty}}$ includes the belief-weighted contribution. With typical parameters ($\gamma = 0.99$, $\lambda_w \leq 1$, $c_{\text{penalty}} = 5$, $|\beta_{\text{base}}| = 2$), the maximum additional depression from the adaptive penalty is bounded by $\gamma \cdot 5 \cdot \bar{\sigma}_{\text{ens}}/(1-\gamma) \approx 500 \cdot \bar{\sigma}_{\text{ens}}$, which remains small relative to the typical Q-value scale in our experiments.
+where $\Delta_{\text{penalty}}$ includes the belief-weighted contribution. With the experimental configuration ($\gamma = 0.99$, $\lambda_w \leq 0.4$ empirically, $c_{\text{penalty}} = 0.5$, $|\beta_{\text{base}}| = 2$), the maximum additional depression from the adaptive penalty is bounded by $\gamma \cdot 0.5 \cdot \bar{\sigma}_{\text{ens}}/(1-\gamma) \approx 50 \cdot \bar{\sigma}_{\text{ens}}$, which remains small relative to the typical Q-value scale in our experiments.
 
 \begin{proposition}[Adaptive conservatism monotonicity --- Lean: \texttt{beta\_eff\_monotone\_conservatism}]
     \label{prop:beta_mono}
@@ -719,7 +719,7 @@ $H_{\max}$ & 20 & Max run-length \\
 $H_{\text{hazard}}$ & 0.05 & BOCD hazard rate \\
 $\sigma_0^2$ & 0.1 & Base surprise variance \\
 $\sigma_g$ & 0.05 & Variance growth rate \\
-$c_{\text{penalty}}$ & 5.0 & Penalty scale ($\beta_{\text{eff}} = \beta_{\text{base}} - \lambda_w c_{\text{penalty}}$) \\
+$c_{\text{penalty}}$ & 0.5 & Penalty scale ($\beta_{\text{eff}} = \beta_{\text{base}} - \lambda_w c_{\text{penalty}}$); sweet spot per Sec.~\ref{sec:sensitivity} \\
 $\alpha_{\text{EMA}}$ & 0.3 & Surprise EMA smoothing \\
 $\alpha_{\text{baseline}}$ & 0.95 & $\lambda_w$ baseline EMA rate \\
 $(w_r, w_q, w_\kappa)$ & $(0.5, 0.3, 0.2)$ & Surprise signal weights \\
