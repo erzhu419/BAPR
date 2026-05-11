@@ -162,7 +162,7 @@ The proof proceeds by structural induction over the sequence of segments:
 \textbf{Inductive step:} At switch time $t_{k+1}$:
 \begin{itemize}
     \item The surprise signal spikes due to the reward/Q-std distribution shift (Assumption~\ref{assump:separability}).
-    \item The BOCD posterior shifts to short run-lengths within $n_\delta = O(\log(1/\delta)/\log L)$ steps (Theorem~\ref{thm:delay}).
+    \item The BOCD posterior shifts to higher expected run-length $\bar h$ within $n_\delta = O(\log(1/\delta)/\log L)$ steps (Theorem~\ref{thm:delay}); this raises $\bar h/(H{-}1)$ above the EMA baseline and triggers $\lambda_w > 0$.
     \item $\beta_{\text{eff}}$ becomes maximally conservative, providing pessimistic protection during the transient.
     \item Once the belief stabilizes, the operator $\mathcal{T}^{BAPR}_{\rho'}$ with the updated belief $\rho'$ is again a $\gamma$-contraction (Corollary~\ref{cor:after_update}).
     \item By Assumption~\ref{assump:metastable}, there are at least $1/(1-\gamma)$ steps remaining before the next switch, sufficient for convergence to the new fixed point. \qedhere
