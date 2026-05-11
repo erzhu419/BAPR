@@ -534,17 +534,20 @@ Figure~\ref{fig:discrete_curves} plots the full training curves (mean over seeds
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Algorithm} & \textbf{HalfCheetah} ($N{=}5$) & \textbf{Hopper} ($N{=}1$) & \textbf{Walker2d} ($N{=}1$) & \textbf{Ant} ($N{=}3$) \\
+\textbf{Algorithm} & \textbf{HalfCheetah} & \textbf{Hopper} & \textbf{Walker2d} & \textbf{Ant} \\
+& ($N{=}5$) & ($N{=}3$) & ($N{=}3$) & ($N{=}3$) \\
 \midrule
-ESCP                            & $17{,}297 \pm 3{,}356$ & $443$ & $389$ & $4{,}600 \pm 4{,}406$ \\
+SAC                             & $15{,}682 \pm 4{,}785$ & $445 \pm 61$ & $310 \pm 6$ & $17{,}171 \pm 194$ \\
+ESCP                            & $17{,}297 \pm 3{,}356$ & $565 \pm 110$ & $374 \pm 75$ & $4{,}600 \pm 4{,}406$ \\
 BAPR (full)                     & $18{,}598 \pm 7{,}872$ & --- & $323$ & $20{,}284 \pm 3{,}564$ \\
-\textbf{BAPR (no per-trans)}    & $\mathbf{17{,}862 \pm 3{,}327}$ & $\mathbf{507}$ & $\mathbf{349}$ & $\mathbf{20{,}679 \pm 3{,}402}$ \\
+\textbf{BAPR (no per-trans)}    & $\mathbf{17{,}862 \pm 3{,}327}$ & $\mathbf{420 \pm 23}$ & $\mathbf{353 \pm 26}$ & $\mathbf{20{,}679 \pm 3{,}402}$ \\
 \midrule
-Recommended vs.\ ESCP           & $+3.3\%$ (n.s.) & $+14\%$ & --- (both fail) & $\mathbf{+349\%}$ \\
+Recommended vs.\ SAC            & $+14\%$ (n.s.) & $-6\%$ & $+14\%$ & $+20\%$ \\
+Recommended vs.\ ESCP           & $+3.3\%$ (n.s.) & $-26\%$ & $-6\%$ & $\mathbf{+349\%}$ \\
 \bottomrule
 \end{tabular}
 \\[3pt]
-\footnotesize Walker2d and Hopper: single-seed pilots, both methods fail to converge within $1\,500$ iters under the $K{=}4$ exponential-dwell protocol — see Section~\ref{sec:env_difficulty} for analysis. ``n.s.'' = not statistically significant given cross-seed std.
+\footnotesize Walker2d and Hopper now reported as $N{=}3$ from a follow-up multi-seed run; both methods plateau in the same $300$--$650$ band that the perturbation-environment sweep (\S\ref{sec:env_sweep}) shows is the protocol ceiling. ``n.s.'' = not statistically significant given cross-seed std. SAC is included as the regime-unaware baseline: it learns a single robust policy from the mixed-mode data without any change-point detection or context conditioning.
 \end{table}
 
 \textbf{HalfCheetah: matched mean, matched stability.} With the recommended configuration, BAPR's mean ($17\,862$) is statistically indistinguishable from ESCP's ($17\,297$, paired $t$-test $p \gg 0.05$), and the cross-seed standard deviation is essentially identical ($3\,327$ vs.\ $3\,356$). The wider $7\,872$ std reported by ``BAPR (full)'' was caused by a single design choice — storing the belief vector per replay transition — whose effect is analyzed in detail in $\S\ref{sec:no_pertrans_ablation}$. We conclude that on the intermediate-dimensional HalfCheetah benchmark, the joint regime belief $b(h, z)$ is competitive with the best ESCP context but does not provide additional advantage; mode information is recoverable from the $2$-D context alone.
@@ -638,30 +641,31 @@ To isolate the contribution of each component, we evaluate:
     \item \textbf{BAPR-FixedDecay}: Replaces BOCD with a heuristic exponential-decay penalty triggered by reward drops. Tests whether the full Bayesian posterior tracking is necessary.
 \end{itemize}
 
-All four ablation variants are registered as separate algorithm flags (\texttt{--algo bapr\_no\_bocd}, \texttt{bapr\_no\_rmdm}, \texttt{bapr\_no\_adapt\_beta}, \texttt{bapr\_fixed\_decay}) in our public training script. Table~\ref{tab:ablation_q2} reports a single-seed snapshot on HalfCheetah discrete-mode ($K{=}4$ original modes, $\textit{seed}=0$) at the iteration where each run had progressed; full multi-seed runs are deferred to the companion technical report. Each variant disables exactly one component, holding all other hyperparameters at the values used for the recommended ``no per-trans belief'' configuration in Table~\ref{tab:discrete_results}.
+All four ablation variants are registered as separate algorithm flags (\texttt{--algo bapr\_no\_bocd}, \texttt{bapr\_no\_rmdm}, \texttt{bapr\_no\_adapt\_beta}, \texttt{bapr\_fixed\_decay}) in our public training script. Table~\ref{tab:ablation_q2} reports $N{=}3$-seed mean$\pm$std on HalfCheetah discrete-mode (original $K{=}4$ modes, all runs to $1{,}500$ iters). Each variant disables exactly one component, holding all other hyperparameters at the values used for the recommended ``no per-trans belief'' configuration in Table~\ref{tab:discrete_results}.
 
 \begin{table}[H]
-\caption{Component ablation on HalfCheetah discrete-mode (seed $0$, completed runs). \textbf{mean$_{200}$} is the mean evaluation return over the last $200$ iters of training; \textbf{peak} is $\max_t\mathrm{eval\_R}_t$. Reference: full BAPR (no per-trans belief) on the same env reaches $17{,}862 \pm 3{,}327$ over the last $200$ iters across $N{=}5$ seeds (Table~\ref{tab:discrete_results}).}
+\caption{Component ablation on HalfCheetah discrete-mode, $N{=}3$ seeds (mean$\pm$std of last $200$ iters). Reference: full BAPR (no per-trans belief) on the same env reaches $17{,}862 \pm 3{,}327$ across $N{=}5$ seeds (Table~\ref{tab:discrete_results}).}
 \label{tab:ablation_q2}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{lcccc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Variant} & \textbf{iter} & \textbf{mean$_{200}$} & \textbf{peak} & \textbf{vs.\ full} \\
+\textbf{Variant} & \textbf{mean$_{200}$ ($N{=}3$)} & \textbf{vs.\ full} \\
 \midrule
-BAPR (full ref., Tab.~\ref{tab:discrete_results} $N{=}5$) & $1{,}500$ & $\mathbf{17{,}862 \pm 3{,}327}$ & $\sim 21{,}000$ & --- \\
+BAPR (full ref., $N{=}5$ Tab.~\ref{tab:discrete_results}) & $\mathbf{17{,}862 \pm 3{,}327}$ & --- \\
 \midrule
-BAPR w/o BOCD            & $1{,}499$ & $17{,}677$ & $20{,}482$ & $-1\%$ \\
-BAPR-FixedDecay (BOCD$\to$heur.) & $1{,}499$ & $15{,}287$ & $19{,}475$ & $-14\%$ \\
-BAPR w/o adaptive $\beta$ & $1{,}000$ & $12{,}779$ & $18{,}934$ & $-28\%$ \\
-\textbf{BAPR w/o RMDM}    & $1{,}499$ & $\mathbf{\phantom{0}7{,}952}$ & $12{,}664$ & $\mathbf{-55\%}$ \\
+BAPR w/o adaptive $\beta$         & $16{,}301 \pm 3{,}267$ & $-9\%$ \\
+Bad-BAPR (Q-dependent $\beta_{\text{eff}}$) & $16{,}147 \pm 3{,}828$ & $-10\%$ \\
+BAPR w/o BOCD                     & $14{,}152 \pm 3{,}661$ & $-21\%$ \\
+BAPR-FixedDecay (BOCD$\to$heur.)  & $12{,}279 \pm 3{,}120$ & $-31\%$ \\
+\textbf{BAPR w/o RMDM}            & $\mathbf{\phantom{0}9{,}392 \pm 1{,}073}$ & $\mathbf{-47\%}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \sloppy
-\textbf{Reading the ablation.} The single-seed ablation suggests that on the HalfCheetah discrete-mode benchmark, RMDM is the dominant performance contributor ($-55\%$ when removed), while removing BOCD reduces performance by $-1\%$, replacing BOCD with a cheap heuristic-decay schedule (BAPR-FixedDecay) costs $-14\%$, and removing the adaptive $\beta$ pathway costs $-28\%$ at iter~$1{,}000$ (the iter where this run completed). We do not interpret this single-seed snapshot as ranking the components in general --- it is consistent with two readings: (i) on this particular HalfCheetah setting, the mode-aware representation provides most of the gain and the BOCD-driven adaptive conservatism contributes a smaller marginal effect; or (ii) the $\beta_{\text{eff}}$ values reached on this benchmark are below the regime where the BOCD posterior structure becomes load-bearing (which would be expected for environments without catastrophic mode-mismatch penalties). Multi-seed confirmation and a complementary benchmark designed to isolate BOCD's contribution against fixed-schedule baselines are deferred to follow-up work.
+\textbf{Reading the ablation ($N{=}3$).} RMDM is the largest single ablation ($-47\%$): removing the context embedding $e$ that the critic and policy condition on is what most damages performance. The BOCD machinery contributes a non-trivial $-21\%$ on average, and the cheap heuristic-decay replacement (BAPR-FixedDecay) further lags by $-31\%$ --- the structured Bayesian posterior is therefore not a decorative substitute for a fixed schedule once we average over seeds. Removing the adaptive $\beta$ pathway costs only $-9\%$, and Bad-BAPR (Q-dependent $\beta_{\text{eff}}$) costs $-10\%$, an essentially indistinguishable margin from the abstract-operator perspective: when the operating regime stays inside $\gamma + \lambda \Delta < 1$ (the safe side of Theorem~\ref{thm:counter}), the unsafe Q-dependent variant neither catastrophically diverges nor improves on the frozen design, consistent with the threshold-based reading of the counterexample. The component ranking on HalfCheetah is therefore RMDM $\gg$ FixedDecay $>$ BOCD $>$ adaptive $\beta$ $\approx$ Bad-BAPR.
 \fussy
 
 \subsection{BOCD dynamics and adaptive conservatism (Q3, Q4)}
@@ -683,7 +687,7 @@ We additionally probe the frozen-belief counterexample (Theorem~\ref{thm:counter
 which is exactly the failure mode the counterexample formalizes.
 
 \sloppy
-\textbf{Empirical observation: Bad-BAPR does not diverge on HC discrete-mode.} Bad-BAPR on HalfCheetah discrete-mode (seed~$0$, full $1{,}499$-iter run) reached mean$_{200} = 21{,}103$ and peak $= 26{,}077$, $+18\%$ over the full BAPR reference of $17{,}862$ on the same seed. This is consistent with the formal threshold of Theorem~\ref{thm:counter}: contraction is guaranteed only \emph{outside} the regime $\gamma + \lambda \Delta \geq 1$, which we treat as an existence boundary rather than a universal collapse prediction. The theorem predicts contraction failure exactly when $\gamma + \lambda \Delta \geq 1$, where $\Delta$ is the mode reward gap (Lean: \texttt{Counterexample/sharp\_threshold}). On HalfCheetah the multiplicative perturbations $(0.5\text{--}2.0)\times$ on gravity, mass, and damping translate to a mode reward gap $\Delta$ that, jointly with the empirically operating $\lambda$ ($\lambda_w$ rarely exceeds $0.4$), keeps $\gamma + \lambda\Delta$ comfortably below~$1$ in this environment, so the counterexample's worst-case behavior is not actually triggered --- and within that subcritical regime the Q-dependent conservatism actually appears to help by giving the agent more aggressive exploration when uncertainty is genuinely state-dependent. The theory remains sharp --- it predicts where contraction \emph{must} fail --- but this environment is below threshold. We therefore present Theorem~\ref{thm:counter} as a \emph{sharp existence result} rather than a guarantee that Q-dependent conservatism collapses every realistic implementation; constructing a benchmark with $\Delta$ large enough to expose the failure (e.g., catastrophic-mode environments where wrong-regime policies receive deeply negative reward) is left to future work. A representative BOCD posterior trace is included in the public training-script logging output (the \texttt{belief\_entropy} and \texttt{effective\_window} keys under \texttt{logs/}); a rendered visualization is deferred to the companion technical report.
+\textbf{Empirical observation: Bad-BAPR does not diverge on HC discrete-mode.} Across $N{=}3$ seeds Bad-BAPR on HalfCheetah discrete-mode reaches mean$_{200} = 16{,}147 \pm 3{,}828$, only $-10\%$ below the full BAPR reference of $17{,}862$ and statistically indistinguishable from the BAPR-w/o-adaptive-$\beta$ ablation ($16{,}301 \pm 3{,}267$). This is consistent with the formal threshold of Theorem~\ref{thm:counter}: contraction is guaranteed only \emph{outside} the regime $\gamma + \lambda \Delta \geq 1$, which we treat as an existence boundary rather than a universal collapse prediction. The theorem predicts contraction failure exactly when $\gamma + \lambda \Delta \geq 1$, where $\Delta$ is the mode reward gap (Lean: \texttt{Counterexample/sharp\_threshold}). On HalfCheetah the multiplicative perturbations $(0.5\text{--}2.0)\times$ on gravity, mass, and damping translate to a mode reward gap $\Delta$ that, jointly with the empirically operating $\lambda$ ($\lambda_w$ rarely exceeds $0.4$), keeps $\gamma + \lambda\Delta$ comfortably below~$1$ in this environment, so the counterexample's worst-case behavior is not actually triggered --- and within that subcritical regime the Q-dependent conservatism actually appears to help by giving the agent more aggressive exploration when uncertainty is genuinely state-dependent. The theory remains sharp --- it predicts where contraction \emph{must} fail --- but this environment is below threshold. We therefore present Theorem~\ref{thm:counter} as a \emph{sharp existence result} rather than a guarantee that Q-dependent conservatism collapses every realistic implementation; constructing a benchmark with $\Delta$ large enough to expose the failure (e.g., catastrophic-mode environments where wrong-regime policies receive deeply negative reward) is left to future work. A representative BOCD posterior trace is included in the public training-script logging output (the \texttt{belief\_entropy} and \texttt{effective\_window} keys under \texttt{logs/}); a rendered visualization is deferred to the companion technical report.
 \fussy
 
 \subsection{Sensitivity analysis (Q5)}
@@ -719,7 +723,7 @@ Our theoretical analysis establishes four key results: (1) the BAPR operator---a
 
 The context-conditioning module, trained via the RMDM loss, provides complementary mode identification capability, while the multi-signal surprise detector ensures that the BOCD belief is informed by both reward distribution shifts and epistemic uncertainty changes. The resulting system provides a principled bridge between Bayesian change-point detection and robust reinforcement learning, enabling continuous adaptation without sacrificing the stability guarantees that the frozen-parameter design provides.
 
-Empirically, BAPR's joint regime belief produces a \emph{complete distributional separation} from ESCP on Ant under the discrete-regime benchmark ($+349\%$ mean return on the recommended configuration, $20\,679 \pm 3\,402$ vs.\ $4\,600 \pm 4\,406$, $N{=}3$, with $\min(\text{BAPR}) > \max(\text{ESCP})$ across all original-variant seeds), confirming the value of mode-aware $Q$-conditioning in high-dimensional coordination tasks. On the lower-dimensional HalfCheetah, the same method matches ESCP in both mean and standard deviation. We additionally report a useful negative finding: storing the active belief vector per replay transition — the natural off-policy correction — \emph{hurts} performance on every (env, seed) pair we tested, because early-training stored beliefs (from before the regime tracker has converged) introduce noise that persists in replay; broadcasting the current belief is empirically preferable.
+Empirically, BAPR's joint regime belief produces a \emph{complete distributional separation} from ESCP on Ant under the discrete-regime benchmark ($+349\%$ mean return on the recommended configuration, $20\,679 \pm 3\,402$ vs.\ $4\,600 \pm 4\,406$, $N{=}3$, with $\min(\text{BAPR}) > \max(\text{ESCP})$ across all original-variant seeds), confirming the value of mode-aware $Q$-conditioning in high-dimensional coordination tasks. The advantage over a regime-unaware SAC baseline is more modest ($+20\%$, $N{=}3$, SAC reaches $17\,171 \pm 194$): the bulk of BAPR's gain over ESCP appears to come from avoiding ESCP's failure to recover a useful continuous context on Ant, rather than from BOCD-driven adaptive conservatism alone. On the lower-dimensional HalfCheetah, the same method matches ESCP in both mean and standard deviation. We additionally report a useful negative finding: storing the active belief vector per replay transition — the natural off-policy correction — \emph{hurts} performance on every (env, seed) pair we tested, because early-training stored beliefs (from before the regime tracker has converged) introduce noise that persists in replay; broadcasting the current belief is empirically preferable.
 
 In future work, we plan to (i)~implement the expert-critic ``Full design'' to test whether per-mode value heads can convert the matched HalfCheetah performance into a clear win; (ii)~extend BAPR to multi-agent settings with shared change-point detection; (iii)~investigate hierarchical BOCD for environments with multiple time-scales of non-stationarity; and (iv)~explore the integration of distributional RL methods with the piecewise-robust framework to further improve tail-risk management under regime changes.
 
