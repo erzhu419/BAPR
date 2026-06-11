@@ -45,6 +45,11 @@ class Config:
     # Ensemble (RE-SAC / ESCP / BAPR)
     ensemble_size: int = 10
     beta: float = -2.0  # LCB coefficient for policy
+    # BAPR actor objective:
+    #   lcb  = ensemble mean + beta_eff * std (legacy conservative path)
+    #   mean = ensemble mean only (SAC-like actor, keeps BAPR training shell)
+    #   ucb  = ensemble mean + abs(beta_eff) * std (optimistic exploration path)
+    actor_objective: str = "lcb"
     beta_ood: float = 0.01  # OOD regularization weight
     beta_bc: float = 0.001  # behavior cloning weight
     weight_reg: float = 0.01  # critic regularization weight

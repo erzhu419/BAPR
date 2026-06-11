@@ -509,6 +509,10 @@ def main():
     parser.add_argument("--context_warmup_iters", type=int, default=None)
     parser.add_argument("--beta", type=float, default=None,
                         help="Override LCB coefficient beta")
+    parser.add_argument("--actor_objective", type=str, default=None,
+                        choices=["lcb", "mean", "ucb"],
+                        help="BAPR actor objective: lcb (legacy), mean "
+                             "(SAC-like ensemble mean), or ucb (optimistic).")
     parser.add_argument("--backend", type=str, default="spring",
                         choices=["spring", "generalized"],
                         help="Brax physics backend: spring (fast) or generalized (accurate)")
@@ -551,6 +555,9 @@ def main():
     parser.add_argument("--use_regime_belief", action="store_true",
                         help="BAPR Minimum redesign: use joint regime belief "
                              "b(h, z) — Q sees [s, a, e, ρ, μ] (24-dim belief).")
+    parser.add_argument("--no_belief_conditioning", action="store_true",
+                        help="BAPR ablation: disable belief vector inputs to "
+                             "actor/critic unless --use_regime_belief is set.")
     parser.add_argument("--critic_target_mode", type=str, default=None,
                         choices=["min", "independent"],
                         help='BAPR critic target operator: "min" (legacy LCB, '
@@ -603,6 +610,8 @@ def main():
         config.context_warmup_iters = args.context_warmup_iters
     if args.beta is not None:
         config.beta = args.beta
+    if args.actor_objective is not None:
+        config.actor_objective = args.actor_objective
     config.brax_backend = args.backend
     if args.log_scale_limit is not None:
         config.log_scale_limit = args.log_scale_limit
@@ -646,6 +655,8 @@ def main():
         config.save_interval = args.save_interval
     if args.use_regime_belief:
         config.use_regime_belief = True
+    if args.no_belief_conditioning:
+        config.belief_conditioned = False
     if args.critic_target_mode is not None:
         config.critic_target_mode = args.critic_target_mode
     if args.no_per_trans_belief:

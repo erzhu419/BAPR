@@ -115,6 +115,7 @@ class BAPR:
         tau = self.config.tau
         beta_base = self.config.beta
         penalty_scale = self.config.penalty_scale
+        actor_objective = getattr(self.config, "actor_objective", "lcb")
         target_mode = getattr(self.config, "critic_target_mode", "min")
         auto_alpha = self.config.auto_alpha
         target_entropy = jnp.array(self.target_entropy)
@@ -220,8 +221,15 @@ class BAPR:
                     cm = nnx.merge(gd_critic, new_c_p)
                     na, lp = pm.sample(obs, k2, ep_full)
                     qv = cm(obs_aug, na)
-                    lcb = qv.mean(axis=0) + effective_beta * qv.std(axis=0)
-                    return (jnp.exp(la) * lp - lcb).mean(), lp
+                    q_mean = qv.mean(axis=0)
+                    q_std = qv.std(axis=0)
+                    if actor_objective == "mean":
+                        actor_q = q_mean
+                    elif actor_objective == "ucb":
+                        actor_q = q_mean + jnp.abs(effective_beta) * q_std
+                    else:
+                        actor_q = q_mean + effective_beta * q_std
+                    return (jnp.exp(la) * lp - actor_q).mean(), lp
 
                 (p_loss, lp), p_grads = jax.value_and_grad(
                     policy_loss_fn, has_aux=True)(p_p)
@@ -369,6 +377,8 @@ class BAPR:
             rho = self.regime_tracker.rho
             mu = self.regime_tracker.mu_marginal
             return jnp.asarray(np.concatenate([rho, mu]), dtype=jnp.float32)
+        if self.belief_dim == 0:
+            return jnp.zeros((0,), dtype=jnp.float32)
         return jnp.asarray(self.belief_tracker.belief, dtype=jnp.float32)
 
     def _observe_chunked_rollout(self, recent_rollout, warmup_jax, belief_jax):

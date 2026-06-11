@@ -77,6 +77,12 @@ case "$ALGO" in
     if [ -n "${BAPR_BETA:-}" ]; then
       EXTRA="$EXTRA --beta ${BAPR_BETA}"
     fi
+    if [ -n "${BAPR_ACTOR_OBJECTIVE:-}" ]; then
+      EXTRA="$EXTRA --actor_objective ${BAPR_ACTOR_OBJECTIVE}"
+    fi
+    if [ "${BAPR_BELIEF_CONDITIONED:-1}" = "0" ]; then
+      EXTRA="$EXTRA --no_belief_conditioning"
+    fi
     ;;
   bapr_unsupervised)
     EXTRA="--penalty_scale ${BAPR_PENALTY_SCALE_VALUE} --critic_target_mode ${TGT}"
