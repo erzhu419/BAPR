@@ -14,7 +14,9 @@ from brax.envs.base import State
 
 
 RAND_PARAMS_MAP = {
-    'gravity': 'opt.gravity',
+    # Brax spring/mjx pipelines read System.gravity at step time. Updating
+    # opt.gravity only changes metadata and leaves the actual physics unchanged.
+    'gravity': 'gravity',
     'body_mass': 'body_mass',
     'dof_damping': 'dof_damping',
     'body_inertia': 'body_inertia',

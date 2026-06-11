@@ -55,10 +55,18 @@ class BAPR:
         self.log_alpha = jnp.array(jnp.log(config.alpha))
         self.target_entropy = -float(act_dim)
 
-        self.policy_opt = optax.adam(config.lr)
-        self.critic_opt = optax.adam(config.lr)
-        self.context_opt = optax.adam(config.lr)
-        self.alpha_opt = optax.adam(config.lr)
+        def make_opt():
+            clip_norm = float(getattr(config, "bapr_grad_clip_norm", 0.0))
+            if clip_norm > 0.0:
+                return optax.chain(
+                    optax.clip_by_global_norm(clip_norm),
+                    optax.adam(config.lr))
+            return optax.adam(config.lr)
+
+        self.policy_opt = make_opt()
+        self.critic_opt = make_opt()
+        self.context_opt = make_opt()
+        self.alpha_opt = make_opt()
 
         self.policy_opt_state = self.policy_opt.init(nnx.state(self.policy, nnx.Param))
         self.critic_opt_state = self.critic_opt.init(nnx.state(self.critic, nnx.Param))
@@ -74,7 +82,11 @@ class BAPR:
             hazard_rate=config.hazard_rate,
             base_variance=config.base_variance,
             variance_growth=config.variance_growth)
-        self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
+        self.surprise_computer = SurpriseComputer(
+            ema_alpha=config.surprise_ema_alpha,
+            reward_weight=getattr(config, "surprise_reward_weight", 0.5),
+            q_weight=getattr(config, "surprise_q_weight", 0.3),
+            reg_weight=getattr(config, "surprise_reg_weight", 0.2))
 
         if self.use_regime_belief:
             self.regime_tracker = RegimeBeliefTracker(
@@ -512,6 +524,7 @@ class BAPR:
         self.update_count += n
 
         c_loss, p_loss, x_loss, alpha, qm, qs, lp = metrics
+        effective_beta = self.config.beta - weighted_lambda * self.config.penalty_scale
         return {
             "critic_loss": float(c_loss.mean()),
             "policy_loss": float(p_loss.mean()),
@@ -521,6 +534,7 @@ class BAPR:
             "q_std_mean": float(qs.mean()),
             "log_prob": float(lp.mean()),
             "weighted_lambda": weighted_lambda,
+            "effective_beta": float(effective_beta),
             "belief_entropy": float(self.belief_tracker.entropy),
             "effective_window": float(self.belief_tracker.effective_window),
             "warmup": bool(warmup),

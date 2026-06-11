@@ -342,9 +342,11 @@ def train(config: Config):
 
         # --- Collect samples ---
         collect_start = time.time()
+        prev_task_id = int(env.current_task_id)
         ep_rewards, recent_rollout = collect_samples(
             agent, env, replay_buffer, config, config.samples_per_iter,
             current_iter=iteration)
+        oracle_switched = int(env.current_task_id != prev_task_id)
         collect_time = time.time() - collect_start
         collect_time_total += collect_time
         total_steps += config.samples_per_iter
@@ -438,6 +440,7 @@ def train(config: Config):
         logger.log("total_steps", total_steps)
         logger.log("iteration", iteration)
         logger.log("mode_id", env.current_task_id)
+        logger.log("oracle_switch", oracle_switched)
         logger.log("iter_time", time.time() - iter_start)
         logger.log("collect_time", collect_time)
         logger.log("train_time", train_time)
@@ -454,8 +457,14 @@ def train(config: Config):
         if hasattr(agent, 'context_net'):
             warmup = iteration < config.context_warmup_iters
             extra += f" | {'[WARMUP]' if warmup else '[ACTIVE]'}"
+        if getattr(config, "oracle_reset_on_switch", False) and oracle_switched:
+            extra += " | oracle-reset"
         extra += f" | {iter_time:.1f}s/iter"
         logger.print_status(iteration, extra)
+
+        if getattr(config, "oracle_reset_on_switch", False) and oracle_switched:
+            if hasattr(agent, "reset_episode"):
+                agent.reset_episode()
 
         # --- Save ---
         if iteration % config.save_interval == 0:
@@ -505,8 +514,22 @@ def main():
                         help="Override log_scale_limit for gravity sampling range")
     parser.add_argument("--penalty_scale", type=float, default=None,
                         help="Override BAPR penalty_scale")
+    parser.add_argument("--bapr_grad_clip_norm", type=float, default=None,
+                        help="Override BAPR global gradient clipping norm; "
+                             "use 0 to disable")
     parser.add_argument("--hazard_rate", type=float, default=None,
                         help="Override BOCD hazard_rate")
+    parser.add_argument("--regime_hazard_rate", type=float, default=None,
+                        help="Override joint-regime BOCD hazard_rate")
+    parser.add_argument("--max_run_length", type=int, default=None,
+                        help="Override BOCD max run length H")
+    parser.add_argument("--num_regimes", type=int, default=None,
+                        help="Override joint belief regime-cluster count K")
+    parser.add_argument("--surprise_weights", nargs=3, type=float, default=None,
+                        metavar=("W_REWARD", "W_Q", "W_REG"),
+                        help="Override normalized surprise weights")
+    parser.add_argument("--oracle_reset_on_switch", action="store_true",
+                        help="Oracle upper-bound ablation: reset BOCD at true switches")
     parser.add_argument("--changing_period", type=int, default=None,
                         help="Override task changing_period (env steps per task)")
     parser.add_argument("--log_interval", type=int, default=None,
@@ -581,8 +604,20 @@ def main():
         config.log_scale_limit = args.log_scale_limit
     if args.penalty_scale is not None:
         config.penalty_scale = args.penalty_scale
+    if args.bapr_grad_clip_norm is not None:
+        config.bapr_grad_clip_norm = args.bapr_grad_clip_norm
     if args.hazard_rate is not None:
         config.hazard_rate = args.hazard_rate
+    if args.regime_hazard_rate is not None:
+        config.regime_hazard_rate = args.regime_hazard_rate
+    if args.max_run_length is not None:
+        config.max_run_length = args.max_run_length
+    if args.num_regimes is not None:
+        config.num_regimes = args.num_regimes
+    if args.surprise_weights is not None:
+        (config.surprise_reward_weight,
+         config.surprise_q_weight,
+         config.surprise_reg_weight) = args.surprise_weights
     if args.log_interval is not None:
         config.log_interval = args.log_interval
     if args.eval_episodes is not None:
@@ -611,6 +646,8 @@ def main():
         config.critic_target_mode = args.critic_target_mode
     if args.no_per_trans_belief:
         config.use_per_transition_belief = False
+    if args.oracle_reset_on_switch:
+        config.oracle_reset_on_switch = True
     config.resume = args.resume
 
     train(config)

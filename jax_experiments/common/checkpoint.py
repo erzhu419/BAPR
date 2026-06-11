@@ -25,6 +25,122 @@ def _to_jax_tree(pytree):
     return jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, pytree)
 
 
+def _patch_flax_variablestate_unpickle():
+    """Allow Flax NNX to read checkpoints saved by nearby NNX builds."""
+    try:
+        from flax.nnx import variablelib
+        cls = variablelib.VariableState
+        orig = getattr(cls, "__setstate__", None)
+        if getattr(cls, "_bapr_legacy_pickle_patch", False):
+            return
+
+        # Flax 0.10 VariableState has slots (type, value, _var_metadata) and
+        # no __setstate__. Pickle probes __setstate__ before slots are
+        # restored; its __getattr__ then raises while _var_metadata is absent.
+        if orig is None:
+            orig_getattr = getattr(cls, "__getattr__", None)
+
+            def _compat_getattr(self, name):
+                try:
+                    if orig_getattr is not None:
+                        return orig_getattr(self, name)
+                except AttributeError as exc:
+                    if "_var_metadata" in str(exc):
+                        raise AttributeError(name) from None
+                    raise
+                raise AttributeError(name)
+
+            supported_slots = set(getattr(cls, "__slots__", ()) or ())
+            dynamic_attrs = not supported_slots
+            default_state = nnx.Param(0).__getstate__()
+
+            def _safe_setattr(obj, name, value):
+                try:
+                    object.__setattr__(obj, name, value)
+                except AttributeError:
+                    pass
+
+            def _supports_attr(name):
+                return dynamic_attrs or name in supported_slots
+
+            def _compat_setstate(self, state):
+                if (isinstance(state, tuple) and len(state) == 2 and
+                        isinstance(state[1], dict)):
+                    state = state[1]
+                if not isinstance(state, dict):
+                    raise TypeError(
+                        f"Unsupported VariableState pickle state: {type(state)}")
+                value = state.get("_raw_value",
+                                  state.get("raw_value", state.get("value")))
+                metadata = {
+                    k: v for k, v in state.items()
+                    if k not in ("type", "value", "raw_value", "_raw_value",
+                                 "_var_metadata", "_trace_state")
+                }
+                legacy_metadata = state.get("_var_metadata", {}) or {}
+                if isinstance(legacy_metadata, dict):
+                    metadata.update(legacy_metadata)
+                for hook_name in (
+                    "get_value_hooks",
+                    "set_value_hooks",
+                    "create_value_hooks",
+                    "add_axis_hooks",
+                    "remove_axis_hooks",
+                ):
+                    metadata.setdefault(hook_name, ())
+                var_type = state.get("type", nnx.Param)
+                # Some Flax NNX builds store the variable type both as a slot
+                # and inside _var_metadata; get_metadata() blindly deletes the
+                # metadata entry, so omitting it makes tree_flatten fail.
+                metadata.setdefault("type", var_type)
+                if _supports_attr("type"):
+                    _safe_setattr(self, "type", var_type)
+                if _supports_attr("value"):
+                    _safe_setattr(self, "value", value)
+                elif "_raw_value" in supported_slots:
+                    _safe_setattr(self, "_raw_value", value)
+                if "_trace_state" in supported_slots:
+                    _safe_setattr(
+                        self, "_trace_state",
+                        state.get("_trace_state", default_state.get("_trace_state")))
+                if "_var_metadata" in supported_slots:
+                    _safe_setattr(self, "_var_metadata", metadata)
+                for k, v in metadata.items():
+                    if k in ("type", "value", "_raw_value", "_var_metadata"):
+                        continue
+                    if _supports_attr(k):
+                        _safe_setattr(self, k, v)
+
+            cls.__getattr__ = _compat_getattr
+            cls.__setstate__ = _compat_setstate
+            cls._bapr_legacy_pickle_patch = True
+            return
+
+        default_state = nnx.Param(0).__getstate__()
+
+        def _compat_setstate(self, state):
+            if isinstance(state, dict):
+                state = dict(state)
+                if "_raw_value" not in state and "raw_value" in state:
+                    state["_raw_value"] = state["raw_value"]
+                if "_raw_value" not in state and "value" in state:
+                    state["_raw_value"] = state["value"]
+                if "_trace_state" not in state:
+                    state["_trace_state"] = default_state.get("_trace_state")
+                if "_var_metadata" not in state:
+                    state["_var_metadata"] = default_state.get("_var_metadata", {})
+                if isinstance(state.get("_var_metadata"), dict):
+                    state["_var_metadata"] = dict(state["_var_metadata"])
+                    state["_var_metadata"].setdefault(
+                        "type", state.get("type", nnx.Param))
+            return orig(self, state)
+
+        cls.__setstate__ = _compat_setstate
+        cls._bapr_legacy_pickle_patch = True
+    except Exception:
+        pass
+
+
 def save_checkpoint(ckpt_dir: str, agent, replay_buffer, logger,
                     iteration: int, total_steps: int, algo: str):
     """Save a full training checkpoint to disk.
@@ -105,7 +221,8 @@ def save_checkpoint(ckpt_dir: str, agent, replay_buffer, logger,
           f"buf={replay_buffer.size}")
 
 
-def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str):
+def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str,
+                    load_replay_buffer: bool = True):
     """Load a training checkpoint. Returns (start_iteration, total_steps).
 
     Args:
@@ -114,6 +231,8 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str):
         replay_buffer: Empty ReplayBuffer instance.
         logger: Logger instance.
         algo: Algorithm name string.
+        load_replay_buffer: Whether to restore replay_buffer.npz. Evaluation
+            callers can skip this because they only need model weights.
 
     Returns:
         (start_iteration, total_steps) to resume from.
@@ -122,11 +241,15 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str):
     buf_path = os.path.join(ckpt_dir, 'replay_buffer.npz')
     state_path = os.path.join(ckpt_dir, 'train_state.pkl')
 
-    if not all(os.path.exists(p) for p in [params_path, buf_path, state_path]):
+    required_paths = [params_path, state_path]
+    if load_replay_buffer:
+        required_paths.append(buf_path)
+    if not all(os.path.exists(p) for p in required_paths):
         print(f"  Incomplete checkpoint in {ckpt_dir}, starting fresh")
         return 0, 0
 
     # --- Load params ---
+    _patch_flax_variablestate_unpickle()
     with open(params_path, 'rb') as f:
         params = pickle.load(f)
 
@@ -173,8 +296,9 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str):
         agent._last_lambda_was_high = params['last_lambda_was_high']
 
     # --- Load replay buffer ---
-    buf = np.load(buf_path)
-    replay_buffer.from_numpy(buf)
+    if load_replay_buffer:
+        buf = np.load(buf_path)
+        replay_buffer.from_numpy(buf)
 
     # --- Load training state ---
     with open(state_path, 'rb') as f:
@@ -193,11 +317,15 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str):
     return start_iter, total_steps
 
 
-def has_checkpoint(ckpt_dir: str) -> bool:
+def has_checkpoint(ckpt_dir: str, require_replay_buffer: bool = True) -> bool:
     """Check if a valid checkpoint exists."""
-    return (os.path.exists(os.path.join(ckpt_dir, 'params.pkl')) and
-            os.path.exists(os.path.join(ckpt_dir, 'replay_buffer.npz')) and
-            os.path.exists(os.path.join(ckpt_dir, 'train_state.pkl')))
+    required = [
+        os.path.join(ckpt_dir, 'params.pkl'),
+        os.path.join(ckpt_dir, 'train_state.pkl'),
+    ]
+    if require_replay_buffer:
+        required.append(os.path.join(ckpt_dir, 'replay_buffer.npz'))
+    return all(os.path.exists(p) for p in required)
 
 
 def get_checkpoint_iteration(ckpt_dir: str) -> int:

@@ -66,17 +66,21 @@ class Config:
     base_variance: float = 0.1      # variance at h=0 for BOCD likelihood
     variance_growth: float = 0.05   # variance grows with run length
     surprise_ema_alpha: float = 0.3
+    surprise_reward_weight: float = 0.5
+    surprise_q_weight: float = 0.3
+    surprise_reg_weight: float = 0.2
 
     # ── Minimum BAPR redesign (joint regime belief b(h, z)) ──────────────
     # Replaces scalar BOCD ρ(h) with joint b(h, z) over (run-length, regime).
     # Toggle with use_regime_belief=True; legacy scalar BOCD stays the default.
     use_regime_belief: bool = False
     num_regimes: int = 4              # K — regime cluster count
-    # Critic target operator: "min" (LCB target, BAPR original — collapses
-    # ensemble) or "independent" (each Q_i learns its own target Q_i,
-    # ESCP-like, preserves ensemble disagreement). GPT-5.5 advice #4: the
-    # "min" choice was a confound in the BAPR vs ESCP comparison.
-    critic_target_mode: str = "min"   # legacy default for backward compat
+    # Critic target operator: "independent" preserves ensemble disagreement.
+    # "min" is kept as an ablation/legacy mode; it makes every Q_i chase the
+    # same pessimistic target and was a confound in BAPR vs ESCP comparisons.
+    critic_target_mode: str = "independent"
+    # BAPR-only stability guard. 0 disables clipping.
+    bapr_grad_clip_norm: float = 10.0
     # GPT-5.5 advice #2 toggle: when True, off-policy critic update uses the
     # belief stored at rollout time (replay's "belief" field). When False, it
     # broadcasts the current iter's belief — the v15 (pre-Phase 2) behavior.
@@ -110,6 +114,7 @@ class Config:
                                      # With β_base=-2, λ_w∈[0,1]: β_eff ∈ [-4, -2]
                                      # (previously [-7, -2], too aggressive early)
     belief_warmup_steps: int = 50
+    oracle_reset_on_switch: bool = False
 
     # EMA Policy (Polyak-averaged actor for stable evaluation)
     ema_tau: float = 0.005          # EMA smoothing coefficient (same as target critic tau)
