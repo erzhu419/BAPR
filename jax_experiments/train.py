@@ -507,6 +507,8 @@ def main():
     parser.add_argument("--samples_per_iter", type=int, default=None)
     parser.add_argument("--updates_per_iter", type=int, default=None)
     parser.add_argument("--context_warmup_iters", type=int, default=None)
+    parser.add_argument("--beta", type=float, default=None,
+                        help="Override LCB coefficient beta")
     parser.add_argument("--backend", type=str, default="spring",
                         choices=["spring", "generalized"],
                         help="Brax physics backend: spring (fast) or generalized (accurate)")
@@ -599,6 +601,8 @@ def main():
         config.updates_per_iter = args.updates_per_iter
     if args.context_warmup_iters is not None:
         config.context_warmup_iters = args.context_warmup_iters
+    if args.beta is not None:
+        config.beta = args.beta
     config.brax_backend = args.backend
     if args.log_scale_limit is not None:
         config.log_scale_limit = args.log_scale_limit

@@ -61,9 +61,10 @@ mkdir -p jax_experiments/results_paper
 # Algo-conditional flags. BAPR family uses regime belief, per-transition
 # replay belief, and independent critic targets by default.
 EXTRA=""
+BAPR_PENALTY_SCALE_VALUE="${BAPR_PENALTY_SCALE:-0.5}"
 case "$ALGO" in
   bapr|bapr_no_bocd|bapr_no_rmdm|bapr_no_adapt_beta|bapr_fixed_decay|bad_bapr)
-    EXTRA="--penalty_scale 0.5 --critic_target_mode ${TGT}"
+    EXTRA="--penalty_scale ${BAPR_PENALTY_SCALE_VALUE} --critic_target_mode ${TGT}"
     if [ "${BAPR_BELIEF_MODE:-joint}" = "joint" ]; then
       EXTRA="$EXTRA --use_regime_belief"
     fi
@@ -73,9 +74,12 @@ case "$ALGO" in
     if [ -n "${BAPR_GRAD_CLIP_NORM:-}" ]; then
       EXTRA="$EXTRA --bapr_grad_clip_norm ${BAPR_GRAD_CLIP_NORM}"
     fi
+    if [ -n "${BAPR_BETA:-}" ]; then
+      EXTRA="$EXTRA --beta ${BAPR_BETA}"
+    fi
     ;;
   bapr_unsupervised)
-    EXTRA="--penalty_scale 0.5 --critic_target_mode ${TGT}"
+    EXTRA="--penalty_scale ${BAPR_PENALTY_SCALE_VALUE} --critic_target_mode ${TGT}"
     ;;
   escp|resac|sac)
     EXTRA=""  # default config; no BAPR-specific flags
