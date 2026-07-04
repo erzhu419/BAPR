@@ -9,6 +9,8 @@ import os
 import sys
 import argparse
 import time
+import faulthandler
+import platform
 import numpy as np
 
 # Must set CUDA lib path before JAX import
@@ -117,10 +119,12 @@ def evaluate(agent, env, config: Config, tasks=None, n_episodes: int = 10):
       - len(tasks) > 10 (continuous, 40 tasks): use first task only
         (full sweep too expensive every eval).
 
-    Uses EMA policy if available (BAPR) for more stable evaluation.
+    Uses EMA policy only when config.use_ema_eval is enabled. In the BAPR
+    redesign runs, EMA was a diagnostic path and could mask online-policy
+    regressions, so online evaluation is the default.
     """
     from flax import nnx
-    if hasattr(agent, 'ema_policy'):
+    if getattr(config, 'use_ema_eval', False) and hasattr(agent, 'ema_policy'):
         policy_params = nnx.state(agent.ema_policy, nnx.Param)
     else:
         policy_params = nnx.state(agent.policy, nnx.Param)
@@ -183,6 +187,8 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int,
     rng_key = jax.random.PRNGKey(config.seed + replay_buffer.size)
 
     if is_random:
+        if hasattr(agent, '_last_ema_rollout_active'):
+            agent._last_ema_rollout_active = False
         # Random exploration: sequential API (small overhead ok)
         obs = env.reset()
         episode_rewards = []
@@ -201,7 +207,22 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int,
     else:
         # Scan-fused GPU rollout: sys is fixed for the entire 4000-step scan
         # (lax.scan requires static structure). Task switching happens at iter boundary.
-        policy_params = nnx.state(agent.policy, nnx.Param)
+        use_ema_rollout = (
+            getattr(config, 'use_ema_rollout', False)
+            and hasattr(agent, 'ema_policy')
+            and current_iter >= getattr(config, 'ema_rollout_start_iter', 0)
+        )
+        if getattr(config, 'ema_rollout_require_reg_latched', False):
+            use_ema_rollout = (
+                use_ema_rollout
+                and bool(getattr(agent, '_reg_latched', False))
+            )
+        if hasattr(agent, '_last_ema_rollout_active'):
+            agent._last_ema_rollout_active = bool(use_ema_rollout)
+        if use_ema_rollout:
+            policy_params = nnx.state(agent.ema_policy, nnx.Param)
+        else:
+            policy_params = nnx.state(agent.policy, nnx.Param)
         context_params = None
         if hasattr(agent, 'context_net'):
             context_params = nnx.state(agent.context_net, nnx.Param)
@@ -314,6 +335,26 @@ def train(config: Config):
     os.makedirs(log_dir, exist_ok=True)
     os.makedirs(model_dir, exist_ok=True)
     logger = Logger(log_dir)
+    diag_path = os.path.join(log_dir, "python_runtime_diagnostics.log")
+    try:
+        diag_fh = open(diag_path, "a", buffering=1)
+        faulthandler.enable(file=diag_fh, all_threads=True)
+        print(
+            f"[python_diag] ts={time.strftime('%Y-%m-%dT%H:%M:%S%z')} "
+            f"pid={os.getpid()} ppid={os.getppid()} host={platform.node()} "
+            f"python={sys.executable} argv={' '.join(sys.argv)}",
+            file=diag_fh,
+            flush=True)
+        for key in (
+            "CUDA_VISIBLE_DEVICES", "JAX_PLATFORMS",
+            "XLA_PYTHON_CLIENT_PREALLOCATE",
+            "XLA_PYTHON_CLIENT_MEM_FRACTION", "XLA_FLAGS",
+            "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+            "NUMEXPR_NUM_THREADS", "TMPDIR"):
+            print(f"[python_diag] env {key}={os.environ.get(key, '')}",
+                  file=diag_fh, flush=True)
+    except Exception as exc:
+        print(f"[python_diag] failed to enable diagnostics: {exc}")
 
     # --- Checkpoint resume ---
     start_iteration = 0
@@ -326,6 +367,62 @@ def train(config: Config):
     else:
         print(f"Logging to: {log_dir}")
         print(f"Starting training... (first {config.start_train_steps} steps are random exploration)")
+    if config.algo == "bapr":
+        print(
+            "BAPR config: "
+            f"adaptation_mode={config.bapr_adaptation_mode}, "
+            f"actor_objective={config.actor_objective}, "
+            f"belief_conditioned={config.belief_conditioned}, "
+            f"use_regime_belief={config.use_regime_belief}, "
+            f"gate_warmup_iters={config.bapr_gate_warmup_iters}, "
+            f"surprise_threshold={config.bapr_surprise_threshold}, "
+            f"gate_max={config.bapr_gate_max}, "
+            f"recent_frac_cap={config.bapr_recent_frac_cap}, "
+            f"recent_frac_floor={config.bapr_recent_frac_floor}, "
+            f"recent_true_floor={config.bapr_recent_true_floor}, "
+            f"recent_floor_mode={config.bapr_recent_floor_mode}, "
+            f"recent_floor_ratio_low={config.bapr_recent_floor_ratio_low}, "
+            f"recent_floor_ratio_high={config.bapr_recent_floor_ratio_high}, "
+            f"recent_floor_mid_frac={config.bapr_recent_floor_mid_frac}, "
+            f"recent_floor_extreme_frac={config.bapr_recent_floor_extreme_frac}, "
+            f"recent_disagreement_gate={config.bapr_recent_disagreement_gate}, "
+            f"recent_open_if_reg_latched={config.bapr_recent_open_if_reg_latched}, "
+            f"recent_qstd_threshold={config.bapr_recent_qstd_threshold}, "
+            f"recent_qstd_ratio_threshold={config.bapr_recent_qstd_ratio_threshold}, "
+            f"reg_disagreement_gate={config.bapr_reg_disagreement_gate}, "
+            f"reg_warmup_iters={config.bapr_reg_warmup_iters}, "
+            f"reg_max_iters={config.bapr_reg_max_iters}, "
+            f"reg_latch={config.bapr_reg_latch}, "
+            f"reg_require_both={config.bapr_reg_require_both}, "
+            f"reg_qstd_threshold={config.bapr_reg_qstd_threshold}, "
+            f"reg_qstd_ratio_threshold={config.bapr_reg_qstd_ratio_threshold}, "
+            f"reg_emergency_gate={config.bapr_reg_emergency_gate}, "
+            f"reg_emergency_scale={config.bapr_reg_emergency_scale}, "
+            f"reg_emergency_qstd_threshold={config.bapr_reg_emergency_qstd_threshold}, "
+            f"reg_emergency_qstd_ratio_threshold={config.bapr_reg_emergency_qstd_ratio_threshold}, "
+            f"reg_latched_scale={config.bapr_reg_latched_scale}, "
+            f"reg_perf_collapse_gate={config.bapr_reg_perf_collapse_gate}, "
+            f"reg_perf_collapse_drop_frac={config.bapr_reg_perf_collapse_drop_frac}, "
+            f"reg_perf_collapse_scale={config.bapr_reg_perf_collapse_scale}, "
+            f"controller_mode={config.bapr_controller_mode}, "
+            f"controller_drop_frac={config.bapr_controller_drop_frac}, "
+            f"controller_low_qstd_ratio={config.bapr_controller_low_qstd_ratio}, "
+            f"controller_latch={config.bapr_controller_latch}, "
+            f"controller_release_drop_frac={config.bapr_controller_release_drop_frac}, "
+            f"controller_latched_signal={config.bapr_controller_latched_signal}, "
+            f"controller_reg_multiplier={config.bapr_controller_reg_multiplier}, "
+            f"controller_recent_multiplier={config.bapr_controller_recent_multiplier}, "
+            f"controller_actor_update_multiplier={config.bapr_controller_actor_update_multiplier}, "
+            f"actor_lcb_perf_gate={config.bapr_actor_lcb_perf_gate}, "
+            f"actor_lcb_perf_drop_frac={config.bapr_actor_lcb_perf_drop_frac}, "
+            f"actor_lcb_perf_warmup_iters={config.bapr_actor_lcb_perf_warmup_iters}, "
+            f"weight_reg={config.weight_reg}, "
+            f"beta_ood={config.beta_ood}, "
+            f"use_ema_eval={config.use_ema_eval}, "
+            f"use_ema_rollout={config.use_ema_rollout}, "
+            f"ema_rollout_start_iter={config.ema_rollout_start_iter}, "
+            f"ema_rollout_require_reg_latched={config.ema_rollout_require_reg_latched}"
+        )
 
     # Separate eval env (offset seed by 1000 for different mode-switch RNG)
     eval_env = make_env(config, seed_offset=1000)
@@ -369,8 +466,12 @@ def train(config: Config):
             # Change 3: belief-aware replay sampling for BAPR. When BOCD detects
             # a regime shift (high λ_w), sample more from recent transitions.
             if _bapr_like and hasattr(replay_buffer, 'sample_stacked_mixed'):
-                prev_lam = float(getattr(agent, "_current_weighted_lambda", 0.0))
-                recent_frac = min(0.8, max(0.0, prev_lam))
+                if hasattr(agent, "recent_replay_fraction"):
+                    recent_frac = float(agent.recent_replay_fraction())
+                else:
+                    prev_lam = float(getattr(agent, "_current_weighted_lambda", 0.0))
+                    recent_cap = float(getattr(config, "bapr_recent_frac_cap", 0.8))
+                    recent_frac = min(recent_cap, max(0.0, prev_lam))
                 stacked = replay_buffer.sample_stacked_mixed(
                     config.updates_per_iter, config.batch_size,
                     rng_key=sample_key, recent_frac=recent_frac,
@@ -384,6 +485,7 @@ def train(config: Config):
                     stacked, current_iter=iteration,
                     recent_rewards=ep_rewards if ep_rewards else None,
                     recent_rollout=recent_rollout)
+                metrics["recent_replay_frac"] = recent_frac
             elif _escp_like:
                 metrics = agent.multi_update(
                     stacked, current_iter=iteration)
@@ -395,6 +497,8 @@ def train(config: Config):
                 if isinstance(v, (int, float, bool, np.integer, np.floating,
                                   np.ndarray)):
                     logger.log(k, v)
+            if hasattr(agent, '_last_ema_rollout_active'):
+                logger.log("ema_rollout_active", agent._last_ema_rollout_active)
         train_time = time.time() - train_start
         train_time_total += train_time
 
@@ -510,9 +614,150 @@ def main():
     parser.add_argument("--beta", type=float, default=None,
                         help="Override LCB coefficient beta")
     parser.add_argument("--actor_objective", type=str, default=None,
-                        choices=["lcb", "mean", "ucb"],
-                        help="BAPR actor objective: lcb (legacy), mean "
-                             "(SAC-like ensemble mean), or ucb (optimistic).")
+                        choices=["lcb", "gated_lcb", "reg_gated_lcb",
+                                 "qstd_gated_lcb", "mean", "ucb"],
+                        help="BAPR actor objective: lcb (legacy), gated_lcb "
+                             "(surprise-gated conservative risk), mean "
+                             "(SAC-like ensemble mean), reg_gated_lcb "
+                             "(LCB only while RE-SAC regularizer is active), "
+                             "qstd_gated_lcb (LCB only under actor q_std gate), "
+                             "or ucb (optimistic).")
+    parser.add_argument("--weight_reg", type=float, default=None,
+                        help="Override RE-SAC/BAPR critic weight regularizer.")
+    parser.add_argument("--beta_ood", type=float, default=None,
+                        help="Override RE-SAC/BAPR OOD critic regularizer.")
+    parser.add_argument("--use_ema_eval", action="store_true",
+                        help="Evaluate BAPR with EMA policy instead of online policy.")
+    parser.add_argument("--use_ema_rollout", action="store_true",
+                        help="Collect training rollouts with EMA policy instead of online policy.")
+    parser.add_argument("--ema_rollout_start_iter", type=int, default=None,
+                        help="Start EMA-policy rollout at/after this training iteration.")
+    parser.add_argument("--ema_rollout_require_reg_latched", action="store_true",
+                        help="Use EMA rollout only after BAPR's reg latch is active.")
+    parser.add_argument("--bapr_adaptation_mode", type=str, default=None,
+                        choices=["gate", "legacy"],
+                        help="BAPR redesign mode. gate: bounded surprise gate "
+                             "for recent replay/optional gated_lcb, no default "
+                             "belief-conditioned Q. legacy: old BOCD adaptive "
+                             "beta path.")
+    parser.add_argument("--bapr_surprise_threshold", type=float, default=None,
+                        help="BAPR gate: surprise threshold before adaptation.")
+    parser.add_argument("--bapr_gate_warmup_iters", type=int, default=None,
+                        help="BAPR gate: iterations before recent replay gate can open.")
+    parser.add_argument("--bapr_gate_gain", type=float, default=None,
+                        help="BAPR gate: multiplier on surprise above threshold.")
+    parser.add_argument("--bapr_gate_ema_alpha", type=float, default=None,
+                        help="BAPR gate: EMA smoothing coefficient.")
+    parser.add_argument("--bapr_gate_max", type=float, default=None,
+                        help="BAPR gate: maximum adaptation gate value.")
+    parser.add_argument("--bapr_recent_frac_cap", type=float, default=None,
+                        help="BAPR gate: maximum fraction of recent replay.")
+    parser.add_argument("--bapr_recent_frac_floor", type=float, default=None,
+                        help="BAPR gate: minimum recent replay fraction while the adaptation gate is active.")
+    parser.add_argument("--bapr_recent_true_floor", action="store_true",
+                        help="Apply bapr_recent_frac_floor even when the surprise gate is zero.")
+    parser.add_argument("--bapr_recent_floor_mode", type=str, default=None,
+                        choices=("always", "low_disagreement", "reg_latched", "ratio_schedule"),
+                        help="How to apply bapr_recent_frac_floor under the disagreement gate.")
+    parser.add_argument("--bapr_recent_floor_ratio_low", type=float, default=None,
+                        help="ratio_schedule: q_std / |q_mean| below this uses bapr_recent_frac_floor.")
+    parser.add_argument("--bapr_recent_floor_ratio_high", type=float, default=None,
+                        help="ratio_schedule: q_std / |q_mean| above this uses the extreme floor.")
+    parser.add_argument("--bapr_recent_floor_mid_frac", type=float, default=None,
+                        help="ratio_schedule: recent replay floor for moderate critic disagreement.")
+    parser.add_argument("--bapr_recent_floor_extreme_frac", type=float, default=None,
+                        help="ratio_schedule: recent replay floor for extreme critic disagreement.")
+    parser.add_argument("--bapr_recent_disagreement_gate", action="store_true",
+                        help="Enable critic-disagreement safety gate for recent replay.")
+    parser.add_argument("--bapr_recent_open_if_reg_latched", action="store_true",
+                        help="Bypass the recent replay disagreement gate after the RE-SAC regularizer latch fires.")
+    parser.add_argument("--bapr_recent_qstd_threshold", type=float, default=None,
+                        help="Allow recent replay only below this q_std.")
+    parser.add_argument("--bapr_recent_qstd_ratio_threshold", type=float, default=None,
+                        help="Allow recent replay only below q_std / |q_mean|.")
+    parser.add_argument("--bapr_reg_disagreement_gate", action="store_true",
+                        help="Enable critic-disagreement safety gate for RE-SAC regularizers.")
+    parser.add_argument("--bapr_reg_warmup_iters", type=int, default=None,
+                        help="Keep RE-SAC regularizers disabled for this many iterations.")
+    parser.add_argument("--bapr_reg_max_iters", type=int, default=None,
+                        help="Disable RE-SAC regularizers at/after this iteration; <=0 means no cap.")
+    parser.add_argument("--bapr_reg_latch", action="store_true",
+                        help="Once high disagreement is detected before reg_max_iters, keep RE-SAC regularizers enabled.")
+    parser.add_argument("--bapr_reg_require_both", action="store_true",
+                        help="Enable RE-SAC regularizers only when both q_std and q_std/|q_mean| are high.")
+    parser.add_argument("--bapr_reg_qstd_threshold", type=float, default=None,
+                        help="Enable RE-SAC regularizers above this q_std.")
+    parser.add_argument("--bapr_reg_qstd_ratio_threshold", type=float, default=None,
+                        help="Enable RE-SAC regularizers above q_std / |q_mean|.")
+    parser.add_argument("--bapr_reg_emergency_gate", action="store_true",
+                        help="Re-enable RE-SAC regularizers after reg_max_iters if critic disagreement explodes.")
+    parser.add_argument("--bapr_reg_emergency_scale", type=float, default=None,
+                        help="Scale for emergency RE-SAC regularizers after reg_max_iters.")
+    parser.add_argument("--bapr_reg_emergency_qstd_threshold", type=float, default=None,
+                        help="Emergency RE-SAC regularizer threshold on q_std.")
+    parser.add_argument("--bapr_reg_emergency_qstd_ratio_threshold", type=float, default=None,
+                        help="Emergency RE-SAC regularizer threshold on q_std / |q_mean|.")
+    parser.add_argument("--bapr_reg_latched_scale", type=float, default=None,
+                        help="Scale RE-SAC regularizers after the permanent disagreement latch fires.")
+    parser.add_argument("--bapr_reg_perf_collapse_gate", action="store_true",
+                        help="Temporarily reduce latched RE-SAC regularization after severe reward drawdown.")
+    parser.add_argument("--bapr_reg_perf_collapse_drop_frac", type=float, default=None,
+                        help="Reward drawdown fraction required to reduce latched RE-SAC regularization.")
+    parser.add_argument("--bapr_reg_perf_collapse_scale", type=float, default=None,
+                        help="Multiplier for RE-SAC regularization while the collapse guard is active.")
+    parser.add_argument("--bapr_reg_perf_collapse_warmup_iters", type=int, default=None,
+                        help="Warmup before the RE-SAC regularization collapse guard can activate.")
+    parser.add_argument("--bapr_controller_mode", type=str, default=None,
+                        choices=["off", "recovery"],
+                        help="Second-layer BAPR algorithm controller mode.")
+    parser.add_argument("--bapr_controller_warmup_iters", type=int, default=None,
+                        help="Warmup before the algorithm controller can activate.")
+    parser.add_argument("--bapr_controller_min_peak", type=float, default=None,
+                        help="Minimum smoothed reward peak before controller activation.")
+    parser.add_argument("--bapr_controller_drop_frac", type=float, default=None,
+                        help="Reward drawdown fraction required by the algorithm controller.")
+    parser.add_argument("--bapr_controller_drop_ramp", type=float, default=None,
+                        help="Drawdown ramp width for continuous controller signal.")
+    parser.add_argument("--bapr_controller_low_qstd_ratio", type=float, default=None,
+                        help="Controller low-disagreement threshold on q_std / |q_mean|.")
+    parser.add_argument("--bapr_controller_low_qstd_threshold", type=float, default=None,
+                        help="Optional absolute q_std threshold for low-disagreement controller activation.")
+    parser.add_argument("--bapr_controller_latch", action="store_true",
+                        help="Keep the algorithm controller active until reward drawdown recovers.")
+    parser.add_argument("--bapr_controller_release_drop_frac", type=float, default=None,
+                        help="Release a latched algorithm controller below this reward drawdown.")
+    parser.add_argument("--bapr_controller_latched_signal", type=float, default=None,
+                        help="Minimum controller signal while the controller is latched.")
+    parser.add_argument("--bapr_controller_reg_multiplier", type=float, default=None,
+                        help="Target RE-SAC regularizer multiplier at full controller activation.")
+    parser.add_argument("--bapr_controller_recent_multiplier", type=float, default=None,
+                        help="Target recent replay multiplier at full controller activation.")
+    parser.add_argument("--bapr_controller_recent_add_frac", type=float, default=None,
+                        help="Extra recent replay fraction at full controller activation.")
+    parser.add_argument("--bapr_controller_lcb_multiplier", type=float, default=None,
+                        help="Target actor LCB multiplier at full controller activation.")
+    parser.add_argument("--bapr_controller_actor_update_multiplier", type=float, default=None,
+                        help="Target actor update multiplier at full controller activation.")
+    parser.add_argument("--bapr_actor_lcb_qstd_gate", action="store_true",
+                        help="Enable actor-only LCB when q_std/q_ratio crosses thresholds.")
+    parser.add_argument("--bapr_actor_lcb_qstd_threshold", type=float, default=None,
+                        help="Actor-only LCB gate q_std threshold.")
+    parser.add_argument("--bapr_actor_lcb_qstd_ratio_threshold", type=float, default=None,
+                        help="Actor-only LCB gate q_std / |q_mean| threshold.")
+    parser.add_argument("--bapr_actor_lcb_require_both", action="store_true",
+                        help="Actor-only LCB gate requires both q_std and ratio thresholds.")
+    parser.add_argument("--bapr_actor_lcb_scale", type=float, default=None,
+                        help="Actor-only LCB scale when the gate is active.")
+    parser.add_argument("--bapr_actor_lcb_perf_gate", action="store_true",
+                        help="Require a train/eval reward drawdown before actor-only LCB can activate.")
+    parser.add_argument("--bapr_actor_lcb_perf_warmup_iters", type=int, default=None,
+                        help="Actor LCB performance gate warmup before drawdown checks are allowed.")
+    parser.add_argument("--bapr_actor_lcb_perf_drop_frac", type=float, default=None,
+                        help="Fractional reward drawdown required before actor-only LCB can activate.")
+    parser.add_argument("--bapr_actor_lcb_perf_min_peak", type=float, default=None,
+                        help="Minimum smoothed reward peak before actor LCB performance gate can activate.")
+    parser.add_argument("--bapr_actor_lcb_perf_ema_alpha", type=float, default=None,
+                        help="EMA alpha for train/eval reward drawdown tracked by actor LCB gate.")
     parser.add_argument("--backend", type=str, default="spring",
                         choices=["spring", "generalized"],
                         help="Brax physics backend: spring (fast) or generalized (accurate)")
@@ -612,6 +857,137 @@ def main():
         config.beta = args.beta
     if args.actor_objective is not None:
         config.actor_objective = args.actor_objective
+    if args.weight_reg is not None:
+        config.weight_reg = args.weight_reg
+    if args.beta_ood is not None:
+        config.beta_ood = args.beta_ood
+    if args.use_ema_eval:
+        config.use_ema_eval = True
+    if args.use_ema_rollout:
+        config.use_ema_rollout = True
+    if args.ema_rollout_start_iter is not None:
+        config.ema_rollout_start_iter = args.ema_rollout_start_iter
+    if args.ema_rollout_require_reg_latched:
+        config.ema_rollout_require_reg_latched = True
+    if args.bapr_adaptation_mode is not None:
+        config.bapr_adaptation_mode = args.bapr_adaptation_mode
+    if args.bapr_surprise_threshold is not None:
+        config.bapr_surprise_threshold = args.bapr_surprise_threshold
+    if args.bapr_gate_warmup_iters is not None:
+        config.bapr_gate_warmup_iters = args.bapr_gate_warmup_iters
+    if args.bapr_gate_gain is not None:
+        config.bapr_gate_gain = args.bapr_gate_gain
+    if args.bapr_gate_ema_alpha is not None:
+        config.bapr_gate_ema_alpha = args.bapr_gate_ema_alpha
+    if args.bapr_gate_max is not None:
+        config.bapr_gate_max = args.bapr_gate_max
+    if args.bapr_recent_frac_cap is not None:
+        config.bapr_recent_frac_cap = args.bapr_recent_frac_cap
+    if args.bapr_recent_frac_floor is not None:
+        config.bapr_recent_frac_floor = args.bapr_recent_frac_floor
+    if args.bapr_recent_true_floor:
+        config.bapr_recent_true_floor = True
+    if args.bapr_recent_floor_mode is not None:
+        config.bapr_recent_floor_mode = args.bapr_recent_floor_mode
+    if args.bapr_recent_floor_ratio_low is not None:
+        config.bapr_recent_floor_ratio_low = args.bapr_recent_floor_ratio_low
+    if args.bapr_recent_floor_ratio_high is not None:
+        config.bapr_recent_floor_ratio_high = args.bapr_recent_floor_ratio_high
+    if args.bapr_recent_floor_mid_frac is not None:
+        config.bapr_recent_floor_mid_frac = args.bapr_recent_floor_mid_frac
+    if args.bapr_recent_floor_extreme_frac is not None:
+        config.bapr_recent_floor_extreme_frac = args.bapr_recent_floor_extreme_frac
+    if args.bapr_recent_disagreement_gate:
+        config.bapr_recent_disagreement_gate = True
+    if args.bapr_recent_open_if_reg_latched:
+        config.bapr_recent_open_if_reg_latched = True
+    if args.bapr_recent_qstd_threshold is not None:
+        config.bapr_recent_qstd_threshold = args.bapr_recent_qstd_threshold
+    if args.bapr_recent_qstd_ratio_threshold is not None:
+        config.bapr_recent_qstd_ratio_threshold = args.bapr_recent_qstd_ratio_threshold
+    if args.bapr_reg_disagreement_gate:
+        config.bapr_reg_disagreement_gate = True
+    if args.bapr_reg_warmup_iters is not None:
+        config.bapr_reg_warmup_iters = args.bapr_reg_warmup_iters
+    if args.bapr_reg_max_iters is not None:
+        config.bapr_reg_max_iters = args.bapr_reg_max_iters
+    if args.bapr_reg_latch:
+        config.bapr_reg_latch = True
+    if args.bapr_reg_require_both:
+        config.bapr_reg_require_both = True
+    if args.bapr_reg_qstd_threshold is not None:
+        config.bapr_reg_qstd_threshold = args.bapr_reg_qstd_threshold
+    if args.bapr_reg_qstd_ratio_threshold is not None:
+        config.bapr_reg_qstd_ratio_threshold = args.bapr_reg_qstd_ratio_threshold
+    if args.bapr_reg_emergency_gate:
+        config.bapr_reg_emergency_gate = True
+    if args.bapr_reg_emergency_scale is not None:
+        config.bapr_reg_emergency_scale = args.bapr_reg_emergency_scale
+    if args.bapr_reg_emergency_qstd_threshold is not None:
+        config.bapr_reg_emergency_qstd_threshold = args.bapr_reg_emergency_qstd_threshold
+    if args.bapr_reg_emergency_qstd_ratio_threshold is not None:
+        config.bapr_reg_emergency_qstd_ratio_threshold = args.bapr_reg_emergency_qstd_ratio_threshold
+    if args.bapr_reg_latched_scale is not None:
+        config.bapr_reg_latched_scale = args.bapr_reg_latched_scale
+    if args.bapr_reg_perf_collapse_gate:
+        config.bapr_reg_perf_collapse_gate = True
+    if args.bapr_reg_perf_collapse_drop_frac is not None:
+        config.bapr_reg_perf_collapse_drop_frac = args.bapr_reg_perf_collapse_drop_frac
+    if args.bapr_reg_perf_collapse_scale is not None:
+        config.bapr_reg_perf_collapse_scale = args.bapr_reg_perf_collapse_scale
+    if args.bapr_reg_perf_collapse_warmup_iters is not None:
+        config.bapr_reg_perf_collapse_warmup_iters = args.bapr_reg_perf_collapse_warmup_iters
+    if args.bapr_controller_mode is not None:
+        config.bapr_controller_mode = args.bapr_controller_mode
+    if args.bapr_controller_warmup_iters is not None:
+        config.bapr_controller_warmup_iters = args.bapr_controller_warmup_iters
+    if args.bapr_controller_min_peak is not None:
+        config.bapr_controller_min_peak = args.bapr_controller_min_peak
+    if args.bapr_controller_drop_frac is not None:
+        config.bapr_controller_drop_frac = args.bapr_controller_drop_frac
+    if args.bapr_controller_drop_ramp is not None:
+        config.bapr_controller_drop_ramp = args.bapr_controller_drop_ramp
+    if args.bapr_controller_low_qstd_ratio is not None:
+        config.bapr_controller_low_qstd_ratio = args.bapr_controller_low_qstd_ratio
+    if args.bapr_controller_low_qstd_threshold is not None:
+        config.bapr_controller_low_qstd_threshold = args.bapr_controller_low_qstd_threshold
+    if args.bapr_controller_latch:
+        config.bapr_controller_latch = True
+    if args.bapr_controller_release_drop_frac is not None:
+        config.bapr_controller_release_drop_frac = args.bapr_controller_release_drop_frac
+    if args.bapr_controller_latched_signal is not None:
+        config.bapr_controller_latched_signal = args.bapr_controller_latched_signal
+    if args.bapr_controller_reg_multiplier is not None:
+        config.bapr_controller_reg_multiplier = args.bapr_controller_reg_multiplier
+    if args.bapr_controller_recent_multiplier is not None:
+        config.bapr_controller_recent_multiplier = args.bapr_controller_recent_multiplier
+    if args.bapr_controller_recent_add_frac is not None:
+        config.bapr_controller_recent_add_frac = args.bapr_controller_recent_add_frac
+    if args.bapr_controller_lcb_multiplier is not None:
+        config.bapr_controller_lcb_multiplier = args.bapr_controller_lcb_multiplier
+    if args.bapr_controller_actor_update_multiplier is not None:
+        config.bapr_controller_actor_update_multiplier = (
+            args.bapr_controller_actor_update_multiplier)
+    if args.bapr_actor_lcb_qstd_gate:
+        config.bapr_actor_lcb_qstd_gate = True
+    if args.bapr_actor_lcb_qstd_threshold is not None:
+        config.bapr_actor_lcb_qstd_threshold = args.bapr_actor_lcb_qstd_threshold
+    if args.bapr_actor_lcb_qstd_ratio_threshold is not None:
+        config.bapr_actor_lcb_qstd_ratio_threshold = args.bapr_actor_lcb_qstd_ratio_threshold
+    if args.bapr_actor_lcb_require_both:
+        config.bapr_actor_lcb_require_both = True
+    if args.bapr_actor_lcb_scale is not None:
+        config.bapr_actor_lcb_scale = args.bapr_actor_lcb_scale
+    if args.bapr_actor_lcb_perf_gate:
+        config.bapr_actor_lcb_perf_gate = True
+    if args.bapr_actor_lcb_perf_warmup_iters is not None:
+        config.bapr_actor_lcb_perf_warmup_iters = args.bapr_actor_lcb_perf_warmup_iters
+    if args.bapr_actor_lcb_perf_drop_frac is not None:
+        config.bapr_actor_lcb_perf_drop_frac = args.bapr_actor_lcb_perf_drop_frac
+    if args.bapr_actor_lcb_perf_min_peak is not None:
+        config.bapr_actor_lcb_perf_min_peak = args.bapr_actor_lcb_perf_min_peak
+    if args.bapr_actor_lcb_perf_ema_alpha is not None:
+        config.bapr_actor_lcb_perf_ema_alpha = args.bapr_actor_lcb_perf_ema_alpha
     config.brax_backend = args.backend
     if args.log_scale_limit is not None:
         config.log_scale_limit = args.log_scale_limit
@@ -664,6 +1040,15 @@ def main():
     if args.oracle_reset_on_switch:
         config.oracle_reset_on_switch = True
     config.resume = args.resume
+
+    # Redesigned BAPR defaults: keep the no-BOCD/context backbone and use the
+    # ensemble mean actor. Static/gated LCB variants were too conservative on
+    # HalfCheetah/Ant; stability comes from EMA evaluation, not Q-std penalties.
+    if config.algo == "bapr" and config.bapr_adaptation_mode == "gate":
+        if args.actor_objective is None:
+            config.actor_objective = "mean"
+        if not args.use_regime_belief and not args.no_belief_conditioning:
+            config.belief_conditioned = False
 
     train(config)
 

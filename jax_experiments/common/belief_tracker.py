@@ -59,8 +59,15 @@ class BeliefTracker:
 class SurpriseComputer:
     """Multi-signal surprise: reward z-score + Q-std spike + reg-norm divergence."""
 
-    def __init__(self, ema_alpha: float = 0.3):
+    def __init__(self, ema_alpha: float = 0.3, reward_weight: float = 0.5,
+                 q_weight: float = 0.3, reg_weight: float = 0.2):
         self.ema_alpha = ema_alpha
+        total = reward_weight + q_weight + reg_weight
+        if total <= 0:
+            reward_weight, q_weight, reg_weight, total = 0.5, 0.3, 0.2, 1.0
+        self.reward_weight = reward_weight / total
+        self.q_weight = q_weight / total
+        self.reg_weight = reg_weight / total
         self.ema_reward = None
         self.ema_reward_var = None
         self.ema_q_std = None
@@ -113,5 +120,7 @@ class SurpriseComputer:
         self.last_surprise_r = float(reward_z)
         self.last_surprise_q = float(q_std_spike)
         self.last_surprise_kappa = float(reg_div)
-        surprise = 0.5 * reward_z + 0.3 * q_std_spike + 0.2 * reg_div
+        surprise = (self.reward_weight * reward_z
+                    + self.q_weight * q_std_spike
+                    + self.reg_weight * reg_div)
         return float(np.clip(surprise, 0.0, 10.0))

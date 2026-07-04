@@ -7,6 +7,11 @@ LOG_STD_MIN = -20.0
 LOG_STD_MAX = 2.0
 
 
+def _module_list(layers):
+    list_cls = getattr(nnx, "List", None)
+    return list_cls(layers) if list_cls is not None else layers
+
+
 class GaussianPolicy(nnx.Module):
     """SAC-style squashed Gaussian policy.
 
@@ -23,7 +28,7 @@ class GaussianPolicy(nnx.Module):
         for _ in range(n_layers):
             layers.append(nnx.Linear(in_d, hidden_dim, rngs=rngs))
             in_d = hidden_dim
-        self.layers = layers
+        self.layers = _module_list(layers)
         self.n_hidden = n_layers
 
         self.mean_head = nnx.Linear(hidden_dim, act_dim, rngs=rngs)

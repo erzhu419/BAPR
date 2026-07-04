@@ -79,7 +79,10 @@ def _patch_flax_variablestate_unpickle():
                 }
                 legacy_metadata = state.get("_var_metadata", {}) or {}
                 if isinstance(legacy_metadata, dict):
-                    metadata.update(legacy_metadata)
+                    metadata.update({
+                        k: v for k, v in legacy_metadata.items()
+                        if k != "type"
+                    })
                 for hook_name in (
                     "get_value_hooks",
                     "set_value_hooks",
@@ -89,10 +92,6 @@ def _patch_flax_variablestate_unpickle():
                 ):
                     metadata.setdefault(hook_name, ())
                 var_type = state.get("type", nnx.Param)
-                # Some Flax NNX builds store the variable type both as a slot
-                # and inside _var_metadata; get_metadata() blindly deletes the
-                # metadata entry, so omitting it makes tree_flatten fail.
-                metadata.setdefault("type", var_type)
                 if _supports_attr("type"):
                     _safe_setattr(self, "type", var_type)
                 if _supports_attr("value"):
@@ -119,6 +118,9 @@ def _patch_flax_variablestate_unpickle():
         default_state = nnx.Param(0).__getstate__()
 
         def _compat_setstate(self, state):
+            if (isinstance(state, tuple) and len(state) == 2 and
+                    isinstance(state[1], dict)):
+                state = state[1]
             if isinstance(state, dict):
                 state = dict(state)
                 if "_raw_value" not in state and "raw_value" in state:
@@ -184,6 +186,34 @@ def save_checkpoint(ckpt_dir: str, agent, replay_buffer, logger,
             params['lw_baseline'] = agent._lw_baseline
         if hasattr(agent, '_current_weighted_lambda'):
             params['current_weighted_lambda'] = agent._current_weighted_lambda
+        if hasattr(agent, '_reg_latched'):
+            params['reg_latched'] = bool(agent._reg_latched)
+        if hasattr(agent, '_train_reward_ema'):
+            params['bapr_controller_state'] = {
+                'train_reward_ema': agent._train_reward_ema,
+                'train_reward_peak': agent._train_reward_peak,
+                'eval_reward_ema': agent._eval_reward_ema,
+                'eval_reward_peak': agent._eval_reward_peak,
+                'last_train_reward_drop_frac': agent._last_train_reward_drop_frac,
+                'last_eval_reward_drop_frac': agent._last_eval_reward_drop_frac,
+                'last_perf_drop_frac': agent._last_perf_drop_frac,
+                'controller_active': getattr(agent, '_controller_active', False),
+                'controller_latched': getattr(agent, '_controller_latched', False),
+                'controller_signal': getattr(agent, '_controller_signal', 0.0),
+                'controller_drawdown': getattr(agent, '_controller_drawdown', 0.0),
+                'controller_low_disagreement': getattr(
+                    agent, '_controller_low_disagreement', False),
+                'controller_reg_multiplier': getattr(
+                    agent, '_controller_reg_multiplier', 1.0),
+                'controller_recent_multiplier': getattr(
+                    agent, '_controller_recent_multiplier', 1.0),
+                'controller_recent_add_frac': getattr(
+                    agent, '_controller_recent_add_frac', 0.0),
+                'controller_lcb_multiplier': getattr(
+                    agent, '_controller_lcb_multiplier', 1.0),
+                'controller_actor_update_multiplier': getattr(
+                    agent, '_controller_actor_update_multiplier', 1.0),
+            }
 
     # EMA policy (BAPR)
     if hasattr(agent, 'ema_policy'):
@@ -278,6 +308,35 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str,
             agent._lw_baseline = params['lw_baseline']
         if 'current_weighted_lambda' in params:
             agent._current_weighted_lambda = params['current_weighted_lambda']
+        if 'reg_latched' in params:
+            agent._reg_latched = bool(params['reg_latched'])
+        if 'bapr_controller_state' in params:
+            state = params['bapr_controller_state']
+            agent._train_reward_ema = state.get('train_reward_ema')
+            agent._train_reward_peak = state.get('train_reward_peak')
+            agent._eval_reward_ema = state.get('eval_reward_ema')
+            agent._eval_reward_peak = state.get('eval_reward_peak')
+            agent._last_train_reward_drop_frac = state.get(
+                'last_train_reward_drop_frac', 0.0)
+            agent._last_eval_reward_drop_frac = state.get(
+                'last_eval_reward_drop_frac', 0.0)
+            agent._last_perf_drop_frac = state.get('last_perf_drop_frac', 0.0)
+            agent._controller_active = state.get('controller_active', False)
+            agent._controller_latched = state.get('controller_latched', False)
+            agent._controller_signal = state.get('controller_signal', 0.0)
+            agent._controller_drawdown = state.get('controller_drawdown', 0.0)
+            agent._controller_low_disagreement = state.get(
+                'controller_low_disagreement', False)
+            agent._controller_reg_multiplier = state.get(
+                'controller_reg_multiplier', 1.0)
+            agent._controller_recent_multiplier = state.get(
+                'controller_recent_multiplier', 1.0)
+            agent._controller_recent_add_frac = state.get(
+                'controller_recent_add_frac', 0.0)
+            agent._controller_lcb_multiplier = state.get(
+                'controller_lcb_multiplier', 1.0)
+            agent._controller_actor_update_multiplier = state.get(
+                'controller_actor_update_multiplier', 1.0)
 
     # EMA policy
     if hasattr(agent, 'ema_policy') and 'ema_policy' in params:

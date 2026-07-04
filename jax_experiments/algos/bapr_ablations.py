@@ -28,6 +28,8 @@ def _build_escp_scan_with_beta(agent, effective_beta_val):
     """
     gamma = agent.config.gamma
     tau = agent.config.tau
+    weight_reg = float(getattr(agent.config, "weight_reg", 0.0))
+    beta_ood = float(getattr(agent.config, "beta_ood", 0.0))
     auto_alpha = agent.config.auto_alpha
     target_entropy = jnp.array(agent.target_entropy)
     rbf_r = agent.config.rbf_radius
@@ -81,11 +83,13 @@ def _build_escp_scan_with_beta(agent, effective_beta_val):
                 pm = nnx.merge(gd_policy, p_p)
                 na, nlp = pm.sample(next_obs, k1, next_ep)
                 # Independent targets: each Q_i uses its own target Q_i
-                tq_all = tm(next_aug, na) - alpha * nlp  # [K, batch]
+                reg_bonus = weight_reg * tm.compute_reg_norm()[:, None]
+                tq_all = tm(next_aug, na) + reg_bonus - alpha * nlp  # [K, batch]
                 tv_all = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq_all
                 cm = nnx.merge(gd_critic, cp)
                 pq = cm(obs_aug, act)
-                return jnp.mean((pq - tv_all) ** 2), pq
+                mse = jnp.mean((pq - tv_all) ** 2)
+                return mse + beta_ood * pq.std(axis=0).mean(), pq
 
             (c_loss, pq), c_grads = jax.value_and_grad(
                 critic_loss_fn, has_aux=True)(c_p)
@@ -98,7 +102,8 @@ def _build_escp_scan_with_beta(agent, effective_beta_val):
                 cm = nnx.merge(gd_critic, new_c_p)
                 na, lp = pm.sample(obs, k2, ep)
                 oa = jnp.concatenate([obs, ep], axis=-1)
-                qv = cm(oa, na)
+                target_reg = weight_reg * nnx.merge(gd_target, t_p).compute_reg_norm()[:, None]
+                qv = cm(oa, na) + target_reg
                 lcb = qv.mean(axis=0) + effective_beta * qv.std(axis=0)
                 return (jnp.exp(la) * lp - lcb).mean(), lp
 
@@ -289,7 +294,11 @@ class BAPRNoRmdm:
             hazard_rate=config.hazard_rate,
             base_variance=config.base_variance,
             variance_growth=config.variance_growth)
-        self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
+        self.surprise_computer = SurpriseComputer(
+            ema_alpha=config.surprise_ema_alpha,
+            reward_weight=getattr(config, "surprise_reward_weight", 0.5),
+            q_weight=getattr(config, "surprise_q_weight", 0.3),
+            reg_weight=getattr(config, "surprise_reg_weight", 0.2))
 
         self.update_count = 0
         self._current_weighted_lambda = 0.0
@@ -300,6 +309,8 @@ class BAPRNoRmdm:
         tau = self.config.tau
         beta_base = self.config.beta
         penalty_scale = self.config.penalty_scale
+        weight_reg = float(getattr(self.config, "weight_reg", 0.0))
+        beta_ood = float(getattr(self.config, "beta_ood", 0.0))
         auto_alpha = self.config.auto_alpha
         target_entropy = jnp.array(self.target_entropy)
 
@@ -329,11 +340,13 @@ class BAPRNoRmdm:
                     pm = nnx.merge(gd_policy, p_p)
                     na, nlp = pm.sample(next_obs, k1)
                     # Independent targets: each Q_i uses its own target Q_i
-                    tq_all = tm(next_obs, na) - alpha * nlp  # [K, batch]
+                    reg_bonus = weight_reg * tm.compute_reg_norm()[:, None]
+                    tq_all = tm(next_obs, na) + reg_bonus - alpha * nlp  # [K, batch]
                     tv_all = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq_all
                     cm = nnx.merge(gd_critic, cp)
                     pq = cm(obs, act)
-                    return jnp.mean((pq - tv_all) ** 2), pq
+                    mse = jnp.mean((pq - tv_all) ** 2)
+                    return mse + beta_ood * pq.std(axis=0).mean(), pq
 
                 (c_loss, pq), c_grads = jax.value_and_grad(
                     critic_loss_fn, has_aux=True)(c_p)
@@ -344,7 +357,8 @@ class BAPRNoRmdm:
                     pm = nnx.merge(gd_policy, pp)
                     cm = nnx.merge(gd_critic, new_c_p)
                     na, lp = pm.sample(obs, k2)
-                    qv = cm(obs, na)
+                    target_reg = weight_reg * nnx.merge(gd_target, t_p).compute_reg_norm()[:, None]
+                    qv = cm(obs, na) + target_reg
                     lcb = qv.mean(axis=0) + effective_beta * qv.std(axis=0)
                     return (jnp.exp(la) * lp - lcb).mean(), lp
 
@@ -481,7 +495,11 @@ class BAPRNoAdaptBeta(_BAPRAblationBase):
             hazard_rate=config.hazard_rate,
             base_variance=config.base_variance,
             variance_growth=config.variance_growth)
-        self.surprise_computer = SurpriseComputer(ema_alpha=config.surprise_ema_alpha)
+        self.surprise_computer = SurpriseComputer(
+            ema_alpha=config.surprise_ema_alpha,
+            reward_weight=getattr(config, "surprise_reward_weight", 0.5),
+            q_weight=getattr(config, "surprise_q_weight", 0.3),
+            reg_weight=getattr(config, "surprise_reg_weight", 0.2))
         self._current_weighted_lambda = 0.0
         self._scan_update = _build_escp_scan_with_beta(self, None)
 

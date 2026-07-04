@@ -15,7 +15,8 @@ class RESAC(SACBase):
         gamma = self.config.gamma
         tau = self.config.tau
         beta = self.config.beta
-        weight_reg = self.config.weight_reg
+        weight_reg = float(getattr(self.config, "weight_reg", 0.0))
+        beta_ood = float(getattr(self.config, "beta_ood", 0.0))
         auto_alpha = self.config.auto_alpha
         target_entropy = jnp.array(self.target_entropy)
 
@@ -45,11 +46,13 @@ class RESAC(SACBase):
                     pm = nnx.merge(gd_policy, p_p)
                     na, nlp = pm.sample(next_obs, k1)
                     # Independent targets: each Q_i uses its own target Q_i
-                    tq_all = tm(next_obs, na) - alpha * nlp  # [K, batch]
+                    reg_bonus = weight_reg * tm.compute_reg_norm()[:, None]
+                    tq_all = tm(next_obs, na) + reg_bonus - alpha * nlp  # [K, batch]
                     tv_all = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq_all
                     cm = nnx.merge(gd_critic, cp)
                     pq = cm(obs, act)
-                    return jnp.mean((pq - tv_all) ** 2), pq
+                    mse = jnp.mean((pq - tv_all) ** 2)
+                    return mse + beta_ood * pq.std(axis=0).mean(), pq
 
                 (c_loss, pq), c_grads = jax.value_and_grad(
                     critic_loss_fn, has_aux=True)(c_p)
@@ -61,12 +64,12 @@ class RESAC(SACBase):
                     pm = nnx.merge(gd_policy, pp)
                     cm = nnx.merge(gd_critic, new_c_p)
                     na, lp = pm.sample(obs, k2)
-                    qv = cm(obs, na)
+                    target_reg = weight_reg * nnx.merge(gd_target, t_p).compute_reg_norm()[:, None]
+                    qv = cm(obs, na) + target_reg
                     qm = qv.mean(axis=0)
                     qs = qv.std(axis=0)
                     lcb = qm + beta * qs
-                    reg = cm.compute_reg_norm()
-                    return (jnp.exp(la) * lp - lcb).mean() + weight_reg * reg.mean(), lp
+                    return (jnp.exp(la) * lp - lcb).mean(), lp
 
                 (p_loss, lp), p_grads = jax.value_and_grad(
                     policy_loss_fn, has_aux=True)(p_p)

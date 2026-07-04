@@ -12,6 +12,11 @@ import jax.numpy as jnp
 from flax import nnx
 
 
+def _module_list(layers):
+    list_cls = getattr(nnx, "List", None)
+    return list_cls(layers) if list_cls is not None else layers
+
+
 class VectorizedLinear(nnx.Module):
     """K parallel linear layers as one batched matmul.
 
@@ -60,7 +65,7 @@ class EnsembleCritic(nnx.Module):
             in_d = hidden_dim
         # Output layer: -> 1
         layers.append(VectorizedLinear(in_d, 1, ensemble_size, rngs=rngs))
-        self.layers = layers
+        self.layers = _module_list(layers)
 
     def __call__(self, obs, act):
         """Returns [ensemble_size, batch] Q-values."""

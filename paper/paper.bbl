@@ -43,7 +43,7 @@
 \bibitem{Lecarpentier2019NonStationary}
 {Lecarpentier Erwan} and {Rachelson Emmanuel}, ``Non-stationary Markov decision processes: A worst-case approach using model-based reinforcement learning,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~32, 2019, pp. 7214--7223.
 
-\bibitem{Lee2020ESCP}
+\bibitem{Luo2022ESCP}
 {Luo Fan-Ming}, {Jiang Shengyi}, {Yu Yang}, {Zhang Zongzhang}, and {Zhang Yi-Feng}, ``Adapt to environment sudden changes by learning a context sensitive policy,'' in \emph{Proc. AAAI Conf. Artificial Intelligence}, 2022, pp. 7637--7646.
 
 \bibitem{Mellor2013Thompson}
@@ -70,17 +70,17 @@
 \bibitem{Wiesemann2013RobustMDP}
 {Wiesemann Wolfram}, {Kuhn Daniel}, and {Rustem Ber\c c}, ``Robust Markov decision processes,'' \emph{Mathematics of Operations Research}, vol.~38, no.~1, pp. 153--183, 2013.
 
-\bibitem{Xu2009RobustLasso}
-{Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robust regression and Lasso,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~21, 2009, pp. 1801--1808.
+\bibitem{Xu2008RobustLasso}
+{Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robust regression and Lasso,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~21, 2008, pp. 1801--1808.
 
 \bibitem{Xu2009RobustSVM}
 {Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robustness and regularization of support vector machines,'' \emph{Journal of Machine Learning Research}, vol.~10, pp. 1485--1510, 2009.
 
-\bibitem{Zhang2025RESAC}
-{Zhang Yifan}, {He Sunyou}, {Wei Hui}, and {Liu Wei}, ``RE-SAC: Disentangled robust ensemble soft actor-critic for non-stationary continuous control,'' \emph{arXiv preprint}, 2025.
+\bibitem{Zhang2026RESAC}
+{Zhang Yifan} and {Zheng Liang}, ``RE-SAC: Disentangling aleatoric and epistemic risks in bus fleet control: A stable and robust ensemble DRL approach,'' \emph{arXiv preprint arXiv:2603.18396}, 2026.
 
-\bibitem{Zhang2025SingleAgentBus}
-{Zhang Yifan}, {He Sunyou}, and {Liu Wei}, ``Single-agent bus holding control via reinforcement learning,'' \emph{arXiv preprint}, 2025.
+\bibitem{Zhang2026SingleAgentBus}
+{Zhang Yifan}, ``Single Agent Robust Deep Reinforcement Learning for Bus Fleet Control,'' \emph{Transportation Safety and Environment}, tdag005, 2026, doi:10.1093/tse/tdag005.
 
 \bibitem{Zhou2023NaturalActorCritic}
 {Zhou Ruida}, {Liu Tao}, {Cheng Min}, {Kalathil Dileep}, {Kumar P. R.}, and {Tian Chao}, ``Natural actor-critic for robust reinforcement learning with function approximation,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~36, 2023.

@@ -46,7 +46,7 @@ def compute_rmdm_loss(ep_tensor, task_ids, rbf_radius=3000.0,
         task_ids: [batch] integer task IDs
         rbf_radius: RBF kernel bandwidth
         consistency_weight: weight for consistency loss
-        diversity_weight: weight for diversity (DPP) loss
+        diversity_weight: weight for cross-task RBF similarity loss
 
     Returns:
         scalar loss
@@ -77,18 +77,18 @@ def compute_rmdm_loss(ep_tensor, task_ids, rbf_radius=3000.0,
     valid_f = valid_mask.astype(jnp.float32)  # [max_tasks]
     cons_loss = jnp.sum(all_cons * valid_f) / jnp.maximum(n_valid, 1.0)
 
-    # DPP diversity: RBF kernel over valid task means
+    # Diversity: penalize off-diagonal RBF similarity between task means.
+    # This preserves the "push task embeddings apart" objective without using
+    # slogdet, which requires cuSolver and fails on some cluster CUDA stacks.
     diff = all_means[:, None, :] - all_means[None, :, :]  # [T, T, ep_dim]
     K = jnp.exp(-(diff ** 2).sum(-1) * rbf_radius)  # [T, T]
-    K = K + jnp.eye(max_tasks) * 1e-3
 
-    # Mask invalid rows/cols: set K[i,j] = delta_ij for invalid tasks
     outer_valid = valid_f[:, None] * valid_f[None, :]  # [T, T]
-    K = K * outer_valid + jnp.eye(max_tasks) * (1.0 - outer_valid)
-
-    div_loss = -jnp.linalg.slogdet(K)[1]
+    off_diag = 1.0 - jnp.eye(max_tasks)
+    pair_mask = outer_valid * off_diag
+    pair_count = jnp.maximum(pair_mask.sum(), 1.0)
+    div_loss = jnp.sum(K * pair_mask) / pair_count
 
     # Return 0 if fewer than 2 valid tasks
     total_loss = consistency_weight * cons_loss + diversity_weight * div_loss
     return jnp.where(n_valid >= 2, total_loss, 0.0)
-

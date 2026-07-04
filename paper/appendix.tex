@@ -10,18 +10,18 @@
 \section{Piecewise Q-value convergence rate}
 \label{app:complexity}
 
-We analyze how BAPR's piecewise-robust design achieves polynomial convergence rates, in contrast to the exponential barrier faced by direct risk-sensitive optimization. Unlike the informal ``regret'' framing common in deep RL theory papers, we provide a \emph{convergence rate} guarantee---measuring how fast $\|Q_t - Q^*\|_\infty$ decays---which is the natural theoretical tool for contraction-based algorithms. Every component of the bound below corresponds to a machine-verified Lean~4 theorem.
+We analyze how BAPR's piecewise-robust design yields a polynomial recovery-count bound for the abstract operator under the assumptions below, in contrast to the exponential barrier faced by direct risk-sensitive optimization. Unlike the informal ``regret'' framing common in deep RL theory papers, we state a \emph{convergence rate} result---measuring how fast $\|Q_t - Q^*\|_\infty$ decays---which is the natural theoretical tool for contraction-based algorithms. The algebraic components of the bound below correspond to machine-verified Lean~4 theorems.
 
 \subsection{Risk-sensitive RL: The exponential barrier (review)}
 As established by Fei et al.~\cite{Fei2020RiskSensitive}, the regret lower bound for any algorithm learning a risk-sensitive policy under exponential utility is exponential in the risk parameter $\beta$ and horizon $H$:
 \begin{equation}
     \text{Regret}_{RS}(T) \ge \Omega(\exp(|\beta|H) \cdot \sqrt{S^2 A T}).
 \end{equation}
-BAPR avoids this barrier through the same mechanism as RE-SAC~\cite{Zhang2025RESAC}: by replacing tail-distribution estimation with frozen structural penalties, converting the problem to a standard (shifted-reward) MDP with $\gamma$-contraction.
+BAPR sidesteps this specific risk-sensitive lower-bound setting at the operator level through the same mechanism as RE-SAC~\cite{Zhang2026RESAC}: replacing tail-distribution estimation with frozen structural penalties, which converts the abstract backup to a standard shifted-reward MDP with $\gamma$-contraction.
 
 \subsection{Formal error budget}
 
-The BAPR convergence rate decomposes into five components, each with a machine-verified bound:
+The BAPR convergence-rate argument decomposes into five components, each tied to a machine-verified algebraic bound:
 
 \begin{center}
 \begin{tabular}{lll}
@@ -81,7 +81,7 @@ Rearranging: $(1-\gamma)\|Q^*_k - Q^*_{k+1}\| \leq \Delta_R$. This algebraic ste
     \begin{equation}
         N_{\text{recover}} = N \cdot \left( n_\delta + \left\lceil \frac{\log(E_{\text{switch}} \cdot (1-\gamma) / \varepsilon)}{\log(1/\gamma)} \right\rceil \right) = N \cdot O\left( \frac{\log(1/\delta)}{\log L} + \frac{\log(\Delta_R/\varepsilon)}{1-\gamma} \right),
     \end{equation}
-    which is \textbf{polynomial in all parameters} (no exponential dependence on $H$ or $\beta$).
+    which is polynomial in the listed parameters under the stated assumptions (with no exponential dependence on $H$ or $\beta$ in this operator-level bound).
 \end{theorem}
 \begin{proof}
 Each phase maps to a Lean-verified building block:
@@ -91,15 +91,15 @@ Each phase maps to a Lean-verified building block:
     \item \textbf{Phase 3:} The irreducible floor is the steady-state decomposition (Lean: \texttt{steady\_state\_decomposition}).
     \item \textbf{Recovery steps:} The detection delay is bounded by Lean: \texttt{detection\_delay\_sufficient}. The contraction recovery time follows from solving $\gamma^n \cdot E_{\text{switch}} \leq \varepsilon/(1-\gamma)$, giving $n \geq \log(E_{\text{switch}}(1-\gamma)/\varepsilon) / \log(1/\gamma)$.
 \end{itemize}
-No informal steps are required; each inequality corresponds to a machine-verified theorem. \qed
+Each displayed inequality above corresponds to a machine-verified algebraic theorem; the surrounding modeling assumptions are stated explicitly in the theorem. \qed
 \end{proof}
 
 \begin{remark}[Why convergence rate, not regret]
-    We deliberately state our result as a \emph{convergence rate} ($\|Q_t - Q^*\|_\infty$ decay) rather than a \emph{regret bound} ($\sum_t V^* - V^{\pi_t}$ accumulation). A formal regret bound would require exploration-exploitation analysis (how quickly the policy visits informative states), which SAC---like all off-policy deep RL methods---does not provide. The convergence rate is the natural and rigorous theoretical tool for contraction-based algorithms, and it directly implies policy quality bounds via $\|V^{\pi_t} - V^*\| \leq 2\|Q_t - Q^*\|/(1-\gamma)$.
+    We deliberately state our result as a \emph{convergence rate} ($\|Q_t - Q^*\|_\infty$ decay) rather than a \emph{regret bound} ($\sum_t V^* - V^{\pi_t}$ accumulation). A formal regret bound would require exploration-exploitation analysis (how quickly the policy visits informative states), which SAC---like all off-policy deep RL methods---does not provide. For the abstract soft operator, the convergence rate can be converted into standard policy-quality bounds such as $\|V^{\pi_t} - V^*\| \leq 2\|Q_t - Q^*\|/(1-\gamma)$ under the usual value-difference assumptions.
 \end{remark}
 
 \begin{remark}[Comparison to static robust methods]
-    A static robust method (e.g., Robust MDP with a fixed uncertainty set calibrated for the worst-case regime) incurs a persistent suboptimality of $\Omega(\Delta)$ per step in favorable regimes. Over $T$ steps with $N \ll T$ switches, BAPR's recovery cost $N \cdot O(\log(1/\delta)/\log L + \log(\Delta_R/\varepsilon)/(1-\gamma))$ is vastly smaller than the static cost $\Omega(\Delta \cdot T)$.
+    A static robust method (e.g., Robust MDP with a fixed uncertainty set calibrated for the worst-case regime) can incur a persistent suboptimality of $\Omega(\Delta)$ per step in favorable regimes. Over $T$ steps with $N \ll T$ switches, the BAPR recovery-count expression $N \cdot O(\log(1/\delta)/\log L + \log(\Delta_R/\varepsilon)/(1-\gamma))$ is smaller than the static cost $\Omega(\Delta \cdot T)$ in regimes where the assumptions hold and switches are sparse.
 \end{remark}
 
 
@@ -157,15 +157,15 @@ While Theorem~\ref{thm:bapr_full} establishes per-step contraction, a piecewise-
 \begin{proof}[Proof sketch]
 The proof proceeds by structural induction over the sequence of segments:
 
-\textbf{Base case:} The first segment $[t_0, t_1)$ has no prior contamination. The BAPR operator with uniform initial belief is a $\gamma$-contraction (Theorem~\ref{thm:bapr_full}), and the combined approximation-stochastic bound (Theorem~\ref{thm:combined}) guarantees convergence.
+\textbf{Base case:} The first segment $[t_0, t_1)$ has no prior contamination. The BAPR operator with uniform initial belief is a $\gamma$-contraction (Theorem~\ref{thm:bapr_full}), and the combined approximation-stochastic bound (Theorem~\ref{thm:combined}) gives the stated recovery bound.
 
 \textbf{Inductive step:} At switch time $t_{k+1}$:
 \begin{itemize}
     \item The surprise signal spikes due to the reward/Q-std distribution shift (Assumption~\ref{assump:separability}).
     \item The BOCD posterior shifts to higher expected run-length $\bar h$ within $n_\delta = O(\log(1/\delta)/\log L)$ steps (Theorem~\ref{thm:delay}); this raises $\bar h/(H{-}1)$ above the EMA baseline and triggers $\lambda_w > 0$.
-    \item $\beta_{\text{eff}}$ becomes maximally conservative, providing pessimistic protection during the transient.
+    \item $\beta_{\text{eff}}$ becomes more conservative, providing pessimistic bias during the transient.
     \item Once the belief stabilizes, the operator $\mathcal{T}^{BAPR}_{\rho'}$ with the updated belief $\rho'$ is again a $\gamma$-contraction (Corollary~\ref{cor:after_update}).
-    \item By Assumption~\ref{assump:metastable}, there are at least $1/(1-\gamma)$ steps remaining before the next switch, sufficient for convergence to the new fixed point. \qedhere
+    \item By Assumption~\ref{assump:metastable}, there are at least $1/(1-\gamma)$ steps remaining before the next switch, sufficient for the stated contraction-recovery phase. \qedhere
 \end{itemize}
 \end{proof}
 
@@ -304,7 +304,7 @@ A referee might observe that once each $\mathcal{T}_h$ is a $\gamma$-contraction
     \item The belief must be \emph{frozen} during the Bellman backup (for the penalties to cancel---without this, the counterexample in \S\ref{app:counterproof} applies);
     \item The Bayesian update must \emph{preserve} properties (1)--(2) at every step.
 \end{enumerate}
-The Lean proof makes each of these requirements explicit and machine-verified. Violating \emph{any one} of them would break the proof (and indeed the contraction, as our counterexample demonstrates for condition (3)).
+The Lean proof makes each of these requirements explicit and machine-verified. Violating any one of them breaks this proof route; the counterexample demonstrates one concrete contraction failure for condition (3).
 
 
 \subsection{Preservation of contraction under Bayesian belief updates}
@@ -329,13 +329,13 @@ The Lean proof makes each of these requirements explicit and machine-verified. V
 By Lemma~\ref{lem:belief_valid}, $\rho'$ satisfies (A3)--(A4). Apply Theorem~\ref{thm:bapr_full} with $\rho'$.
 \end{proof}
 
-\noindent This corollary is the critical bridge between RE-SAC (which provides the $\kappa$ surprise signal) and BAPR (which uses it for belief updating): the contraction guarantee is \emph{automatically preserved} through the belief update cycle.
+\noindent This corollary is the critical bridge between RE-SAC (which provides the $\kappa$ surprise signal) and BAPR (which uses it for belief updating): at the abstract-operator level, each valid frozen posterior snapshot again satisfies the contraction theorem's assumptions.
 
 
 \section{Counterexample: Q-dependent belief weights break contraction}
 \label{app:counterproof}
 
-Theorem~\ref{thm:bapr_full} requires the belief $\rho$ to be \emph{frozen} during the Bellman backup. This section proves that this requirement is \emph{necessary}: allowing $\rho$ to depend on the Q-function being updated can destroy contractivity. The results are machine-verified in \texttt{BAPR-Counterproof.lean}.
+Theorem~\ref{thm:bapr_full} requires the belief $\rho$ to be \emph{frozen} during the Bellman backup. This section shows why that requirement is load-bearing for this proof class: allowing $\rho$ to depend on the Q-function being updated can destroy contractivity. The results are machine-verified in \texttt{BAPR-Counterproof.lean}.
 
 \subsection{The ``bad'' operator with Q-dependent mode weights}
 
@@ -373,7 +373,7 @@ Take $q_1 = 1, q_2 = 0$:
     \item The cycle amplifies, preventing convergence.
 \end{enumerate}
 
-\textbf{The critical threshold.} The contraction factor is $\gamma + \lambda\Delta$. For typical RL parameters ($\gamma = 0.99$), any $\lambda\Delta \geq 0.01$ breaks contraction. Since $\Delta$ (the mode reward gap) can be large in practice (e.g., $\Delta = 50$ between ``normal traffic'' and ``severe congestion'' in bus control), even a tiny sensitivity $\lambda = 0.001$ suffices to breach the threshold.
+\textbf{The critical threshold.} The contraction factor in this constructed operator is $\gamma + \lambda\Delta$. For typical RL parameters ($\gamma = 0.99$), any $\lambda\Delta \geq 0.01$ breaks contraction in the construction. Thus even small Q-sensitivity can be problematic when the mode reward gap is large.
 
 \medskip
 \begin{center}
@@ -391,7 +391,7 @@ $\mathcal{T}^{REV}_\kappa$ & $\kappa$ frozen & $\gamma$ & $\checkmark$ ($\gamma 
 \end{tabular}
 \end{center}
 
-\noindent\textbf{Parallel structure with RE-SAC.} The BAPR counterexample is structurally analogous to RE-SAC's counterexample (\texttt{RESAC-Counterproof.lean}), but with a different amplification mechanism: in RE-SAC, Q-dependent \emph{aleatoric penalties} cause expansion; in BAPR, Q-dependent \emph{belief weights} cause expansion. Both demonstrate that frozen parameters are \emph{necessary} not merely convenient design choices. The fact that two independent amplification channels exist underscores the importance of the frozen-parameter design principle across robust RL architectures.
+\noindent\textbf{Parallel structure with RE-SAC.} The BAPR counterexample is structurally analogous to RE-SAC's counterexample (\texttt{RESAC-Counterproof.lean}), but with a different amplification mechanism: in RE-SAC, Q-dependent \emph{aleatoric penalties} cause expansion; in BAPR, Q-dependent \emph{belief weights} cause expansion. Together, they show concrete ways that non-frozen adaptive quantities can invalidate the contraction argument. The fact that two independent amplification channels exist underscores the importance of the frozen-parameter design principle across robust RL architectures.
 
 \subsection{Sharp threshold characterization}
 
@@ -529,7 +529,7 @@ A natural concern is whether the adaptive $\beta_{\text{eff}}$ mechanism could d
 \end{proposition}
 
 \noindent\textbf{Quantitative Q-value depression.}
-Following the same analysis as RE-SAC~\cite{Zhang2025RESAC}:
+Following the same analysis as RE-SAC~\cite{Zhang2026RESAC}:
 \begin{equation}
     Q^*_{\text{BAPR}}(s,a) = Q^*(s,a) - \frac{\gamma \cdot \Delta_{\text{penalty}}}{1-\gamma},
 \end{equation}
@@ -544,7 +544,7 @@ where $\Delta_{\text{penalty}}$ includes the belief-weighted contribution. With 
     Furthermore, $\beta_{\text{eff}}$ is monotonically decreasing in $\lambda_w$ (Lean: \texttt{beta\_eff\_mono\_in\_lambda}): higher surprise (larger $\lambda_w$) leads to more conservative behavior.
 \end{proposition}
 
-\noindent This machine-verified result formally guarantees that the adaptive mechanism is \emph{safe by construction}: false positive change-point detections can only cause temporary over-conservatism, never unsafe (over-optimistic) behavior. The ``Bayesian Amnesia'' name reflects this one-directional modulation: the agent can only become \emph{more} cautious after surprise, never less cautious than its RE-SAC baseline.
+\noindent This machine-verified result guarantees a monotonicity property of the surrogate LCB objective: false positive change-point detections can only make $\beta_{\text{eff}}$ more conservative, not more optimistic than the RE-SAC baseline. The ``Bayesian Amnesia'' name reflects this one-directional modulation in the objective.
 
 \begin{proposition}[Context embedding equivalence --- Lean: \texttt{context\_embedding\_equiv}]
     \label{prop:context_equiv}
@@ -552,10 +552,10 @@ where $\Delta_{\text{penalty}}$ includes the belief-weighted contribution. With 
     \begin{equation}
         Q_{\text{shared}}(m, s, a) = Q_m(s, a) \quad \text{for all } m, s, a.
     \end{equation}
-    When the context embedding $\phi: \mathcal{S} \to \mathbb{R}^{d_e}$ is injective (different modes produce distinct embeddings), the shared critic $Q_\phi(s \oplus \phi(s), a)$ can perfectly represent all mode-conditional Q-functions. In this case, the practical scalar approximation (Remark~\ref{rem:tractable}) introduces no representational error, and the contraction guarantee of Theorem~\ref{thm:bapr_full} applies exactly to the implemented algorithm.
+    When the context embedding $\phi: \mathcal{S} \to \mathbb{R}^{d_e}$ is injective (different modes produce distinct embeddings) and the critic class is sufficiently expressive, a shared critic $Q_\phi(s \oplus \phi(s), a)$ can represent the collection of mode-conditional Q-functions. In this idealized representational case, the scalar approximation in Remark~\ref{rem:tractable} need not introduce additional representation error beyond the stated approximation terms.
 \end{proposition}
 
-\noindent This bridges the theory-practice gap: while the abstract operator assumes $M$ independent critics, the shared critic with a sufficiently expressive context embedding can recover the same function class. The approximation error is bounded by the context module's ability to separate modes---which is precisely what the RMDM loss (\S\ref{sec:context}) is designed to enforce.
+\noindent This narrows the theory-practice gap: while the abstract operator assumes $M$ independent critics, a shared critic with a sufficiently expressive context embedding can recover the same function class in principle. The remaining approximation error depends on the context module's ability to separate modes---which is what the RMDM loss (\S\ref{sec:context}) is designed to encourage.
 
 
 \section{Scope and limitations}
@@ -567,11 +567,11 @@ Like all Bellman-operator contraction proofs in deep RL, our result is a per-ste
 
 \medskip
 \noindent\textbf{(S2) Mode separability assumption and graceful degradation.}
-The detection delay bound (Theorem~\ref{thm:delay}) requires $L > 1$. In environments where regime changes are very subtle (small $\Delta$), the detection delay grows as $O(1/\log L)$, potentially exceeding the metastable period. Importantly, BAPR degrades \emph{gracefully} rather than catastrophically in this regime:
+The detection delay bound (Theorem~\ref{thm:delay}) requires $L > 1$. In environments where regime changes are very subtle (small $\Delta$), the detection delay grows as $O(1/\log L)$, potentially exceeding the metastable period. In this regime, the intended fallback behavior is:
 \begin{itemize}
-    \item \textbf{Detection failure ($L \approx 1$):} If the change is too subtle to detect, $\lambda_w$ does not spike, and $\beta_{\text{eff}} \approx \beta_{\text{base}}$. BAPR effectively reduces to RE-SAC, which is itself a robust agent. The agent loses the \emph{adaptive} conservatism benefit but retains the \emph{static} robustness baseline.
+    \item \textbf{Detection failure ($L \approx 1$):} If the change is too subtle to detect, $\lambda_w$ does not spike, and $\beta_{\text{eff}} \approx \beta_{\text{base}}$. BAPR behaves close to RE-SAC in the LCB objective, losing the \emph{adaptive} conservatism benefit but retaining the \emph{static} robustness mechanism.
     \item \textbf{Context module as backup:} Even when BOCD fails to detect a change, the RMDM-trained context embedding $e$ may still capture the mode shift through state-based features, providing an alternative mode identification channel that does not rely on the surprise signal.
-    \item \textbf{No false positive harm:} By construction ($\beta_{\text{eff}} \leq \beta_{\text{base}}$), false positive detections can only increase conservatism, never decrease it. The worst case is temporary over-conservatism, not unsafe behavior.
+    \item \textbf{False-positive effect:} By construction ($\beta_{\text{eff}} \leq \beta_{\text{base}}$), false positive detections can only increase conservatism in the surrogate objective, never decrease it. The expected cost is temporary over-conservatism.
 \end{itemize}
 
 \medskip
@@ -580,7 +580,7 @@ The run-length posterior is truncated at $H$ (default 20). Modes persisting long
 
 \medskip
 \noindent\textbf{(S4) Three-level frozen-parameter chain.}
-BAPR requires freezing at \emph{three} levels for contraction: (i) the aleatoric penalty $\kappa$ (from RE-SAC), (ii) the epistemic penalty $\Gamma_{\text{epi}}$ (from RE-SAC), and (iii) the belief distribution $\rho$ (new in BAPR). Each level has its own counterexample demonstrating necessity. This multi-level frozen-parameter design is the key architectural constraint that distinguishes BAPR from naive adaptive approaches.
+The contraction proof uses frozen quantities at \emph{three} levels: (i) the aleatoric penalty $\kappa$ (from RE-SAC), (ii) the epistemic penalty $\Gamma_{\text{epi}}$ (from RE-SAC), and (iii) the belief distribution $\rho$ (new in BAPR). Counterexamples show that Q-dependent variants can fail. This multi-level frozen-parameter design is the key architectural constraint that distinguishes BAPR from naive adaptive approaches.
 
 \medskip
 \noindent\textbf{(S5) Theory-to-implementation gap.}
@@ -588,7 +588,7 @@ The contraction theorem (Theorem~\ref{thm:bapr_full}) proves a property of the a
 
 \medskip
 \noindent\textbf{(S6) Relationship to the ApproxContraction results.}
-The function-approximation and stochastic tracking bounds from \texttt{ApproxContraction.lean} apply directly to the BAPR operator, since they are operator-agnostic. The projected contraction, approximation error bound, and stochastic tracking bound therefore carry over without modification, providing a complete error budget for practical deep RL with the BAPR operator.
+The function-approximation and stochastic tracking bounds from \texttt{ApproxContraction.lean} apply to the abstract BAPR operator because they are operator-agnostic. The projected contraction, approximation error bound, and stochastic tracking bound therefore carry over to that operator-level setting, while the practical deep-RL implementation still depends on the stated approximation assumptions.
 
 
 \section{Connection to RE-SAC and ESCP}
@@ -596,17 +596,17 @@ The function-approximation and stochastic tracking bounds from \texttt{ApproxCon
 
 \subsection{BAPR as a generalization of RE-SAC}
 
-In a stationary environment with a single mode ($|\mathcal{M}| = 1$), the belief is trivially $\rho(m_0) = 1$, and BAPR reduces exactly to RE-SAC. The adaptive $\beta_{\text{eff}}$ also reduces to $\beta_{\text{base}}$ (since $\lambda_w \to 0$ in steady state).
+In a stationary environment with a single mode ($|\mathcal{M}| = 1$), the belief is trivially $\rho(m_0) = 1$, and the abstract BAPR operator reduces to the RE-SAC operator. The adaptive $\beta_{\text{eff}}$ also approaches $\beta_{\text{base}}$ when the BOCD surprise signal remains at its steady-state baseline.
 
 \subsection{BAPR as an extension of ESCP}
 
-ESCP~\cite{Lee2020ESCP} provides context-conditioning but uses a fixed LCB coefficient $\beta$. BAPR extends ESCP by adding BOCD belief tracking, adaptive $\beta$ modulation, and formal contraction guarantees.
+ESCP~\cite{Luo2022ESCP} provides context-conditioning but uses a fixed LCB coefficient $\beta$. BAPR extends this direction by adding BOCD belief tracking and adaptive $\beta$ modulation, while the contraction analysis applies to the frozen abstract operator.
 
 \subsection{Ablation hierarchy}
 \begin{center}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Algorithm} & \textbf{Context} & \textbf{BOCD} & \textbf{Adaptive $\beta$} & \textbf{Formal guarantee} \\
+\textbf{Algorithm} & \textbf{Context} & \textbf{BOCD} & \textbf{Adaptive $\beta$} & \textbf{Formal property} \\
 \midrule
 SAC & $\times$ & $\times$ & $\times$ & $\gamma$-contraction (stationary) \\
 RE-SAC & $\times$ & $\times$ & $\times$ & $\gamma$-contraction (stationary, robust) \\

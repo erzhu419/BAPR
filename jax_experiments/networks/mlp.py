@@ -4,6 +4,11 @@ import jax.numpy as jnp
 from flax import nnx
 
 
+def _module_list(layers):
+    list_cls = getattr(nnx, "List", None)
+    return list_cls(layers) if list_cls is not None else layers
+
+
 class MLP(nnx.Module):
     """Simple feedforward MLP with ReLU activations."""
 
@@ -15,7 +20,7 @@ class MLP(nnx.Module):
             layers.append(nnx.Linear(in_d, hidden_dim, rngs=rngs))
             in_d = hidden_dim
         layers.append(nnx.Linear(in_d, output_dim, rngs=rngs))
-        self.layers = layers
+        self.layers = _module_list(layers)
         self.n_hidden = n_layers
 
     def __call__(self, x):

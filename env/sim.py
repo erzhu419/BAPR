@@ -58,7 +58,11 @@ class env_bus(object):
         self.timetable_set = self.timetable_set.sort_values(by=['launch_time', 'direction'])[:self.effective_trip_num].reset_index(drop=True)
         # add index for timetable
         self.timetable_set['launch_turn'] = range(self.timetable_set.shape[0])
-        self.max_agent_num = 25
+        # Bus ids are assigned monotonically when a new vehicle is launched.
+        # In heavy mode-switch runs more than 25 vehicles can be created before
+        # terminal reuse catches up, so action/state tables must cover the full
+        # truncated timetable horizon rather than the nominal fleet size.
+        self.max_agent_num = int(self.effective_trip_num)
 
         self.visualizer = visualize(self)
 
@@ -286,7 +290,10 @@ class env_bus(object):
                 bus.trajectory.append([bus.last_station.station_name, self.current_time, bus.absolute_distance, bus.direction, bus.trip_id])
                 bus.trajectory_dict[bus.last_station.station_name].append([bus.last_station.station_name, self.current_time + bus.holding_time, bus.absolute_distance, bus.direction, bus.trip_id])
             if bus.on_route:
-                bus.drive(self.current_time, action[bus.bus_id], self.bus_all, debug=debug)
+                bus_action = action.get(bus.bus_id, 0.0)
+                if bus_action is None:
+                    bus_action = 0.0
+                bus.drive(self.current_time, bus_action, self.bus_all, debug=debug)
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
         self.reward_list = reward_list = list(filter(lambda x: x.reward is not None, self.bus_all))

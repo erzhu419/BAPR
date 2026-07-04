@@ -46,13 +46,20 @@ class Config:
     ensemble_size: int = 10
     beta: float = -2.0  # LCB coefficient for policy
     # BAPR actor objective:
-    #   lcb  = ensemble mean + beta_eff * std (legacy conservative path)
-    #   mean = ensemble mean only (SAC-like actor, keeps BAPR training shell)
-    #   ucb  = ensemble mean + abs(beta_eff) * std (optimistic exploration path)
-    actor_objective: str = "lcb"
+    #   mean      = ensemble mean only (default; v1 survived Ant/HalfCheetah)
+    #   gated_lcb = ensemble mean + beta * gate * std (diagnostic; hurt Ant/HC)
+    #   reg_gated_lcb = LCB only while RE-SAC regularizer gate is active
+    #   qstd_gated_lcb = LCB only under an actor-specific q_std/q_ratio gate
+    #   lcb       = ensemble mean + beta_eff * std (diagnostic; too conservative)
+    #   ucb       = ensemble mean + abs(beta_eff) * std (optimistic ablation)
+    actor_objective: str = "mean"
     beta_ood: float = 0.01  # OOD regularization weight
     beta_bc: float = 0.001  # behavior cloning weight
     weight_reg: float = 0.01  # critic regularization weight
+    use_ema_eval: bool = False  # evaluate EMA policy only when explicitly enabled
+    use_ema_rollout: bool = False  # collect training rollouts with EMA policy when explicitly enabled
+    ema_rollout_start_iter: int = 0
+    ema_rollout_require_reg_latched: bool = False
 
     # Context / ESCP
     ep_dim: int = 2  # context embedding dimension
@@ -120,6 +127,111 @@ class Config:
                                      # (previously [-7, -2], too aggressive early)
     belief_warmup_steps: int = 50
     oracle_reset_on_switch: bool = False
+
+    # BAPR redesign switch.
+    #   gate   : do not feed BOCD/belief into actor/critic by default; use a
+    #            bounded surprise gate only for recent replay and optional
+    #            gated_lcb actor risk. This is the new production path.
+    #   legacy : old BOCD run-length path (belief-conditioned Q/π + adaptive β).
+    bapr_adaptation_mode: str = "gate"
+    bapr_gate_warmup_iters: int = 10
+    bapr_surprise_threshold: float = 0.10
+    bapr_gate_gain: float = 1.0
+    bapr_gate_ema_alpha: float = 0.3
+    bapr_gate_max: float = 0.35
+    bapr_recent_frac_cap: float = 0.35
+    # Optional recent-replay safety gate. Recent replay helped low-disagreement
+    # HalfCheetah/Ant but hurt high-disagreement Hopper/Walker in v7; this gate
+    # keeps recent replay only when critic disagreement is small on the previous
+    # rollout.
+    bapr_recent_disagreement_gate: bool = False
+    bapr_recent_open_if_reg_latched: bool = False
+    bapr_recent_frac_floor: float = 0.0
+    # Historical behavior only applied the floor when the surprise gate was
+    # already nonzero. Enable this for the recovery-controller path where the
+    # floor is meant to be a true low-rate recency bias.
+    bapr_recent_true_floor: bool = False
+    # How the recent replay floor is applied:
+    #   always           - keep the old behavior: floor remains active even
+    #                      when disagreement closes normal recent replay.
+    #   low_disagreement - apply the floor only when the disagreement gate
+    #                      would already allow recent replay.
+    #   reg_latched      - apply the floor only after the regularizer latch fires.
+    #   ratio_schedule   - use a larger floor under low critic disagreement, a
+    #                      smaller floor under moderate disagreement, and shut
+    #                      the floor off under extreme disagreement.
+    bapr_recent_floor_mode: str = "always"
+    bapr_recent_floor_ratio_low: float = 0.02
+    bapr_recent_floor_ratio_high: float = 0.04
+    bapr_recent_floor_mid_frac: float = 0.015
+    bapr_recent_floor_extreme_frac: float = 0.0
+    bapr_recent_qstd_threshold: float = 5.0
+    bapr_recent_qstd_ratio_threshold: float = 0.02
+    # Optional RE-SAC regularizer safety gate. In v6, regularization helped
+    # high-disagreement Hopper/Walker but hurt low-disagreement HalfCheetah/Ant.
+    bapr_reg_disagreement_gate: bool = False
+    bapr_reg_warmup_iters: int = 0
+    bapr_reg_max_iters: int = 0
+    bapr_reg_latch: bool = False
+    bapr_reg_require_both: bool = False
+    bapr_reg_qstd_threshold: float = 5.0
+    bapr_reg_qstd_ratio_threshold: float = 0.02
+    # Late safety valve: if critic disagreement explodes after reg_max_iters,
+    # briefly re-enable the RE-SAC regularizer. This targets Ant-like late
+    # critic blowups without touching low-disagreement HalfCheetah runs.
+    bapr_reg_emergency_gate: bool = False
+    bapr_reg_emergency_scale: float = 1.0
+    bapr_reg_emergency_qstd_threshold: float = 20.0
+    bapr_reg_emergency_qstd_ratio_threshold: float = 0.05
+    # Permanent latch scale. This keeps low-disagreement environments on the
+    # base setting while letting high-disagreement Hopper/Walker-style runs use
+    # a softer RE-SAC regularizer after the safety latch fires.
+    bapr_reg_latched_scale: float = 1.0
+    # Optional collapse guard for latched regularization. If the regularizer is
+    # on but smoothed train/eval return has severely drawn down, temporarily
+    # reduce the RE-SAC regularization scale. This targets Ant-like late critic
+    # over-regularization without changing the default path.
+    bapr_reg_perf_collapse_gate: bool = False
+    bapr_reg_perf_collapse_drop_frac: float = 1.0
+    bapr_reg_perf_collapse_scale: float = 0.0
+    bapr_reg_perf_collapse_warmup_iters: int = 100
+
+    # Second-layer algorithm controller. This does not identify the environment
+    # name; it reacts to normalized training state. The intended first use is the
+    # Ant-like pattern: large reward drawdown while ensemble disagreement is
+    # already low, where more always-on RE-SAC regularization can worsen recovery.
+    bapr_controller_mode: str = "off"
+    bapr_controller_warmup_iters: int = 120
+    bapr_controller_min_peak: float = 100.0
+    bapr_controller_drop_frac: float = 0.9
+    bapr_controller_drop_ramp: float = 0.4
+    bapr_controller_low_qstd_ratio: float = 0.02
+    bapr_controller_low_qstd_threshold: float = 0.0
+    bapr_controller_latch: bool = False
+    bapr_controller_release_drop_frac: float = 0.45
+    bapr_controller_latched_signal: float = 1.0
+    bapr_controller_reg_multiplier: float = 0.2
+    bapr_controller_recent_multiplier: float = 1.0
+    bapr_controller_recent_add_frac: float = 0.0
+    bapr_controller_lcb_multiplier: float = 1.0
+    bapr_controller_actor_update_multiplier: float = 1.0
+
+    # Actor-only LCB gate. This is intentionally separate from the RE-SAC
+    # regularizer gate because Hopper wants regularization but not actor LCB,
+    # while Walker often needs a conservative actor under extreme disagreement.
+    bapr_actor_lcb_qstd_gate: bool = False
+    bapr_actor_lcb_qstd_threshold: float = 270.0
+    bapr_actor_lcb_qstd_ratio_threshold: float = 0.04
+    bapr_actor_lcb_require_both: bool = True
+    bapr_actor_lcb_scale: float = 1.0
+    # Recovery-controller guard for actor LCB. Critic disagreement alone caused
+    # false positives on Hopper; require an actual performance drawdown before
+    # conservative actor updates are enabled.
+    bapr_actor_lcb_perf_gate: bool = False
+    bapr_actor_lcb_perf_warmup_iters: int = 100
+    bapr_actor_lcb_perf_drop_frac: float = 0.25
+    bapr_actor_lcb_perf_min_peak: float = 100.0
+    bapr_actor_lcb_perf_ema_alpha: float = 0.20
 
     # EMA Policy (Polyak-averaged actor for stable evaluation)
     ema_tau: float = 0.005          # EMA smoothing coefficient (same as target critic tau)

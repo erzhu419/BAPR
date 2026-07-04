@@ -17,7 +17,11 @@ import torch.nn.functional as F
 from torch.distributions import Normal
 from normalization import Normalization, RewardScaling, RunningMeanStd
 
-from IPython.display import clear_output
+try:
+    from IPython.display import clear_output
+except ImportError:
+    def clear_output(*args, **kwargs):
+        return None
 import matplotlib.pyplot as plt
 from env.sim import env_bus
 from bapr_components import BeliefTracker, SurpriseComputer
@@ -63,6 +67,7 @@ parser.add_argument('--eval_sigmas', type=float, nargs='*', default=None, help='
 parser.add_argument('--hidden_dim', type=int, default=64, help='Hidden dimension size')
 parser.add_argument('--save_root', type=str, default='bapr_experiments', help='Base directory for saving models')
 parser.add_argument('--run_name', type=str, default=None, help='Specific run name (if provided, overrides auto-generated parameter path)')
+parser.add_argument('--seed', type=int, default=0, help='Random seed')
 parser.add_argument("--ensemble_size", type=int, default=10, help="Number of models in the ensemble")
 # ===== BA-PR 参数 =====
 parser.add_argument('--enable_mode_switch', action='store_true', default=False, help='Enable environment mode switching')
@@ -80,6 +85,11 @@ parser.add_argument('--repr_loss_weight', type=float, default=1.0, help='Weight 
 parser.add_argument('--context_warmup_episodes', type=int, default=50, help='Episodes before injecting ep_tensor into actor/critic')
 
 args = parser.parse_args()
+random.seed(args.seed)
+np.random.seed(args.seed)
+torch.manual_seed(args.seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(args.seed)
 
 ROUTE_SIGMA_TOKEN = f"route_sigma_{str(args.route_sigma).replace('.', 'p')}"
 

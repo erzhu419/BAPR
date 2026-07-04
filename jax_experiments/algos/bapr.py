@@ -29,6 +29,8 @@ class BAPR:
         self.act_dim = act_dim
         self.rngs = nnx.Rngs(seed)
 
+        self.adaptation_mode = getattr(config, "bapr_adaptation_mode", "gate")
+
         # Belief conditioning (3 modes):
         #   use_regime_belief=True : Q sees [s, a, e, ρ, μ] — joint b(h, z)
         #   belief_conditioned=True : Q sees [s, a, e, ρ]    — scalar BOCD (v15)
@@ -47,6 +49,7 @@ class BAPR:
         self.policy = GaussianPolicy(
             obs_dim, act_dim, config.hidden_dim,
             ep_dim=self.aug_dim, n_layers=2, rngs=self.rngs)
+        self.ema_policy = deepcopy(self.policy)
         self.critic = EnsembleCritic(
             obs_dim + self.aug_dim, act_dim, config.hidden_dim,
             ensemble_size=config.ensemble_size, n_layers=3, rngs=self.rngs)
@@ -108,13 +111,49 @@ class BAPR:
 
         self.update_count = 0
         self._current_weighted_lambda = 0.0
+        self._adaptation_gate = 0.0
+        self._raw_adaptation_gate = 0.0
+        self._last_surprise = 0.0
+        self._last_q_std_mean = 0.0
+        self._last_q_abs_mean = 0.0
+        self._last_q_std_ratio = 0.0
+        self._current_recent_replay_frac = 0.0
+        self._current_reg_scale = 1.0
+        self._current_actor_lcb_scale = 0.0
+        self._reg_latched = False
+        self._last_ema_rollout_active = False
+        self._train_reward_ema = None
+        self._train_reward_peak = None
+        self._eval_reward_ema = None
+        self._eval_reward_peak = None
+        self._last_train_reward_drop_frac = 0.0
+        self._last_eval_reward_drop_frac = 0.0
+        self._last_perf_drop_frac = 0.0
+        self._reg_perf_collapse_active = False
+        self._actor_lcb_perf_active = False
+        self._actor_lcb_qstd_active = False
+        self._actor_lcb_active = False
+        self._controller_active = False
+        self._controller_latched = False
+        self._controller_signal = 0.0
+        self._controller_drawdown = 0.0
+        self._controller_low_disagreement = False
+        self._controller_reg_multiplier = 1.0
+        self._controller_recent_multiplier = 1.0
+        self._controller_recent_add_frac = 0.0
+        self._controller_lcb_multiplier = 1.0
+        self._controller_actor_update_multiplier = 1.0
+        self._controller_actor_update_multiplier = 1.0
         self._build_scan_fn()
 
     def _build_scan_fn(self):
         gamma = self.config.gamma
         tau = self.config.tau
+        ema_tau = float(getattr(self.config, "ema_tau", tau))
         beta_base = self.config.beta
         penalty_scale = self.config.penalty_scale
+        weight_reg = float(getattr(self.config, "weight_reg", 0.0))
+        beta_ood = float(getattr(self.config, "beta_ood", 0.0))
         actor_objective = getattr(self.config, "actor_objective", "lcb")
         target_mode = getattr(self.config, "critic_target_mode", "min")
         auto_alpha = self.config.auto_alpha
@@ -137,11 +176,13 @@ class BAPR:
 
         @jax.jit
         def _scan_update(critic_params, target_params, policy_params,
+                         ema_policy_params,
                          ctx_params, log_alpha,
                          c_opt_state, p_opt_state, x_opt_state, a_opt_state,
                          all_obs, all_act, all_rew, all_next_obs, all_done,
                          all_task_ids, rng_key, warmup, weighted_lambda,
-                         belief_vec, all_beliefs):
+                         belief_vec, all_beliefs, reg_scale, actor_lcb_scale,
+                         actor_update_scale):
             """BAPR scan with adaptive beta + belief-conditioned Q.
 
             belief_vec: shape (belief_dim,) — current BOCD posterior, used as
@@ -154,7 +195,8 @@ class BAPR:
             effective_beta = beta_base - weighted_lambda * penalty_scale
 
             def body_fn(carry, batch_data):
-                (c_p, t_p, p_p, x_p, la, c_os, p_os, x_os, a_os, key) = carry
+                (c_p, t_p, p_p, ema_p, x_p, la,
+                 c_os, p_os, x_os, a_os, key) = carry
                 (obs, act, rew, next_obs, done, tids, b) = batch_data
                 key, k1, k2 = jax.random.split(key, 3)
                 alpha = jnp.exp(la)
@@ -196,19 +238,22 @@ class BAPR:
                     tm = nnx.merge(gd_target, t_p)
                     pm = nnx.merge(gd_policy, p_p)
                     na, nlp = pm.sample(next_obs, k1, next_ep_full)
-                    tq_all = tm(next_aug, na)              # [K, B]
+                    reg_bonus = reg_scale * weight_reg * tm.compute_reg_norm()[:, None]
+                    tq_all = tm(next_aug, na) + reg_bonus  # [K, B]
                     if target_mode == "min":
                         tq = tq_all.min(axis=0) - alpha * nlp
                         tv = rew.squeeze(-1) + gamma * (1 - done.squeeze(-1)) * tq
                         cm = nnx.merge(gd_critic, cp)
                         pq = cm(obs_aug, act)
-                        return jnp.mean((pq - tv[None]) ** 2), pq
+                        mse = jnp.mean((pq - tv[None]) ** 2)
+                        return mse + reg_scale * beta_ood * pq.std(axis=0).mean(), pq
                     else:                                    # "independent"
                         tv_all = (rew.squeeze(-1) + gamma * (1 - done.squeeze(-1))
                                   * (tq_all - alpha * nlp))   # [K, B]
                         cm = nnx.merge(gd_critic, cp)
                         pq = cm(obs_aug, act)
-                        return jnp.mean((pq - tv_all) ** 2), pq
+                        mse = jnp.mean((pq - tv_all) ** 2)
+                        return mse + reg_scale * beta_ood * pq.std(axis=0).mean(), pq
 
                 (c_loss, pq), c_grads = jax.value_and_grad(
                     critic_loss_fn, has_aux=True)(c_p)
@@ -220,21 +265,35 @@ class BAPR:
                     pm = nnx.merge(gd_policy, pp)
                     cm = nnx.merge(gd_critic, new_c_p)
                     na, lp = pm.sample(obs, k2, ep_full)
-                    qv = cm(obs_aug, na)
+                    target_reg = (
+                        reg_scale * weight_reg
+                        * nnx.merge(gd_target, t_p).compute_reg_norm()[:, None])
+                    qv = cm(obs_aug, na) + target_reg
                     q_mean = qv.mean(axis=0)
                     q_std = qv.std(axis=0)
                     if actor_objective == "mean":
                         actor_q = q_mean
                     elif actor_objective == "ucb":
                         actor_q = q_mean + jnp.abs(effective_beta) * q_std
+                    elif actor_objective == "gated_lcb":
+                        actor_q = q_mean + beta_base * weighted_lambda * q_std
+                    elif actor_objective == "reg_gated_lcb":
+                        actor_q = q_mean + beta_base * reg_scale * q_std
+                    elif actor_objective == "qstd_gated_lcb":
+                        actor_q = q_mean + beta_base * actor_lcb_scale * q_std
                     else:
                         actor_q = q_mean + effective_beta * q_std
                     return (jnp.exp(la) * lp - actor_q).mean(), lp
 
                 (p_loss, lp), p_grads = jax.value_and_grad(
                     policy_loss_fn, has_aux=True)(p_p)
+                p_grads = jax.tree.map(
+                    lambda g: g * actor_update_scale, p_grads)
                 p_upd, new_p_os = p_opt.update(p_grads, p_os, p_p)
                 new_p_p = optax.apply_updates(p_p, p_upd)
+                new_ema_p = jax.tree.map(
+                    lambda ep, pp: ep * (1.0 - ema_tau) + pp * ema_tau,
+                    ema_p, new_p_p)
 
                 # === Alpha ===
                 a_grad = -(lp.mean() + target_entropy)
@@ -247,13 +306,15 @@ class BAPR:
                 new_t_p = jax.tree.map(
                     lambda tp, cp: tp * (1 - tau) + cp * tau, t_p, new_c_p)
 
-                new_carry = (new_c_p, new_t_p, new_p_p, new_x_p, new_la,
+                new_carry = (new_c_p, new_t_p, new_p_p, new_ema_p,
+                             new_x_p, new_la,
                              new_c_os, new_p_os, new_x_os, new_a_os, key)
                 metrics = (c_loss, p_loss, x_loss, jnp.exp(new_la),
                            pq.mean(), pq.std(axis=0).mean(), lp.mean())
                 return new_carry, metrics
 
             init = (critic_params, target_params, policy_params,
+                    ema_policy_params,
                     ctx_params, log_alpha,
                     c_opt_state, p_opt_state, x_opt_state, a_opt_state, rng_key)
             batches = (all_obs, all_act, all_rew, all_next_obs, all_done,
@@ -277,7 +338,7 @@ class BAPR:
                 ep_full = ep
             oa = jnp.concatenate([obs, ep_full], axis=-1)
             pq = cm(oa, act)
-            return pq.std(axis=0).mean()
+            return pq.std(axis=0).mean(), jnp.abs(pq.mean(axis=0)).mean()
 
         # ── Minimum BAPR redesign: chunked observable signals ─────────────
         # Splits a full rollout into n_chunks pieces, returns per-chunk
@@ -423,7 +484,7 @@ class BAPR:
             self.regime_tracker.observe(y)
 
     def _compute_weighted_lambda(self):
-        """Compute belief-weighted penalty.
+        """Compute legacy belief-weighted penalty.
 
         BOCD dynamics: high surprise → belief pushed to high h (high variance
         explains outliers) → effective_window increases.
@@ -432,6 +493,418 @@ class BAPR:
         ew = self.belief_tracker.effective_window
         max_h = self.belief_tracker.max_H - 1
         return float(np.clip(ew / max_h, 0.0, 1.0))
+
+    def _update_adaptation_gate(self, surprise: float):
+        """Bounded surprise gate for redesigned BAPR.
+
+        The gate is intentionally much simpler than BOCD belief conditioning:
+        it is not a critic input and does not change Bellman targets. It only
+        controls how much recent replay is sampled and, when explicitly
+        requested, how much gated LCB risk the actor sees.
+        """
+        threshold = float(getattr(self.config, "bapr_surprise_threshold", 0.8))
+        gain = float(getattr(self.config, "bapr_gate_gain", 0.5))
+        gate_max = float(getattr(self.config, "bapr_gate_max", 0.8))
+        alpha = float(getattr(self.config, "bapr_gate_ema_alpha", 0.2))
+
+        raw = np.clip((float(surprise) - threshold) * gain, 0.0, gate_max)
+        self._raw_adaptation_gate = float(raw)
+        self._adaptation_gate = float(
+            np.clip(alpha * raw + (1.0 - alpha) * self._adaptation_gate,
+                    0.0, gate_max))
+        return self._adaptation_gate
+
+    def _compute_recent_replay_frac(self, weighted_lambda, q_std, q_abs_mean):
+        cap = float(getattr(self.config, "bapr_recent_frac_cap", 0.0))
+        frac = float(min(cap, max(0.0, float(weighted_lambda))))
+        floor = float(min(cap, max(
+            0.0, float(getattr(self.config, "bapr_recent_frac_floor", 0.0)))))
+        true_floor = bool(getattr(self.config, "bapr_recent_true_floor", False))
+        floor_mode = str(getattr(
+            self.config, "bapr_recent_floor_mode", "always")).lower()
+        q_std = float(q_std)
+        q_abs_mean = max(float(q_abs_mean), 1e-6)
+        ratio = q_std / q_abs_mean
+        self._last_q_std_ratio = float(ratio)
+
+        if cap <= 0.0:
+            return 0.0
+        if frac <= 0.0 and (not true_floor or floor <= 0.0):
+            return self._apply_controller_to_recent_frac(0.0, cap)
+
+        if not getattr(self.config, "bapr_recent_disagreement_gate", False):
+            return self._apply_controller_to_recent_frac(max(frac, floor), cap)
+
+        def gated_floor():
+            if floor_mode == "always":
+                return floor
+            if floor_mode == "reg_latched":
+                return floor if bool(getattr(self, "_reg_latched", False)) else 0.0
+            if floor_mode == "low_disagreement":
+                return 0.0
+            if floor_mode == "ratio_schedule":
+                low = float(getattr(
+                    self.config, "bapr_recent_floor_ratio_low", 0.02))
+                high = float(getattr(
+                    self.config, "bapr_recent_floor_ratio_high", 0.04))
+                if ratio <= low:
+                    return floor
+                if ratio <= high:
+                    mid_floor = float(getattr(
+                        self.config, "bapr_recent_floor_mid_frac", floor))
+                    return float(min(cap, max(0.0, mid_floor)))
+                extreme_floor = float(getattr(
+                    self.config, "bapr_recent_floor_extreme_frac", 0.0))
+                return float(min(cap, max(0.0, extreme_floor)))
+            return floor
+
+        if (getattr(self.config, "bapr_recent_open_if_reg_latched", False)
+                and bool(getattr(self, "_reg_latched", False))):
+            return self._apply_controller_to_recent_frac(
+                max(frac, gated_floor()), cap)
+
+        qstd_ok = q_std <= float(getattr(
+            self.config, "bapr_recent_qstd_threshold", 5.0))
+        ratio_ok = ratio <= float(getattr(
+            self.config, "bapr_recent_qstd_ratio_threshold", 0.02))
+        if qstd_ok and ratio_ok:
+            return self._apply_controller_to_recent_frac(
+                max(frac, gated_floor()), cap)
+        # Keep a small amount of recent data available under high disagreement.
+        # Full shutoff made Walker/Hopper lose recovery signal after switches.
+        return self._apply_controller_to_recent_frac(gated_floor(), cap)
+
+    def recent_replay_fraction(self):
+        return float(getattr(self, "_current_recent_replay_frac", 0.0))
+
+    def _update_reward_drop(self, value, ema_attr, peak_attr):
+        """Track fractional drawdown from the best smoothed reward so far."""
+        if value is None:
+            return 0.0
+        value = float(value)
+        alpha = float(getattr(
+            self.config, "bapr_actor_lcb_perf_ema_alpha", 0.20))
+        ema = getattr(self, ema_attr)
+        if ema is None:
+            ema = value
+        else:
+            ema = alpha * value + (1.0 - alpha) * float(ema)
+        peak = getattr(self, peak_attr)
+        if peak is None:
+            peak = ema
+        else:
+            peak = max(float(peak), float(ema))
+        setattr(self, ema_attr, float(ema))
+        setattr(self, peak_attr, float(peak))
+        denom = max(abs(float(peak)), 1e-6)
+        return float(max(0.0, (float(peak) - float(ema)) / denom))
+
+    def _observe_train_reward(self, recent_rewards):
+        if recent_rewards is None or len(recent_rewards) == 0:
+            return
+        self._last_train_reward_drop_frac = self._update_reward_drop(
+            float(np.mean(recent_rewards)),
+            "_train_reward_ema",
+            "_train_reward_peak")
+
+    def _reset_algorithm_controller(self):
+        self._controller_active = False
+        self._controller_latched = False
+        self._controller_signal = 0.0
+        self._controller_drawdown = 0.0
+        self._controller_low_disagreement = False
+        self._controller_reg_multiplier = 1.0
+        self._controller_recent_multiplier = 1.0
+        self._controller_recent_add_frac = 0.0
+        self._controller_lcb_multiplier = 1.0
+
+    def _update_algorithm_controller(self, q_std, q_abs_mean, current_iter):
+        mode = str(getattr(self.config, "bapr_controller_mode", "off")).lower()
+        if mode in ("", "off", "none", "disabled"):
+            self._reset_algorithm_controller()
+            return
+
+        warmup_iters = int(getattr(
+            self.config, "bapr_controller_warmup_iters", 120))
+        if current_iter < warmup_iters:
+            self._reset_algorithm_controller()
+            return
+
+        q_std = float(q_std)
+        q_abs_mean = max(float(q_abs_mean), 1e-6)
+        ratio = q_std / q_abs_mean
+        self._last_q_std_ratio = float(ratio)
+
+        drop_frac = max(
+            float(getattr(self, "_last_train_reward_drop_frac", 0.0)),
+            float(getattr(self, "_last_eval_reward_drop_frac", 0.0)))
+        train_peak = getattr(self, "_train_reward_peak", None)
+        eval_peak = getattr(self, "_eval_reward_peak", None)
+        peak = max(float(train_peak or 0.0), float(eval_peak or 0.0))
+        min_peak = float(getattr(
+            self.config, "bapr_controller_min_peak", 100.0))
+
+        low_ratio_th = float(getattr(
+            self.config, "bapr_controller_low_qstd_ratio", 0.02))
+        low_qstd_th = float(getattr(
+            self.config, "bapr_controller_low_qstd_threshold", 0.0))
+        ratio_ok = True if low_ratio_th <= 0.0 else ratio <= low_ratio_th
+        qstd_ok = True if low_qstd_th <= 0.0 else q_std <= low_qstd_th
+        low_disagreement = bool(ratio_ok and qstd_ok)
+
+        drop_threshold = float(getattr(
+            self.config, "bapr_controller_drop_frac", 0.9))
+        drop_ramp = max(float(getattr(
+            self.config, "bapr_controller_drop_ramp", 0.4)), 1e-6)
+        signal = float(np.clip(
+            (drop_frac - drop_threshold) / drop_ramp, 0.0, 1.0))
+        entry_active = bool(peak >= min_peak and low_disagreement and signal > 0.0)
+        latch_enabled = bool(getattr(self.config, "bapr_controller_latch", False))
+        release_drop = float(getattr(
+            self.config, "bapr_controller_release_drop_frac", 0.45))
+        if latch_enabled and entry_active:
+            self._controller_latched = True
+        elif (
+            latch_enabled
+            and bool(getattr(self, "_controller_latched", False))
+            and drop_frac <= release_drop
+        ):
+            self._controller_latched = False
+
+        active = entry_active
+        if latch_enabled and bool(getattr(self, "_controller_latched", False)):
+            active = bool(peak >= min_peak and drop_frac > release_drop)
+            if active:
+                latched_signal = float(getattr(
+                    self.config, "bapr_controller_latched_signal", 1.0))
+                signal = max(signal, float(np.clip(latched_signal, 0.0, 1.0)))
+
+        self._controller_drawdown = float(drop_frac)
+        self._controller_low_disagreement = low_disagreement
+        self._controller_signal = float(signal)
+        self._controller_active = active
+        if not active:
+            self._controller_reg_multiplier = 1.0
+            self._controller_recent_multiplier = 1.0
+            self._controller_recent_add_frac = 0.0
+            self._controller_lcb_multiplier = 1.0
+            self._controller_actor_update_multiplier = 1.0
+            return
+
+        reg_target = float(np.clip(getattr(
+            self.config, "bapr_controller_reg_multiplier", 0.2), 0.0, 1.0))
+        recent_target = float(max(0.0, getattr(
+            self.config, "bapr_controller_recent_multiplier", 1.0)))
+        recent_add = float(max(0.0, getattr(
+            self.config, "bapr_controller_recent_add_frac", 0.0)))
+        lcb_target = float(np.clip(getattr(
+            self.config, "bapr_controller_lcb_multiplier", 1.0), 0.0, 1.0))
+        actor_update_target = float(np.clip(getattr(
+            self.config, "bapr_controller_actor_update_multiplier", 1.0),
+            0.0, 1.0))
+
+        self._controller_reg_multiplier = float(
+            1.0 + signal * (reg_target - 1.0))
+        self._controller_recent_multiplier = float(
+            1.0 + signal * (recent_target - 1.0))
+        self._controller_recent_add_frac = float(signal * recent_add)
+        self._controller_lcb_multiplier = float(
+            1.0 + signal * (lcb_target - 1.0))
+        self._controller_actor_update_multiplier = float(
+            1.0 + signal * (actor_update_target - 1.0))
+
+    def _apply_controller_to_recent_frac(self, frac, cap):
+        if not bool(getattr(self, "_controller_active", False)):
+            return float(frac)
+        value = (
+            float(frac) * float(getattr(self, "_controller_recent_multiplier", 1.0))
+            + float(getattr(self, "_controller_recent_add_frac", 0.0))
+        )
+        return float(min(float(cap), max(0.0, value)))
+
+    def _apply_controller_to_reg_scale(self, scale):
+        return float(scale) * float(getattr(
+            self, "_controller_reg_multiplier", 1.0))
+
+    def _apply_controller_to_actor_lcb_scale(self, scale):
+        return float(scale) * float(getattr(
+            self, "_controller_lcb_multiplier", 1.0))
+
+    def _actor_update_scale(self):
+        return float(getattr(
+            self, "_controller_actor_update_multiplier", 1.0))
+
+    def report_eval(self, eval_reward):
+        self._last_eval_reward_drop_frac = self._update_reward_drop(
+            eval_reward,
+            "_eval_reward_ema",
+            "_eval_reward_peak")
+
+    def _performance_drop_active(self, current_iter):
+        warmup_iters = int(getattr(
+            self.config, "bapr_actor_lcb_perf_warmup_iters", 100))
+        if current_iter < warmup_iters:
+            self._last_perf_drop_frac = 0.0
+            self._actor_lcb_perf_active = False
+            return False
+        min_peak = float(getattr(
+            self.config, "bapr_actor_lcb_perf_min_peak", 100.0))
+        train_peak = getattr(self, "_train_reward_peak", None)
+        eval_peak = getattr(self, "_eval_reward_peak", None)
+        peak = max(float(train_peak or 0.0), float(eval_peak or 0.0))
+        drop_frac = max(
+            float(getattr(self, "_last_train_reward_drop_frac", 0.0)),
+            float(getattr(self, "_last_eval_reward_drop_frac", 0.0)))
+        threshold = float(getattr(
+            self.config, "bapr_actor_lcb_perf_drop_frac", 0.25))
+        active = peak >= min_peak and drop_frac >= threshold
+        self._last_perf_drop_frac = float(drop_frac)
+        self._actor_lcb_perf_active = bool(active)
+        return bool(active)
+
+    def _adjust_reg_scale_for_perf_collapse(self, scale, current_iter):
+        if not getattr(self.config, "bapr_reg_perf_collapse_gate", False):
+            self._reg_perf_collapse_active = False
+            return float(scale)
+        warmup_iters = int(getattr(
+            self.config, "bapr_reg_perf_collapse_warmup_iters", 100))
+        if current_iter < warmup_iters:
+            self._reg_perf_collapse_active = False
+            return float(scale)
+        drop_frac = max(
+            float(getattr(self, "_last_train_reward_drop_frac", 0.0)),
+            float(getattr(self, "_last_eval_reward_drop_frac", 0.0)))
+        threshold = float(getattr(
+            self.config, "bapr_reg_perf_collapse_drop_frac", 1.0))
+        active = drop_frac >= threshold and float(scale) > 0.0
+        self._reg_perf_collapse_active = bool(active)
+        if not active:
+            return float(scale)
+        collapse_scale = float(getattr(
+            self.config, "bapr_reg_perf_collapse_scale", 0.0))
+        return float(scale) * float(np.clip(collapse_scale, 0.0, 1.0))
+
+    def _compute_reg_scale(self, q_std, q_abs_mean, current_iter):
+        if not getattr(self.config, "bapr_reg_disagreement_gate", False):
+            scale = self._adjust_reg_scale_for_perf_collapse(1.0, current_iter)
+            return self._apply_controller_to_reg_scale(scale)
+
+        warmup_iters = int(getattr(self.config, "bapr_reg_warmup_iters", 0))
+        if current_iter < warmup_iters:
+            self._reg_perf_collapse_active = False
+            return 0.0
+
+        q_std = float(q_std)
+        q_abs_mean = max(float(q_abs_mean), 1e-6)
+        ratio = q_std / q_abs_mean
+        qstd_high = q_std > float(getattr(
+            self.config, "bapr_reg_qstd_threshold", 5.0))
+        ratio_high = ratio > float(getattr(
+            self.config, "bapr_reg_qstd_ratio_threshold", 0.02))
+        high_disagreement = (qstd_high and ratio_high) if getattr(
+            self.config, "bapr_reg_require_both", False) else (
+            qstd_high or ratio_high)
+        emergency_disagreement = False
+        if getattr(self.config, "bapr_reg_emergency_gate", False):
+            emergency_disagreement = (
+                q_std > float(getattr(
+                    self.config, "bapr_reg_emergency_qstd_threshold", 20.0))
+                and ratio > float(getattr(
+                    self.config,
+                    "bapr_reg_emergency_qstd_ratio_threshold", 0.05)))
+
+        max_iters = int(getattr(self.config, "bapr_reg_max_iters", 0))
+        if getattr(self.config, "bapr_reg_latch", False):
+            if (max_iters <= 0 or current_iter < max_iters) and high_disagreement:
+                self._reg_latched = True
+            if self._reg_latched:
+                scale = float(getattr(
+                    self.config, "bapr_reg_latched_scale", 1.0))
+                scale = self._adjust_reg_scale_for_perf_collapse(
+                    scale, current_iter)
+                return self._apply_controller_to_reg_scale(scale)
+            if emergency_disagreement:
+                scale = float(getattr(
+                    self.config, "bapr_reg_emergency_scale", 1.0))
+                scale = self._adjust_reg_scale_for_perf_collapse(
+                    scale, current_iter)
+                return self._apply_controller_to_reg_scale(scale)
+            self._reg_perf_collapse_active = False
+            return 0.0
+
+        if max_iters > 0 and current_iter >= max_iters:
+            if emergency_disagreement:
+                scale = float(getattr(
+                    self.config, "bapr_reg_emergency_scale", 1.0))
+                scale = self._adjust_reg_scale_for_perf_collapse(
+                    scale, current_iter)
+                return self._apply_controller_to_reg_scale(scale)
+            self._reg_perf_collapse_active = False
+            return 0.0
+
+        if getattr(self.config, "bapr_reg_require_both", False):
+            if qstd_high and ratio_high:
+                scale = self._adjust_reg_scale_for_perf_collapse(
+                    1.0, current_iter)
+                return self._apply_controller_to_reg_scale(scale)
+            self._reg_perf_collapse_active = False
+            return 0.0
+        if qstd_high or ratio_high:
+            scale = self._adjust_reg_scale_for_perf_collapse(
+                1.0, current_iter)
+            return self._apply_controller_to_reg_scale(scale)
+        self._reg_perf_collapse_active = False
+        return 0.0
+
+    def _compute_actor_lcb_scale(self, q_std, q_abs_mean, current_iter):
+        if not getattr(self.config, "bapr_actor_lcb_qstd_gate", False):
+            self._last_perf_drop_frac = max(
+                float(getattr(self, "_last_train_reward_drop_frac", 0.0)),
+                float(getattr(self, "_last_eval_reward_drop_frac", 0.0)))
+            self._actor_lcb_perf_active = False
+            self._actor_lcb_qstd_active = False
+            self._actor_lcb_active = False
+            return 0.0
+
+        perf_ok = True
+        if getattr(self.config, "bapr_actor_lcb_perf_gate", False):
+            perf_ok = self._performance_drop_active(current_iter)
+        else:
+            self._last_perf_drop_frac = max(
+                float(getattr(self, "_last_train_reward_drop_frac", 0.0)),
+                float(getattr(self, "_last_eval_reward_drop_frac", 0.0)))
+            self._actor_lcb_perf_active = False
+
+        q_std = float(q_std)
+        q_abs_mean = max(float(q_abs_mean), 1e-6)
+        ratio = q_std / q_abs_mean
+        qstd_high = q_std > float(getattr(
+            self.config, "bapr_actor_lcb_qstd_threshold", 270.0))
+        ratio_high = ratio > float(getattr(
+            self.config, "bapr_actor_lcb_qstd_ratio_threshold", 0.04))
+        if getattr(self.config, "bapr_actor_lcb_require_both", True):
+            active = qstd_high and ratio_high
+        else:
+            active = qstd_high or ratio_high
+        self._actor_lcb_qstd_active = bool(active)
+        if not active:
+            self._actor_lcb_active = False
+            return 0.0
+        scale = float(getattr(self.config, "bapr_actor_lcb_scale", 1.0))
+        if not getattr(self.config, "bapr_actor_lcb_perf_gate", False):
+            value = self._apply_controller_to_actor_lcb_scale(scale)
+            self._actor_lcb_active = value > 0.0
+            return value
+
+        if not perf_ok:
+            self._actor_lcb_active = False
+            return 0.0
+        threshold = max(float(getattr(
+            self.config, "bapr_actor_lcb_perf_drop_frac", 0.25)), 1e-6)
+        ramp = float(np.clip(self._last_perf_drop_frac / threshold, 0.0, 1.0))
+        value = self._apply_controller_to_actor_lcb_scale(scale * ramp)
+        self._actor_lcb_active = value > 0.0
+        return value
 
     def multi_update(self, stacked_batch, current_iter=0, recent_rewards=None,
                      recent_rollout=None, **kwargs):
@@ -450,7 +923,7 @@ class BAPR:
             robs = jnp.asarray(recent_rollout["obs"][-w:])
             ract = jnp.asarray(recent_rollout["act"][-w:])
             rrew = np.asarray(recent_rollout["rew"][-w:]).reshape(-1)
-            q_std = self._compute_q_stats(
+            q_std, q_abs_mean = self._compute_q_stats(
                 nnx.state(self.critic, nnx.Param),
                 nnx.state(self.context_net, nnx.Param),
                 robs, ract, warmup, belief_jax)
@@ -459,7 +932,7 @@ class BAPR:
             # Fallback: replay batch (random exploration phase or compatibility)
             last_obs = jnp.asarray(stacked_batch["obs"][-1])
             last_act = jnp.asarray(stacked_batch["act"][-1])
-            q_std = self._compute_q_stats(
+            q_std, q_abs_mean = self._compute_q_stats(
                 nnx.state(self.critic, nnx.Param),
                 nnx.state(self.context_net, nnx.Param),
                 last_obs, last_act, warmup, belief_jax)
@@ -470,6 +943,7 @@ class BAPR:
 
         surprise = self.surprise_computer.compute(
             reward_signal, np.asarray([float(q_std)], dtype=np.float32))
+        self._last_surprise = float(surprise)
         self.belief_tracker.update(surprise)
 
         # ── Minimum redesign: feed chunked observations to regime tracker.
@@ -479,12 +953,33 @@ class BAPR:
         if self.use_regime_belief and recent_rollout is not None:
             self._observe_chunked_rollout(recent_rollout, warmup, belief_jax)
 
-        # P0: BAPR mechanism warmup — λ_w=0 for first bapr_warmup_iters.
-        if current_iter < self.config.bapr_warmup_iters:
+        if self.adaptation_mode == "gate":
+            # Gate-mode BAPR keeps the stable mean-actor path and only uses
+            # this scalar for recent replay / optional gated_lcb. Do not
+            # reuse the long legacy BOCD warmup: in the failed v1 runs, critic
+            # disagreement exploded before the gate was even allowed to open.
+            gate_warmup = int(getattr(self.config, "bapr_gate_warmup_iters", 0))
+            if current_iter < gate_warmup:
+                weighted_lambda = 0.0
+                self._adaptation_gate = 0.0
+                self._raw_adaptation_gate = 0.0
+            else:
+                weighted_lambda = self._update_adaptation_gate(surprise)
+        elif current_iter < self.config.bapr_warmup_iters:
             weighted_lambda = 0.0
         else:
             weighted_lambda = self._compute_weighted_lambda()
         self._current_weighted_lambda = weighted_lambda
+        self._last_q_std_mean = float(q_std)
+        self._last_q_abs_mean = float(q_abs_mean)
+        self._observe_train_reward(recent_rewards)
+        self._update_algorithm_controller(q_std, q_abs_mean, current_iter)
+        self._current_recent_replay_frac = self._compute_recent_replay_frac(
+            weighted_lambda, q_std, q_abs_mean)
+        self._current_reg_scale = self._compute_reg_scale(
+            q_std, q_abs_mean, current_iter)
+        self._current_actor_lcb_scale = self._compute_actor_lcb_scale(
+            q_std, q_abs_mean, current_iter)
 
         # Refresh belief vector AFTER update so scan uses post-update belief.
         # Format depends on flags: see _build_belief_jax docstring.
@@ -494,6 +989,7 @@ class BAPR:
         c_p = nnx.state(self.critic, nnx.Param)
         t_p = nnx.state(self.target_critic, nnx.Param)
         p_p = nnx.state(self.policy, nnx.Param)
+        ema_p = nnx.state(self.ema_policy, nnx.Param)
         x_p = nnx.state(self.context_net, nnx.Param)
 
         obs = jnp.array(stacked_batch["obs"])
@@ -515,18 +1011,22 @@ class BAPR:
                 else jnp.zeros((n_iters, batch_size, 0), dtype=jnp.float32)
 
         final, metrics = self._scan_update(
-            c_p, t_p, p_p, x_p, self.log_alpha,
+            c_p, t_p, p_p, ema_p, x_p, self.log_alpha,
             self.critic_opt_state, self.policy_opt_state,
             self.context_opt_state, self.alpha_opt_state,
             obs, act, rew, nobs, done, tids, rng_key, warmup,
-            jnp.array(weighted_lambda), belief_jax, beliefs)
+            jnp.array(weighted_lambda), belief_jax, beliefs,
+            jnp.array(self._current_reg_scale, dtype=jnp.float32),
+            jnp.array(self._current_actor_lcb_scale, dtype=jnp.float32),
+            jnp.array(self._actor_update_scale(), dtype=jnp.float32))
 
-        (new_c, new_t, new_p, new_x, new_la,
+        (new_c, new_t, new_p, new_ema_p, new_x, new_la,
          self.critic_opt_state, self.policy_opt_state,
          self.context_opt_state, self.alpha_opt_state, _) = final
         nnx.update(self.critic, new_c)
         nnx.update(self.target_critic, new_t)
         nnx.update(self.policy, new_p)
+        nnx.update(self.ema_policy, new_ema_p)
         nnx.update(self.context_net, new_x)
         self.log_alpha = new_la
 
@@ -544,6 +1044,32 @@ class BAPR:
             "q_std_mean": float(qs.mean()),
             "log_prob": float(lp.mean()),
             "weighted_lambda": weighted_lambda,
+            "adaptation_gate": float(self._adaptation_gate),
+            "raw_adaptation_gate": float(self._raw_adaptation_gate),
+            "surprise": float(self._last_surprise),
+            "q_std_ratio": float(self._last_q_std_ratio),
+            "planned_recent_replay_frac": float(self._current_recent_replay_frac),
+            "reg_scale": float(self._current_reg_scale),
+            "reg_perf_collapse_active": float(self._reg_perf_collapse_active),
+            "actor_lcb_scale": float(self._current_actor_lcb_scale),
+            "actor_lcb_perf_active": float(self._actor_lcb_perf_active),
+            "actor_lcb_qstd_active": float(self._actor_lcb_qstd_active),
+            "actor_lcb_active": float(self._actor_lcb_active),
+            "controller_active": float(self._controller_active),
+            "controller_latched": float(self._controller_latched),
+            "controller_signal": float(self._controller_signal),
+            "controller_drawdown": float(self._controller_drawdown),
+            "controller_low_disagreement": float(self._controller_low_disagreement),
+            "controller_reg_multiplier": float(self._controller_reg_multiplier),
+            "controller_recent_multiplier": float(self._controller_recent_multiplier),
+            "controller_recent_add_frac": float(self._controller_recent_add_frac),
+            "controller_lcb_multiplier": float(self._controller_lcb_multiplier),
+            "controller_actor_update_multiplier": float(
+                self._controller_actor_update_multiplier),
+            "perf_drop_frac": float(self._last_perf_drop_frac),
+            "train_reward_drop_frac": float(self._last_train_reward_drop_frac),
+            "eval_reward_drop_frac": float(self._last_eval_reward_drop_frac),
+            "reg_latched": float(self._reg_latched),
             "effective_beta": float(effective_beta),
             "belief_entropy": float(self.belief_tracker.entropy),
             "effective_window": float(self.belief_tracker.effective_window),
