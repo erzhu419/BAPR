@@ -205,16 +205,36 @@ class Config:
     bapr_controller_min_peak: float = 100.0
     bapr_controller_drop_frac: float = 0.9
     bapr_controller_drop_ramp: float = 0.4
+    # In soft_recovery mode the instantaneous controller signal is allowed to
+    # decay instead of acting as a binary emergency latch.
+    bapr_controller_soft_decay: float = 0.92
+    bapr_controller_soft_min_signal: float = 0.01
     bapr_controller_low_qstd_ratio: float = 0.02
     bapr_controller_low_qstd_threshold: float = 0.0
     bapr_controller_latch: bool = False
     bapr_controller_release_drop_frac: float = 0.45
+    # Optional safety release for recovery latch. 0 disables the cap. When the
+    # cap fires, the controller stays suppressed until drawdown recovers below
+    # bapr_controller_release_drop_frac, preventing immediate re-latching.
+    bapr_controller_max_active_iters: int = 0
+    # v79: explicit controller exit/re-entry controls. A cooldown lets recovery
+    # return the algorithm to normal training for a window instead of staying
+    # active for the whole tail whenever drawdown remains high.
+    bapr_controller_min_active_iters: int = 0
+    bapr_controller_exit_cooldown_iters: int = 0
+    bapr_controller_exit_signal_threshold: float = 0.0
+    bapr_controller_exit_improve_frac: float = 0.0
+    bapr_controller_exit_drawdown_frac: float = -1.0
     bapr_controller_latched_signal: float = 1.0
     bapr_controller_reg_multiplier: float = 0.2
+    # Optional linear recovery of controller multipliers while active. 0 keeps
+    # the historical fixed target.
+    bapr_controller_reg_recover_iters: int = 0
     bapr_controller_recent_multiplier: float = 1.0
     bapr_controller_recent_add_frac: float = 0.0
     bapr_controller_lcb_multiplier: float = 1.0
     bapr_controller_actor_update_multiplier: float = 1.0
+    bapr_controller_actor_recover_iters: int = 0
 
     # Actor-only LCB gate. This is intentionally separate from the RE-SAC
     # regularizer gate because Hopper wants regularization but not actor LCB,
@@ -232,6 +252,19 @@ class Config:
     bapr_actor_lcb_perf_drop_frac: float = 0.25
     bapr_actor_lcb_perf_min_peak: float = 100.0
     bapr_actor_lcb_perf_ema_alpha: float = 0.20
+
+    # v80: conservative residual actor objective. The actor proposes an
+    # adaptation action, but the loss evaluates a bounded residual from a
+    # slow zero-context EMA policy and gates that residual by conservative
+    # Q-advantage. This keeps a stable base policy in charge unless the
+    # critic ensemble says the adaptive proposal is worth using.
+    bapr_residual_delta: float = 0.25
+    bapr_residual_gate_scale: float = 1.0
+    bapr_residual_adv_margin: float = 0.0
+    bapr_residual_adv_temp: float = 300.0
+    bapr_residual_qstd_scale: float = 0.5
+    bapr_residual_behavior_weight: float = 0.05
+    bapr_residual_action_penalty: float = 0.0
 
     # EMA Policy (Polyak-averaged actor for stable evaluation)
     ema_tau: float = 0.005          # EMA smoothing coefficient (same as target critic tau)

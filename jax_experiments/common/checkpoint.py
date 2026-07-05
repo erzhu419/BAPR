@@ -29,6 +29,50 @@ def _patch_flax_variablestate_unpickle():
     """Allow Flax NNX to read checkpoints saved by nearby NNX builds."""
     try:
         from flax.nnx import variablelib
+        raw_default_state = nnx.Param(0).__getstate__()
+
+        def _patch_raw_value_variable(cls):
+            """Make Flax Variable/Param unpickle states from nearby NNX builds."""
+            if cls is None or getattr(cls, "_bapr_raw_value_pickle_patch", False):
+                return
+            orig_setstate = getattr(cls, "__setstate__", None)
+            supported_slots = set(getattr(cls, "__slots__", ()) or ())
+            if "raw_value" not in supported_slots:
+                return
+
+            def _compat_setstate(self, state):
+                if (isinstance(state, tuple) and len(state) == 2 and
+                        isinstance(state[1], dict)):
+                    state = state[1]
+                if isinstance(state, dict):
+                    state = dict(state)
+                    if "raw_value" not in state and "_raw_value" in state:
+                        state["raw_value"] = state["_raw_value"]
+                    if "raw_value" not in state and "value" in state:
+                        state["raw_value"] = state["value"]
+                    if "_trace_state" not in state:
+                        state["_trace_state"] = raw_default_state.get(
+                            "_trace_state")
+                    if "_var_metadata" not in state:
+                        state["_var_metadata"] = raw_default_state.get(
+                            "_var_metadata", {})
+                if orig_setstate is not None:
+                    return orig_setstate(self, state)
+                if not isinstance(state, dict):
+                    raise TypeError(
+                        f"Unsupported Variable pickle state: {type(state)}")
+                object.__setattr__(self, "raw_value", state["raw_value"])
+                object.__setattr__(self, "_trace_state",
+                                   state.get("_trace_state"))
+                object.__setattr__(self, "_var_metadata",
+                                   state.get("_var_metadata", {}))
+
+            cls.__setstate__ = _compat_setstate
+            cls._bapr_raw_value_pickle_patch = True
+
+        _patch_raw_value_variable(getattr(variablelib, "Variable", None))
+        _patch_raw_value_variable(getattr(variablelib, "Param", None))
+
         cls = variablelib.VariableState
         orig = getattr(cls, "__setstate__", None)
         if getattr(cls, "_bapr_legacy_pickle_patch", False):
@@ -123,6 +167,10 @@ def _patch_flax_variablestate_unpickle():
                 state = state[1]
             if isinstance(state, dict):
                 state = dict(state)
+                if "raw_value" not in state and "_raw_value" in state:
+                    state["raw_value"] = state["_raw_value"]
+                if "raw_value" not in state and "value" in state:
+                    state["raw_value"] = state["value"]
                 if "_raw_value" not in state and "raw_value" in state:
                     state["_raw_value"] = state["raw_value"]
                 if "_raw_value" not in state and "value" in state:
@@ -199,10 +247,22 @@ def save_checkpoint(ckpt_dir: str, agent, replay_buffer, logger,
                 'last_perf_drop_frac': agent._last_perf_drop_frac,
                 'controller_active': getattr(agent, '_controller_active', False),
                 'controller_latched': getattr(agent, '_controller_latched', False),
+                'controller_active_iters': getattr(
+                    agent, '_controller_active_iters', 0),
+                'controller_duration_released': getattr(
+                    agent, '_controller_duration_released', False),
+                'controller_cooldown_iters': getattr(
+                    agent, '_controller_cooldown_iters', 0),
+                'controller_exit_reason': getattr(
+                    agent, '_controller_exit_reason', 0),
                 'controller_signal': getattr(agent, '_controller_signal', 0.0),
                 'controller_drawdown': getattr(agent, '_controller_drawdown', 0.0),
                 'controller_low_disagreement': getattr(
                     agent, '_controller_low_disagreement', False),
+                'last_train_reward_improve_frac': getattr(
+                    agent, '_last_train_reward_improve_frac', 0.0),
+                'last_eval_reward_improve_frac': getattr(
+                    agent, '_last_eval_reward_improve_frac', 0.0),
                 'controller_reg_multiplier': getattr(
                     agent, '_controller_reg_multiplier', 1.0),
                 'controller_recent_multiplier': getattr(
@@ -323,10 +383,22 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str,
             agent._last_perf_drop_frac = state.get('last_perf_drop_frac', 0.0)
             agent._controller_active = state.get('controller_active', False)
             agent._controller_latched = state.get('controller_latched', False)
+            agent._controller_active_iters = state.get(
+                'controller_active_iters', 0)
+            agent._controller_duration_released = state.get(
+                'controller_duration_released', False)
+            agent._controller_cooldown_iters = state.get(
+                'controller_cooldown_iters', 0)
+            agent._controller_exit_reason = state.get(
+                'controller_exit_reason', 0)
             agent._controller_signal = state.get('controller_signal', 0.0)
             agent._controller_drawdown = state.get('controller_drawdown', 0.0)
             agent._controller_low_disagreement = state.get(
                 'controller_low_disagreement', False)
+            agent._last_train_reward_improve_frac = state.get(
+                'last_train_reward_improve_frac', 0.0)
+            agent._last_eval_reward_improve_frac = state.get(
+                'last_eval_reward_improve_frac', 0.0)
             agent._controller_reg_multiplier = state.get(
                 'controller_reg_multiplier', 1.0)
             agent._controller_recent_multiplier = state.get(

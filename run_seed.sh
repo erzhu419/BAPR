@@ -302,6 +302,12 @@ case "$ALGO" in
     if [ -n "${BAPR_CONTROLLER_DROP_RAMP:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_drop_ramp ${BAPR_CONTROLLER_DROP_RAMP}"
     fi
+    if [ -n "${BAPR_CONTROLLER_SOFT_DECAY:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_soft_decay ${BAPR_CONTROLLER_SOFT_DECAY}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_SOFT_MIN_SIGNAL:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_soft_min_signal ${BAPR_CONTROLLER_SOFT_MIN_SIGNAL}"
+    fi
     if [ -n "${BAPR_CONTROLLER_LOW_QSTD_RATIO:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_low_qstd_ratio ${BAPR_CONTROLLER_LOW_QSTD_RATIO}"
     fi
@@ -314,11 +320,32 @@ case "$ALGO" in
     if [ -n "${BAPR_CONTROLLER_RELEASE_DROP_FRAC:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_release_drop_frac ${BAPR_CONTROLLER_RELEASE_DROP_FRAC}"
     fi
+    if [ -n "${BAPR_CONTROLLER_MAX_ACTIVE_ITERS:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_max_active_iters ${BAPR_CONTROLLER_MAX_ACTIVE_ITERS}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_MIN_ACTIVE_ITERS:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_min_active_iters ${BAPR_CONTROLLER_MIN_ACTIVE_ITERS}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_EXIT_COOLDOWN_ITERS:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_exit_cooldown_iters ${BAPR_CONTROLLER_EXIT_COOLDOWN_ITERS}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_EXIT_SIGNAL_THRESHOLD:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_exit_signal_threshold ${BAPR_CONTROLLER_EXIT_SIGNAL_THRESHOLD}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_EXIT_IMPROVE_FRAC:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_exit_improve_frac ${BAPR_CONTROLLER_EXIT_IMPROVE_FRAC}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_EXIT_DRAWDOWN_FRAC:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_exit_drawdown_frac ${BAPR_CONTROLLER_EXIT_DRAWDOWN_FRAC}"
+    fi
     if [ -n "${BAPR_CONTROLLER_LATCHED_SIGNAL:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_latched_signal ${BAPR_CONTROLLER_LATCHED_SIGNAL}"
     fi
     if [ -n "${BAPR_CONTROLLER_REG_MULTIPLIER:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_reg_multiplier ${BAPR_CONTROLLER_REG_MULTIPLIER}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_REG_RECOVER_ITERS:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_reg_recover_iters ${BAPR_CONTROLLER_REG_RECOVER_ITERS}"
     fi
     if [ -n "${BAPR_CONTROLLER_RECENT_MULTIPLIER:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_recent_multiplier ${BAPR_CONTROLLER_RECENT_MULTIPLIER}"
@@ -331,6 +358,9 @@ case "$ALGO" in
     fi
     if [ -n "${BAPR_CONTROLLER_ACTOR_UPDATE_MULTIPLIER:-}" ]; then
       EXTRA="$EXTRA --bapr_controller_actor_update_multiplier ${BAPR_CONTROLLER_ACTOR_UPDATE_MULTIPLIER}"
+    fi
+    if [ -n "${BAPR_CONTROLLER_ACTOR_RECOVER_ITERS:-}" ]; then
+      EXTRA="$EXTRA --bapr_controller_actor_recover_iters ${BAPR_CONTROLLER_ACTOR_RECOVER_ITERS}"
     fi
     if [ "${BAPR_ACTOR_LCB_QSTD_GATE:-0}" = "1" ]; then
       EXTRA="$EXTRA --bapr_actor_lcb_qstd_gate"
@@ -361,6 +391,27 @@ case "$ALGO" in
     fi
     if [ -n "${BAPR_ACTOR_LCB_PERF_EMA_ALPHA:-}" ]; then
       EXTRA="$EXTRA --bapr_actor_lcb_perf_ema_alpha ${BAPR_ACTOR_LCB_PERF_EMA_ALPHA}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_DELTA:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_delta ${BAPR_RESIDUAL_DELTA}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_GATE_SCALE:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_gate_scale ${BAPR_RESIDUAL_GATE_SCALE}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_ADV_MARGIN:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_adv_margin ${BAPR_RESIDUAL_ADV_MARGIN}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_ADV_TEMP:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_adv_temp ${BAPR_RESIDUAL_ADV_TEMP}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_QSTD_SCALE:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_qstd_scale ${BAPR_RESIDUAL_QSTD_SCALE}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_BEHAVIOR_WEIGHT:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_behavior_weight ${BAPR_RESIDUAL_BEHAVIOR_WEIGHT}"
+    fi
+    if [ -n "${BAPR_RESIDUAL_ACTION_PENALTY:-}" ]; then
+      EXTRA="$EXTRA --bapr_residual_action_penalty ${BAPR_RESIDUAL_ACTION_PENALTY}"
     fi
     if [ "${BAPR_BELIEF_CONDITIONED:-1}" = "0" ]; then
       EXTRA="$EXTRA --no_belief_conditioning"

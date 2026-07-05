@@ -406,16 +406,33 @@ def train(config: Config):
             f"reg_perf_collapse_scale={config.bapr_reg_perf_collapse_scale}, "
             f"controller_mode={config.bapr_controller_mode}, "
             f"controller_drop_frac={config.bapr_controller_drop_frac}, "
+            f"controller_soft_decay={config.bapr_controller_soft_decay}, "
+            f"controller_soft_min_signal={config.bapr_controller_soft_min_signal}, "
             f"controller_low_qstd_ratio={config.bapr_controller_low_qstd_ratio}, "
             f"controller_latch={config.bapr_controller_latch}, "
             f"controller_release_drop_frac={config.bapr_controller_release_drop_frac}, "
+            f"controller_max_active_iters={config.bapr_controller_max_active_iters}, "
+            f"controller_min_active_iters={config.bapr_controller_min_active_iters}, "
+            f"controller_exit_cooldown_iters={config.bapr_controller_exit_cooldown_iters}, "
+            f"controller_exit_signal_threshold={config.bapr_controller_exit_signal_threshold}, "
+            f"controller_exit_improve_frac={config.bapr_controller_exit_improve_frac}, "
+            f"controller_exit_drawdown_frac={config.bapr_controller_exit_drawdown_frac}, "
             f"controller_latched_signal={config.bapr_controller_latched_signal}, "
             f"controller_reg_multiplier={config.bapr_controller_reg_multiplier}, "
+            f"controller_reg_recover_iters={config.bapr_controller_reg_recover_iters}, "
             f"controller_recent_multiplier={config.bapr_controller_recent_multiplier}, "
             f"controller_actor_update_multiplier={config.bapr_controller_actor_update_multiplier}, "
+            f"controller_actor_recover_iters={config.bapr_controller_actor_recover_iters}, "
             f"actor_lcb_perf_gate={config.bapr_actor_lcb_perf_gate}, "
             f"actor_lcb_perf_drop_frac={config.bapr_actor_lcb_perf_drop_frac}, "
             f"actor_lcb_perf_warmup_iters={config.bapr_actor_lcb_perf_warmup_iters}, "
+            f"residual_delta={config.bapr_residual_delta}, "
+            f"residual_gate_scale={config.bapr_residual_gate_scale}, "
+            f"residual_adv_margin={config.bapr_residual_adv_margin}, "
+            f"residual_adv_temp={config.bapr_residual_adv_temp}, "
+            f"residual_qstd_scale={config.bapr_residual_qstd_scale}, "
+            f"residual_behavior_weight={config.bapr_residual_behavior_weight}, "
+            f"residual_action_penalty={config.bapr_residual_action_penalty}, "
             f"weight_reg={config.weight_reg}, "
             f"beta_ood={config.beta_ood}, "
             f"use_ema_eval={config.use_ema_eval}, "
@@ -615,13 +632,16 @@ def main():
                         help="Override LCB coefficient beta")
     parser.add_argument("--actor_objective", type=str, default=None,
                         choices=["lcb", "gated_lcb", "reg_gated_lcb",
-                                 "qstd_gated_lcb", "mean", "ucb"],
+                                 "qstd_gated_lcb", "mean", "ucb",
+                                 "conservative_residual",
+                                 "residual_advantage", "v80_residual"],
                         help="BAPR actor objective: lcb (legacy), gated_lcb "
                              "(surprise-gated conservative risk), mean "
                              "(SAC-like ensemble mean), reg_gated_lcb "
                              "(LCB only while RE-SAC regularizer is active), "
                              "qstd_gated_lcb (LCB only under actor q_std gate), "
-                             "or ucb (optimistic).")
+                             "ucb (optimistic), or conservative_residual "
+                             "(v80 bounded adaptive residual from EMA base).")
     parser.add_argument("--weight_reg", type=float, default=None,
                         help="Override RE-SAC/BAPR critic weight regularizer.")
     parser.add_argument("--beta_ood", type=float, default=None,
@@ -708,7 +728,7 @@ def main():
     parser.add_argument("--bapr_reg_perf_collapse_warmup_iters", type=int, default=None,
                         help="Warmup before the RE-SAC regularization collapse guard can activate.")
     parser.add_argument("--bapr_controller_mode", type=str, default=None,
-                        choices=["off", "recovery"],
+                        choices=["off", "recovery", "soft", "soft_recovery"],
                         help="Second-layer BAPR algorithm controller mode.")
     parser.add_argument("--bapr_controller_warmup_iters", type=int, default=None,
                         help="Warmup before the algorithm controller can activate.")
@@ -718,6 +738,10 @@ def main():
                         help="Reward drawdown fraction required by the algorithm controller.")
     parser.add_argument("--bapr_controller_drop_ramp", type=float, default=None,
                         help="Drawdown ramp width for continuous controller signal.")
+    parser.add_argument("--bapr_controller_soft_decay", type=float, default=None,
+                        help="Soft controller signal decay per iteration.")
+    parser.add_argument("--bapr_controller_soft_min_signal", type=float, default=None,
+                        help="Minimum soft controller signal before multipliers are applied.")
     parser.add_argument("--bapr_controller_low_qstd_ratio", type=float, default=None,
                         help="Controller low-disagreement threshold on q_std / |q_mean|.")
     parser.add_argument("--bapr_controller_low_qstd_threshold", type=float, default=None,
@@ -726,10 +750,24 @@ def main():
                         help="Keep the algorithm controller active until reward drawdown recovers.")
     parser.add_argument("--bapr_controller_release_drop_frac", type=float, default=None,
                         help="Release a latched algorithm controller below this reward drawdown.")
+    parser.add_argument("--bapr_controller_max_active_iters", type=int, default=None,
+                        help="Force-release the recovery controller after this many active iterations; 0 disables.")
+    parser.add_argument("--bapr_controller_min_active_iters", type=int, default=None,
+                        help="Minimum active iterations before signal/improvement/drawdown exits can fire.")
+    parser.add_argument("--bapr_controller_exit_cooldown_iters", type=int, default=None,
+                        help="After a controller exit, suppress re-entry for this many iterations.")
+    parser.add_argument("--bapr_controller_exit_signal_threshold", type=float, default=None,
+                        help="Exit after min-active iters once soft controller signal drops below this threshold.")
+    parser.add_argument("--bapr_controller_exit_improve_frac", type=float, default=None,
+                        help="Exit after min-active iters once smoothed reward improves by this peak-normalized fraction.")
+    parser.add_argument("--bapr_controller_exit_drawdown_frac", type=float, default=None,
+                        help="Exit after min-active iters once drawdown is at or below this fraction; negative disables.")
     parser.add_argument("--bapr_controller_latched_signal", type=float, default=None,
                         help="Minimum controller signal while the controller is latched.")
     parser.add_argument("--bapr_controller_reg_multiplier", type=float, default=None,
                         help="Target RE-SAC regularizer multiplier at full controller activation.")
+    parser.add_argument("--bapr_controller_reg_recover_iters", type=int, default=None,
+                        help="Linearly restore controller regularization multiplier to 1 over this many active iterations.")
     parser.add_argument("--bapr_controller_recent_multiplier", type=float, default=None,
                         help="Target recent replay multiplier at full controller activation.")
     parser.add_argument("--bapr_controller_recent_add_frac", type=float, default=None,
@@ -738,6 +776,8 @@ def main():
                         help="Target actor LCB multiplier at full controller activation.")
     parser.add_argument("--bapr_controller_actor_update_multiplier", type=float, default=None,
                         help="Target actor update multiplier at full controller activation.")
+    parser.add_argument("--bapr_controller_actor_recover_iters", type=int, default=None,
+                        help="Linearly restore actor update multiplier to 1 over this many active iterations.")
     parser.add_argument("--bapr_actor_lcb_qstd_gate", action="store_true",
                         help="Enable actor-only LCB when q_std/q_ratio crosses thresholds.")
     parser.add_argument("--bapr_actor_lcb_qstd_threshold", type=float, default=None,
@@ -758,6 +798,20 @@ def main():
                         help="Minimum smoothed reward peak before actor LCB performance gate can activate.")
     parser.add_argument("--bapr_actor_lcb_perf_ema_alpha", type=float, default=None,
                         help="EMA alpha for train/eval reward drawdown tracked by actor LCB gate.")
+    parser.add_argument("--bapr_residual_delta", type=float, default=None,
+                        help="v80 max absolute residual action from the zero-context EMA base.")
+    parser.add_argument("--bapr_residual_gate_scale", type=float, default=None,
+                        help="v80 multiplier for the conservative residual gate.")
+    parser.add_argument("--bapr_residual_adv_margin", type=float, default=None,
+                        help="v80 conservative advantage margin before residual gate opens.")
+    parser.add_argument("--bapr_residual_adv_temp", type=float, default=None,
+                        help="v80 sigmoid temperature for residual conservative advantage.")
+    parser.add_argument("--bapr_residual_qstd_scale", type=float, default=None,
+                        help="v80 positive Q-std penalty in conservative advantage.")
+    parser.add_argument("--bapr_residual_behavior_weight", type=float, default=None,
+                        help="v80 behavior regularization toward base action when gate is low.")
+    parser.add_argument("--bapr_residual_action_penalty", type=float, default=None,
+                        help="v80 penalty on the gated residual action magnitude.")
     parser.add_argument("--backend", type=str, default="spring",
                         choices=["spring", "generalized"],
                         help="Brax physics backend: spring (fast) or generalized (accurate)")
@@ -947,6 +1001,10 @@ def main():
         config.bapr_controller_drop_frac = args.bapr_controller_drop_frac
     if args.bapr_controller_drop_ramp is not None:
         config.bapr_controller_drop_ramp = args.bapr_controller_drop_ramp
+    if args.bapr_controller_soft_decay is not None:
+        config.bapr_controller_soft_decay = args.bapr_controller_soft_decay
+    if args.bapr_controller_soft_min_signal is not None:
+        config.bapr_controller_soft_min_signal = args.bapr_controller_soft_min_signal
     if args.bapr_controller_low_qstd_ratio is not None:
         config.bapr_controller_low_qstd_ratio = args.bapr_controller_low_qstd_ratio
     if args.bapr_controller_low_qstd_threshold is not None:
@@ -955,10 +1013,28 @@ def main():
         config.bapr_controller_latch = True
     if args.bapr_controller_release_drop_frac is not None:
         config.bapr_controller_release_drop_frac = args.bapr_controller_release_drop_frac
+    if args.bapr_controller_max_active_iters is not None:
+        config.bapr_controller_max_active_iters = args.bapr_controller_max_active_iters
+    if args.bapr_controller_min_active_iters is not None:
+        config.bapr_controller_min_active_iters = args.bapr_controller_min_active_iters
+    if args.bapr_controller_exit_cooldown_iters is not None:
+        config.bapr_controller_exit_cooldown_iters = (
+            args.bapr_controller_exit_cooldown_iters)
+    if args.bapr_controller_exit_signal_threshold is not None:
+        config.bapr_controller_exit_signal_threshold = (
+            args.bapr_controller_exit_signal_threshold)
+    if args.bapr_controller_exit_improve_frac is not None:
+        config.bapr_controller_exit_improve_frac = (
+            args.bapr_controller_exit_improve_frac)
+    if args.bapr_controller_exit_drawdown_frac is not None:
+        config.bapr_controller_exit_drawdown_frac = (
+            args.bapr_controller_exit_drawdown_frac)
     if args.bapr_controller_latched_signal is not None:
         config.bapr_controller_latched_signal = args.bapr_controller_latched_signal
     if args.bapr_controller_reg_multiplier is not None:
         config.bapr_controller_reg_multiplier = args.bapr_controller_reg_multiplier
+    if args.bapr_controller_reg_recover_iters is not None:
+        config.bapr_controller_reg_recover_iters = args.bapr_controller_reg_recover_iters
     if args.bapr_controller_recent_multiplier is not None:
         config.bapr_controller_recent_multiplier = args.bapr_controller_recent_multiplier
     if args.bapr_controller_recent_add_frac is not None:
@@ -968,6 +1044,9 @@ def main():
     if args.bapr_controller_actor_update_multiplier is not None:
         config.bapr_controller_actor_update_multiplier = (
             args.bapr_controller_actor_update_multiplier)
+    if args.bapr_controller_actor_recover_iters is not None:
+        config.bapr_controller_actor_recover_iters = (
+            args.bapr_controller_actor_recover_iters)
     if args.bapr_actor_lcb_qstd_gate:
         config.bapr_actor_lcb_qstd_gate = True
     if args.bapr_actor_lcb_qstd_threshold is not None:
@@ -988,6 +1067,20 @@ def main():
         config.bapr_actor_lcb_perf_min_peak = args.bapr_actor_lcb_perf_min_peak
     if args.bapr_actor_lcb_perf_ema_alpha is not None:
         config.bapr_actor_lcb_perf_ema_alpha = args.bapr_actor_lcb_perf_ema_alpha
+    if args.bapr_residual_delta is not None:
+        config.bapr_residual_delta = args.bapr_residual_delta
+    if args.bapr_residual_gate_scale is not None:
+        config.bapr_residual_gate_scale = args.bapr_residual_gate_scale
+    if args.bapr_residual_adv_margin is not None:
+        config.bapr_residual_adv_margin = args.bapr_residual_adv_margin
+    if args.bapr_residual_adv_temp is not None:
+        config.bapr_residual_adv_temp = args.bapr_residual_adv_temp
+    if args.bapr_residual_qstd_scale is not None:
+        config.bapr_residual_qstd_scale = args.bapr_residual_qstd_scale
+    if args.bapr_residual_behavior_weight is not None:
+        config.bapr_residual_behavior_weight = args.bapr_residual_behavior_weight
+    if args.bapr_residual_action_penalty is not None:
+        config.bapr_residual_action_penalty = args.bapr_residual_action_penalty
     config.brax_backend = args.backend
     if args.log_scale_limit is not None:
         config.log_scale_limit = args.log_scale_limit

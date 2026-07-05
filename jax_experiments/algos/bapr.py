@@ -128,6 +128,8 @@ class BAPR:
         self._eval_reward_peak = None
         self._last_train_reward_drop_frac = 0.0
         self._last_eval_reward_drop_frac = 0.0
+        self._last_train_reward_improve_frac = 0.0
+        self._last_eval_reward_improve_frac = 0.0
         self._last_perf_drop_frac = 0.0
         self._reg_perf_collapse_active = False
         self._actor_lcb_perf_active = False
@@ -135,6 +137,10 @@ class BAPR:
         self._actor_lcb_active = False
         self._controller_active = False
         self._controller_latched = False
+        self._controller_active_iters = 0
+        self._controller_cooldown_iters = 0
+        self._controller_duration_released = False
+        self._controller_exit_reason = 0.0
         self._controller_signal = 0.0
         self._controller_drawdown = 0.0
         self._controller_low_disagreement = False
@@ -142,7 +148,6 @@ class BAPR:
         self._controller_recent_multiplier = 1.0
         self._controller_recent_add_frac = 0.0
         self._controller_lcb_multiplier = 1.0
-        self._controller_actor_update_multiplier = 1.0
         self._controller_actor_update_multiplier = 1.0
         self._build_scan_fn()
 
@@ -161,6 +166,19 @@ class BAPR:
         rbf_r = self.config.rbf_radius
         cons_w = self.config.consistency_loss_weight
         div_w = self.config.diversity_loss_weight
+        residual_delta = float(getattr(self.config, "bapr_residual_delta", 0.25))
+        residual_gate_scale = float(getattr(
+            self.config, "bapr_residual_gate_scale", 1.0))
+        residual_adv_margin = float(getattr(
+            self.config, "bapr_residual_adv_margin", 0.0))
+        residual_adv_temp = max(float(getattr(
+            self.config, "bapr_residual_adv_temp", 300.0)), 1e-6)
+        residual_qstd_scale = float(getattr(
+            self.config, "bapr_residual_qstd_scale", 0.5))
+        residual_behavior_weight = float(getattr(
+            self.config, "bapr_residual_behavior_weight", 0.05))
+        residual_action_penalty = float(getattr(
+            self.config, "bapr_residual_action_penalty", 0.0))
 
         gd_policy = nnx.graphdef(self.policy)
         gd_critic = nnx.graphdef(self.critic)
@@ -268,6 +286,65 @@ class BAPR:
                     target_reg = (
                         reg_scale * weight_reg
                         * nnx.merge(gd_target, t_p).compute_reg_norm()[:, None])
+                    residual_gate_mean = jnp.array(0.0, dtype=obs.dtype)
+                    residual_adv_mean = jnp.array(0.0, dtype=obs.dtype)
+                    residual_norm_mean = jnp.array(0.0, dtype=obs.dtype)
+                    if actor_objective in (
+                            "conservative_residual",
+                            "residual_advantage",
+                            "v80_residual"):
+                        # v80: treat a zero-context EMA policy as the stable
+                        # base. The online context-conditioned actor can only
+                        # affect the objective through a bounded residual, and
+                        # that residual is stopped unless conservative
+                        # Q-advantage over the base is positive enough.
+                        base_pm = nnx.merge(gd_policy, ema_p)
+                        zero_ep = jnp.zeros_like(ep_full)
+                        base_action = jax.lax.stop_gradient(
+                            base_pm.deterministic(obs, zero_ep))
+                        prop_residual = jnp.clip(
+                            na - base_action,
+                            -residual_delta, residual_delta)
+                        prop_action = jnp.clip(
+                            base_action + prop_residual,
+                            -1.0 + 1e-6, 1.0 - 1e-6)
+
+                        base_qv = cm(obs_aug, base_action) + target_reg
+                        prop_qv = cm(obs_aug, prop_action) + target_reg
+                        base_safe = (
+                            base_qv.mean(axis=0)
+                            - residual_qstd_scale * base_qv.std(axis=0))
+                        prop_safe = (
+                            prop_qv.mean(axis=0)
+                            - residual_qstd_scale * prop_qv.std(axis=0))
+                        adv = prop_safe - base_safe
+                        gate = residual_gate_scale * jax.nn.sigmoid(
+                            (adv - residual_adv_margin) / residual_adv_temp)
+                        gate = jnp.clip(gate, 0.0, 1.0)
+                        gate = jax.lax.stop_gradient(gate)
+                        mixed_action = jnp.clip(
+                            base_action + gate[:, None] * prop_residual,
+                            -1.0 + 1e-6, 1.0 - 1e-6)
+                        qv = cm(obs_aug, mixed_action) + target_reg
+                        safe_q = (
+                            qv.mean(axis=0)
+                            - residual_qstd_scale * qv.std(axis=0))
+                        residual_norm = jnp.sum(
+                            jnp.square(mixed_action - base_action), axis=-1)
+                        behavior_loss = jnp.mean(
+                            (1.0 - gate)
+                            * jnp.sum(jnp.square(na - base_action), axis=-1))
+                        action_penalty = jnp.mean(residual_norm)
+                        residual_gate_mean = gate.mean()
+                        residual_adv_mean = adv.mean()
+                        residual_norm_mean = residual_norm.mean()
+                        loss = (
+                            (jnp.exp(la) * lp - safe_q).mean()
+                            + residual_behavior_weight * behavior_loss
+                            + residual_action_penalty * action_penalty)
+                        return loss, (lp, residual_gate_mean,
+                                      residual_adv_mean, residual_norm_mean)
+
                     qv = cm(obs_aug, na) + target_reg
                     q_mean = qv.mean(axis=0)
                     q_std = qv.std(axis=0)
@@ -283,10 +360,13 @@ class BAPR:
                         actor_q = q_mean + beta_base * actor_lcb_scale * q_std
                     else:
                         actor_q = q_mean + effective_beta * q_std
-                    return (jnp.exp(la) * lp - actor_q).mean(), lp
+                    loss = (jnp.exp(la) * lp - actor_q).mean()
+                    return loss, (lp, residual_gate_mean,
+                                  residual_adv_mean, residual_norm_mean)
 
-                (p_loss, lp), p_grads = jax.value_and_grad(
+                (p_loss, p_aux), p_grads = jax.value_and_grad(
                     policy_loss_fn, has_aux=True)(p_p)
+                lp, residual_gate_mean, residual_adv_mean, residual_norm_mean = p_aux
                 p_grads = jax.tree.map(
                     lambda g: g * actor_update_scale, p_grads)
                 p_upd, new_p_os = p_opt.update(p_grads, p_os, p_p)
@@ -310,7 +390,9 @@ class BAPR:
                              new_x_p, new_la,
                              new_c_os, new_p_os, new_x_os, new_a_os, key)
                 metrics = (c_loss, p_loss, x_loss, jnp.exp(new_la),
-                           pq.mean(), pq.std(axis=0).mean(), lp.mean())
+                           pq.mean(), pq.std(axis=0).mean(), lp.mean(),
+                           residual_gate_mean, residual_adv_mean,
+                           residual_norm_mean)
                 return new_carry, metrics
 
             init = (critic_params, target_params, policy_params,
@@ -585,6 +667,7 @@ class BAPR:
         alpha = float(getattr(
             self.config, "bapr_actor_lcb_perf_ema_alpha", 0.20))
         ema = getattr(self, ema_attr)
+        prev_ema = ema
         if ema is None:
             ema = value
         else:
@@ -597,6 +680,11 @@ class BAPR:
         setattr(self, ema_attr, float(ema))
         setattr(self, peak_attr, float(peak))
         denom = max(abs(float(peak)), 1e-6)
+        improve = 0.0 if prev_ema is None else (float(ema) - float(prev_ema)) / denom
+        if ema_attr == "_train_reward_ema":
+            self._last_train_reward_improve_frac = float(improve)
+        elif ema_attr == "_eval_reward_ema":
+            self._last_eval_reward_improve_frac = float(improve)
         return float(max(0.0, (float(peak) - float(ema)) / denom))
 
     def _observe_train_reward(self, recent_rewards):
@@ -610,6 +698,10 @@ class BAPR:
     def _reset_algorithm_controller(self):
         self._controller_active = False
         self._controller_latched = False
+        self._controller_active_iters = 0
+        self._controller_cooldown_iters = 0
+        self._controller_duration_released = False
+        self._controller_exit_reason = 0.0
         self._controller_signal = 0.0
         self._controller_drawdown = 0.0
         self._controller_low_disagreement = False
@@ -617,6 +709,7 @@ class BAPR:
         self._controller_recent_multiplier = 1.0
         self._controller_recent_add_frac = 0.0
         self._controller_lcb_multiplier = 1.0
+        self._controller_actor_update_multiplier = 1.0
 
     def _update_algorithm_controller(self, q_std, q_abs_mean, current_iter):
         mode = str(getattr(self.config, "bapr_controller_mode", "off")).lower()
@@ -659,9 +752,29 @@ class BAPR:
         signal = float(np.clip(
             (drop_frac - drop_threshold) / drop_ramp, 0.0, 1.0))
         entry_active = bool(peak >= min_peak and low_disagreement and signal > 0.0)
-        latch_enabled = bool(getattr(self.config, "bapr_controller_latch", False))
+        soft_mode = mode in ("soft", "soft_recovery")
+        if soft_mode:
+            prev_signal = float(getattr(self, "_controller_signal", 0.0))
+            decay = float(np.clip(getattr(
+                self.config, "bapr_controller_soft_decay", 0.92), 0.0, 0.999))
+            min_signal = float(max(0.0, getattr(
+                self.config, "bapr_controller_soft_min_signal", 0.01)))
+            signal = float(max(signal if entry_active else 0.0,
+                               prev_signal * decay))
+            active = bool(signal > min_signal)
+            latch_enabled = False
+        else:
+            active = entry_active
+            latch_enabled = bool(getattr(self.config, "bapr_controller_latch", False))
         release_drop = float(getattr(
             self.config, "bapr_controller_release_drop_frac", 0.45))
+        if drop_frac <= release_drop:
+            self._controller_duration_released = False
+        if bool(getattr(self, "_controller_duration_released", False)):
+            entry_active = False
+            active = False
+            signal = 0.0
+
         if latch_enabled and entry_active:
             self._controller_latched = True
         elif (
@@ -671,7 +784,6 @@ class BAPR:
         ):
             self._controller_latched = False
 
-        active = entry_active
         if latch_enabled and bool(getattr(self, "_controller_latched", False)):
             active = bool(peak >= min_peak and drop_frac > release_drop)
             if active:
@@ -679,10 +791,67 @@ class BAPR:
                     self.config, "bapr_controller_latched_signal", 1.0))
                 signal = max(signal, float(np.clip(latched_signal, 0.0, 1.0)))
 
+        active_iters = int(getattr(self, "_controller_active_iters", 0))
+        cooldown_iters = int(getattr(self, "_controller_cooldown_iters", 0))
+        exit_reason = 0.0
+        if cooldown_iters > 0:
+            cooldown_iters -= 1
+            active = False
+            signal = 0.0
+            active_iters = 0
+            exit_reason = 1.0
+        if active:
+            active_iters += 1
+            max_active_iters = int(getattr(
+                self.config, "bapr_controller_max_active_iters", 0))
+            min_active_iters = int(getattr(
+                self.config, "bapr_controller_min_active_iters", 0))
+            min_active_ok = active_iters >= max(0, min_active_iters)
+            cooldown_target = int(getattr(
+                self.config, "bapr_controller_exit_cooldown_iters", 0))
+            signal_exit_th = float(getattr(
+                self.config, "bapr_controller_exit_signal_threshold", 0.0))
+            improve_exit_th = float(getattr(
+                self.config, "bapr_controller_exit_improve_frac", 0.0))
+            drawdown_exit_th = float(getattr(
+                self.config, "bapr_controller_exit_drawdown_frac", -1.0))
+            reward_improve = max(
+                float(getattr(self, "_last_train_reward_improve_frac", 0.0)),
+                float(getattr(self, "_last_eval_reward_improve_frac", 0.0)))
+            force_exit = False
+            if max_active_iters > 0 and active_iters > max_active_iters:
+                force_exit = True
+                exit_reason = 2.0
+            elif min_active_ok and signal_exit_th > 0.0 and signal <= signal_exit_th:
+                force_exit = True
+                exit_reason = 3.0
+            elif min_active_ok and improve_exit_th > 0.0 and reward_improve >= improve_exit_th:
+                force_exit = True
+                exit_reason = 4.0
+            elif min_active_ok and drawdown_exit_th >= 0.0 and drop_frac <= drawdown_exit_th:
+                force_exit = True
+                exit_reason = 5.0
+
+            if force_exit:
+                if cooldown_target > 0:
+                    cooldown_iters = cooldown_target
+                    self._controller_duration_released = False
+                else:
+                    self._controller_duration_released = True
+                self._controller_latched = False
+                active = False
+                signal = 0.0
+                active_iters = 0
+        else:
+            active_iters = 0
+
         self._controller_drawdown = float(drop_frac)
         self._controller_low_disagreement = low_disagreement
         self._controller_signal = float(signal)
         self._controller_active = active
+        self._controller_active_iters = active_iters
+        self._controller_cooldown_iters = cooldown_iters
+        self._controller_exit_reason = float(exit_reason)
         if not active:
             self._controller_reg_multiplier = 1.0
             self._controller_recent_multiplier = 1.0
@@ -702,6 +871,22 @@ class BAPR:
         actor_update_target = float(np.clip(getattr(
             self.config, "bapr_controller_actor_update_multiplier", 1.0),
             0.0, 1.0))
+
+        def recover_target(target, recover_iters):
+            recover_iters = int(recover_iters)
+            if recover_iters <= 0 or target >= 1.0:
+                return float(target)
+            progress = float(np.clip(
+                (active_iters - 1) / max(float(recover_iters), 1.0),
+                0.0, 1.0))
+            return float(target + progress * (1.0 - target))
+
+        reg_target = recover_target(
+            reg_target,
+            getattr(self.config, "bapr_controller_reg_recover_iters", 0))
+        actor_update_target = recover_target(
+            actor_update_target,
+            getattr(self.config, "bapr_controller_actor_recover_iters", 0))
 
         self._controller_reg_multiplier = float(
             1.0 + signal * (reg_target - 1.0))
@@ -1033,7 +1218,8 @@ class BAPR:
         n = obs.shape[0]
         self.update_count += n
 
-        c_loss, p_loss, x_loss, alpha, qm, qs, lp = metrics
+        (c_loss, p_loss, x_loss, alpha, qm, qs, lp,
+         residual_gate, residual_adv, residual_norm) = metrics
         effective_beta = self.config.beta - weighted_lambda * self.config.penalty_scale
         return {
             "critic_loss": float(c_loss.mean()),
@@ -1043,6 +1229,9 @@ class BAPR:
             "q_mean": float(qm.mean()),
             "q_std_mean": float(qs.mean()),
             "log_prob": float(lp.mean()),
+            "v80_residual_gate": float(residual_gate.mean()),
+            "v80_residual_advantage": float(residual_adv.mean()),
+            "v80_residual_norm": float(residual_norm.mean()),
             "weighted_lambda": weighted_lambda,
             "adaptation_gate": float(self._adaptation_gate),
             "raw_adaptation_gate": float(self._raw_adaptation_gate),
@@ -1057,6 +1246,11 @@ class BAPR:
             "actor_lcb_active": float(self._actor_lcb_active),
             "controller_active": float(self._controller_active),
             "controller_latched": float(self._controller_latched),
+            "controller_active_iters": float(self._controller_active_iters),
+            "controller_cooldown_iters": float(self._controller_cooldown_iters),
+            "controller_duration_released": float(
+                self._controller_duration_released),
+            "controller_exit_reason": float(self._controller_exit_reason),
             "controller_signal": float(self._controller_signal),
             "controller_drawdown": float(self._controller_drawdown),
             "controller_low_disagreement": float(self._controller_low_disagreement),
@@ -1069,6 +1263,10 @@ class BAPR:
             "perf_drop_frac": float(self._last_perf_drop_frac),
             "train_reward_drop_frac": float(self._last_train_reward_drop_frac),
             "eval_reward_drop_frac": float(self._last_eval_reward_drop_frac),
+            "train_reward_improve_frac": float(
+                self._last_train_reward_improve_frac),
+            "eval_reward_improve_frac": float(
+                self._last_eval_reward_improve_frac),
             "reg_latched": float(self._reg_latched),
             "effective_beta": float(effective_beta),
             "belief_entropy": float(self.belief_tracker.entropy),
