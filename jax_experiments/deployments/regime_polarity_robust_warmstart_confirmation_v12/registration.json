@@ -1,0 +1,136 @@
+{
+  "created_before_training": true,
+  "gate": {
+    "minimum_calibration_gain": 0.05,
+    "minimum_holdout_mode_gain": 0.05,
+    "minimum_holdout_mode_wins": 3,
+    "minimum_switching_gain": 0.1,
+    "require_all_switching_events_per_passing_seed": true,
+    "require_distinct_switching_traces": true,
+    "require_zero_termination": true,
+    "required_seed_passes": 4
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      167001,
+      167017,
+      167033
+    ],
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v12-actor-only-warmstart-confirmation",
+    "stationary_holdout_event_seeds": [
+      167101,
+      167117,
+      167133
+    ],
+    "switching_event_seeds": [
+      167201,
+      167217,
+      167233
+    ],
+    "switching_schedules": {
+      "167201": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "167217": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "167233": [
+        2,
+        0,
+        3,
+        1
+      ]
+    },
+    "training_seeds": [
+      71003,
+      71021,
+      71039,
+      71057,
+      71079
+    ],
+    "variant": "actor_only"
+  },
+  "schema": "bapr.robust-warmstart-specialist-registration.v12",
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_robust_warmstart_confirmation_v12.py": {
+      "sha256": "92da54909f4627d997e6a1cbded4ce47aca885bc777ac265905be2ba44feae5d",
+      "size": 4805
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_robust_warmstart_specialist_v11.py": {
+      "sha256": "adeb9f0587df5fa775fb64c2858d4fe828724cad441b11fd1ed3680ff629c9d4",
+      "size": 7660
+    },
+    "jax_experiments/analysis/regime_polarity_robust_warmstart_confirmation_v12.py": {
+      "sha256": "6fc7d39d4dbf2ab0058880cde064baf92d6cd11350be5bcf1c445fa4ae6a5427",
+      "size": 13892
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v12.py": {
+      "sha256": "0ae15af3e9d3ac3d1298215d7131127c6b872cb21514f74ab789902acc6857fb",
+      "size": 9124
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_confirmation_audit_v12.py": {
+      "sha256": "6c095c935949802387a898db14b44416674083d96073fb5d286309fb5c9930ba",
+      "size": 14966
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_specialist_audit_v11.py": {
+      "sha256": "c580066aeb38bee9603d6057c385e123d97c763962152a659163ee1fefd8c73c",
+      "size": 16111
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_specialist_v11.py": {
+      "sha256": "dd0bed1cc914a6d7b5377b9e68f8ac26b8d317bf65a2a76f248cc29962c7206c",
+      "size": 15612
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_specialist_v12.py": {
+      "sha256": "a5d4688a2f6816d3c68f8bdae051696ea327488071b229892dacc36f6e52dba9",
+      "size": 6987
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/deployments/regime_polarity_robust_warmstart_specialist_v11/registration.json": {
+      "sha256": "656ff70954e9ac7d8eb5db2cb267a761176c07a873f00b0a5fad090e96b11a19",
+      "size": 4288
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_specialist_analysis_v11/analysis.json": {
+      "sha256": "6f374a05d23f02b9c0a782abc68c6751a242aa6e9c7529dd14d231337ac11f81",
+      "size": 13575
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_polarity_robust_warmstart_confirmation_v12_preregistration_2026-08-31.md": {
+      "sha256": "7b34da4fb5101ae158b1b2a738420e5f08782ddb7e3244b82e9311f21e7fb0da",
+      "size": 2265
+    },
+    "reports/regime_polarity_robust_warmstart_specialist_v11_2026-08-31.md": {
+      "sha256": "20daf5dc1ba8ccc3d9c89341f6846a401e0a698a65c83d7a36d98feb45d7d300",
+      "size": 1018
+    }
+  },
+  "status": "registered",
+  "sync_policy": "policy parameters and JSON provenance only; no full checkpoint",
+  "training": {
+    "initialization": "copy robust actor only; fresh critic, target, alpha, optimizers, replay",
+    "robust_source_steps": 5600000,
+    "specialist_final_steps": 8400000,
+    "specialist_finetune_steps": 2800000
+  }
+}

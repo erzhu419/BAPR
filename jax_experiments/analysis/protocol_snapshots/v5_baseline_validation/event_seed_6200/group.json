@@ -1,0 +1,1848 @@
+{
+  "bundle_manifest_sha256": {
+    "robust": "baad82089b6a5d9f8e53385ca933942f473048f6e3d38d584e0dd03bca4042de",
+    "specialist_mode_0": "e3732b54b9f3977735e076720a7bd50f3e5dcdf0c3d7a549a7c566d6d15bc5e7",
+    "specialist_mode_1": "b6665b6196caa292d94cd1f2517429cb2f76bccf7133df62981811263ca99971",
+    "specialist_mode_2": "318ebe1cc4b937d80803f2706d8103abe82c484b2c6f23430bfc356793d3b7f4",
+    "specialist_mode_3": "9f4042921e868b95eed20c0f075a0415938810a6cab8265bcbbd01a99a40f8de"
+  },
+  "decision_variant": "cs4d025c80h8",
+  "env": "HalfCheetah-v2",
+  "episodes_per_task": 5,
+  "estimator_manifest_file": {
+    "sha256": "9c380e077d931b1d07517ce7c017fcbe5e13220883cefe4eae94cf8107883469",
+    "size": 18295
+  },
+  "estimator_parameter_file": {
+    "sha256": "64a2d41c05067c8605c6cbd9cbac277458596196838ba60c74e0749eef1435ee",
+    "size": 247166
+  },
+  "event_seed": 6200,
+  "event_seed_role": "utility decision validation stream",
+  "family": "structured_channel",
+  "full_cycle_dwell_steps": 250,
+  "oracle_controller_map": [
+    0,
+    4,
+    2,
+    3
+  ],
+  "role": "validation",
+  "router_config": {
+    "change_cusum_drift": 0.25,
+    "change_cusum_threshold": 4.0,
+    "change_reset_alpha": 0.25,
+    "change_reset_mix": 1.0,
+    "change_reset_threshold": 0.0,
+    "confidence_threshold": 0.8,
+    "evidence_scale": 0.25,
+    "hazard_rate": 0.005,
+    "hysteresis_margin": 0.02,
+    "margin_threshold": 0.02,
+    "min_history": 8,
+    "posterior_decay": 1.0
+  },
+  "schema": "bapr.v3-utility-router-audit-group.v2",
+  "slow_dwell_steps": 500,
+  "source_snapshot_sha256": "734422fb635307b3ba2447c0769a92ad95480c3c2f3d3dc9add2079f601ee451",
+  "stationary": {
+    "dynamic_utility_oracle": {
+      "0": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 3225.6889681965113,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2974.2584751546383,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 3026.9821221083403,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2957.474876895547,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 3180.3292509168386,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 3072.946738654375,
+        "returns": [
+          3225.6889681965113,
+          2974.2584751546383,
+          3026.9821221083403,
+          2957.474876895547,
+          3180.3292509168386
+        ],
+        "routing": [],
+        "std": 109.58746535089512,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "1": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2116.37933485955,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2240.373048812151,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2039.216084226966,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2151.057354107499,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2188.361520975828,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2147.077468596399,
+        "returns": [
+          2116.37933485955,
+          2240.373048812151,
+          2039.216084226966,
+          2151.057354107499,
+          2188.361520975828
+        ],
+        "routing": [],
+        "std": 67.82437822841987,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "2": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 3117.2441360652447,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 3319.494922503829,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 3265.798583343625,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 3212.3392886668444,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 3216.8482269495726,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 3226.345031505823,
+        "returns": [
+          3117.2441360652447,
+          3319.494922503829,
+          3265.798583343625,
+          3212.3392886668444,
+          3216.8482269495726
+        ],
+        "routing": [],
+        "std": 66.96691789345805,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "3": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2968.7373840361834,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2342.9024354591966,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2631.522885069251,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2849.717798233032,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2900.5693815350533,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2738.6899768665435,
+        "returns": [
+          2968.7373840361834,
+          2342.9024354591966,
+          2631.522885069251,
+          2849.717798233032,
+          2900.5693815350533
+        ],
+        "routing": [],
+        "std": 227.85367752847694,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      }
+    },
+    "learned_utility_router": {
+      "0": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 3191.9117825329304,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 3177.3482078388333,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 3210.660915285349,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 3010.8090955913067,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 3123.0501091480255,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 3142.756022079289,
+        "returns": [
+          3191.9117825329304,
+          3177.3482078388333,
+          3210.660915285349,
+          3010.8090955913067,
+          3123.0501091480255
+        ],
+        "routing": [
+          {
+            "action_accuracy": 1.0,
+            "best_expected_advantage_mean": 839.9221950467743,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9718376079209796,
+            "coverage": 1.0,
+            "effective_accuracy": 1.0,
+            "episode": 0,
+            "fallback_rate": 0.0,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 12,
+              "0": 988
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.0
+          },
+          {
+            "action_accuracy": 0.9597107438016529,
+            "best_expected_advantage_mean": 814.0745327234698,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9576968821360805,
+            "coverage": 0.9597107438016529,
+            "effective_accuracy": 0.9597107438016529,
+            "episode": 1,
+            "fallback_rate": 0.04028925619834711,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 56,
+              "0": 944
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.040289256198347105
+          },
+          {
+            "action_accuracy": 0.878099173553719,
+            "best_expected_advantage_mean": 784.5119300685208,
+            "conditional_accuracy": 0.9279475982532751,
+            "confidence_mean": 0.9512979535108028,
+            "coverage": 0.9462809917355371,
+            "effective_accuracy": 0.878099173553719,
+            "episode": 2,
+            "fallback_rate": 0.05371900826446285,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 60,
+              "0": 874,
+              "2": 66
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.12190082644628099
+          },
+          {
+            "action_accuracy": 1.0,
+            "best_expected_advantage_mean": 837.4627471492943,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9706566894690272,
+            "coverage": 1.0,
+            "effective_accuracy": 1.0,
+            "episode": 3,
+            "fallback_rate": 0.0,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 8,
+              "0": 992
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.0
+          },
+          {
+            "action_accuracy": 0.9142561983471075,
+            "best_expected_advantage_mean": 778.2478344020855,
+            "conditional_accuracy": 0.9899328859060402,
+            "confidence_mean": 0.9382668090444342,
+            "coverage": 0.9235537190082644,
+            "effective_accuracy": 0.9142561983471075,
+            "episode": 4,
+            "fallback_rate": 0.07644628099173556,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 83,
+              "0": 908,
+              "2": 9
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.08574380165289257
+          }
+        ],
+        "std": 72.14193930967554,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "1": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2420.6118336096406,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2204.629184499383,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2034.5455337017775,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2151.057354107499,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2234.9537147581577,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2209.1595241352916,
+        "returns": [
+          2420.6118336096406,
+          2204.629184499383,
+          2034.5455337017775,
+          2151.057354107499,
+          2234.9537147581577
+        ],
+        "routing": [
+          {
+            "action_accuracy": 0.9927685950413223,
+            "best_expected_advantage_mean": 12.555703342735562,
+            "conditional_accuracy": 0.9904891304347826,
+            "confidence_mean": 0.8506519084401029,
+            "coverage": 0.7603305785123967,
+            "effective_accuracy": 0.9927685950413223,
+            "episode": 0,
+            "fallback_rate": 0.23966942148760328,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 252,
+              "2": 7,
+              "4": 741
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.007231404958677686
+          },
+          {
+            "action_accuracy": 0.9648760330578512,
+            "best_expected_advantage_mean": 25.099628018691437,
+            "conditional_accuracy": 0.9559014267185474,
+            "confidence_mean": 0.8648397624104928,
+            "coverage": 0.7964876033057852,
+            "effective_accuracy": 0.9648760330578512,
+            "episode": 1,
+            "fallback_rate": 0.20351239669421484,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 216,
+              "2": 34,
+              "4": 750
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.03512396694214876
+          },
+          {
+            "action_accuracy": 0.9989669421487604,
+            "best_expected_advantage_mean": 2.6807727816463904,
+            "conditional_accuracy": 0.9988304093567252,
+            "confidence_mean": 0.9143118074621018,
+            "coverage": 0.8832644628099173,
+            "effective_accuracy": 0.9989669421487604,
+            "episode": 2,
+            "fallback_rate": 0.11673553719008267,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 128,
+              "2": 1,
+              "4": 871
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.0010330578512396695
+          },
+          {
+            "action_accuracy": 1.0,
+            "best_expected_advantage_mean": 3.5279584110799482,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9163794409748472,
+            "coverage": 0.871900826446281,
+            "effective_accuracy": 1.0,
+            "episode": 3,
+            "fallback_rate": 0.12809917355371903,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 141,
+              "4": 859
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.0
+          },
+          {
+            "action_accuracy": 0.9979338842975206,
+            "best_expected_advantage_mean": 17.296506448375737,
+            "conditional_accuracy": 0.9974968710888611,
+            "confidence_mean": 0.8940667200250136,
+            "coverage": 0.8254132231404959,
+            "effective_accuracy": 0.9979338842975206,
+            "episode": 4,
+            "fallback_rate": 0.17458677685950408,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 186,
+              "2": 2,
+              "4": 812
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.002066115702479339
+          }
+        ],
+        "std": 125.90778470467596,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "2": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2887.8799757659435,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 3050.177149489522,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2993.560982629657,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 3524.2117241173983,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2873.02178427577,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 3065.7703232556582,
+        "returns": [
+          2887.8799757659435,
+          3050.177149489522,
+          2993.560982629657,
+          3524.2117241173983,
+          2873.02178427577
+        ],
+        "routing": [
+          {
+            "action_accuracy": 0.9204545454545454,
+            "best_expected_advantage_mean": 488.1885528474766,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9305079109422172,
+            "coverage": 0.9204545454545454,
+            "effective_accuracy": 0.9204545454545454,
+            "episode": 0,
+            "fallback_rate": 0.07954545454545459,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 109,
+              "2": 891
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.07954545454545454
+          },
+          {
+            "action_accuracy": 0.9762396694214877,
+            "best_expected_advantage_mean": 523.5360066316074,
+            "conditional_accuracy": 0.9947368421052631,
+            "confidence_mean": 0.9685256942897547,
+            "coverage": 0.981404958677686,
+            "effective_accuracy": 0.9762396694214877,
+            "episode": 1,
+            "fallback_rate": 0.018595041322314043,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 43,
+              "2": 952,
+              "4": 5
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.023760330578512397
+          },
+          {
+            "action_accuracy": 0.9287190082644629,
+            "best_expected_advantage_mean": 497.0636904603896,
+            "conditional_accuracy": 0.9900881057268722,
+            "confidence_mean": 0.943366723086823,
+            "coverage": 0.9380165289256198,
+            "effective_accuracy": 0.9287190082644629,
+            "episode": 2,
+            "fallback_rate": 0.06198347107438018,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 82,
+              "2": 909,
+              "4": 9
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.07128099173553719
+          },
+          {
+            "action_accuracy": 1.0,
+            "best_expected_advantage_mean": 538.5094538197909,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9789309637785796,
+            "coverage": 1.0,
+            "effective_accuracy": 1.0,
+            "episode": 3,
+            "fallback_rate": 0.0,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 23,
+              "2": 977
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.0
+          },
+          {
+            "action_accuracy": 0.8884297520661157,
+            "best_expected_advantage_mean": 483.4862895854144,
+            "conditional_accuracy": 1.0,
+            "confidence_mean": 0.9291554591885336,
+            "coverage": 0.8884297520661157,
+            "effective_accuracy": 0.8884297520661157,
+            "episode": 4,
+            "fallback_rate": 0.11157024793388426,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 137,
+              "2": 863
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.1115702479338843
+          }
+        ],
+        "std": 238.50485486660867,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "3": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 1997.079732440412,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2252.548560090363,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2081.5939956381917,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 1415.2847134247422,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2478.7267355024815,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2045.046747419238,
+        "returns": [
+          1997.079732440412,
+          2252.548560090363,
+          2081.5939956381917,
+          1415.2847134247422,
+          2478.7267355024815
+        ],
+        "routing": [
+          {
+            "action_accuracy": 0.6838842975206612,
+            "best_expected_advantage_mean": 341.78842031235945,
+            "conditional_accuracy": 0.9337094499294781,
+            "confidence_mean": 0.8379378507344517,
+            "coverage": 0.7324380165289256,
+            "effective_accuracy": 0.6838842975206612,
+            "episode": 0,
+            "fallback_rate": 0.2675619834710744,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 291,
+              "0": 44,
+              "3": 662,
+              "4": 3
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.31611570247933884
+          },
+          {
+            "action_accuracy": 0.5216942148760331,
+            "best_expected_advantage_mean": 291.74088484252553,
+            "conditional_accuracy": 0.9619047619047619,
+            "confidence_mean": 0.7913170705827728,
+            "coverage": 0.5423553719008265,
+            "effective_accuracy": 0.5216942148760331,
+            "episode": 1,
+            "fallback_rate": 0.4576446280991735,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 456,
+              "0": 31,
+              "3": 505,
+              "4": 8
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.47830578512396693
+          },
+          {
+            "action_accuracy": 0.5599173553719008,
+            "best_expected_advantage_mean": 279.113876011512,
+            "conditional_accuracy": 0.9475524475524476,
+            "confidence_mean": 0.7832070168884905,
+            "coverage": 0.5909090909090909,
+            "effective_accuracy": 0.5599173553719008,
+            "episode": 2,
+            "fallback_rate": 0.40909090909090906,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 416,
+              "0": 38,
+              "3": 542,
+              "4": 4
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.44008264462809915
+          },
+          {
+            "action_accuracy": 0.637396694214876,
+            "best_expected_advantage_mean": 309.2194232635326,
+            "conditional_accuracy": 0.970125786163522,
+            "confidence_mean": 0.798121457587704,
+            "coverage": 0.6570247933884298,
+            "effective_accuracy": 0.637396694214876,
+            "episode": 3,
+            "fallback_rate": 0.3429752066115702,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 364,
+              "0": 19,
+              "3": 617
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.36260330578512395
+          },
+          {
+            "action_accuracy": 0.6900826446280992,
+            "best_expected_advantage_mean": 309.20668597214774,
+            "conditional_accuracy": 0.9188445667125172,
+            "confidence_mean": 0.8536402788599445,
+            "coverage": 0.7510330578512396,
+            "effective_accuracy": 0.6900826446280992,
+            "episode": 4,
+            "fallback_rate": 0.24896694214876036,
+            "median_switch_delay": 0.0,
+            "selected_controller_counts": {
+              "-1": 273,
+              "2": 2,
+              "3": 668,
+              "4": 57
+            },
+            "switch_count": 0,
+            "switch_delays": [],
+            "wrong_route_rate": 0.30991735537190085
+          }
+        ],
+        "std": 355.35111922292464,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      }
+    },
+    "robust": {
+      "0": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2496.0863009244204,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2261.7382408082485,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2433.6750923246145,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2299.3237621486187,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2425.3361508846283,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2383.231909418106,
+        "returns": [
+          2496.0863009244204,
+          2261.7382408082485,
+          2433.6750923246145,
+          2299.3237621486187,
+          2425.3361508846283
+        ],
+        "routing": [],
+        "std": 88.15291739239377,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "1": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2116.37933485955,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2240.373048812151,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2039.216084226966,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2151.057354107499,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2188.361520975828,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2147.077468596399,
+        "returns": [
+          2116.37933485955,
+          2240.373048812151,
+          2039.216084226966,
+          2151.057354107499,
+          2188.361520975828
+        ],
+        "routing": [],
+        "std": 67.82437822841987,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "2": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2916.2808045595884,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2605.142986267805,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2620.8423893153667,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2800.0684434324503,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2385.732505246997,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2665.6134257644417,
+        "returns": [
+          2916.2808045595884,
+          2605.142986267805,
+          2620.8423893153667,
+          2800.0684434324503,
+          2385.732505246997
+        ],
+        "routing": [],
+        "std": 181.60767384417824,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      },
+      "3": {
+        "episodes": [
+          {
+            "episode": 0,
+            "return": 2355.0985932052135,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 1,
+            "return": 2211.0706719607115,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 2,
+            "return": 2304.7292143553495,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 3,
+            "return": 2305.065061122179,
+            "steps": 1000,
+            "terminated": false
+          },
+          {
+            "episode": 4,
+            "return": 2093.9546608775854,
+            "steps": 1000,
+            "terminated": false
+          }
+        ],
+        "mean": 2253.9836403042077,
+        "returns": [
+          2355.0985932052135,
+          2211.0706719607115,
+          2304.7292143553495,
+          2305.065061122179,
+          2093.9546608775854
+        ],
+        "routing": [],
+        "std": 92.5845080422329,
+        "steps_mean": 1000.0,
+        "terminated_rate": 0.0
+      }
+    }
+  },
+  "status": "complete",
+  "switching": {
+    "full_cycle": {
+      "dynamic_utility_oracle": {
+        "episodes": [
+          {
+            "configured_mode_sequence": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "episode": 0,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2929.6986415982246,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              3,
+              2,
+              1,
+              0
+            ],
+            "episode": 1,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2677.8691094890237,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "episode": 2,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2630.002664066851,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              3,
+              0,
+              2
+            ],
+            "episode": 3,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2841.867916330695,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              2,
+              0,
+              3,
+              1
+            ],
+            "episode": 4,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2834.7348256856203,
+            "termination_count": 0
+          }
+        ],
+        "mean": 2782.834631434083,
+        "routing": [],
+        "std": 111.4656605570185
+      },
+      "learned_utility_router": {
+        "episodes": [
+          {
+            "configured_mode_sequence": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "episode": 0,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2899.2752637416124,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              3,
+              2,
+              1,
+              0
+            ],
+            "episode": 1,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2696.531084790826,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "episode": 2,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2748.9151369184256,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              3,
+              0,
+              2
+            ],
+            "episode": 3,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2745.521043919027,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              2,
+              0,
+              3,
+              1
+            ],
+            "episode": 4,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2836.816363815218,
+            "termination_count": 0
+          }
+        ],
+        "mean": 2785.4117786370216,
+        "routing": [
+          {
+            "action_accuracy": 0.8460743801652892,
+            "best_expected_advantage_mean": 385.84414736506415,
+            "conditional_accuracy": 0.9908854166666666,
+            "confidence_mean": 0.8727123858666676,
+            "coverage": 0.7933884297520661,
+            "effective_accuracy": 0.8460743801652892,
+            "episode": 0,
+            "fallback_rate": 0.20661157024793386,
+            "median_switch_delay": 13.0,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "selected_controller_counts": {
+              "-1": 211,
+              "0": 218,
+              "2": 218,
+              "3": 168,
+              "4": 185
+            },
+            "switch_count": 3,
+            "switch_delays": [
+              7,
+              13,
+              17
+            ],
+            "wrong_route_rate": 0.15392561983471073
+          },
+          {
+            "action_accuracy": 0.8502066115702479,
+            "best_expected_advantage_mean": 401.8194309158958,
+            "conditional_accuracy": 0.9750623441396509,
+            "confidence_mean": 0.8842846599861273,
+            "coverage": 0.8285123966942148,
+            "effective_accuracy": 0.8502066115702479,
+            "episode": 1,
+            "fallback_rate": 0.17148760330578516,
+            "median_switch_delay": 12.0,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "selected_controller_counts": {
+              "-1": 198,
+              "0": 238,
+              "2": 254,
+              "3": 117,
+              "4": 193
+            },
+            "switch_count": 3,
+            "switch_delays": [
+              12,
+              7,
+              12
+            ],
+            "wrong_route_rate": 0.14979338842975207
+          },
+          {
+            "action_accuracy": 0.78099173553719,
+            "best_expected_advantage_mean": 364.93291864030994,
+            "conditional_accuracy": 0.9387755102040817,
+            "confidence_mean": 0.8892201126728946,
+            "coverage": 0.8099173553719008,
+            "effective_accuracy": 0.78099173553719,
+            "episode": 2,
+            "fallback_rate": 0.1900826446280992,
+            "median_switch_delay": 29.0,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "selected_controller_counts": {
+              "-1": 194,
+              "0": 205,
+              "2": 173,
+              "3": 196,
+              "4": 232
+            },
+            "switch_count": 3,
+            "switch_delays": [
+              51,
+              7,
+              29
+            ],
+            "wrong_route_rate": 0.2190082644628099
+          },
+          {
+            "action_accuracy": 0.8729338842975206,
+            "best_expected_advantage_mean": 386.21953518827996,
+            "conditional_accuracy": 0.9526011560693641,
+            "confidence_mean": 0.9246622025176816,
+            "coverage": 0.893595041322314,
+            "effective_accuracy": 0.8729338842975206,
+            "episode": 3,
+            "fallback_rate": 0.10640495867768596,
+            "median_switch_delay": 18.0,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "selected_controller_counts": {
+              "-1": 119,
+              "0": 173,
+              "2": 238,
+              "3": 246,
+              "4": 224
+            },
+            "switch_count": 3,
+            "switch_delays": [
+              18,
+              64,
+              17
+            ],
+            "wrong_route_rate": 0.12706611570247933
+          },
+          {
+            "action_accuracy": 0.8347107438016529,
+            "best_expected_advantage_mean": 401.1197504196559,
+            "conditional_accuracy": 0.9096385542168675,
+            "confidence_mean": 0.9052171968464062,
+            "coverage": 0.8574380165289256,
+            "effective_accuracy": 0.8347107438016529,
+            "episode": 4,
+            "fallback_rate": 0.1425619834710744,
+            "median_switch_delay": 31.0,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "selected_controller_counts": {
+              "-1": 166,
+              "0": 164,
+              "2": 268,
+              "3": 232,
+              "4": 170
+            },
+            "switch_count": 3,
+            "switch_delays": [
+              67,
+              31,
+              27
+            ],
+            "wrong_route_rate": 0.1652892561983471
+          }
+        ],
+        "std": 72.70540272794591
+      },
+      "robust": {
+        "episodes": [
+          {
+            "configured_mode_sequence": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "episode": 0,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2506.5255492031574,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              3,
+              2,
+              1,
+              0
+            ],
+            "episode": 1,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2462.7806320637465,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "episode": 2,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2364.1905218288302,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              3,
+              0,
+              2
+            ],
+            "episode": 3,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2409.2242718786,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              2,
+              0,
+              3,
+              1
+            ],
+            "episode": 4,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 250,
+              "1": 250,
+              "2": 250,
+              "3": 250
+            },
+            "return": 2358.6462723501027,
+            "termination_count": 0
+          }
+        ],
+        "mean": 2420.2734494648876,
+        "routing": [],
+        "std": 57.11667591597888
+      }
+    },
+    "slow_pair": {
+      "dynamic_utility_oracle": {
+        "episodes": [
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 0,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2575.751470834017,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              0
+            ],
+            "episode": 1,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2722.6916518583894,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 2,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2893.906898699701,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              0
+            ],
+            "episode": 3,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2952.8813871741295,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 4,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2803.113679856062,
+            "termination_count": 0
+          }
+        ],
+        "mean": 2789.6690176844595,
+        "routing": [],
+        "std": 132.61316429178459
+      },
+      "learned_utility_router": {
+        "episodes": [
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 0,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2930.2206915318966,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              0
+            ],
+            "episode": 1,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2758.491766490042,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 2,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2798.563507050276,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              0
+            ],
+            "episode": 3,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2782.548180833459,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 4,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2870.3849111646414,
+            "termination_count": 0
+          }
+        ],
+        "mean": 2828.041811414063,
+        "routing": [
+          {
+            "action_accuracy": 0.9896694214876033,
+            "best_expected_advantage_mean": 423.48585601511735,
+            "conditional_accuracy": 0.9888765294771968,
+            "confidence_mean": 0.9363276179717556,
+            "coverage": 0.9287190082644629,
+            "effective_accuracy": 0.9896694214876033,
+            "episode": 0,
+            "fallback_rate": 0.07128099173553715,
+            "median_switch_delay": 10.0,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "selected_controller_counts": {
+              "-1": 81,
+              "0": 498,
+              "4": 421
+            },
+            "switch_count": 1,
+            "switch_delays": [
+              10
+            ],
+            "wrong_route_rate": 0.010330578512396695
+          },
+          {
+            "action_accuracy": 0.9514462809917356,
+            "best_expected_advantage_mean": 400.87991383265717,
+            "conditional_accuracy": 0.9707317073170731,
+            "confidence_mean": 0.8942828475279235,
+            "coverage": 0.8471074380165289,
+            "effective_accuracy": 0.9514462809917356,
+            "episode": 1,
+            "fallback_rate": 0.15289256198347112,
+            "median_switch_delay": 40.0,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "selected_controller_counts": {
+              "-1": 168,
+              "0": 460,
+              "2": 7,
+              "4": 365
+            },
+            "switch_count": 1,
+            "switch_delays": [
+              40
+            ],
+            "wrong_route_rate": 0.04855371900826446
+          },
+          {
+            "action_accuracy": 0.9907024793388429,
+            "best_expected_advantage_mean": 423.4623017516079,
+            "conditional_accuracy": 0.9899888765294772,
+            "confidence_mean": 0.9404557454421277,
+            "coverage": 0.9287190082644629,
+            "effective_accuracy": 0.9907024793388429,
+            "episode": 2,
+            "fallback_rate": 0.07128099173553715,
+            "median_switch_delay": 9.0,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "selected_controller_counts": {
+              "-1": 78,
+              "0": 500,
+              "4": 422
+            },
+            "switch_count": 1,
+            "switch_delays": [
+              9
+            ],
+            "wrong_route_rate": 0.009297520661157025
+          },
+          {
+            "action_accuracy": 0.9266528925619835,
+            "best_expected_advantage_mean": 374.25400848179885,
+            "conditional_accuracy": 0.9887359198998749,
+            "confidence_mean": 0.8938750866430016,
+            "coverage": 0.8254132231404959,
+            "effective_accuracy": 0.9266528925619835,
+            "episode": 3,
+            "fallback_rate": 0.17458677685950408,
+            "median_switch_delay": 43.0,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "selected_controller_counts": {
+              "-1": 191,
+              "0": 429,
+              "4": 380
+            },
+            "switch_count": 1,
+            "switch_delays": [
+              43
+            ],
+            "wrong_route_rate": 0.07334710743801653
+          },
+          {
+            "action_accuracy": 0.984504132231405,
+            "best_expected_advantage_mean": 434.3917334085122,
+            "conditional_accuracy": 0.9808917197452229,
+            "confidence_mean": 0.8830527310482984,
+            "coverage": 0.8109504132231405,
+            "effective_accuracy": 0.984504132231405,
+            "episode": 4,
+            "fallback_rate": 0.18904958677685946,
+            "median_switch_delay": 7.0,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "selected_controller_counts": {
+              "-1": 191,
+              "0": 499,
+              "2": 8,
+              "4": 302
+            },
+            "switch_count": 1,
+            "switch_delays": [
+              7
+            ],
+            "wrong_route_rate": 0.015495867768595042
+          }
+        ],
+        "std": 63.260273851958466
+      },
+      "robust": {
+        "episodes": [
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 0,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2383.967366054654,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              0
+            ],
+            "episode": 1,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2385.2514471784234,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 2,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2196.993158146739,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              1,
+              0
+            ],
+            "episode": 3,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 2379.5762872695923,
+            "termination_count": 0
+          },
+          {
+            "configured_mode_sequence": [
+              0,
+              1
+            ],
+            "episode": 4,
+            "first_done_step": 1000,
+            "physics_mode_counts": {
+              "0": 500,
+              "1": 500,
+              "2": 0,
+              "3": 0
+            },
+            "return": 1938.7110421136022,
+            "termination_count": 0
+          }
+        ],
+        "mean": 2256.8998601526023,
+        "routing": [],
+        "std": 174.64405148110845
+      }
+    }
+  },
+  "switching_episodes": 5,
+  "training_seed": 0,
+  "utility_table_file": {
+    "sha256": "a2d8efaa2157776f64eec61f68c3d8c76820122c08fc589e74944fbb845daa2c",
+    "size": 8273
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "env": "HalfCheetah-v2",
+  "families": [
+    {
+      "checks": {
+        "deterministic_family_has_zero_process_noise": true,
+        "finite": true,
+        "variance_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "deterministic_mean",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "gravity_scale": 0.75,
+          "mode_id": 1,
+          "physics_gravity_z": -7.357500076293945,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "gravity_scale": 1.25,
+          "mode_id": 2,
+          "physics_gravity_z": -12.262500762939453,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 0.7,
+          "target_action_noise_std": 0.0
+        }
+      ]
+    },
+    {
+      "checks": {
+        "deterministic_family_has_zero_process_noise": true,
+        "finite": true,
+        "variance_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "variance_only",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0006576386513188481,
+          "empirical_action_std": 0.04997439309954643,
+          "gravity_scale": 1.0,
+          "mode_id": 1,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.05
+        },
+        {
+          "empirical_action_mean_abs": 0.0015783326234668493,
+          "empirical_action_std": 0.11993853747844696,
+          "gravity_scale": 1.0,
+          "mode_id": 2,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.12
+        },
+        {
+          "empirical_action_mean_abs": 0.0028936099261045456,
+          "empirical_action_std": 0.21988734602928162,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.22
+        }
+      ]
+    },
+    {
+      "checks": {
+        "deterministic_family_has_zero_process_noise": true,
+        "finite": true,
+        "variance_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "mean_variance",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0002465283323545009,
+          "empirical_action_std": 0.020134570077061653,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.02
+        },
+        {
+          "empirical_action_mean_abs": 0.0009861133294180036,
+          "empirical_action_std": 0.08053828030824661,
+          "gravity_scale": 0.75,
+          "mode_id": 1,
+          "physics_gravity_z": -7.357500076293945,
+          "target_action_gain": 0.85,
+          "target_action_noise_std": 0.08
+        },
+        {
+          "empirical_action_mean_abs": 0.00147917028516531,
+          "empirical_action_std": 0.12080740928649902,
+          "gravity_scale": 1.25,
+          "mode_id": 2,
+          "physics_gravity_z": -12.262500762939453,
+          "target_action_gain": 1.1,
+          "target_action_noise_std": 0.12
+        },
+        {
+          "empirical_action_mean_abs": 0.0024652837309986353,
+          "empirical_action_std": 0.20134568214416504,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 0.7,
+          "target_action_noise_std": 0.2
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "samples": 4096
+}

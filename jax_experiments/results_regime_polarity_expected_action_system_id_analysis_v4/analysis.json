@@ -1,0 +1,821 @@
+{
+  "audit_manifests": {
+    "101": {
+      "sha256": "defae1966d393312805170489e2cfa51e52e945308d914a6d73bd1a7bf77b842",
+      "size": 2728
+    },
+    "211": {
+      "sha256": "f9cb2f8826599a64fdad51f5e6a6a39d0548a3481d00055996e64cb0ced48e19",
+      "size": 2728
+    },
+    "307": {
+      "sha256": "c5134cdb132411ece8961f96e3c4ac4bd9b74bb5b043d415f3c2583421ce41a7",
+      "size": 2728
+    },
+    "419": {
+      "sha256": "09877f3bcc61fd165874ea34982add24fae5cb71c3e0a9ee5dfb81e3dc0ab855",
+      "size": 2728
+    },
+    "523": {
+      "sha256": "0c125a9058f7416fe80e21a55f966fb1b9e5e29a5e37f437445cad5ab80a70cc",
+      "size": 2728
+    }
+  },
+  "by_training_seed": {
+    "101": {
+      "posterior": {
+        "learned_map": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.0012676533246449375,
+          "epistemic_mean": 0.0058888042782200495,
+          "expected_calibration_error": 0.0012865384421359152,
+          "mean_normalized_entropy": 0.0044826181716713836,
+          "mean_true_probability": 0.9980623585101988,
+          "median_switch_delay": 6.0,
+          "mode_accuracy": 0.9992028985507245,
+          "negative_log_likelihood": 0.0027335866044195995,
+          "p90_switch_delay": 9.600000000000001,
+          "switch_count": 45
+        },
+        "learned_soft": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.001653278567529454,
+          "epistemic_mean": 0.005936071113442691,
+          "expected_calibration_error": 0.0010000822386974334,
+          "mean_normalized_entropy": 0.00437092524310972,
+          "mean_true_probability": 0.9979288848155626,
+          "median_switch_delay": 4.0,
+          "mode_accuracy": 0.9990579710144928,
+          "negative_log_likelihood": 0.0035492434357557736,
+          "p90_switch_delay": 10.0,
+          "switch_count": 45
+        }
+      },
+      "stationary": {
+        "learned_map": {
+          "by_mode": {
+            "0": 2324.5852637410167,
+            "1": 2237.5135601619877,
+            "2": 1860.3314143270254,
+            "3": 2224.7374323579174
+          },
+          "mean": 2161.791917646987,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1860.3314143270254
+        },
+        "learned_soft": {
+          "by_mode": {
+            "0": 2293.5011056035755,
+            "1": 2243.5667802850407,
+            "2": 1814.3766624093053,
+            "3": 2207.5224265600245
+          },
+          "mean": 2139.741743714487,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1814.3766624093053
+        },
+        "oracle": {
+          "by_mode": {
+            "0": 2325.8011168400444,
+            "1": 2237.2772061576447,
+            "2": 1871.6105439066887,
+            "3": 2236.6643294091027
+          },
+          "mean": 2167.8382990783703,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1871.6105439066887
+        },
+        "robust": {
+          "by_mode": {
+            "0": 521.0242476687456,
+            "1": 1004.8203833045437,
+            "2": 706.7277447994799,
+            "3": 557.3985637987653
+          },
+          "mean": 697.4927348928836,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 521.0242476687456
+        }
+      },
+      "switching": {
+        "learned_map": {
+          "mean": 2175.2631847749153,
+          "termination_mean": 0.0
+        },
+        "learned_soft": {
+          "mean": 2158.1444904963178,
+          "termination_mean": 0.0
+        },
+        "oracle": {
+          "mean": 2272.2703825235367,
+          "termination_mean": 0.0
+        },
+        "robust": {
+          "mean": 721.2072368396445,
+          "termination_mean": 0.0
+        }
+      }
+    },
+    "211": {
+      "posterior": {
+        "learned_map": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.0007673587181267406,
+          "epistemic_mean": 0.0034722641951365706,
+          "expected_calibration_error": 0.0005727937824943993,
+          "mean_normalized_entropy": 0.002192912934154932,
+          "mean_true_probability": 0.9989924236088097,
+          "median_switch_delay": 7.0,
+          "mode_accuracy": 0.9995652173913042,
+          "negative_log_likelihood": 0.0015997830543603992,
+          "p90_switch_delay": 10.600000000000001,
+          "switch_count": 45
+        },
+        "learned_soft": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.0009460683523614619,
+          "epistemic_mean": 0.0034323434438343,
+          "expected_calibration_error": 0.0007609175020709618,
+          "mean_normalized_entropy": 0.002680514619176418,
+          "mean_true_probability": 0.9987234730553597,
+          "median_switch_delay": 7.0,
+          "mode_accuracy": 0.9994202898550725,
+          "negative_log_likelihood": 0.0019630687128116046,
+          "p90_switch_delay": 12.0,
+          "switch_count": 45
+        }
+      },
+      "stationary": {
+        "learned_map": {
+          "by_mode": {
+            "0": 2857.0287089119356,
+            "1": 2561.471050091088,
+            "2": 2788.090224854151,
+            "3": 2789.958140617609
+          },
+          "mean": 2749.137031118696,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 2561.471050091088
+        },
+        "learned_soft": {
+          "by_mode": {
+            "0": 2844.5222538466255,
+            "1": 2572.8150559350847,
+            "2": 2774.1863158221045,
+            "3": 2810.8536600907646
+          },
+          "mean": 2750.594321423645,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 2572.8150559350847
+        },
+        "oracle": {
+          "by_mode": {
+            "0": 2857.0287089119356,
+            "1": 2573.4440123662353,
+            "2": 2776.0855152726176,
+            "3": 2818.331166540583
+          },
+          "mean": 2756.222350772843,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 2573.4440123662353
+        },
+        "robust": {
+          "by_mode": {
+            "0": 810.3962023196121,
+            "1": 946.9252156949292,
+            "2": 839.3458723224079,
+            "3": 519.9012491973738
+          },
+          "mean": 779.1421348835809,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 519.9012491973738
+        }
+      },
+      "switching": {
+        "learned_map": {
+          "mean": 2570.3615630532304,
+          "termination_mean": 0.0
+        },
+        "learned_soft": {
+          "mean": 2568.164261304339,
+          "termination_mean": 0.0
+        },
+        "oracle": {
+          "mean": 2706.530917778114,
+          "termination_mean": 0.0
+        },
+        "robust": {
+          "mean": 873.0337539974602,
+          "termination_mean": 0.0
+        }
+      }
+    },
+    "307": {
+      "posterior": {
+        "learned_map": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.011068911501007165,
+          "epistemic_mean": 0.005215013321617153,
+          "expected_calibration_error": 0.004292162146130489,
+          "mean_normalized_entropy": 0.012847020341078685,
+          "mean_true_probability": 0.9893449794482665,
+          "median_switch_delay": 6.0,
+          "mode_accuracy": 0.9895652173913043,
+          "negative_log_likelihood": 0.018853253570333486,
+          "p90_switch_delay": 12.600000000000001,
+          "switch_count": 45
+        },
+        "learned_soft": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.0018065305179128192,
+          "epistemic_mean": 0.00524088163189396,
+          "expected_calibration_error": 0.0020311303030228762,
+          "mean_normalized_entropy": 0.006908625730919775,
+          "mean_true_probability": 0.9969288086020013,
+          "median_switch_delay": 5.0,
+          "mode_accuracy": 0.9991304347826087,
+          "negative_log_likelihood": 0.004105910592542085,
+          "p90_switch_delay": 12.200000000000003,
+          "switch_count": 45
+        }
+      },
+      "stationary": {
+        "learned_map": {
+          "by_mode": {
+            "0": 2216.8197135855753,
+            "1": 2491.9211912383635,
+            "2": 1852.3803805410862,
+            "3": 2471.439454209805
+          },
+          "mean": 2258.1401848937076,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1852.3803805410862
+        },
+        "learned_soft": {
+          "by_mode": {
+            "0": 2245.75113898466,
+            "1": 2519.712289060652,
+            "2": 1850.356274431447,
+            "3": 2531.257358027498
+          },
+          "mean": 2286.769265126064,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1850.356274431447
+        },
+        "oracle": {
+          "by_mode": {
+            "0": 2215.507318769892,
+            "1": 2489.3505238274734,
+            "2": 1858.8091749310495,
+            "3": 2495.654365676641
+          },
+          "mean": 2264.8303458012642,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1858.8091749310495
+        },
+        "robust": {
+          "by_mode": {
+            "0": 1001.0065363143882,
+            "1": 1944.3113716609776,
+            "2": 780.2573147314291,
+            "3": 1465.8333669086298
+          },
+          "mean": 1297.8521474038562,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 780.2573147314291
+        }
+      },
+      "switching": {
+        "learned_map": {
+          "mean": 2179.9116443758207,
+          "termination_mean": 0.0
+        },
+        "learned_soft": {
+          "mean": 2283.3562817444404,
+          "termination_mean": 0.0
+        },
+        "oracle": {
+          "mean": 2383.113836877545,
+          "termination_mean": 0.0
+        },
+        "robust": {
+          "mean": 1349.293593914186,
+          "termination_mean": 0.0
+        }
+      }
+    },
+    "419": {
+      "posterior": {
+        "learned_map": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.008844385006785405,
+          "epistemic_mean": 0.0050915683729380054,
+          "expected_calibration_error": 0.0029787506470925016,
+          "mean_normalized_entropy": 0.011761744957304357,
+          "mean_true_probability": 0.9910527193500558,
+          "median_switch_delay": 4.0,
+          "mode_accuracy": 0.994927536231884,
+          "negative_log_likelihood": 0.02021103341279305,
+          "p90_switch_delay": 8.0,
+          "switch_count": 45
+        },
+        "learned_soft": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.002590557138040171,
+          "epistemic_mean": 0.004577982593760438,
+          "expected_calibration_error": 0.0011995423100055887,
+          "mean_normalized_entropy": 0.0023933547166947243,
+          "mean_true_probability": 0.9979534304435709,
+          "median_switch_delay": 5.0,
+          "mode_accuracy": 0.9984057971014493,
+          "negative_log_likelihood": 0.005646823153928181,
+          "p90_switch_delay": 15.200000000000003,
+          "switch_count": 45
+        }
+      },
+      "stationary": {
+        "learned_map": {
+          "by_mode": {
+            "0": 2400.5196325421334,
+            "1": 3063.4489916453763,
+            "2": 2238.3877984305223,
+            "3": 3022.067810133596
+          },
+          "mean": 2681.106058187907,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 2238.3877984305223
+        },
+        "learned_soft": {
+          "by_mode": {
+            "0": 2348.4607895861072,
+            "1": 3081.2439449548724,
+            "2": 2436.3901963139574,
+            "3": 3036.582392407457
+          },
+          "mean": 2725.6693308155986,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 2348.4607895861072
+        },
+        "oracle": {
+          "by_mode": {
+            "0": 2400.5196325421334,
+            "1": 3097.637801759938,
+            "2": 2414.7007782727483,
+            "3": 3049.462354911367
+          },
+          "mean": 2740.580141871547,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 2400.5196325421334
+        },
+        "robust": {
+          "by_mode": {
+            "0": 1007.6262017513315,
+            "1": 1787.8123457541067,
+            "2": 2095.6681852526963,
+            "3": 2186.7091263721386
+          },
+          "mean": 1769.4539647825684,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1007.6262017513315
+        }
+      },
+      "switching": {
+        "learned_map": {
+          "mean": 2115.353147646288,
+          "termination_mean": 0.0
+        },
+        "learned_soft": {
+          "mean": 2514.0426451280714,
+          "termination_mean": 0.0
+        },
+        "oracle": {
+          "mean": 2690.2074053679903,
+          "termination_mean": 0.0
+        },
+        "robust": {
+          "mean": 1409.9687671576937,
+          "termination_mean": 0.0
+        }
+      }
+    },
+    "523": {
+      "posterior": {
+        "learned_map": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.001052260314055707,
+          "epistemic_mean": 0.004894693811233932,
+          "expected_calibration_error": 0.001837452899421553,
+          "mean_normalized_entropy": 0.007355089685847219,
+          "mean_true_probability": 0.9976490615019559,
+          "median_switch_delay": 3.0,
+          "mode_accuracy": 0.9992753623188406,
+          "negative_log_likelihood": 0.0030607815242278593,
+          "p90_switch_delay": 6.600000000000001,
+          "switch_count": 45
+        },
+        "learned_soft": {
+          "aleatoric_mean": 0.060703814029693604,
+          "brier_score": 0.013070519559714132,
+          "epistemic_mean": 0.004961170489969664,
+          "expected_calibration_error": 0.005392397335426528,
+          "mean_normalized_entropy": 0.012235398725655433,
+          "mean_true_probability": 0.9894234008856394,
+          "median_switch_delay": 4.0,
+          "mode_accuracy": 0.9915217391304347,
+          "negative_log_likelihood": 0.027215925888748434,
+          "p90_switch_delay": 10.0,
+          "switch_count": 45
+        }
+      },
+      "stationary": {
+        "learned_map": {
+          "by_mode": {
+            "0": 1863.8606297771137,
+            "1": 1313.166532447189,
+            "2": 2037.5775474990407,
+            "3": 1471.2804285271716
+          },
+          "mean": 1671.4712845626286,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1313.166532447189
+        },
+        "learned_soft": {
+          "by_mode": {
+            "0": 1804.8097461700438,
+            "1": 1318.2403954833746,
+            "2": 2018.1353772625328,
+            "3": 1488.8074577505388
+          },
+          "mean": 1657.4982441666225,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1318.2403954833746
+        },
+        "oracle": {
+          "by_mode": {
+            "0": 1869.2421169583995,
+            "1": 1310.7049100828665,
+            "2": 2021.8625744690498,
+            "3": 1486.0776475097985
+          },
+          "mean": 1671.9718122550285,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 1310.7049100828665
+        },
+        "robust": {
+          "by_mode": {
+            "0": 871.3638200857986,
+            "1": 690.8172357158114,
+            "2": 859.5238425451021,
+            "3": 349.72079245907565
+          },
+          "mean": 692.856422701447,
+          "termination_by_mode": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          },
+          "termination_mean": 0.0,
+          "worst": 349.72079245907565
+        }
+      },
+      "switching": {
+        "learned_map": {
+          "mean": 1519.7864152441423,
+          "termination_mean": 0.0
+        },
+        "learned_soft": {
+          "mean": 1332.927414322893,
+          "termination_mean": 0.0
+        },
+        "oracle": {
+          "mean": 1586.3079052167634,
+          "termination_mean": 0.0
+        },
+        "robust": {
+          "mean": 763.623419976731,
+          "termination_mean": 0.0
+        }
+      }
+    }
+  },
+  "control_feasibility_pass": true,
+  "decision": "direct_posterior_policy_training_authorized",
+  "deployment_gates": {
+    "learned_map": {
+      "checks": {
+        "headroom_recovery_at_least_threshold": true,
+        "policy_seed_wins_at_least_threshold": true,
+        "termination_gap_at_most_threshold": true
+      },
+      "pass": true,
+      "termination_gap": 0.0
+    },
+    "learned_soft": {
+      "checks": {
+        "headroom_recovery_at_least_threshold": true,
+        "policy_seed_wins_at_least_threshold": true,
+        "termination_gap_at_most_threshold": true
+      },
+      "pass": true,
+      "termination_gap": 0.0
+    }
+  },
+  "env": "HalfCheetah-v2",
+  "family": "actuator_polarity",
+  "headroom_recovery": {
+    "learned_map": {
+      "by_seed": {
+        "101": 0.9374576089835149,
+        "211": 0.9257324432157267,
+        "307": 0.8034453340560809,
+        "419": 0.5509788249124266,
+        "523": 0.9191409450815007
+      },
+      "mean": 0.82735103124985,
+      "minimum": 0.5509788249124266
+    },
+    "learned_soft": {
+      "by_seed": {
+        "101": 0.926420860204954,
+        "211": 0.9245340220824425,
+        "307": 0.9035058988135519,
+        "419": 0.8623969352415518,
+        "523": 0.6920076950035804
+      },
+      "mean": 0.8617730822692161,
+      "minimum": 0.6920076950035804
+    }
+  },
+  "inference_gate": {
+    "brier_score_at_most_threshold": true,
+    "median_switch_delay_at_most_threshold": true,
+    "mode_accuracy_at_least_threshold": true,
+    "p90_switch_delay_at_most_threshold": true
+  },
+  "inference_gate_pass": true,
+  "model_manifest": {
+    "sha256": "fc4b28662ac1f38081aab02723ebcbea2fa47fbe37eea27bb4e1a564b8d571d0",
+    "size": 56089
+  },
+  "paired_stationary_vs_robust": {
+    "learned_map": {
+      "ci95_high": 1824.6615678142623,
+      "ci95_low": 689.2780608839737,
+      "mean": 1256.969814349118,
+      "n_training_seeds": 5,
+      "sd": 457.20239475927997,
+      "wins": 5
+    },
+    "learned_soft": {
+      "ci95_high": 1817.297024892483,
+      "ci95_low": 712.0931753403497,
+      "mean": 1264.6951001164164,
+      "n_training_seeds": 5,
+      "sd": 445.04948647579334,
+      "wins": 5
+    }
+  },
+  "paired_switching_vs_robust": {
+    "learned_map": {
+      "ci95_high": 1653.6433482010498,
+      "ci95_low": 523.7763250824227,
+      "mean": 1088.7098366417363,
+      "n_training_seeds": 5,
+      "sd": 454.980987108079,
+      "wins": 5
+    },
+    "learned_soft": {
+      "ci95_high": 1691.0584315698388,
+      "ci95_low": 604.7448968742996,
+      "mean": 1147.9016642220693,
+      "n_training_seeds": 5,
+      "sd": 437.4426319306341,
+      "wins": 5
+    }
+  },
+  "posterior_conditioned_training_authorized": true,
+  "posterior_summary": {
+    "learned_map": {
+      "aleatoric_mean": 0.060703814029693604,
+      "brier_score": 0.004600113772923991,
+      "epistemic_mean": 0.004912468795829142,
+      "expected_calibration_error": 0.0021935395834549714,
+      "mean_normalized_entropy": 0.007727877218011316,
+      "mean_true_probability": 0.9950203084838574,
+      "median_switch_delay": 5.0,
+      "mode_accuracy": 0.9965072463768117,
+      "negative_log_likelihood": 0.009291687633226879,
+      "p90_switch_delay": 10.0,
+      "switch_count": 225
+    },
+    "learned_soft": {
+      "aleatoric_mean": 0.060703814029693604,
+      "brier_score": 0.004013390827111608,
+      "epistemic_mean": 0.00482968985458021,
+      "expected_calibration_error": 0.0020768139378446776,
+      "mean_normalized_entropy": 0.005717763807111214,
+      "mean_true_probability": 0.9961915995604269,
+      "median_switch_delay": 5.0,
+      "mode_accuracy": 0.9975072463768114,
+      "negative_log_likelihood": 0.008496194356757216,
+      "p90_switch_delay": 12.0,
+      "switch_count": 225
+    }
+  },
+  "schema": "bapr.regime-polarity-expected-action-system-id-analysis.v4",
+  "stationary_summary": {
+    "learned_map": {
+      "mean": {
+        "mean": 2304.329295281985,
+        "sd": 436.6847405735716
+      },
+      "worst": {
+        "mean": 1965.147435167382,
+        "sd": 468.7867463403757
+      }
+    },
+    "learned_soft": {
+      "mean": {
+        "mean": 2312.054581049283,
+        "sd": 453.3677658305718
+      },
+      "worst": {
+        "mean": 1980.8498355690638,
+        "sd": 492.27883171207935
+      }
+    },
+    "oracle": {
+      "mean": {
+        "mean": 2320.2885899558105,
+        "sd": 450.9197779853603
+      },
+      "worst": {
+        "mean": 2003.0176547657945,
+        "sd": 500.18869006416
+      }
+    },
+    "robust": {
+      "mean": {
+        "mean": 1047.3594809328672,
+        "sd": 475.4436671582847
+      },
+      "worst": {
+        "mean": 635.7059611615912,
+        "sd": 258.63579731921266
+      }
+    }
+  },
+  "status": "complete",
+  "switching_summary": {
+    "learned_map": {
+      "mean": 2112.1351910188796,
+      "sd": 377.3054553871958
+    },
+    "learned_soft": {
+      "mean": 2171.3270185992124,
+      "sd": 497.63742553278973
+    },
+    "oracle": {
+      "mean": 2327.68608955279,
+      "sd": 455.7219152789045
+    },
+    "robust": {
+      "mean": 1023.4253543771432,
+      "sd": 330.5512020299859
+    }
+  },
+  "test_controller_seeds": [
+    101,
+    211,
+    307,
+    419,
+    523
+  ],
+  "test_event_seeds": [
+    94001,
+    94002,
+    94003
+  ],
+  "training_controller_seeds": [
+    8,
+    16
+  ],
+  "validation_controller_seeds": [
+    24
+  ]
+}

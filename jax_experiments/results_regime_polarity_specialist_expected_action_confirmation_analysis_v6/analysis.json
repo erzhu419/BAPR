@@ -1,0 +1,383 @@
+{
+  "aggregate": {
+    "event_wins": 12,
+    "headroom_available_seeds": 4,
+    "max_terminated_rate": 0.0,
+    "mean_mode_accuracy": 0.9824236337878036,
+    "mean_oracle_recovery_available_seeds": 0.698440395903487,
+    "mean_relative_gain": 0.2224125291050721,
+    "mean_robust_action_fraction": 0.00396,
+    "oracle_mean": 2838.0218091396487,
+    "paired_difference_ci95": [
+      -707.2216455253102,
+      1469.5824215591592
+    ],
+    "paired_difference_mean": 381.18038801692444,
+    "primary_mean": 2658.7181899938982,
+    "robust_mean": 2277.5378019769737,
+    "seed_wins": 4
+  },
+  "diagnosis": "v5 is directionally positive but does not meet the strict per-bank confirmation gate",
+  "event_seeds": [
+    155301,
+    155317,
+    155333
+  ],
+  "frozen_estimator": {
+    "manifest": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "parameters": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    }
+  },
+  "next_step": "report heterogeneous controller-bank transfer and inspect only the failed banks before authorizing new training",
+  "primary_arm": "posterior_sticky_confirm3",
+  "primary_pass": false,
+  "protocol_version": "v6-fresh-policy-bank-confirmation",
+  "schema": "bapr.regime-polarity-specialist-expected-action-confirmation-analysis.v6",
+  "source_seed_metrics": {
+    "5003": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "155301": 2786.0776054799558,
+            "155317": 2935.452979400754,
+            "155333": 2666.6931408286096
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": false,
+          "mean": 2796.0745752364396,
+          "oracle_recovery": null,
+          "relative_gain": -0.12152415536187897,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.9904666666666667,
+          "event_returns": {
+            "155301": 2573.2166510015727,
+            "155317": 2516.740651883185,
+            "155333": 2632.5830630630253
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": false,
+          "mean": 2574.1801219825943,
+          "oracle_recovery": null,
+          "relative_gain": -0.1912393621625425,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.98334654706794,
+          "event_returns": {
+            "155301": 2672.363553188741,
+            "155317": 2700.4231282040478,
+            "155333": 2345.424357110262
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 0.0032,
+          "headroom_available": false,
+          "mean": 2572.7370128343505,
+          "option_switch_count_mean": 3.0,
+          "oracle_recovery": null,
+          "relative_gain": -0.1916927608448009,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "155301": 3063.033100715652,
+            "155317": 3180.4577818363905,
+            "155333": 3305.1196761876345
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "headroom_available": false,
+          "mean": 3182.870186246559,
+          "oracle_recovery": null,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    },
+    "5021": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "155301": 2506.5192409947513,
+            "155317": 2374.9907813608647,
+            "155333": 2481.5648036718367
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 2454.358275342484,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.12352957679351548,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.9906,
+          "event_returns": {
+            "155301": 2411.7422606259584,
+            "155317": 2462.4794752001762,
+            "155333": 2452.19874894619
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 2442.140161590775,
+          "oracle_recovery": 0.9547227792183073,
+          "relative_gain": 0.1179365008719664,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.9819952992697493,
+          "event_returns": {
+            "155301": 2311.8931024834515,
+            "155317": 2348.830813370645,
+            "155333": 2434.263177780807
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.003933333333333333,
+          "headroom_available": true,
+          "mean": 2364.995697878301,
+          "option_switch_count_mean": 3.0,
+          "oracle_recovery": 0.6688450253705528,
+          "relative_gain": 0.08262214292447251,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "155301": 2177.392535921931,
+            "155317": 2189.601773004234,
+            "155333": 2186.52682492882
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "headroom_available": true,
+          "mean": 2184.5070446183286,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    },
+    "5039": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "155301": 2817.3739862769844,
+            "155317": 3046.9249973893166,
+            "155333": 2988.6933201909064
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 2950.997434619069,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.2806758356872205,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.9909333333333333,
+          "event_returns": {
+            "155301": 3036.5806197404863,
+            "155317": 2871.1196638554334,
+            "155333": 2876.689698213339
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 2928.1299939364194,
+          "oracle_recovery": 0.9646423884652072,
+          "relative_gain": 0.27075180852178843,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.9823201629257712,
+          "event_returns": {
+            "155301": 2721.211242824793,
+            "155317": 2822.217136183381,
+            "155333": 2805.121779850125
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.004533333333333334,
+          "headroom_available": true,
+          "mean": 2782.8500529527664,
+          "option_switch_count_mean": 3.0,
+          "oracle_recovery": 0.7400107041248117,
+          "relative_gain": 0.20770312279772,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "155301": 2351.2165373325347,
+            "155317": 2271.5797810032964,
+            "155333": 2289.954010170698
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "headroom_available": true,
+          "mean": 2304.250109502176,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    },
+    "5051": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "155301": 3980.1707238554955,
+            "155317": 3957.5123207569122,
+            "155333": 3937.0077239960433
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 3958.2302562028167,
+          "oracle_recovery": 1.0,
+          "relative_gain": 1.1629544740212223,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.9808,
+          "event_returns": {
+            "155301": 3739.9554390877483,
+            "155317": 3702.479737123847,
+            "155333": 3469.278240531683
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 3637.2378055810927,
+          "oracle_recovery": 0.849173230585471,
+          "relative_gain": 0.9875498077284286,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.9829287796136287,
+          "event_returns": {
+            "155301": 3638.2670368298886,
+            "155317": 3761.1497552812098,
+            "155333": 3423.3443943589928
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0042,
+          "headroom_available": true,
+          "mean": 3607.5870621566974,
+          "option_switch_count_mean": 3.1333333333333333,
+          "oracle_recovery": 0.8352410467201538,
+          "relative_gain": 0.9713473121693715,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "155301": 1962.4536987006663,
+            "155317": 1730.7612322732807,
+            "155333": 1796.81775867939
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "headroom_available": true,
+          "mean": 1830.0108965511124,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    },
+    "5077": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "155301": 2099.570023137331,
+            "155317": 1843.4281624242662,
+            "155333": 2148.3473273307086
+          },
+          "event_wins_vs_robust": 2,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 2030.4485042974354,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.07656089295178949,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.9909333333333333,
+          "event_returns": {
+            "155301": 2184.1666748210787,
+            "155317": 2036.8422811359167,
+            "155333": 1994.0751176089047
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "headroom_available": true,
+          "mean": 2071.6946911886334,
+          "oracle_recovery": 1.2856429011112627,
+          "relative_gain": 0.09842996852620745,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.9815273800619289,
+          "event_returns": {
+            "155301": 2148.0800441026686,
+            "155317": 1752.642110694945,
+            "155333": 1995.5412176445127
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.003933333333333333,
+          "headroom_available": true,
+          "mean": 1965.4211241473756,
+          "option_switch_count_mean": 3.0666666666666664,
+          "oracle_recovery": 0.54966480739843,
+          "relative_gain": 0.042082828478597185,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "155301": 2106.9065040774644,
+            "155317": 1610.4390408858658,
+            "155333": 1940.8067739367484
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "headroom_available": true,
+          "mean": 1886.0507729666926,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    }
+  },
+  "source_seed_pass": {
+    "5003": false,
+    "5021": false,
+    "5039": true,
+    "5051": true,
+    "5077": false
+  },
+  "status": "complete",
+  "training_seeds": [
+    5003,
+    5021,
+    5039,
+    5051,
+    5077
+  ]
+}

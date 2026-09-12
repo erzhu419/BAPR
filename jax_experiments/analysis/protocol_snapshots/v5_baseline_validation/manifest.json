@@ -1,0 +1,15 @@
+{
+  "decision_variant": "cs4d025c80h8",
+  "event_groups": {
+    "6100": {
+      "path": "event_seed_6100/group.json",
+      "sha256": "7028b6494681f74f522a646e3e8132d10aa313d36779059d6977067e59d47afc"
+    },
+    "6200": {
+      "path": "event_seed_6200/group.json",
+      "sha256": "3efaae2c241caf1458e98d93a954380ed23b2a603ce7233436517ac2c0070419"
+    }
+  },
+  "schema": "bapr.v5-baseline-validation-snapshot.v1",
+  "source": "results_bapr_v3_structured_channel_utility_router_validation_v3"
+}

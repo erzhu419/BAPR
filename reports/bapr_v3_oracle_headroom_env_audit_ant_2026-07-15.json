@@ -1,0 +1,357 @@
+{
+  "env": "Ant-v2",
+  "families": [
+    {
+      "checks": {
+        "burst_event_rate_matches": true,
+        "deterministic_family_has_zero_process_noise": true,
+        "event_families_keep_robot_fixed": true,
+        "finite": true,
+        "gaussian_variance_matches": true,
+        "packet_loss_rate_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "deterministic_mean",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 0.75,
+          "mode_id": 1,
+          "physics_gravity_z": -7.357500076293945,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.25,
+          "mode_id": 2,
+          "physics_gravity_z": -12.262500762939453,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 0.7,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        }
+      ]
+    },
+    {
+      "checks": {
+        "burst_event_rate_matches": true,
+        "deterministic_family_has_zero_process_noise": true,
+        "event_families_keep_robot_fixed": true,
+        "finite": true,
+        "gaussian_variance_matches": true,
+        "packet_loss_rate_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "variance_only",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0005103675648570061,
+          "empirical_action_std": 0.050138913094997406,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 1.0,
+          "mode_id": 1,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.05,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0012248822022229433,
+          "empirical_action_std": 0.12033338844776154,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 1.0,
+          "mode_id": 2,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.12,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.002245617099106312,
+          "empirical_action_std": 0.22061121463775635,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.22,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        }
+      ]
+    },
+    {
+      "checks": {
+        "burst_event_rate_matches": true,
+        "deterministic_family_has_zero_process_noise": true,
+        "event_families_keep_robot_fixed": true,
+        "finite": true,
+        "gaussian_variance_matches": true,
+        "packet_loss_rate_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "mean_variance",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.00021197687601670623,
+          "empirical_action_std": 0.020072007551789284,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.02,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0008479075040668249,
+          "empirical_action_std": 0.08028803020715714,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 0.75,
+          "mode_id": 1,
+          "physics_gravity_z": -7.357500076293945,
+          "target_action_gain": 0.85,
+          "target_action_noise_std": 0.08,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0012718611396849155,
+          "empirical_action_std": 0.1204320415854454,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 1.25,
+          "mode_id": 2,
+          "physics_gravity_z": -12.262500762939453,
+          "target_action_gain": 1.1,
+          "target_action_noise_std": 0.12,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0021197686437517405,
+          "empirical_action_std": 0.20072007179260254,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 1.0,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 0.7,
+          "target_action_noise_std": 0.2,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        }
+      ]
+    },
+    {
+      "checks": {
+        "burst_event_rate_matches": true,
+        "deterministic_family_has_zero_process_noise": true,
+        "event_families_keep_robot_fixed": true,
+        "finite": true,
+        "gaussian_variance_matches": true,
+        "packet_loss_rate_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "packet_loss",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.082763671875,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 1,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.08
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.1865234375,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 2,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.18
+        },
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.330810546875,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.32
+        }
+      ]
+    },
+    {
+      "checks": {
+        "burst_event_rate_matches": true,
+        "deterministic_family_has_zero_process_noise": true,
+        "event_families_keep_robot_fixed": true,
+        "finite": true,
+        "gaussian_variance_matches": true,
+        "packet_loss_rate_matches": true,
+        "variance_only_keeps_mean_physics": true
+      },
+      "family": "burst_torque",
+      "rows": [
+        {
+          "empirical_action_mean_abs": 0.0,
+          "empirical_action_std": 0.0,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.0,
+          "gravity_scale": 1.0,
+          "mode_id": 0,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.0,
+          "target_burst_std": 0.0,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0003221910446882248,
+          "empirical_action_std": 0.042051222175359726,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.027587890625,
+          "gravity_scale": 1.0,
+          "mode_id": 1,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.03,
+          "target_burst_std": 0.25,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0016023449134081602,
+          "empirical_action_std": 0.12296079099178314,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.076171875,
+          "gravity_scale": 1.0,
+          "mode_id": 2,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.08,
+          "target_burst_std": 0.45,
+          "target_packet_loss_prob": 0.0
+        },
+        {
+          "empirical_action_mean_abs": 0.0032014944590628147,
+          "empirical_action_std": 0.2333245873451233,
+          "empirical_packet_loss_rate": 0.0,
+          "empirical_zero_command_nonzero_rate": 0.145751953125,
+          "gravity_scale": 1.0,
+          "mode_id": 3,
+          "physics_gravity_z": -9.8100004196167,
+          "target_action_gain": 1.0,
+          "target_action_noise_std": 0.0,
+          "target_burst_prob": 0.15,
+          "target_burst_std": 0.7,
+          "target_packet_loss_prob": 0.0
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "samples": 4096
+}

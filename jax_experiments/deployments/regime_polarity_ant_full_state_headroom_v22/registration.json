@@ -1,0 +1,136 @@
+{
+  "budget": {
+    "robust_steps": 5600000,
+    "specialist_additional_steps": 2800000,
+    "specialist_initialization": "copy actor, critic, target critic, and alpha from the matched robust source; reset optimizer and replay"
+  },
+  "created_before_training": true,
+  "frozen_boundary": {
+    "estimator_or_router_training": false,
+    "halfcheetah_v21_untouched": true,
+    "question": "whether Ant has stable robust-inclusive true-mode policy-bank headroom before porting the frozen causal estimator",
+    "same_environment_family_and_dwell": true,
+    "same_robust_and_full_state_specialist_recipe": true
+  },
+  "gate": {
+    "all_three_policy_seeds_pass": true,
+    "all_three_switching_events_win": true,
+    "minimum_per_mode_gain": 0.05,
+    "minimum_stationary_mode_wins_per_seed": 3,
+    "minimum_switching_gain": 0.1,
+    "zero_termination": true
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      187001,
+      187017,
+      187033
+    ],
+    "environment": "Ant-v2",
+    "family": "actuator_polarity",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v22-ant-full-state-headroom-development",
+    "stationary_holdout_event_seeds": [
+      187101,
+      187117,
+      187133
+    ],
+    "switching_event_seeds": [
+      187201,
+      187217,
+      187233
+    ],
+    "switching_schedules": {
+      "187201": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "187217": [
+        2,
+        0,
+        3,
+        1
+      ],
+      "187233": [
+        1,
+        3,
+        2,
+        0
+      ]
+    },
+    "training_seeds": [
+      85003,
+      85021,
+      85039
+    ],
+    "variant": "full_state_final"
+  },
+  "schema": "bapr.ant-full-state-headroom-registration.v22",
+  "source_records": {
+    "jax_experiments/algos/sac_policy_stability.py": {
+      "sha256": "ab2d66f1899b33d3c78fb3a46e319333efe6075c1f7eb7d40cb8c89b24a81af4",
+      "size": 14010
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_ant_full_state_headroom_v22.py": {
+      "sha256": "22fa38d74df8abb2dcaa362f5ab486e4ca5ba9ff991e9fa8d11395fdb34ecb4f",
+      "size": 3689
+    },
+    "jax_experiments/analysis/regime_polarity_ant_full_state_headroom_v22.py": {
+      "sha256": "e1f072c3a99a9280242d043dac6aa3040795a1d5a39b2ce82f3fb8c3b16c1e07",
+      "size": 14584
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_full_state_audit_v22.py": {
+      "sha256": "34039afcfcf6bfc3f751da28e91c7221c4a6197ec3d4f99c67d12d331b2bdeb4",
+      "size": 1046
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_full_state_specialist_v22.py": {
+      "sha256": "451ac5f7af3957086d9afbb55393a95d8a5deadaf7c5f963a31307b6e06ce470",
+      "size": 2213
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_robust_source_v22.py": {
+      "sha256": "b6ba7d0a8be050cd9ab24a2db62630906b154a177a3ed0851685497017c205c9",
+      "size": 1199
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v19.py": {
+      "sha256": "c7b718c1c6b7f525bc94d539bef2fc9286e17188a55d7cc8c9f2ad7a72945481",
+      "size": 7074
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "dd8e55eab65bb276b3df7ec5d2ec005ac559cd576a32b7022b5d0276232ab56e",
+      "size": 19338
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_audit_v19.py": {
+      "sha256": "cf8469a22f6a8baff7de7ebd14051907fa72fb1ec5213070f51b3ebbb72b3c07",
+      "size": 10146
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/results_regime_polarity_full_state_final_confirmation_analysis_v21/analysis.json": {
+      "sha256": "1798aeabf2dd1ae85847ce17afd2b30131e45a47d6544ea18272639dc944ee0c",
+      "size": 27521
+    },
+    "jax_experiments/results_regime_polarity_headroom_analysis_v1/analysis.json": {
+      "sha256": "9ef4220865cafe6039fe713b9e172a22324ebc57d56f6609270f63bf156cd9ff",
+      "size": 27841
+    },
+    "scripts/submit_regime_polarity_ant_full_state_headroom_v22.py": {
+      "sha256": "43395004fb01a1930f0b6bceae8bdf36f68e83730e9ff3e70351e6f3efe252fa",
+      "size": 12189
+    }
+  },
+  "status": "registered",
+  "sync_policy": "compact policy/controller bundles and JSON only; never sync replay or full checkpoints"
+}

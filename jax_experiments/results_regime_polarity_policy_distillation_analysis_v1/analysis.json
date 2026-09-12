@@ -1,0 +1,963 @@
+{
+  "development_only": true,
+  "env": "HalfCheetah-v2",
+  "family": "actuator_polarity",
+  "groups": {
+    "combined": {
+      "group_pass": true,
+      "student_models": {
+        "1409": {
+          "best_individual_robust": {
+            "arm": "robust_final_seed_719",
+            "mean": 1921.5450426152597
+          },
+          "final_validation_loss": 0.008896193467080593,
+          "headroom_recovery": 1.1638990623211634,
+          "individual_robust_means": {
+            "robust_development_seed_101": 753.2232081917425,
+            "robust_development_seed_211": 871.5257597187534,
+            "robust_development_seed_307": 1352.2888899698853,
+            "robust_development_seed_419": 1409.893535922716,
+            "robust_development_seed_523": 785.1965383140371,
+            "robust_final_seed_1031": 1651.9959130242466,
+            "robust_final_seed_607": 877.6617405050745,
+            "robust_final_seed_719": 1921.5450426152597,
+            "robust_final_seed_823": 1168.9724735215307,
+            "robust_final_seed_929": 1036.3140373986214
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2046.195951316754,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 865.8158999377862,
+              "99002": 844.3292756449804,
+              "99003": 879.8575366129353
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 863.3342373985673,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          },
+          "passed": true,
+          "student_seed": 1409,
+          "student_stationary": {
+            "by_mode": {
+              "0": 2066.9640228919066,
+              "1": 2051.310882821555,
+              "2": 2007.2915622974435,
+              "3": 2221.654297421624
+            },
+            "worst_mode": 2007.2915622974435
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 1944.7406637124097,
+            "episode_wins": 10,
+            "event_seed_deltas": {
+              "99001": 12.528615109995007,
+              "99002": -41.80277558118105,
+              "99003": 98.86102376263588
+            },
+            "event_seed_wins": 2,
+            "mean_delta": 23.19562109714995,
+            "n_episodes": 15,
+            "reference_mean": 1921.5450426152597
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 1944.7406637124097,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 794.7736706888303,
+              "99002": 679.0384167161212,
+              "99003": 811.8247619777172
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 761.878949794223,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 1944.7406637124097,
+            "episode_wins": 10,
+            "event_seed_deltas": {
+              "99001": 81.62169081792236,
+              "99002": 215.97215141877533,
+              "99003": 24.267175224237143
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 107.2870058203116,
+            "n_episodes": 15,
+            "reference_mean": 1837.4536578920981
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2021.4592012036592,
+              "1": 2082.851877157887,
+              "2": 1978.809304191172,
+              "3": 2304.637057836354
+            },
+            "worst_mode": 1978.809304191172
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 1837.4536578920981,
+            "episode_wins": 14,
+            "event_seed_deltas": {
+              "99001": 713.151979870908,
+              "99002": 463.06626529734586,
+              "99003": 787.5575867534801
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 654.5919439739114,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          }
+        },
+        "1511": {
+          "best_individual_robust": {
+            "arm": "robust_final_seed_719",
+            "mean": 1921.5450426152597
+          },
+          "final_validation_loss": 0.008786932565271854,
+          "headroom_recovery": 1.1783699930327627,
+          "individual_robust_means": {
+            "robust_development_seed_101": 753.2232081917425,
+            "robust_development_seed_211": 871.5257597187534,
+            "robust_development_seed_307": 1352.2888899698853,
+            "robust_development_seed_419": 1409.893535922716,
+            "robust_development_seed_523": 785.1965383140371,
+            "robust_final_seed_1031": 1651.9959130242466,
+            "robust_final_seed_607": 877.6617405050745,
+            "robust_final_seed_719": 1921.5450426152597,
+            "robust_final_seed_823": 1168.9724735215307,
+            "robust_final_seed_929": 1036.3140373986214
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2046.195951316754,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 865.8158999377862,
+              "99002": 844.3292756449804,
+              "99003": 879.8575366129353
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 863.3342373985673,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          },
+          "passed": true,
+          "student_seed": 1511,
+          "student_stationary": {
+            "by_mode": {
+              "0": 2009.1905469996234,
+              "1": 2075.983718703563,
+              "2": 1962.3447872432569,
+              "3": 2240.9092402790984
+            },
+            "worst_mode": 1962.3447872432569
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 1954.2132183780272,
+            "episode_wins": 11,
+            "event_seed_deltas": {
+              "99001": 19.339325296878815,
+              "99002": 40.37384511455893,
+              "99003": 38.29135687686503
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 32.668175762767596,
+            "n_episodes": 15,
+            "reference_mean": 1921.5450426152597
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 1954.2132183780272,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 801.5843808757141,
+              "99002": 761.2150374118612,
+              "99003": 751.2550950919464
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 771.3515044598406,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 1954.2132183780272,
+            "episode_wins": 11,
+            "event_seed_deltas": {
+              "99001": 88.43240100480617,
+              "99002": 298.1487721145153,
+              "99003": -36.302491661533715
+            },
+            "event_seed_wins": 2,
+            "mean_delta": 116.75956048592926,
+            "n_episodes": 15,
+            "reference_mean": 1837.4536578920981
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2021.4592012036592,
+              "1": 2082.851877157887,
+              "2": 1978.809304191172,
+              "3": 2304.637057836354
+            },
+            "worst_mode": 1978.809304191172
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 1837.4536578920981,
+            "episode_wins": 14,
+            "event_seed_deltas": {
+              "99001": 713.151979870908,
+              "99002": 463.06626529734586,
+              "99003": 787.5575867534801
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 654.5919439739114,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          }
+        },
+        "1601": {
+          "best_individual_robust": {
+            "arm": "robust_final_seed_719",
+            "mean": 1921.5450426152597
+          },
+          "final_validation_loss": 0.008999453857541084,
+          "headroom_recovery": 1.0989418445272339,
+          "individual_robust_means": {
+            "robust_development_seed_101": 753.2232081917425,
+            "robust_development_seed_211": 871.5257597187534,
+            "robust_development_seed_307": 1352.2888899698853,
+            "robust_development_seed_419": 1409.893535922716,
+            "robust_development_seed_523": 785.1965383140371,
+            "robust_final_seed_1031": 1651.9959130242466,
+            "robust_final_seed_607": 877.6617405050745,
+            "robust_final_seed_719": 1921.5450426152597,
+            "robust_final_seed_823": 1168.9724735215307,
+            "robust_final_seed_929": 1036.3140373986214
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2046.195951316754,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 865.8158999377862,
+              "99002": 844.3292756449804,
+              "99003": 879.8575366129353
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 863.3342373985673,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          },
+          "passed": true,
+          "student_seed": 1601,
+          "student_stationary": {
+            "by_mode": {
+              "0": 2011.7560230625172,
+              "1": 2078.236303281784,
+              "2": 2033.4797693139562,
+              "3": 2274.659146391352
+            },
+            "worst_mode": 2011.7560230625172
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 1902.2201922415445,
+            "episode_wins": 7,
+            "event_seed_deltas": {
+              "99001": -17.54004239216447,
+              "99002": -34.3149967122823,
+              "99003": -6.119512016698718
+            },
+            "event_seed_wins": 0,
+            "mean_delta": -19.32485037371516,
+            "n_episodes": 15,
+            "reference_mean": 1921.5450426152597
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 1902.2201922415445,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 764.7050131866708,
+              "99002": 686.5261955850199,
+              "99003": 706.8442261983826
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 719.3584783233579,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 1902.2201922415445,
+            "episode_wins": 5,
+            "event_seed_deltas": {
+              "99001": 51.553033315762875,
+              "99002": 223.45993028767407,
+              "99003": -80.71336055509747
+            },
+            "event_seed_wins": 2,
+            "mean_delta": 64.7665343494465,
+            "n_episodes": 15,
+            "reference_mean": 1837.4536578920981
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2021.4592012036592,
+              "1": 2082.851877157887,
+              "2": 1978.809304191172,
+              "3": 2304.637057836354
+            },
+            "worst_mode": 1978.809304191172
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 1837.4536578920981,
+            "episode_wins": 14,
+            "event_seed_deltas": {
+              "99001": 713.151979870908,
+              "99002": 463.06626529734586,
+              "99003": 787.5575867534801
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 654.5919439739114,
+            "n_episodes": 15,
+            "reference_mean": 1182.8617139181868
+          }
+        }
+      },
+      "student_seed_passes": 3,
+      "validation_selected_seed": 1511
+    },
+    "development": {
+      "group_pass": true,
+      "student_models": {
+        "1409": {
+          "best_individual_robust": {
+            "arm": "robust_development_seed_419",
+            "mean": 1409.893535922716
+          },
+          "final_validation_loss": 0.020576855167746544,
+          "headroom_recovery": 1.0025660357294242,
+          "individual_robust_means": {
+            "robust_development_seed_101": 753.2232081917425,
+            "robust_development_seed_211": 871.5257597187534,
+            "robust_development_seed_307": 1352.2888899698853,
+            "robust_development_seed_419": 1409.893535922716,
+            "robust_development_seed_523": 785.1965383140371
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2179.953484318654,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1126.7576669229568,
+              "99002": 1092.2494747418164,
+              "99003": 1217.5765520209075
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1145.527897895227,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          },
+          "passed": true,
+          "student_seed": 1409,
+          "student_stationary": {
+            "by_mode": {
+              "0": 2194.778496596714,
+              "1": 2267.3358042031527,
+              "2": 2059.532293484981,
+              "3": 2478.25579157571
+            },
+            "worst_mode": 2059.532293484981
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 2096.760425357024,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 697.7993521861732,
+              "99002": 729.4687323436141,
+              "99003": 633.3325837731361
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 686.8668894343078,
+            "n_episodes": 15,
+            "reference_mean": 1409.893535922716
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 2096.760425357024,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1072.2851441285015,
+              "99002": 1101.299574842602,
+              "99003": 1013.4197978296877
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1062.3348389335972,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 2096.760425357024,
+            "episode_wins": 8,
+            "event_seed_deltas": {
+              "99001": 69.03267486691475,
+              "99002": 15.871814500540495,
+              "99003": -76.74745315387845
+            },
+            "event_seed_wins": 2,
+            "mean_delta": 2.7190120711922647,
+            "n_episodes": 15,
+            "reference_mean": 2094.041413285832
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2166.0527967326343,
+              "1": 2256.5600967630744,
+              "2": 2103.4202963620423,
+              "3": 2548.0848991572857
+            },
+            "worst_mode": 2103.4202963620423
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 2094.041413285832,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1003.2524692615867,
+              "99002": 1085.4277603420614,
+              "99003": 1090.1672509835662
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1059.615826862405,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          }
+        },
+        "1511": {
+          "best_individual_robust": {
+            "arm": "robust_development_seed_419",
+            "mean": 1409.893535922716
+          },
+          "final_validation_loss": 0.020430903881788254,
+          "headroom_recovery": 0.9971692805908426,
+          "individual_robust_means": {
+            "robust_development_seed_101": 753.2232081917425,
+            "robust_development_seed_211": 871.5257597187534,
+            "robust_development_seed_307": 1352.2888899698853,
+            "robust_development_seed_419": 1409.893535922716,
+            "robust_development_seed_523": 785.1965383140371
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2179.953484318654,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1126.7576669229568,
+              "99002": 1092.2494747418164,
+              "99003": 1217.5765520209075
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1145.527897895227,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          },
+          "passed": true,
+          "student_seed": 1511,
+          "student_stationary": {
+            "by_mode": {
+              "0": 2152.2871147717037,
+              "1": 2244.88555352812,
+              "2": 2078.019525277863,
+              "3": 2591.5438715455434
+            },
+            "worst_mode": 2078.019525277863
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 2091.041938198482,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 687.2695140812546,
+              "99002": 653.7285735435784,
+              "99003": 702.4471192024648
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 681.148402275766,
+            "n_episodes": 15,
+            "reference_mean": 1409.893535922716
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 2091.041938198482,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1061.7553060235828,
+              "99002": 1025.5594160425662,
+              "99003": 1082.5343332590164
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1056.6163517750551,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 2091.041938198482,
+            "episode_wins": 6,
+            "event_seed_deltas": {
+              "99001": 58.50283676199615,
+              "99002": -59.86834429949522,
+              "99003": -7.63291772454977
+            },
+            "event_seed_wins": 1,
+            "mean_delta": -2.9994750873496137,
+            "n_episodes": 15,
+            "reference_mean": 2094.041413285832
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2166.0527967326343,
+              "1": 2256.5600967630744,
+              "2": 2103.4202963620423,
+              "3": 2548.0848991572857
+            },
+            "worst_mode": 2103.4202963620423
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 2094.041413285832,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1003.2524692615867,
+              "99002": 1085.4277603420614,
+              "99003": 1090.1672509835662
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1059.615826862405,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          }
+        },
+        "1601": {
+          "best_individual_robust": {
+            "arm": "robust_development_seed_419",
+            "mean": 1409.893535922716
+          },
+          "final_validation_loss": 0.020593492314219475,
+          "headroom_recovery": 0.9567496436992636,
+          "individual_robust_means": {
+            "robust_development_seed_101": 753.2232081917425,
+            "robust_development_seed_211": 871.5257597187534,
+            "robust_development_seed_307": 1352.2888899698853,
+            "robust_development_seed_419": 1409.893535922716,
+            "robust_development_seed_523": 785.1965383140371
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2179.953484318654,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1126.7576669229568,
+              "99002": 1092.2494747418164,
+              "99003": 1217.5765520209075
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1145.527897895227,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          },
+          "passed": true,
+          "student_seed": 1601,
+          "student_stationary": {
+            "by_mode": {
+              "0": 2132.0016587945324,
+              "1": 2227.3759765585264,
+              "2": 2111.6923536417385,
+              "3": 2592.681557666262
+            },
+            "worst_mode": 2111.6923536417385
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 2048.2126512321333,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 640.3869456976652,
+              "99002": 623.8536835178733,
+              "99003": 650.7167167127133
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 638.3191153094173,
+            "n_episodes": 15,
+            "reference_mean": 1409.893535922716
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 2048.2126512321333,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1014.8727376399935,
+              "99002": 995.6845260168611,
+              "99003": 1030.8039307692648
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1013.7870648087065,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 2048.2126512321333,
+            "episode_wins": 8,
+            "event_seed_deltas": {
+              "99001": 11.620268378406763,
+              "99002": -89.74323432520032,
+              "99003": -59.363320214301346
+            },
+            "event_seed_wins": 1,
+            "mean_delta": -45.8287620536983,
+            "n_episodes": 15,
+            "reference_mean": 2094.041413285832
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2166.0527967326343,
+              "1": 2256.5600967630744,
+              "2": 2103.4202963620423,
+              "3": 2548.0848991572857
+            },
+            "worst_mode": 2103.4202963620423
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 2094.041413285832,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 1003.2524692615867,
+              "99002": 1085.4277603420614,
+              "99003": 1090.1672509835662
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 1059.615826862405,
+            "n_episodes": 15,
+            "reference_mean": 1034.4255864234267
+          }
+        }
+      },
+      "student_seed_passes": 3,
+      "validation_selected_seed": 1511
+    },
+    "final": {
+      "group_pass": true,
+      "student_models": {
+        "1409": {
+          "best_individual_robust": {
+            "arm": "robust_final_seed_719",
+            "mean": 1921.5450426152597
+          },
+          "final_validation_loss": 0.02064261958003044,
+          "headroom_recovery": 0.9869627976021048,
+          "individual_robust_means": {
+            "robust_final_seed_1031": 1651.9959130242466,
+            "robust_final_seed_607": 877.6617405050745,
+            "robust_final_seed_719": 1921.5450426152597,
+            "robust_final_seed_823": 1168.9724735215307,
+            "robust_final_seed_929": 1036.3140373986214
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2102.839196893573,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 769.6591813211887,
+              "99002": 747.639939308688,
+              "99003": 797.3249458120018
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 771.5413554806262,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          },
+          "passed": true,
+          "student_seed": 1409,
+          "student_stationary": {
+            "by_mode": {
+              "0": 1973.274378535648,
+              "1": 2320.730476591488,
+              "2": 2079.55504221643,
+              "3": 2360.5285517377156
+            },
+            "worst_mode": 1973.274378535648
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 2021.330773493896,
+            "episode_wins": 12,
+            "event_seed_deltas": {
+              "99001": 94.98461981862783,
+              "99002": 102.00398731157183,
+              "99003": 102.36858550570905
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 99.78573087863624,
+            "n_episodes": 15,
+            "reference_mean": 1921.5450426152597
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 2021.330773493896,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 742.188365579918,
+              "99002": 665.2550119904429,
+              "99003": 662.6554186724871
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 690.0329320809493,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 2021.330773493896,
+            "episode_wins": 8,
+            "event_seed_deltas": {
+              "99001": 15.163812759146094,
+              "99002": -15.10551412962377,
+              "99003": -27.4030952680856
+            },
+            "event_seed_wins": 1,
+            "mean_delta": -9.114932212854425,
+            "n_episodes": 15,
+            "reference_mean": 2030.4457057067505
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2001.617528106148,
+              "1": 2262.1866026791436,
+              "2": 2106.1048520773647,
+              "3": 2311.5755832867076
+            },
+            "worst_mode": 2001.617528106148
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 2030.4457057067505,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 727.0245528207719,
+              "99002": 680.3605261200667,
+              "99003": 690.0585139405728
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 699.1478642938038,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          }
+        },
+        "1511": {
+          "best_individual_robust": {
+            "arm": "robust_final_seed_719",
+            "mean": 1921.5450426152597
+          },
+          "final_validation_loss": 0.020585715770721436,
+          "headroom_recovery": 0.6365217108516136,
+          "individual_robust_means": {
+            "robust_final_seed_1031": 1651.9959130242466,
+            "robust_final_seed_607": 877.6617405050745,
+            "robust_final_seed_719": 1921.5450426152597,
+            "robust_final_seed_823": 1168.9724735215307,
+            "robust_final_seed_929": 1036.3140373986214
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2102.839196893573,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 769.6591813211887,
+              "99002": 747.639939308688,
+              "99003": 797.3249458120018
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 771.5413554806262,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          },
+          "passed": false,
+          "student_seed": 1511,
+          "student_stationary": {
+            "by_mode": {
+              "0": 1824.3787536938985,
+              "1": 2275.8663056650507,
+              "2": 2118.5107392281293,
+              "3": 2348.876963286226
+            },
+            "worst_mode": 1824.3787536938985
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 1776.3206361314903,
+            "episode_wins": 7,
+            "event_seed_deltas": {
+              "99001": -95.01275404021143,
+              "99002": -351.9387591164559,
+              "99003": 11.2782937053591
+            },
+            "event_seed_wins": 1,
+            "mean_delta": -145.22440648376943,
+            "n_episodes": 15,
+            "reference_mean": 1921.5450426152597
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 1776.3206361314903,
+            "episode_wins": 14,
+            "event_seed_deltas": {
+              "99001": 552.1909917210787,
+              "99002": 211.31226556241512,
+              "99003": 571.5651268721372
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 445.0227947185437,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 1776.3206361314903,
+            "episode_wins": 2,
+            "event_seed_deltas": {
+              "99001": -174.83356109969318,
+              "99002": -469.04826055765153,
+              "99003": -118.49338706843555
+            },
+            "event_seed_wins": 0,
+            "mean_delta": -254.12506957526008,
+            "n_episodes": 15,
+            "reference_mean": 2030.4457057067505
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2001.617528106148,
+              "1": 2262.1866026791436,
+              "2": 2106.1048520773647,
+              "3": 2311.5755832867076
+            },
+            "worst_mode": 2001.617528106148
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 2030.4457057067505,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 727.0245528207719,
+              "99002": 680.3605261200667,
+              "99003": 690.0585139405728
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 699.1478642938038,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          }
+        },
+        "1601": {
+          "best_individual_robust": {
+            "arm": "robust_final_seed_719",
+            "mean": 1921.5450426152597
+          },
+          "final_validation_loss": 0.020459100604057312,
+          "headroom_recovery": 0.8398820494190572,
+          "individual_robust_means": {
+            "robust_final_seed_1031": 1651.9959130242466,
+            "robust_final_seed_607": 877.6617405050745,
+            "robust_final_seed_719": 1921.5450426152597,
+            "robust_final_seed_823": 1168.9724735215307,
+            "robust_final_seed_929": 1036.3140373986214
+          },
+          "oracle_vs_individual_robust_population": {
+            "candidate_mean": 2102.839196893573,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 769.6591813211887,
+              "99002": 747.639939308688,
+              "99003": 797.3249458120018
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 771.5413554806262,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          },
+          "passed": true,
+          "student_seed": 1601,
+          "student_stationary": {
+            "by_mode": {
+              "0": 1917.297432269777,
+              "1": 2263.917760047565,
+              "2": 2230.650725378096,
+              "3": 2372.3573272794483
+            },
+            "worst_mode": 1917.297432269777
+          },
+          "student_vs_best_individual_robust": {
+            "candidate_mean": 1918.4995825229832,
+            "episode_wins": 10,
+            "event_seed_deltas": {
+              "99001": -107.37526152394712,
+              "99002": 36.59869352951646,
+              "99003": 61.640187717601655
+            },
+            "event_seed_wins": 2,
+            "mean_delta": -3.045460092276335,
+            "n_episodes": 15,
+            "reference_mean": 1921.5450426152597
+          },
+          "student_vs_individual_robust_population": {
+            "candidate_mean": 1918.4995825229832,
+            "episode_wins": 14,
+            "event_seed_deltas": {
+              "99001": 539.828484237343,
+              "99002": 599.8497182083875,
+              "99003": 621.9270208843798
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 587.2017411100368,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          },
+          "student_vs_teacher": {
+            "candidate_mean": 1918.4995825229832,
+            "episode_wins": 4,
+            "event_seed_deltas": {
+              "99001": -187.19606858342885,
+              "99002": -80.51080791167915,
+              "99003": -68.131493056193
+            },
+            "event_seed_wins": 0,
+            "mean_delta": -111.946123183767,
+            "n_episodes": 15,
+            "reference_mean": 2030.4457057067505
+          },
+          "switching_terminated_rate": 0.0,
+          "teacher_stationary": {
+            "by_mode": {
+              "0": 2001.617528106148,
+              "1": 2262.1866026791436,
+              "2": 2106.1048520773647,
+              "3": 2311.5755832867076
+            },
+            "worst_mode": 2001.617528106148
+          },
+          "teacher_vs_individual_robust_population": {
+            "candidate_mean": 2030.4457057067505,
+            "episode_wins": 15,
+            "event_seed_deltas": {
+              "99001": 727.0245528207719,
+              "99002": 680.3605261200667,
+              "99003": 690.0585139405728
+            },
+            "event_seed_wins": 3,
+            "mean_delta": 699.1478642938038,
+            "n_episodes": 15,
+            "reference_mean": 1331.2978414129466
+          }
+        }
+      },
+      "student_seed_passes": 2,
+      "validation_selected_seed": 1601
+    }
+  },
+  "promotion": true,
+  "protocol_version": "v1-dagger-median",
+  "recommendation": "The combined median teacher can be compressed into one stable causal student. Freeze the validation-selected combined student and run a genuinely new five-seed confirmation; do not select a student from audit return.",
+  "schema": "bapr.regime-polarity-policy-distillation-analysis.v1",
+  "status": "complete",
+  "thresholds": {
+    "max_terminated_rate": 0.0,
+    "min_event_seed_wins": 3,
+    "min_headroom_recovery": 0.8,
+    "min_student_seed_passes": 2
+  }
+}

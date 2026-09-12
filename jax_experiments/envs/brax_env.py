@@ -14,12 +14,14 @@ from brax.envs.base import State
 
 
 RAND_PARAMS_MAP = {
-    # Brax spring/mjx pipelines read System.gravity at step time. Updating
-    # opt.gravity only changes metadata and leaves the actual physics unchanged.
+    # Map MuJoCo-style logical names to the Brax System fields that are actually
+    # read by the spring/generalized pipelines. Top-level body_mass,
+    # body_inertia, and dof_damping exist as legacy copies, but replacing them is
+    # a silent no-op for physics.
     'gravity': 'gravity',
-    'body_mass': 'body_mass',
-    'dof_damping': 'dof_damping',
-    'body_inertia': 'body_inertia',
+    'body_mass': 'link.inertia.mass',
+    'dof_damping': 'dof.damping',
+    'body_inertia': 'link.inertia.i',
 }
 
 BRAX_ENV_MAP = {
@@ -28,6 +30,39 @@ BRAX_ENV_MAP = {
     'Walker2d-v2': 'walker2d', 'Walker2d-v4': 'walker2d', 'Walker2d-v5': 'walker2d',
     'Ant-v2': 'ant', 'Ant-v4': 'ant', 'Ant-v5': 'ant',
 }
+
+
+def apply_action_disturbance(
+        action, rng, gain, noise_std, packet_loss_prob=0.0,
+        burst_prob=0.0, burst_std=0.0):
+    """Apply mode-conditioned actuator dynamics before the physics step.
+
+    The replay action remains the policy command.  A packet-loss event drops
+    the whole command for one simulator step, while a burst event adds a
+    heavy-tailed torque impulse.  Their probabilities are fixed within a
+    persistent mode but sampled independently on each transition.
+    """
+    action = jnp.asarray(action)
+    gain = jnp.asarray(gain, dtype=action.dtype)
+    noise_std = jnp.asarray(noise_std, dtype=action.dtype)
+    packet_loss_prob = jnp.clip(
+        jnp.asarray(packet_loss_prob, dtype=action.dtype), 0.0, 1.0)
+    burst_prob = jnp.clip(
+        jnp.asarray(burst_prob, dtype=action.dtype), 0.0, 1.0)
+    burst_std = jnp.maximum(
+        jnp.asarray(burst_std, dtype=action.dtype), 0.0)
+    noise_key, packet_key, burst_key, impulse_key = jax.random.split(rng, 4)
+    noise = jax.random.normal(noise_key, action.shape, dtype=action.dtype)
+    packet_kept = jnp.logical_not(jax.random.bernoulli(
+        packet_key, packet_loss_prob))
+    burst_active = jax.random.bernoulli(burst_key, burst_prob)
+    impulse = jax.random.normal(
+        impulse_key, action.shape, dtype=action.dtype)
+    executed = (
+        gain * action * packet_kept
+        + noise_std * noise
+        + burst_active * burst_std * impulse)
+    return jnp.clip(executed, -1.0, 1.0)
 
 
 def _build_core_fns(env, env_name):
@@ -128,7 +163,9 @@ class BraxNonstationaryEnv:
 
     def __init__(self, env_name: str, rand_params: List[str] = None,
                  log_scale_limit: float = 3.0, seed: int = 0,
-                 backend: str = 'spring'):
+                 backend: str = 'spring',
+                 task_scale_distribution: str = 'exp',
+                 task_seed_salt: int = 0):
         brax_name = BRAX_ENV_MAP.get(env_name, env_name.lower())
         self.env = envs.get_environment(brax_name, backend=backend)
         self.base_sys = self.env.sys
@@ -137,7 +174,13 @@ class BraxNonstationaryEnv:
 
         self.rand_params = rand_params or ['gravity']
         self.log_scale_limit = log_scale_limit
+        if task_scale_distribution not in ('exp', 'pow1p5'):
+            raise ValueError(
+                "task_scale_distribution must be 'exp' or 'pow1p5', got "
+                f"{task_scale_distribution!r}")
+        self.task_scale_distribution = task_scale_distribution
         self.seed = seed
+        self.task_seed_salt = int(task_seed_salt)
         self.rng = jax.random.PRNGKey(seed)
 
         self.obs_dim = self.env.observation_size
@@ -157,11 +200,21 @@ class BraxNonstationaryEnv:
         self.current_task_id = 0
         self._tasks = None
         self._task_sys_list = None
+        self._task_sample_calls = 0
         self._changing_interval = 10
         self._changing_period = 100
         self._step_counter = 0
         self._current_sys = self.base_sys
         self._state = None
+        self._action_gain = jnp.ones((self.act_dim,), dtype=jnp.float32)
+        self._action_noise_std = jnp.zeros(
+            (self.act_dim,), dtype=jnp.float32)
+        self._action_packet_loss_prob = jnp.asarray(0.0, dtype=jnp.float32)
+        self._action_burst_prob = jnp.asarray(0.0, dtype=jnp.float32)
+        self._action_burst_std = jnp.asarray(0.0, dtype=jnp.float32)
+        # Nonzero values ask collect_samples to preserve the environment's
+        # mode clock by splitting every algorithm's fused rollout equally.
+        self.rollout_chunk_steps = 0
 
         # Build core physics functions
         self._physics_step, self._reward_obs, self._reset_state = \
@@ -191,6 +244,29 @@ class BraxNonstationaryEnv:
     def _set_sys(self, sys):
         self._current_sys = sys
 
+    def _set_action_disturbance(
+            self, gain=1.0, noise_std=0.0, packet_loss_prob=0.0,
+            burst_prob=0.0, burst_std=0.0):
+        self._action_gain = jnp.broadcast_to(
+            jnp.asarray(gain, dtype=jnp.float32), (self.act_dim,))
+        self._action_noise_std = jnp.broadcast_to(
+            jnp.asarray(noise_std, dtype=jnp.float32), (self.act_dim,))
+        self._action_packet_loss_prob = jnp.clip(
+            jnp.asarray(packet_loss_prob, dtype=jnp.float32), 0.0, 1.0)
+        self._action_burst_prob = jnp.clip(
+            jnp.asarray(burst_prob, dtype=jnp.float32), 0.0, 1.0)
+        self._action_burst_std = jnp.maximum(
+            jnp.asarray(burst_std, dtype=jnp.float32), 0.0)
+
+    def action_disturbance_params(self):
+        return (
+            self._action_gain,
+            self._action_noise_std,
+            self._action_packet_loss_prob,
+            self._action_burst_prob,
+            self._action_burst_std,
+        )
+
     def sample_tasks(self, n_tasks: int) -> List[Dict]:
         """Sample piecewise-stationary tasks with continuous uniform log_scale.
 
@@ -204,14 +280,24 @@ class BraxNonstationaryEnv:
         was extreme, BOCD constantly fired, β_eff stayed over-conservative.
         """
         tasks = []
-        rng = np.random.RandomState(self.seed + 42)
+        call_id = self._task_sample_calls
+        self._task_sample_calls += 1
+        # Use deterministic but distinct streams for sequential train/test
+        # sampling calls. Previously both calls used self.seed + 42, so
+        # train_tasks and test_tasks were identical and OOD eval was mislabeled.
+        rng = np.random.RandomState(
+            self.seed + self.task_seed_salt + 42 + 100_003 * call_id)
         for _ in range(n_tasks):
             task = {}
             for param in self.rand_params:
                 base = np.array(self._base_values[param])
                 log_scale = rng.uniform(-self.log_scale_limit, self.log_scale_limit,
                                        size=base.shape)
-                task[param] = base * np.exp(log_scale).astype(np.float32)
+                if self.task_scale_distribution == 'pow1p5':
+                    scale = np.power(1.5, log_scale)
+                else:
+                    scale = np.exp(log_scale)
+                task[param] = base * scale.astype(np.float32)
             tasks.append(task)
         return tasks
 
@@ -245,6 +331,14 @@ class BraxNonstationaryEnv:
                 self.current_task_id = idx
                 self._set_sys(self._task_sys_list[idx])
 
+    def task_id_for_next_step(self) -> int:
+        """Return the physics task that the next action will encounter."""
+        next_step = self._step_counter + 1
+        if (self._tasks is not None and self._tasks
+                and next_step % self._changing_interval == 0):
+            return int(next_step / self._changing_period) % len(self._tasks)
+        return int(self.current_task_id)
+
     # --- Sequential API ---
 
     def reset(self):
@@ -255,10 +349,24 @@ class BraxNonstationaryEnv:
     def step(self, action):
         self._step_counter += 1
         self._check_switch()
+        self.rng, noise_key = jax.random.split(self.rng)
         action_jax = jnp.array(action)
-        self._state = self._step_fn(self._current_sys, self._state, action_jax)
+        executed_action = apply_action_disturbance(
+            action_jax, noise_key, self._action_gain,
+            self._action_noise_std, self._action_packet_loss_prob,
+            self._action_burst_prob, self._action_burst_std)
+        self._state = self._step_fn(
+            self._current_sys, self._state, executed_action)
         return np.array(self._state.obs), float(self._state.reward), \
-               bool(self._state.done), {}
+               bool(self._state.done), {
+                   "executed_action": np.asarray(executed_action),
+                   "action_gain": np.asarray(self._action_gain),
+                   "action_noise_std": np.asarray(self._action_noise_std),
+                   "packet_loss_prob": float(
+                       self._action_packet_loss_prob),
+                   "burst_prob": float(self._action_burst_prob),
+                   "burst_std": float(self._action_burst_std),
+               }
 
     def close(self):
         pass
@@ -272,12 +380,28 @@ class BraxNonstationaryEnv:
 
     # --- Scan-fused rollout with policy ---
 
-    def build_rollout_fn(self, policy_graphdef, context_graphdef=None):
+    def build_rollout_fn(self, policy_graphdef, context_graphdef=None,
+                         transition_context_graphdef=None,
+                         recurrent_context_graphdef=None,
+                         recurrent_context_non_params=None,
+                         critic_graphdef=None,
+                         direct_policy_context=False):
         """Build JIT'd scan rollouts: stochastic (training) + deterministic (eval).
 
         Args:
             policy_graphdef: nnx.graphdef(agent.policy)
             context_graphdef: optional nnx.graphdef(agent.context_net) for ESCP/BAPR
+            transition_context_graphdef: optional causal context encoder for
+                BAPR-v2. It consumes transitions inside the same rollout scan.
+            recurrent_context_graphdef: optional ESCP recurrent probe. It
+                consumes ``(observation, previous_action)`` and carries a GRU
+                state causally through the rollout.
+            recurrent_context_non_params: exhaustive non-parameter NNX state
+                for the recurrent probe. Flax 0.10 stores GRU RNG state here.
+            critic_graphdef: optional BAPR-v2 critic used for conservative
+                residual-advantage fallback during rollout and evaluation.
+            direct_policy_context: feed belief_vec directly to a conditioned
+                policy without a state or transition encoder.
         """
         from flax import nnx
 
@@ -285,20 +409,48 @@ class BraxNonstationaryEnv:
         reward_obs = self._reward_obs
         reset_state = self._reset_state
         has_context = context_graphdef is not None
+        has_direct_context = bool(direct_policy_context)
+        has_transition_context = transition_context_graphdef is not None
+        has_recurrent_context = recurrent_context_graphdef is not None
+        if sum(map(int, (
+                has_context, has_direct_context, has_transition_context,
+                has_recurrent_context))) > 1:
+            raise ValueError("rollout context mechanisms are mutually exclusive")
+        has_advantage_critic = critic_graphdef is not None
+        if has_advantage_critic:
+            from jax_experiments.networks.residual_policy import (
+                advantage_gated_action,
+            )
+
+        def adaptive_context(context_model, adapt, oracle_latent, source):
+            learned = context_model.policy_context(adapt, oracle_latent)
+            oracle = jnp.concatenate([
+                oracle_latent[:context_model.latent_dim],
+                jnp.ones((1,), dtype=oracle_latent.dtype),
+            ])
+            selected = jnp.where(
+                source == 0,
+                jnp.zeros_like(learned),
+                jnp.where(source == 1, oracle, learned),
+            )
+            gate = jnp.clip(selected[-1:], 0.0, 1.0)
+            return jnp.concatenate([selected[:-1] * gate, gate])
 
         # --- Stochastic rollout (training) ---
         # v15: optional belief_vec arg lets BAPR feed the BOCD posterior into
         # the policy alongside context. None → ESCP/RESAC/SAC unchanged path.
         @jax.jit
-        def _rollout_scan(sys, policy_params, context_params, belief_vec,
-                          init_state, keys, warmup):
+        def _rollout_scan(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                belief_vec, init_state, keys, warmup):
             """warmup: jax bool — when True, zero out the context embedding
             so rollout matches the training-time warmup phase (GPT-5.5
             advice #3). belief_vec is also zeroed during warmup.
             """
             def scan_body(carry, key):
                 state = carry
-                key1, key2 = jax.random.split(key)
+                policy_key, noise_key, reset_key = jax.random.split(key, 3)
 
                 pre_obs = state.obs
                 policy = nnx.merge(policy_graphdef, policy_params)
@@ -311,39 +463,185 @@ class BraxNonstationaryEnv:
                         b = jnp.where(warmup, jnp.zeros_like(belief_vec),
                                        belief_vec)
                         ep = jnp.concatenate([ep, b[None, :]], axis=-1)
-                    action, _ = policy.sample(pre_obs[None], key1, ep)
+                    action, _ = policy.sample(pre_obs[None], policy_key, ep)
+                elif has_direct_context:
+                    ep = jnp.where(
+                        warmup, jnp.zeros_like(belief_vec), belief_vec)
+                    action, _ = policy.sample(
+                        pre_obs[None], policy_key, ep[None, :])
                 else:
-                    action, _ = policy.sample(pre_obs[None], key1)
+                    action, _ = policy.sample(pre_obs[None], policy_key)
                 action = action[0]
+                executed_action = apply_action_disturbance(
+                    action, noise_key, action_gain, action_noise_std,
+                    packet_loss_prob, burst_prob, burst_std)
 
                 ps0 = state.pipeline_state
-                ps1 = physics_step(sys, ps0, action)
-                reward, post_obs, done = reward_obs(ps0, ps1, action)
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
                 next_state = state.replace(
                     pipeline_state=ps1, obs=post_obs, reward=reward, done=done)
 
-                reset_st = reset_state(sys, key2)
+                reset_st = reset_state(sys, reset_key)
                 out_state = jax.tree.map(
                     lambda r, n: jnp.where(done, r, n), reset_st, next_state)
 
-                transition = (pre_obs, action, reward, post_obs, done)
+                transition = (
+                    pre_obs, action, reward, post_obs, done, executed_action)
                 return out_state, transition
 
             final_state, transitions = jax.lax.scan(
                 scan_body, init_state, keys)
             return final_state, transitions
 
-        # --- Deterministic rollout (eval): tanh(mean), no PRNG per step ---
         @jax.jit
-        def _rollout_scan_det(sys, policy_params, context_params, belief_vec,
-                               init_state, reset_keys, warmup):
+        def _rollout_scan_recurrent(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                init_hidden, init_previous_action, init_state, keys, warmup,
+                context_noise_sigma):
+            """ESCP rollout with a causal recurrent environment probe."""
+            policy = nnx.merge(policy_graphdef, policy_params)
+            context_model = nnx.merge(
+                recurrent_context_graphdef, context_params,
+                recurrent_context_non_params)
+
+            def scan_body(carry, key):
+                state, hidden, previous_action = carry
+                (policy_key, context_noise_key, process_noise_key,
+                 reset_key) = jax.random.split(key, 4)
+                pre_obs = state.obs
+                next_hidden, context = context_model.step(
+                    hidden, pre_obs[None], previous_action[None])
+                context = context[0]
+                context = jnp.where(
+                    warmup, jnp.zeros_like(context), context)
+                context = context + jnp.where(
+                    warmup, 0.0, context_noise_sigma) * jax.random.normal(
+                        context_noise_key, context.shape)
+                action, _ = policy.sample(
+                    pre_obs[None], policy_key, context[None])
+                action = action[0]
+                executed_action = apply_action_disturbance(
+                    action, process_noise_key, action_gain,
+                    action_noise_std, packet_loss_prob, burst_prob,
+                    burst_std)
+
+                ps0 = state.pipeline_state
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
+                next_state = state.replace(
+                    pipeline_state=ps1, obs=post_obs,
+                    reward=reward, done=done)
+                reset_st = reset_state(sys, reset_key)
+                out_state = jax.tree.map(
+                    lambda reset, current: jnp.where(
+                        done, reset, current),
+                    reset_st, next_state)
+                out_hidden = jnp.where(
+                    done, jnp.zeros_like(next_hidden), next_hidden)
+                out_previous_action = jnp.where(
+                    done, jnp.zeros_like(action), action)
+                transition = (
+                    pre_obs, action, reward, post_obs, done,
+                    executed_action)
+                return (
+                    out_state, out_hidden, out_previous_action), transition
+
+            final, transitions = jax.lax.scan(
+                scan_body,
+                (init_state, init_hidden, init_previous_action), keys)
+            return final, transitions
+
+        @jax.jit
+        def _rollout_scan_adaptive(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, critic_params,
+                context_params,
+                adaptation_state, oracle_latent, init_state, keys, warmup,
+                context_source, advantage_enabled, advantage_margin,
+                advantage_lcb_scale):
+            """BAPR-v2 rollout with causal context carried through the scan."""
+            def scan_body(carry, key):
+                state, adapt = carry
+                action_key, noise_key, reset_key = jax.random.split(key, 3)
+                policy = nnx.merge(policy_graphdef, policy_params)
+                context_model = nnx.merge(
+                    transition_context_graphdef, context_params)
+
+                pre_obs = state.obs
+                context = adaptive_context(
+                    context_model, adapt, oracle_latent, context_source)
+                policy_context = jnp.where(
+                    warmup, jnp.zeros_like(context), context)
+                if has_advantage_critic:
+                    critic = nnx.merge(critic_graphdef, critic_params)
+                    action, advantage, advantage_gate = (
+                        advantage_gated_action(
+                            policy, critic, pre_obs[None],
+                            policy_context[None], key=action_key,
+                            enabled=advantage_enabled,
+                            margin=advantage_margin,
+                            lcb_scale=advantage_lcb_scale))
+                    action = action[0]
+                    advantage = advantage[0]
+                    advantage_gate = advantage_gate[0]
+                else:
+                    action, _ = policy.sample(
+                        pre_obs[None], action_key, policy_context[None])
+                    action = action[0]
+                    advantage = jnp.asarray(0.0, dtype=action.dtype)
+                    advantage_gate = jnp.asarray(1.0, dtype=action.dtype)
+                executed_action = apply_action_disturbance(
+                    action, noise_key, action_gain, action_noise_std,
+                    packet_loss_prob, burst_prob, burst_std)
+
+                ps0 = state.pipeline_state
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
+                next_state = state.replace(
+                    pipeline_state=ps1, obs=post_obs,
+                    reward=reward, done=done)
+
+                next_adapt, error, _, _ = context_model.observe(
+                    adapt, pre_obs, action, reward, post_obs, done,
+                    enable_reset=True)
+                next_context = adaptive_context(
+                    context_model, next_adapt, oracle_latent, context_source)
+                next_policy_context = jnp.where(
+                    warmup, jnp.zeros_like(next_context), next_context)
+
+                reset_st = reset_state(sys, reset_key)
+                out_state = jax.tree.map(
+                    lambda r, n: jnp.where(done, r, n),
+                    reset_st, next_state)
+                transition = (
+                    pre_obs, action, reward, post_obs, done,
+                    policy_context, next_policy_context, error,
+                    advantage, advantage_gate)
+                return (out_state, next_adapt), transition
+
+            (final_state, final_adapt), transitions = jax.lax.scan(
+                scan_body, (init_state, adaptation_state), keys)
+            return final_state, final_adapt, transitions
+
+        # --- Mean-policy rollout (eval); transition noise remains stochastic ---
+        @jax.jit
+        def _rollout_scan_det(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                belief_vec, init_state, step_keys, warmup):
             """Eval rollout — uses policy mean (no exploration noise).
 
-            reset_keys: [N, 2] keys used only for auto-reset sampling.
+            step_keys: per-step keys for process noise and auto-reset sampling.
             warmup: jax bool — same semantics as _rollout_scan.
             """
-            def scan_body(carry, reset_key):
+            def scan_body(carry, step_key):
                 state = carry
+                noise_key, reset_key = jax.random.split(step_key)
                 pre_obs = state.obs
                 policy = nnx.merge(policy_graphdef, policy_params)
 
@@ -356,13 +654,22 @@ class BraxNonstationaryEnv:
                                        belief_vec)
                         ep = jnp.concatenate([ep, b[None, :]], axis=-1)
                     action = policy.deterministic(pre_obs[None], ep)
+                elif has_direct_context:
+                    ep = jnp.where(
+                        warmup, jnp.zeros_like(belief_vec), belief_vec)
+                    action = policy.deterministic(
+                        pre_obs[None], ep[None, :])
                 else:
                     action = policy.deterministic(pre_obs[None])
                 action = action[0]
+                executed_action = apply_action_disturbance(
+                    action, noise_key, action_gain, action_noise_std,
+                    packet_loss_prob, burst_prob, burst_std)
 
                 ps0 = state.pipeline_state
-                ps1 = physics_step(sys, ps0, action)
-                reward, post_obs, done = reward_obs(ps0, ps1, action)
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
                 next_state = state.replace(
                     pipeline_state=ps1, obs=post_obs, reward=reward, done=done)
 
@@ -373,15 +680,217 @@ class BraxNonstationaryEnv:
                 return out_state, (reward, done)
 
             final_state, (rewards, dones) = jax.lax.scan(
-                scan_body, init_state, reset_keys)
+                scan_body, init_state, step_keys)
             return final_state, (rewards, dones)
+
+        @jax.jit
+        def _rollout_scan_det_horizon(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                belief_vec, init_state, step_keys, warmup, episode_horizon):
+            """Eval rollout with forced reset at fixed episode boundaries."""
+
+            def scan_body(carry, step_key):
+                state, step_in_episode = carry
+                noise_key, reset_key = jax.random.split(step_key)
+                pre_obs = state.obs
+                policy = nnx.merge(policy_graphdef, policy_params)
+
+                if has_context:
+                    ctx_net = nnx.merge(context_graphdef, context_params)
+                    ep = ctx_net(pre_obs[None])
+                    ep = jnp.where(warmup, jnp.zeros_like(ep), ep)
+                    if belief_vec is not None:
+                        b = jnp.where(warmup, jnp.zeros_like(belief_vec),
+                                      belief_vec)
+                        ep = jnp.concatenate([ep, b[None, :]], axis=-1)
+                    action = policy.deterministic(pre_obs[None], ep)
+                elif has_direct_context:
+                    ep = jnp.where(
+                        warmup, jnp.zeros_like(belief_vec), belief_vec)
+                    action = policy.deterministic(
+                        pre_obs[None], ep[None, :])
+                else:
+                    action = policy.deterministic(pre_obs[None])
+                action = action[0]
+                executed_action = apply_action_disturbance(
+                    action, noise_key, action_gain, action_noise_std,
+                    packet_loss_prob, burst_prob, burst_std)
+
+                ps0 = state.pipeline_state
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
+                next_state = state.replace(
+                    pipeline_state=ps1, obs=post_obs, reward=reward, done=done)
+
+                horizon_done = step_in_episode + 1 >= episode_horizon
+                episode_done = jnp.logical_or(done > 0.5, horizon_done)
+                reset_st = reset_state(sys, reset_key)
+                out_state = jax.tree.map(
+                    lambda r, n: jnp.where(episode_done, r, n),
+                    reset_st, next_state)
+                next_step = jnp.where(episode_done, 0, step_in_episode + 1)
+
+                return (out_state, next_step), (reward, done, horizon_done)
+
+            init_carry = (init_state, jnp.asarray(0, dtype=jnp.int32))
+            (final_state, _), outputs = jax.lax.scan(
+                scan_body, init_carry, step_keys)
+            return final_state, outputs
+
+        @jax.jit
+        def _rollout_scan_det_recurrent_horizon(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                init_hidden, init_previous_action, init_state, step_keys,
+                episode_horizon):
+            """Strict-horizon ESCP eval with causal recurrent resets."""
+            policy = nnx.merge(policy_graphdef, policy_params)
+            context_model = nnx.merge(
+                recurrent_context_graphdef, context_params,
+                recurrent_context_non_params)
+
+            def scan_body(carry, step_key):
+                state, hidden, previous_action, step_in_episode = carry
+                process_noise_key, reset_key = jax.random.split(step_key)
+                pre_obs = state.obs
+                next_hidden, context = context_model.step(
+                    hidden, pre_obs[None], previous_action[None])
+                action = policy.deterministic(
+                    pre_obs[None], context)[0]
+                executed_action = apply_action_disturbance(
+                    action, process_noise_key, action_gain,
+                    action_noise_std, packet_loss_prob, burst_prob,
+                    burst_std)
+
+                ps0 = state.pipeline_state
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
+                next_state = state.replace(
+                    pipeline_state=ps1, obs=post_obs,
+                    reward=reward, done=done)
+                horizon_done = step_in_episode + 1 >= episode_horizon
+                episode_done = jnp.logical_or(done > 0.5, horizon_done)
+                reset_st = reset_state(sys, reset_key)
+                out_state = jax.tree.map(
+                    lambda reset, current: jnp.where(
+                        episode_done, reset, current),
+                    reset_st, next_state)
+                out_hidden = jnp.where(
+                    episode_done, jnp.zeros_like(next_hidden), next_hidden)
+                out_previous_action = jnp.where(
+                    episode_done, jnp.zeros_like(action), action)
+                next_step = jnp.where(
+                    episode_done, 0, step_in_episode + 1)
+                return (
+                    out_state, out_hidden, out_previous_action, next_step
+                ), (reward, done, horizon_done)
+
+            initial = (
+                init_state, init_hidden, init_previous_action,
+                jnp.asarray(0, dtype=jnp.int32))
+            final, outputs = jax.lax.scan(
+                scan_body, initial, step_keys)
+            return final, outputs
+
+        @jax.jit
+        def _rollout_scan_det_adaptive_horizon(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, critic_params,
+                context_params,
+                adaptation_state, oracle_latent, init_state, reset_keys,
+                episode_horizon, context_source, advantage_enabled,
+                advantage_margin, advantage_lcb_scale):
+            """Strict-horizon mean-policy eval with causal latent updates."""
+            context_model = nnx.merge(
+                transition_context_graphdef, context_params)
+            initial_adapt = context_model.initial_state()
+
+            def scan_body(carry, step_key):
+                state, adapt, step_in_episode = carry
+                noise_key, reset_key = jax.random.split(step_key)
+                policy = nnx.merge(policy_graphdef, policy_params)
+                pre_obs = state.obs
+                context = adaptive_context(
+                    context_model, adapt, oracle_latent, context_source)
+                if has_advantage_critic:
+                    critic = nnx.merge(critic_graphdef, critic_params)
+                    action, advantage, advantage_gate = (
+                        advantage_gated_action(
+                            policy, critic, pre_obs[None], context[None],
+                            enabled=advantage_enabled,
+                            margin=advantage_margin,
+                            lcb_scale=advantage_lcb_scale))
+                    action = action[0]
+                    advantage = advantage[0]
+                    advantage_gate = advantage_gate[0]
+                else:
+                    action = policy.deterministic(
+                        pre_obs[None], context[None])[0]
+                    advantage = jnp.asarray(0.0, dtype=action.dtype)
+                    advantage_gate = jnp.asarray(1.0, dtype=action.dtype)
+                executed_action = apply_action_disturbance(
+                    action, noise_key, action_gain, action_noise_std,
+                    packet_loss_prob, burst_prob, burst_std)
+
+                ps0 = state.pipeline_state
+                ps1 = physics_step(sys, ps0, executed_action)
+                reward, post_obs, done = reward_obs(
+                    ps0, ps1, executed_action)
+                next_state = state.replace(
+                    pipeline_state=ps1, obs=post_obs,
+                    reward=reward, done=done)
+                next_adapt, error, _, _ = context_model.observe(
+                    adapt, pre_obs, action, reward, post_obs, done,
+                    enable_reset=True)
+
+                horizon_done = step_in_episode + 1 >= episode_horizon
+                episode_done = jnp.logical_or(done > 0.5, horizon_done)
+                reset_st = reset_state(sys, reset_key)
+                out_state = jax.tree.map(
+                    lambda r, n: jnp.where(episode_done, r, n),
+                    reset_st, next_state)
+                out_adapt = jax.tree.map(
+                    lambda initial, current: jnp.where(
+                        episode_done, initial, current),
+                    initial_adapt, next_adapt)
+                next_step = jnp.where(
+                    episode_done, 0, step_in_episode + 1)
+                return (
+                    out_state, out_adapt, next_step), (
+                    reward, done, horizon_done, context[-1], error,
+                    advantage, advantage_gate)
+
+            init = (
+                init_state, adaptation_state,
+                jnp.asarray(0, dtype=jnp.int32))
+            (final_state, final_adapt, _), outputs = jax.lax.scan(
+                scan_body, init, reset_keys)
+            return final_state, final_adapt, outputs
 
         self._rollout_scan = _rollout_scan
         self._rollout_scan_det = _rollout_scan_det
+        self._rollout_scan_det_horizon = _rollout_scan_det_horizon
+        if has_recurrent_context:
+            self._rollout_scan_recurrent = _rollout_scan_recurrent
+            self._rollout_scan_det_recurrent_horizon = (
+                _rollout_scan_det_recurrent_horizon)
+        if has_transition_context:
+            self._rollout_scan_adaptive = _rollout_scan_adaptive
+            self._rollout_scan_det_adaptive_horizon = (
+                _rollout_scan_det_adaptive_horizon)
         self._has_context = has_context
+        self._has_transition_context = has_transition_context
+        self._has_recurrent_context = has_recurrent_context
+        self._recurrent_context_graphdef = recurrent_context_graphdef
+        self._recurrent_context_non_params = recurrent_context_non_params
+        self._has_direct_policy_context = has_direct_context
 
     def rollout(self, policy_params, n_steps: int, rng_key,
-                context_params=None, belief_vec=None, warmup=False):
+                context_params=None, belief_vec=None, warmup=False,
+                continue_state=False, return_executed_action=False):
         """Run n_steps using the pre-built scan rollout.
 
         Returns JAX arrays (stay on GPU) + episode rewards (CPU).
@@ -395,17 +904,30 @@ class BraxNonstationaryEnv:
             context_params: optional nnx.State(agent.context_net, nnx.Param)
 
         Returns:
-            (obs, act, rew, nobs, done): JAX arrays [n_steps, ...]
+            (obs, act, rew, nobs, done): JAX arrays [n_steps, ...].
+                If ``return_executed_action`` is true, the transition tuple
+                also includes the disturbed action applied to physics.
             ep_rewards: list of float (computed on CPU from done mask)
         """
+        if self._has_direct_policy_context and belief_vec is None:
+            raise ValueError(
+                "direct conditioned rollout requires belief_vec")
         rng_key, init_key, roll_key = jax.random.split(rng_key, 3)
-        init_state = self._reset_fn(self._current_sys, init_key)
+        init_state = (
+            self._state
+            if bool(continue_state) and self._state is not None
+            else self._reset_fn(self._current_sys, init_key))
         keys = jax.random.split(roll_key, n_steps)
+        (action_gain, action_noise_std, packet_loss_prob,
+         burst_prob, burst_std) = self.action_disturbance_params()
 
         # Single JIT call for all N steps
-        final_state, (obs, act, rew, nobs, done) = self._rollout_scan(
-            self._current_sys, policy_params, context_params, belief_vec,
-            init_state, keys, jnp.asarray(warmup))
+        final_state, (
+            obs, act, rew, nobs, done, executed_action
+        ) = self._rollout_scan(
+            self._current_sys, action_gain, action_noise_std,
+            packet_loss_prob, burst_prob, burst_std, policy_params,
+            context_params, belief_vec, init_state, keys, jnp.asarray(warmup))
 
         # Episode rewards need CPU for Python-level segmentation
         rew_np = np.array(rew)
@@ -423,10 +945,128 @@ class BraxNonstationaryEnv:
         self._check_switch()   # ← switches _current_sys so next rollout uses new task
         self._state = final_state
         # Return JAX arrays (obs, act, rew, nobs, done stay on GPU)
-        return (obs, act, rew, nobs, done), ep_rewards
+        transitions = (obs, act, rew, nobs, done)
+        if return_executed_action:
+            transitions = transitions + (executed_action,)
+        return transitions, ep_rewards
+
+    def rollout_recurrent(
+            self, policy_params, context_params, recurrent_hidden,
+            previous_action, n_steps: int, rng_key, warmup=False,
+            context_noise_sigma=0.0, continue_state=False):
+        """Run a stochastic ESCP rollout and preserve its recurrent carry."""
+        if not getattr(self, "_has_recurrent_context", False):
+            raise RuntimeError("recurrent rollout was not built")
+        rng_key, init_key, rollout_key = jax.random.split(rng_key, 3)
+        init_state = (
+            self._state
+            if bool(continue_state) and self._state is not None
+            else self._reset_fn(self._current_sys, init_key))
+        keys = jax.random.split(rollout_key, n_steps)
+        (action_gain, action_noise_std, packet_loss_prob,
+         burst_prob, burst_std) = self.action_disturbance_params()
+        (final_state, final_hidden, final_previous_action), transitions = (
+            self._rollout_scan_recurrent(
+                self._current_sys, action_gain, action_noise_std,
+                packet_loss_prob, burst_prob, burst_std, policy_params,
+                context_params, recurrent_hidden, previous_action,
+                init_state, keys, jnp.asarray(warmup),
+                jnp.asarray(context_noise_sigma, dtype=jnp.float32)))
+        obs, act, rew, nobs, done, _ = transitions
+
+        rew_np = np.asarray(rew)
+        done_np = np.asarray(done)
+        episode_rewards = []
+        episode_reward = 0.0
+        for idx in range(n_steps):
+            episode_reward += float(rew_np[idx])
+            if done_np[idx] > 0.5:
+                episode_rewards.append(episode_reward)
+                episode_reward = 0.0
+
+        self._step_counter += n_steps
+        self._check_switch()
+        self._state = final_state
+        return (
+            obs, act, rew, nobs, done
+        ), episode_rewards, final_hidden, final_previous_action
+
+    def rollout_adaptive(
+            self, policy_params, context_params, adaptation_state,
+            oracle_latent, n_steps: int, rng_key, warmup=False,
+            critic_params=None, context_source=2, advantage_enabled=False,
+            advantage_margin=0.0, advantage_lcb_scale=1.0,
+            continue_state=False):
+        """Run a BAPR-v2 rollout and return per-transition causal contexts."""
+        rng_key, init_key, roll_key = jax.random.split(rng_key, 3)
+        init_state = (
+            self._state
+            if bool(continue_state) and self._state is not None
+            else self._reset_fn(self._current_sys, init_key))
+        keys = jax.random.split(roll_key, n_steps)
+        (action_gain, action_noise_std, packet_loss_prob,
+         burst_prob, burst_std) = self.action_disturbance_params()
+        final_state, final_adapt, transitions = self._rollout_scan_adaptive(
+            self._current_sys, action_gain, action_noise_std,
+            packet_loss_prob, burst_prob, burst_std, policy_params,
+            critic_params, context_params, adaptation_state, oracle_latent,
+            init_state, keys,
+            jnp.asarray(warmup), jnp.asarray(context_source, jnp.int32),
+            jnp.asarray(advantage_enabled, jnp.bool_),
+            jnp.asarray(advantage_margin, jnp.float32),
+            jnp.asarray(advantage_lcb_scale, jnp.float32))
+        (obs, act, rew, nobs, done, context, next_context, error,
+         advantage, advantage_gate) = transitions
+
+        rew_np = np.asarray(rew)
+        done_np = np.asarray(done)
+        ep_rewards = []
+        ep_reward = 0.0
+        for idx in range(n_steps):
+            ep_reward += float(rew_np[idx])
+            if done_np[idx] > 0.5:
+                ep_rewards.append(ep_reward)
+                ep_reward = 0.0
+
+        self._step_counter += n_steps
+        self._check_switch()
+        self._state = final_state
+        return (
+            obs, act, rew, nobs, done, context, next_context, error,
+            advantage, advantage_gate
+        ), ep_rewards, final_adapt
+
+    def eval_rollout_recurrent(
+            self, policy_params, context_params, n_steps: int, rng_key,
+            episode_horizon: int):
+        """Fast deterministic ESCP eval with strict recurrent boundaries."""
+        if not getattr(self, "_has_recurrent_context", False):
+            raise RuntimeError("recurrent eval rollout was not built")
+        from flax import nnx
+
+        rng_key, init_key, reset_key = jax.random.split(rng_key, 3)
+        sys = self._current_sys
+        init_state = self._reset_fn(sys, init_key)
+        step_keys = jax.random.split(reset_key, n_steps)
+        context_model = nnx.merge(
+            self._recurrent_context_graphdef, context_params,
+            self._recurrent_context_non_params)
+        init_hidden = context_model.initial_hidden((1,))
+        init_previous_action = jnp.zeros(
+            (self.act_dim,), dtype=jnp.float32)
+        (action_gain, action_noise_std, packet_loss_prob,
+         burst_prob, burst_std) = self.action_disturbance_params()
+        horizon = jnp.asarray(int(episode_horizon), dtype=jnp.int32)
+        _, (rewards, dones, _) = self._rollout_scan_det_recurrent_horizon(
+            sys, action_gain, action_noise_std, packet_loss_prob,
+            burst_prob, burst_std, policy_params, context_params,
+            init_hidden, init_previous_action, init_state, step_keys,
+            horizon)
+        return np.asarray(rewards), np.asarray(dones)
 
     def eval_rollout(self, policy_params, n_steps: int, rng_key,
-                     context_params=None, belief_vec=None, warmup=False):
+                     context_params=None, belief_vec=None, warmup=False,
+                     episode_horizon=None):
         """Deterministic eval rollout — does NOT update step counter or switch task.
 
         Uses tanh(mean) policy (no exploration noise). ~10-50x faster than the
@@ -441,13 +1081,58 @@ class BraxNonstationaryEnv:
         Returns:
             (rew_np, done_np): per-step reward and done arrays [n_steps]
         """
+        if self._has_direct_policy_context and belief_vec is None:
+            raise ValueError(
+                "direct conditioned eval requires belief_vec")
         rng_key, init_key, reset_key = jax.random.split(rng_key, 3)
         sys = self._current_sys
         init_state = self._reset_fn(sys, init_key)
-        reset_keys = jax.random.split(reset_key, n_steps)
+        step_keys = jax.random.split(reset_key, n_steps)
+        (action_gain, action_noise_std, packet_loss_prob,
+         burst_prob, burst_std) = self.action_disturbance_params()
 
-        _, (rew_jax, done_jax) = self._rollout_scan_det(
-            sys, policy_params, context_params, belief_vec,
-            init_state, reset_keys, jnp.asarray(warmup))
+        if episode_horizon is None:
+            _, (rew_jax, done_jax) = self._rollout_scan_det(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                belief_vec, init_state, step_keys, jnp.asarray(warmup))
+        else:
+            horizon = jnp.asarray(int(episode_horizon), dtype=jnp.int32)
+            _, (rew_jax, done_jax, _) = self._rollout_scan_det_horizon(
+                sys, action_gain, action_noise_std, packet_loss_prob,
+                burst_prob, burst_std, policy_params, context_params,
+                belief_vec, init_state, step_keys, jnp.asarray(warmup),
+                horizon)
 
         return np.array(rew_jax), np.array(done_jax)
+
+    def eval_rollout_adaptive(
+            self, policy_params, context_params, adaptation_state,
+            oracle_latent, n_steps: int, rng_key, episode_horizon: int,
+            critic_params=None, context_source=2, advantage_enabled=False,
+            advantage_margin=0.0, advantage_lcb_scale=1.0):
+        """Fast stationary BAPR-v2 eval using the same causal update as train."""
+        rng_key, init_key, reset_key = jax.random.split(rng_key, 3)
+        sys = self._current_sys
+        init_state = self._reset_fn(sys, init_key)
+        step_keys = jax.random.split(reset_key, n_steps)
+        (action_gain, action_noise_std, packet_loss_prob,
+         burst_prob, burst_std) = self.action_disturbance_params()
+        horizon = jnp.asarray(int(episode_horizon), dtype=jnp.int32)
+        _, _, outputs = self._rollout_scan_det_adaptive_horizon(
+            sys, action_gain, action_noise_std, packet_loss_prob,
+            burst_prob, burst_std, policy_params, critic_params,
+            context_params, adaptation_state, oracle_latent, init_state,
+            step_keys, horizon,
+            jnp.asarray(context_source, jnp.int32),
+            jnp.asarray(advantage_enabled, jnp.bool_),
+            jnp.asarray(advantage_margin, jnp.float32),
+            jnp.asarray(advantage_lcb_scale, jnp.float32))
+        rewards, dones, _, gates, errors, advantages, advantage_gates = outputs
+        diagnostics = {
+            "gate_mean": float(jnp.mean(gates)),
+            "error_mean": float(jnp.mean(errors)),
+            "advantage_mean": float(jnp.mean(advantages)),
+            "advantage_gate_mean": float(jnp.mean(advantage_gates)),
+        }
+        return np.asarray(rewards), np.asarray(dones), diagnostics

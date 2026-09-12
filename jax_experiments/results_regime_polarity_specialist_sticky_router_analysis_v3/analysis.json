@@ -1,0 +1,211 @@
+{
+  "diagnosis": "mode information is useful, but frozen estimator trajectories remain insufficient for the registered sticky router",
+  "event_seeds": [
+    153241,
+    153253,
+    153269
+  ],
+  "next_step": "fit the estimator on specialist-policy trajectories without changing the frozen confirm3 option",
+  "no_gate_useful": true,
+  "primary_arm": "posterior_sticky_confirm3",
+  "primary_pass": false,
+  "protocol_version": "v3-sticky-independent-specialist-router",
+  "schema": "bapr.regime-polarity-specialist-sticky-router-analysis.v3",
+  "status": "complete",
+  "training_seed_metrics": {
+    "4021": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "153241": 2652.9336472554596,
+            "153253": 2806.851708716154,
+            "153269": 2833.177172771096
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2764.3208429142364,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.7825381283881649,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.8903333333333334,
+          "event_returns": {
+            "153241": 1672.8077159386362,
+            "153253": 2364.2135932952165,
+            "153269": 2302.25180324018
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2113.091037491344,
+          "oracle_recovery": 0.46336481820514264,
+          "posterior_mode_accuracy": 0.8903333333333334,
+          "relative_gain": 0.3626006375991746,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm2": {
+          "adaptive_mode_accuracy": 0.9007918904755825,
+          "event_returns": {
+            "153241": 2087.1005015492437,
+            "153253": 2268.8998685456345,
+            "153269": 2439.44506290555
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.004866666666666666,
+          "mean": 2265.1484776668094,
+          "option_switch_count_mean": 23.866666666666664,
+          "oracle_recovery": 0.5886652442180964,
+          "posterior_mode_accuracy": 0.8485333333333333,
+          "relative_gain": 0.4606529984575912,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.9226915758960722,
+          "event_returns": {
+            "153241": 2271.713673006417,
+            "153253": 1893.0592333400623,
+            "153269": 2292.3148887305056
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.004866666666666666,
+          "mean": 2152.362598358995,
+          "option_switch_count_mean": 12.666666666666666,
+          "oracle_recovery": 0.495725900314851,
+          "posterior_mode_accuracy": 0.8534,
+          "relative_gain": 0.3879244182259215,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm5": {
+          "adaptive_mode_accuracy": 0.9386356620874285,
+          "event_returns": {
+            "153241": 2162.9893514714204,
+            "153253": 2224.229552622698,
+            "153269": 1796.768755299831
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.004866666666666666,
+          "mean": 2061.329219797983,
+          "option_switch_count_mean": 5.733333333333333,
+          "oracle_recovery": 0.42071134593375104,
+          "posterior_mode_accuracy": 0.8652666666666667,
+          "relative_gain": 0.32922266923866333,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "153241": 1626.6190769463778,
+            "153253": 1664.2863432198762,
+            "153269": 1361.4284607597626
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 1550.7779603086722,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    },
+    "4049": {
+      "arms": {
+        "dynamic_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_returns": {
+            "153241": 3097.62847417593,
+            "153253": 3230.3254484117033,
+            "153269": 3120.7931578189136
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 3149.5823601355155,
+          "oracle_recovery": 1.0,
+          "relative_gain": 1.0363544927036004,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_no_gate": {
+          "adaptive_mode_accuracy": 0.9002,
+          "event_returns": {
+            "153241": 2397.891274520755,
+            "153253": 2171.667321127653,
+            "153269": 2183.505871936679
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2251.021489195029,
+          "oracle_recovery": 0.43941744074917,
+          "posterior_mode_accuracy": 0.9002,
+          "relative_gain": 0.4553922388927204,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm2": {
+          "adaptive_mode_accuracy": 0.9260102343837682,
+          "event_returns": {
+            "153241": 2485.5219130396845,
+            "153253": 2056.1182263568044,
+            "153269": 2446.931210257113
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0044,
+          "mean": 2329.5237832178673,
+          "option_switch_count_mean": 21.066666666666666,
+          "oracle_recovery": 0.4883924387861126,
+          "posterior_mode_accuracy": 0.8650000000000001,
+          "relative_gain": 0.506147698138456,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3": {
+          "adaptive_mode_accuracy": 0.9300922104756376,
+          "event_returns": {
+            "153241": 2194.895804771781,
+            "153253": 2598.1084964156153,
+            "153269": 2136.8311509624123
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0044,
+          "mean": 2309.9451507166027,
+          "option_switch_count_mean": 13.0,
+          "oracle_recovery": 0.47617797422490504,
+          "posterior_mode_accuracy": 0.8604666666666666,
+          "relative_gain": 0.4934891829144796,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm5": {
+          "adaptive_mode_accuracy": 0.9341763670963762,
+          "event_returns": {
+            "153241": 2072.625054782629,
+            "153253": 2755.6573641031982,
+            "153269": 1449.8335638269782
+          },
+          "event_wins_vs_robust": 3,
+          "fallback_action_fraction": 0.0044,
+          "mean": 2092.705327570935,
+          "option_switch_count_mean": 6.266666666666667,
+          "oracle_recovery": 0.3406491970784741,
+          "posterior_mode_accuracy": 0.8516666666666667,
+          "relative_gain": 0.3530333258281508,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_returns": {
+            "153241": 1637.5602227911354,
+            "153253": 1634.02348267138,
+            "153269": 1368.4468561425806
+          },
+          "event_wins_vs_robust": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 1546.6768538683652,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      }
+    }
+  },
+  "training_seeds": [
+    4021,
+    4049
+  ]
+}

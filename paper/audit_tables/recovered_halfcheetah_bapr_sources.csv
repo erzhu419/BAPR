@@ -1,0 +1,16 @@
+group,table_label,seed,last40_mean,n_eval,local_path,source_note
+main_table_full,BAPR full,0,31732.73,300,/home/erzhu419/mine_code/BAPR/jax_experiments/archive_paper/day4_gpu1/bapr_regime_HC_tune_p05/logs/eval_reward.npy,existing local archive
+main_table_full,BAPR full,1,16812.71,300,/home/erzhu419/mine_code/BAPR/jax_experiments/archive_paper/day4_gpu1/bapr_regime_HC_tune_p05_s1/logs/eval_reward.npy,existing local archive
+main_table_full,BAPR full,2,19183.66,300,/home/erzhu419/mine_code/BAPR/jax_experiments/archive_paper/day6_gpu1/bapr_regime_HC_p05_s2/logs/eval_reward.npy,existing local archive
+main_table_full,BAPR full,3,12090.10,300,/home/erzhu419/mine_code/BAPR/jax_experiments/archive_paper/day6_gpu1/bapr_regime_HC_p05_s3/logs/eval_reward.npy,existing local archive
+main_table_full,BAPR full,4,13168.63,300,/home/erzhu419/mine_code/BAPR/jax_experiments/archive_paper/day6_gpu1/bapr_regime_HC_p05_s4/logs/eval_reward.npy,existing local archive
+paired_full,no-per-trans ablation paired full,0,21054.91,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_phase1/bapr_fixed_HC_s0/logs/eval_reward.npy,recovered from jtl110gpu2:/home/erzhu419/bapr_v15/jax_experiments/results_phase1/bapr_fixed_HC_s0
+paired_full,no-per-trans ablation paired full,1,18273.11,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_phase2/bapr_fixed_HC_s1/logs/eval_reward.npy,existing local result
+paired_full,no-per-trans ablation paired full,2,8005.33,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_phase2/bapr_fixed_HC_s2/logs/eval_reward.npy,existing local result
+paired_full,no-per-trans ablation paired full,3,10357.80,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_phase2/bapr_fixed_HC_s3/logs/eval_reward.npy,existing local result
+paired_full,no-per-trans ablation paired full,4,21780.51,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_phase2/bapr_fixed_HC_s4/logs/eval_reward.npy,existing local result
+no_pertrans,BAPR no per-trans,0,20188.45,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_no2_full/bapr_no2_HC_s0/logs/eval_reward.npy,existing local result
+no_pertrans,BAPR no per-trans,1,17979.83,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_no2_full/bapr_no2_HC_s1/logs/eval_reward.npy,existing local result
+no_pertrans,BAPR no per-trans,2,15633.10,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_ablation/bapr_hc_no2_s2/logs/eval_reward.npy,existing local result
+no_pertrans,BAPR no per-trans,3,13781.61,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_ablation/bapr_hc_no2_s3/logs/eval_reward.npy,existing local result
+no_pertrans,BAPR no per-trans,4,21727.22,300,/home/erzhu419/mine_code/BAPR/jax_experiments/results_no2_full/bapr_no2_HC_s4/logs/eval_reward.npy,existing local result

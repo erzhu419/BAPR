@@ -36,7 +36,8 @@ class ContextNetwork(nnx.Module):
 
 
 def compute_rmdm_loss(ep_tensor, task_ids, rbf_radius=3000.0,
-                      consistency_weight=50.0, diversity_weight=0.025):
+                      consistency_weight=50.0, diversity_weight=0.025,
+                      max_tasks=64):
     """RMDM representation loss: within-task consistency + cross-task diversity.
 
     Fully JIT-compatible: no boolean indexing, no data-dependent shapes.
@@ -47,12 +48,11 @@ def compute_rmdm_loss(ep_tensor, task_ids, rbf_radius=3000.0,
         rbf_radius: RBF kernel bandwidth
         consistency_weight: weight for consistency loss
         diversity_weight: weight for cross-task RBF similarity loss
+        max_tasks: static upper bound for unique task ids in the batch
 
     Returns:
         scalar loss
     """
-    max_tasks = 20  # static upper bound for number of unique tasks
-
     # Get unique task IDs with fixed output size (padded with -1)
     unique_tasks = jnp.unique(task_ids, size=max_tasks, fill_value=-1)
     valid_mask = unique_tasks >= 0  # [max_tasks] bool — but used only as float mask

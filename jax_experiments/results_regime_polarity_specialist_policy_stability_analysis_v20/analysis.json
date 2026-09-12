@@ -1,0 +1,1093 @@
+{
+  "cells": {
+    "full_state_best": {
+      "83003": {
+        "pass": false,
+        "stationary": {
+          "mode_wins": 0,
+          "modes": {
+            "0": {
+              "event_wins": 1,
+              "pass": false,
+              "relative_gain": -0.028651719765876795,
+              "robust_mean": 1776.6696505629354,
+              "specialist_mean": 1725.765009618468,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 2,
+              "pass": false,
+              "relative_gain": 0.00204355086529621,
+              "robust_mean": 1736.7238064035773,
+              "specialist_mean": 1740.2728898409339,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.32585244231055366,
+              "robust_mean": 2199.097509372565,
+              "specialist_mean": 1482.5162150644592,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 1,
+              "pass": false,
+              "relative_gain": -0.11522698811525027,
+              "robust_mean": 1735.3562852947246,
+              "specialist_mean": 1535.3964072333445,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": false
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 1366.3835214216263,
+                "185217": 1083.6859938435257,
+                "185233": 1516.2402498014271
+              },
+              "mean": 1322.103255022193,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1788.85965026021,
+                "185217": 1763.0616188168526,
+                "185233": 1782.4195958465339
+              },
+              "mean": 1778.113621641199,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 1788.85965026021,
+                "185217": 1763.0616188168526,
+                "185233": 1782.4195958465339
+              },
+              "mean": 1778.113621641199,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": false,
+          "safe_event_wins": 0,
+          "safe_relative_gain": 0.0
+        },
+        "utility_map": {
+          "0": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.0674087451451061,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.04779648146872432,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "robust_sac",
+            "event_wins": 1,
+            "relative_gain": -0.2206591938352621,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "robust_sac",
+            "event_wins": 2,
+            "relative_gain": -0.001430748205970966,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      },
+      "83021": {
+        "pass": false,
+        "stationary": {
+          "mode_wins": 2,
+          "modes": {
+            "0": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 2.1922026270446358,
+              "robust_mean": 1153.3904348061317,
+              "specialist_mean": 3681.8559759962886,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.02428376327214292,
+              "robust_mean": 1853.9060426172284,
+              "specialist_mean": 1808.8862271495163,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.9887048511547938,
+              "robust_mean": 702.1681124303076,
+              "specialist_mean": 2098.573243946665,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.12309539095052725,
+              "robust_mean": 2868.0204505837623,
+              "specialist_mean": 2514.980351965047,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": false
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 2339.7611904323103,
+                "185217": 2341.6574834987523,
+                "185233": 2079.5962421610952
+              },
+              "mean": 2253.671638697386,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1421.0626914575696,
+                "185217": 1451.0881354484707,
+                "185233": 1463.5310117326676
+              },
+              "mean": 1445.2272795462359,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 2541.3628582164647,
+                "185217": 2467.784293264523,
+                "185233": 2306.7213665440677
+              },
+              "mean": 2438.622839341685,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 0.6873628624747172
+        },
+        "utility_map": {
+          "0": {
+            "controller": "specialist_0",
+            "event_wins": 3,
+            "relative_gain": 2.560313618612368,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.06581260016949808,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 1.7591492699563585,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.13258511019190078,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      },
+      "83039": {
+        "pass": true,
+        "stationary": {
+          "mode_wins": 3,
+          "modes": {
+            "0": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.8170577736308586,
+              "robust_mean": 930.561296734545,
+              "specialist_mean": 2621.444934806062,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 1,
+              "pass": false,
+              "relative_gain": 0.004759160058380501,
+              "robust_mean": 1832.4334993428654,
+              "specialist_mean": 1841.1543436625764,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 4.7081077777757985,
+              "robust_mean": 707.75271757154,
+              "specialist_mean": 4039.928791912065,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.35881327539042357,
+              "robust_mean": 1918.5291824903754,
+              "specialist_mean": 2606.9229223918587,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 2780.5795335024595,
+                "185217": 2717.0281444385646,
+                "185233": 2725.3767138674857
+              },
+              "mean": 2740.994797269503,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1242.4722859226167,
+                "185217": 1400.535296216607,
+                "185233": 1284.227798128873
+              },
+              "mean": 1309.0784600893655,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 2773.0900255426764,
+                "185217": 2661.190351706743,
+                "185233": 2815.4707041963934
+              },
+              "mean": 2749.917027148604,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 1.1006510388696475
+        },
+        "utility_map": {
+          "0": {
+            "controller": "specialist_0",
+            "event_wins": 3,
+            "relative_gain": 1.735913756270934,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "robust_sac",
+            "event_wins": 2,
+            "relative_gain": -0.014181001229200822,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 5.139470544484149,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "specialist_3",
+            "event_wins": 3,
+            "relative_gain": 0.38527804542262367,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      }
+    },
+    "full_state_final": {
+      "83003": {
+        "pass": true,
+        "stationary": {
+          "mode_wins": 4,
+          "modes": {
+            "0": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.34571160091194,
+              "robust_mean": 1776.6696505629354,
+              "specialist_mean": 4167.55461031364,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.0108874395307612,
+              "robust_mean": 1736.7238064035773,
+              "specialist_mean": 3492.356088231007,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.9865464601467094,
+              "robust_mean": 2199.097509372565,
+              "specialist_mean": 4368.609372761514,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.1593626043310319,
+              "robust_mean": 1735.3562852947246,
+              "specialist_mean": 3747.2634676562416,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 3780.8578445136545,
+                "185217": 3913.7183160960676,
+                "185233": 3892.2584940195084
+              },
+              "mean": 3862.2782182097435,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1788.85965026021,
+                "185217": 1763.0616188168526,
+                "185233": 1782.4195958465339
+              },
+              "mean": 1778.113621641199,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 3780.8578445136545,
+                "185217": 3913.7183160960676,
+                "185233": 3892.2584940195084
+              },
+              "mean": 3862.2782182097435,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 1.1721211576146977
+        },
+        "utility_map": {
+          "0": {
+            "controller": "specialist_0",
+            "event_wins": 3,
+            "relative_gain": 1.2200232773534772,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "specialist_1",
+            "event_wins": 3,
+            "relative_gain": 0.934924466230618,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 1.239331696798169,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "specialist_3",
+            "event_wins": 3,
+            "relative_gain": 1.0594442707256047,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      },
+      "83021": {
+        "pass": true,
+        "stationary": {
+          "mode_wins": 4,
+          "modes": {
+            "0": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.9821189913057287,
+              "robust_mean": 1153.3904348061317,
+              "specialist_mean": 3439.547520025737,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.7966051932433572,
+              "robust_mean": 1853.9060426172284,
+              "specialist_mean": 3330.7372239513534,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.4298266564490472,
+              "robust_mean": 702.1681124303076,
+              "specialist_mean": 1706.146796891673,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.27833017038095687,
+              "robust_mean": 2868.0204505837623,
+              "specialist_mean": 3666.2770712508095,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 2855.238560962677,
+                "185217": 2777.1373633638023,
+                "185233": 2869.7171259894967
+              },
+              "mean": 2834.031016771992,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1421.0626914575696,
+                "185217": 1451.0881354484707,
+                "185233": 1463.5310117326676
+              },
+              "mean": 1445.2272795462359,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 2855.238560962677,
+                "185217": 2777.1373633638023,
+                "185233": 2869.7171259894967
+              },
+              "mean": 2834.031016771992,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 0.9609587065515431
+        },
+        "utility_map": {
+          "0": {
+            "controller": "specialist_0",
+            "event_wins": 3,
+            "relative_gain": 2.314243099076847,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "specialist_1",
+            "event_wins": 3,
+            "relative_gain": 0.7799848512006395,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 1.21449422031342,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "specialist_3",
+            "event_wins": 3,
+            "relative_gain": 0.2877332801918249,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      },
+      "83039": {
+        "pass": true,
+        "stationary": {
+          "mode_wins": 4,
+          "modes": {
+            "0": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.8702828345673042,
+              "robust_mean": 930.561296734545,
+              "specialist_mean": 2670.974116529856,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.5339890808776893,
+              "robust_mean": 1832.4334993428654,
+              "specialist_mean": 2810.93297942645,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 3.2133524431520533,
+              "robust_mean": 707.75271757154,
+              "specialist_mean": 2982.011641727553,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.6186161490850577,
+              "robust_mean": 1918.5291824903754,
+              "specialist_mean": 3105.3623172698753,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 2809.7952814146875,
+                "185217": 2850.409182322025,
+                "185233": 2891.4922467425467
+              },
+              "mean": 2850.5655701597534,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1242.4722859226167,
+                "185217": 1400.535296216607,
+                "185233": 1284.227798128873
+              },
+              "mean": 1309.0784600893655,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 2809.7952814146875,
+                "185217": 2850.409182322025,
+                "185233": 2891.4922467425467
+              },
+              "mean": 2850.5655701597534,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 1.1775360737087956
+        },
+        "utility_map": {
+          "0": {
+            "controller": "specialist_0",
+            "event_wins": 3,
+            "relative_gain": 1.7004088253186571,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "specialist_1",
+            "event_wins": 3,
+            "relative_gain": 0.5410722396367846,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 3.4945922084671754,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "specialist_3",
+            "event_wins": 3,
+            "relative_gain": 0.6471071812224931,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      }
+    },
+    "period2_best": {
+      "83003": {
+        "pass": false,
+        "stationary": {
+          "mode_wins": 2,
+          "modes": {
+            "0": {
+              "event_wins": 2,
+              "pass": false,
+              "relative_gain": 0.03270832295026695,
+              "robust_mean": 1776.6696505629354,
+              "specialist_mean": 1834.7815352694859,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.14839413553310232,
+              "robust_mean": 1736.7238064035773,
+              "specialist_mean": 1994.4434343145952,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 1,
+              "pass": false,
+              "relative_gain": -0.018896630247387965,
+              "robust_mean": 2199.097509372565,
+              "specialist_mean": 2157.54197686,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.05811630725433113,
+              "robust_mean": 1735.3562852947246,
+              "specialist_mean": 1836.2087843666475,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": false
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 1622.5683675527573,
+                "185217": 1898.8810366868972,
+                "185233": 1912.3712255954742
+              },
+              "mean": 1811.2735432783763,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1788.85965026021,
+                "185217": 1763.0616188168526,
+                "185233": 1782.4195958465339
+              },
+              "mean": 1778.113621641199,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 1846.4363602757453,
+                "185217": 1919.2913538336754,
+                "185233": 1790.5482495129108
+              },
+              "mean": 1852.0919878741106,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": false,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 0.04160497132046579
+        },
+        "utility_map": {
+          "0": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.04933980882594961,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "specialist_1",
+            "event_wins": 3,
+            "relative_gain": 0.14076293307531845,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "robust_sac",
+            "event_wins": 1,
+            "relative_gain": 0.09083756453731572,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.11566820537545756,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      },
+      "83021": {
+        "pass": false,
+        "stationary": {
+          "mode_wins": 1,
+          "modes": {
+            "0": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.12879135874936584,
+              "robust_mean": 1153.3904348061317,
+              "specialist_mean": 1004.8437135389281,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.06522594000843653,
+              "robust_mean": 1853.9060426172284,
+              "specialist_mean": 1732.9832783001991,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.6616634735107698,
+              "robust_mean": 702.1681124303076,
+              "specialist_mean": 1868.9352171197534,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.1113666748858642,
+              "robust_mean": 2868.0204505837623,
+              "specialist_mean": 2548.6185494975907,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": false
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 1321.4885165587068,
+                "185217": 1729.6364942237735,
+                "185233": 1621.0475158587099
+              },
+              "mean": 1557.3908422137301,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1421.0626914575696,
+                "185217": 1451.0881354484707,
+                "185233": 1463.5310117326676
+              },
+              "mean": 1445.2272795462359,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 1734.649316355586,
+                "185217": 1782.9071080539375,
+                "185233": 1664.0339426737278
+              },
+              "mean": 1727.1967890277504,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 0.19510392135003543
+        },
+        "utility_map": {
+          "0": {
+            "controller": "robust_sac",
+            "event_wins": 1,
+            "relative_gain": -0.02961871945380671,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.06289243848524939,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 1.4751699673798655,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.08544953511796849,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      },
+      "83039": {
+        "pass": true,
+        "stationary": {
+          "mode_wins": 3,
+          "modes": {
+            "0": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 1.2610552477379509,
+              "robust_mean": 930.561296734545,
+              "specialist_mean": 2104.0505033234754,
+              "terminated_rate": 0.0
+            },
+            "1": {
+              "event_wins": 0,
+              "pass": false,
+              "relative_gain": -0.04660793850306398,
+              "robust_mean": 1832.4334993428654,
+              "specialist_mean": 1747.0275514945388,
+              "terminated_rate": 0.0
+            },
+            "2": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 3.5110751332408503,
+              "robust_mean": 707.75271757154,
+              "specialist_mean": 3192.7256847206086,
+              "terminated_rate": 0.0
+            },
+            "3": {
+              "event_wins": 3,
+              "pass": true,
+              "relative_gain": 0.42598353183119486,
+              "robust_mean": 1918.5291824903754,
+              "specialist_mean": 2735.7910195688405,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true
+        },
+        "switching": {
+          "arms": {
+            "dynamic_specialist_oracle": {
+              "event_returns": {
+                "185201": 2405.5627408713103,
+                "185217": 2403.3974849507213,
+                "185233": 2368.1343279629946
+              },
+              "mean": 2392.364851261675,
+              "terminated_rate": 0.0
+            },
+            "robust_sac": {
+              "event_returns": {
+                "185201": 1242.4722859226167,
+                "185217": 1400.535296216607,
+                "185233": 1284.227798128873
+              },
+              "mean": 1309.0784600893655,
+              "terminated_rate": 0.0
+            },
+            "true_mode_safe_utility": {
+              "event_returns": {
+                "185201": 2504.0509004816413,
+                "185217": 2463.280710056424,
+                "185233": 2415.4042913153767
+              },
+              "mean": 2460.911967284481,
+              "terminated_rate": 0.0
+            }
+          },
+          "pass": true,
+          "safe_event_wins": 3,
+          "safe_relative_gain": 0.8798811853618647
+        },
+        "utility_map": {
+          "0": {
+            "controller": "specialist_0",
+            "event_wins": 3,
+            "relative_gain": 1.1605065049669117,
+            "specialist_terminated_rate": 0.0
+          },
+          "1": {
+            "controller": "robust_sac",
+            "event_wins": 0,
+            "relative_gain": -0.03623232628484882,
+            "specialist_terminated_rate": 0.0
+          },
+          "2": {
+            "controller": "specialist_2",
+            "event_wins": 3,
+            "relative_gain": 3.7510527461707133,
+            "specialist_terminated_rate": 0.0
+          },
+          "3": {
+            "controller": "specialist_3",
+            "event_wins": 3,
+            "relative_gain": 0.43436784921528265,
+            "specialist_terminated_rate": 0.0
+          }
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "full_state_best": {
+      "candidate": "full_state_best",
+      "candidate_mode_passes": 5,
+      "candidate_worst_seed_safe_gain": 0.0,
+      "checks": {
+        "all_cells_pass": false,
+        "better_worst_seed_gain": false,
+        "mode_passes_not_reduced": false,
+        "paired_event_wins": false,
+        "paired_seed_wins": false,
+        "positive_mean_switching_delta": false,
+        "stationary_retention": false
+      },
+      "control": "full_state_final",
+      "control_mode_passes": 12,
+      "control_worst_seed_safe_gain": 0.9609587065515431,
+      "mean_safe_switching_delta": -860.073772336667,
+      "minimum_stationary_retention": 0.33935655229511197,
+      "paired_event_wins": 0,
+      "paired_seed_wins": 0,
+      "pass": false,
+      "seed_rows": {
+        "83003": {
+          "candidate_cell_pass": false,
+          "candidate_safe_gain": 0.0,
+          "control_safe_gain": 1.1721211576146977,
+          "event_deltas": {
+            "185201": -1991.9981942534446,
+            "185217": -2150.656697279215,
+            "185233": -2109.8388981729745
+          },
+          "safe_switching_delta": -2084.1645965685448,
+          "stationary_mode_retentions": {
+            "0": 0.4140953559067079,
+            "1": 0.4983091202256066,
+            "2": 0.33935655229511197,
+            "3": 0.4097380449722344
+          }
+        },
+        "83021": {
+          "candidate_cell_pass": false,
+          "candidate_safe_gain": 0.6873628624747172,
+          "control_safe_gain": 0.9609587065515431,
+          "event_deltas": {
+            "185201": -313.8757027462125,
+            "185217": -309.3530700992792,
+            "185233": -562.995759445429
+          },
+          "safe_switching_delta": -395.4081774303072,
+          "stationary_mode_retentions": {
+            "0": 1.0704477709814395,
+            "1": 0.5430888435574573,
+            "2": 1.2300074341609588,
+            "3": 0.6859766196303927
+          }
+        },
+        "83039": {
+          "candidate_cell_pass": true,
+          "candidate_safe_gain": 1.1006510388696475,
+          "control_safe_gain": 1.1775360737087956,
+          "event_deltas": {
+            "185201": -36.705255872011094,
+            "185217": -189.21883061528206,
+            "185233": -76.02154254615334
+          },
+          "safe_switching_delta": -100.64854301114929,
+          "stationary_mode_retentions": {
+            "0": 0.9814565100360678,
+            "1": 0.654997595865217,
+            "2": 1.3547662709900203,
+            "3": 0.8394907440893316
+          }
+        }
+      }
+    },
+    "period2_best": {
+      "candidate": "period2_best",
+      "candidate_mode_passes": 6,
+      "candidate_worst_seed_safe_gain": 0.04160497132046579,
+      "checks": {
+        "all_cells_pass": false,
+        "better_worst_seed_gain": false,
+        "mode_passes_not_reduced": false,
+        "paired_event_wins": false,
+        "paired_seed_wins": false,
+        "positive_mean_switching_delta": false,
+        "stationary_retention": false
+      },
+      "control": "full_state_final",
+      "control_mode_passes": 12,
+      "control_worst_seed_safe_gain": 0.9609587065515431,
+      "mean_safe_switching_delta": -1168.8913536517157,
+      "minimum_stationary_retention": 0.2921441578255646,
+      "paired_event_wins": 0,
+      "paired_seed_wins": 0,
+      "pass": false,
+      "seed_rows": {
+        "83003": {
+          "candidate_cell_pass": false,
+          "candidate_safe_gain": 0.04160497132046579,
+          "control_safe_gain": 1.1721211576146977,
+          "event_deltas": {
+            "185201": -1934.4214842379092,
+            "185217": -1994.4269622623922,
+            "185233": -2101.7102445065975
+          },
+          "safe_switching_delta": -2010.186230335633,
+          "stationary_mode_retentions": {
+            "0": 0.4402537475403123,
+            "1": 0.5710882235164187,
+            "2": 0.4938738607100869,
+            "3": 0.4900132590663875
+          }
+        },
+        "83021": {
+          "candidate_cell_pass": false,
+          "candidate_safe_gain": 0.19510392135003543,
+          "control_safe_gain": 0.9609587065515431,
+          "event_deltas": {
+            "185201": -1120.5892446070911,
+            "185217": -994.2302553098648,
+            "185233": -1205.683183315769
+          },
+          "safe_switching_delta": -1106.8342277442418,
+          "stationary_mode_retentions": {
+            "0": 0.2921441578255646,
+            "1": 0.520300210367334,
+            "2": 1.0954129038161633,
+            "3": 0.6951516483799431
+          }
+        },
+        "83039": {
+          "candidate_cell_pass": true,
+          "candidate_safe_gain": 0.8798811853618647,
+          "control_safe_gain": 1.1775360737087956,
+          "event_deltas": {
+            "185201": -305.74438093304616,
+            "185217": -387.128472265601,
+            "185233": -476.0879554271701
+          },
+          "safe_switching_delta": -389.65360287527255,
+          "stationary_mode_retentions": {
+            "0": 0.7877464967938623,
+            "1": 0.6215116348490837,
+            "2": 1.0706617103852027,
+            "3": 0.8809893146298147
+          }
+        }
+      }
+    }
+  },
+  "diagnosis": "policy_selection_and_period_do_not_resolve_bank_variance",
+  "mean_safe_switching_return": {
+    "full_state_best": 2322.2178293771626,
+    "full_state_final": 3182.29160171383,
+    "period2_best": 2013.4002480621139
+  },
+  "next_step": "close validation checkpoint selection and actor-period thinning; do not alter the frozen posterior or v18/v19 holdouts",
+  "passing_candidates": [],
+  "protocol_version": "v20-full-state-policy-stability-development",
+  "schema": "bapr.specialist-policy-stability-analysis.v20",
+  "selected_candidate": null,
+  "status": "complete",
+  "training_seeds": [
+    83003,
+    83021,
+    83039
+  ],
+  "variants": [
+    "full_state_final",
+    "full_state_best",
+    "period2_best"
+  ]
+}

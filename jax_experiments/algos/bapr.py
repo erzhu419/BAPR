@@ -166,6 +166,7 @@ class BAPR:
         rbf_r = self.config.rbf_radius
         cons_w = self.config.consistency_loss_weight
         div_w = self.config.diversity_loss_weight
+        rmdm_max_tasks = int(getattr(self.config, "rmdm_max_tasks", 64))
         residual_delta = float(getattr(self.config, "bapr_residual_delta", 0.25))
         residual_gate_scale = float(getattr(
             self.config, "bapr_residual_gate_scale", 1.0))
@@ -222,7 +223,8 @@ class BAPR:
                 # === Context RMDM ===
                 def ctx_loss_fn(xp):
                     xm = nnx.merge(gd_ctx, xp)
-                    return compute_rmdm_loss(xm(obs), tids, rbf_r, cons_w, div_w)
+                    return compute_rmdm_loss(
+                        xm(obs), tids, rbf_r, cons_w, div_w, rmdm_max_tasks)
 
                 x_loss, x_grads = jax.value_and_grad(ctx_loss_fn)(x_p)
                 x_upd, new_x_os = x_opt.update(x_grads, x_os, x_p)

@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "passed": false,
+  "result": {
+    "path": "bus_policy_bank_audits_v1/seed_86021/audit.json",
+    "sha256": "91a926883f4e2726b7dff5421ee1642e57019f5b9e4a363ac79ffa578cc17458",
+    "size": 38379
+  },
+  "schema": "bapr.bus-policy-bank-audit-manifest.v1",
+  "training_seed": 86021
+}

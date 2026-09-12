@@ -1,0 +1,872 @@
+{
+  "causal_margin_reproducible": false,
+  "comparisons": {
+    "posterior_map_safe_utility": {
+      "mean": 2462.5774953585487,
+      "paired_difference_ci95": [
+        -477.71263079234313,
+        1581.458827630091
+      ],
+      "paired_difference_mean": 551.873098418874,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "robust_handoff_1": {
+      "mean": 2481.877889424289,
+      "paired_difference_ci95": [
+        -509.4592003312878,
+        1651.8061853005165
+      ],
+      "paired_difference_mean": 571.1734924846144,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "robust_handoff_2": {
+      "mean": 2445.450400516664,
+      "paired_difference_ci95": [
+        -504.22586661229457,
+        1573.7178737662723
+      ],
+      "paired_difference_mean": 534.7460035769889,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "robust_handoff_4": {
+      "mean": 2462.5446761902795,
+      "paired_difference_ci95": [
+        -511.6424144113936,
+        1615.3229729126024
+      ],
+      "paired_difference_mean": 551.8402792506043,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "robust_handoff_8": {
+      "mean": 2504.5084144572916,
+      "paired_difference_ci95": [
+        -491.2159987238315,
+        1678.8240337590642
+      ],
+      "paired_difference_mean": 593.8040175176163,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "stale_delay_1": {
+      "mean": 2519.8453572312,
+      "paired_difference_ci95": [
+        -479.0260003987555,
+        1697.3079209818047
+      ],
+      "paired_difference_mean": 609.1409602915246,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "stale_delay_2": {
+      "mean": 2462.946553084813,
+      "paired_difference_ci95": [
+        -582.2382072149375,
+        1686.7225195052133
+      ],
+      "paired_difference_mean": 552.242156145138,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "stale_delay_4": {
+      "mean": 2470.4489887853715,
+      "paired_difference_ci95": [
+        -518.5321188781132,
+        1638.0213025695057
+      ],
+      "paired_difference_mean": 559.7445918456962,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "stale_delay_8": {
+      "mean": 2347.1217939303324,
+      "paired_difference_ci95": [
+        -512.8564948321294,
+        1385.691288813443
+      ],
+      "paired_difference_mean": 436.4173969906568,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    },
+    "true_mode_safe_utility": {
+      "mean": 2492.2340546999503,
+      "paired_difference_ci95": [
+        -555.6018990796908,
+        1718.6612146002406
+      ],
+      "paired_difference_mean": 581.5296577602749,
+      "robust_mean": 1910.704396939675,
+      "seed_wins": 3
+    }
+  },
+  "delay_4_retention_seed_count": 3,
+  "diagnosis": "policy_bank_headroom_not_reproducible",
+  "estimator_retraining_authorized": false,
+  "event_seeds": [
+    156201,
+    156217,
+    156233
+  ],
+  "headroom_seed_count": 3,
+  "posterior_recovery_seed_count": 2,
+  "protocol_version": "v10-safe-utility-causal-delay-diagnostic",
+  "schema": "bapr.safe-utility-causal-delay-analysis.v10",
+  "seed_metrics": {
+    "61003": {
+      "arms": {
+        "posterior_map_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 3017.971136084199,
+            "156217": 3051.357544206083,
+            "156233": 2476.4753951251505
+          },
+          "mean": 2848.6013584718107,
+          "routing_mode_accuracy": 0.9904666666666667,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 3070.977964821458,
+            "156217": 3123.5318674102427,
+            "156233": 2760.400463783741
+          },
+          "mean": 2984.970098671814,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2695.3971787065266,
+            "156217": 2973.5472818955777,
+            "156233": 2997.778576117754
+          },
+          "mean": 2888.9076789066194,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2939.004063680768,
+            "156217": 3020.239386148751,
+            "156233": 2877.7198981180786
+          },
+          "mean": 2945.654449315866,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 3042.8311295539143,
+            "156217": 2923.8181110456585,
+            "156233": 2979.8201717838647
+          },
+          "mean": 2982.156470794479,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 789.8333244405687,
+            "156217": 910.120492631942,
+            "156233": 993.707674407959
+          },
+          "mean": 897.8871638268232,
+          "routing_mode_accuracy": null,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2967.25877378881,
+            "156217": 3070.394969211519,
+            "156233": 2984.0474604725837
+          },
+          "mean": 3007.2337344909706,
+          "routing_mode_accuracy": 0.9969969969969968,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 3054.4301877707244,
+            "156217": 3055.2478160992264,
+            "156233": 3053.3819471508264
+          },
+          "mean": 3054.353317006926,
+          "routing_mode_accuracy": 0.9939879759519038,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2930.2680523008107,
+            "156217": 2967.9434392109515,
+            "156233": 3013.2157241687178
+          },
+          "mean": 2970.47573856016,
+          "routing_mode_accuracy": 0.9879518072289156,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2483.2567765951158,
+            "156217": 2589.1603564605116,
+            "156233": 2982.7782187893986
+          },
+          "mean": 2685.065117281675,
+          "routing_mode_accuracy": 0.9758064516129034,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 3132.4319420695306,
+            "156217": 3085.9107701644302,
+            "156233": 3038.1244103759527
+          },
+          "mean": 3085.489040869971,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        }
+      },
+      "best_delay_4_retention": 0.9474249389174653,
+      "delay_4_retains_headroom": true,
+      "delay_retention": {
+        "1": {
+          "robust_handoff": 0.9540506235375777,
+          "stale": 0.9642278116506402
+        },
+        "2": {
+          "robust_handoff": 0.9101384195971439,
+          "stale": 0.9857671890896667
+        },
+        "4": {
+          "robust_handoff": 0.9360785922605298,
+          "stale": 0.9474249389174653
+        },
+        "8": {
+          "robust_handoff": 0.952764453550771,
+          "stale": 0.8169575882200625
+        }
+      },
+      "headroom_available": true,
+      "posterior_recovers_headroom": true,
+      "posterior_recovery": 0.8917135312032427,
+      "relative_safe_oracle_headroom": 2.436388407335639
+    },
+    "61021": {
+      "arms": {
+        "posterior_map_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2266.288793949969,
+            "156217": 2468.589136213064,
+            "156233": 2387.8202443391083
+          },
+          "mean": 2374.232724834047,
+          "routing_mode_accuracy": 0.9908666666666667,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2543.0366892099382,
+            "156217": 2574.3762220025064,
+            "156233": 2526.789682084322
+          },
+          "mean": 2548.0675310989222,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2502.214891681075,
+            "156217": 2606.6915473639965,
+            "156233": 2231.7319634377955
+          },
+          "mean": 2446.879467494289,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2573.021178895235,
+            "156217": 2420.2987629294394,
+            "156233": 2554.5563204437494
+          },
+          "mean": 2515.9587540894745,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2502.8318076252935,
+            "156217": 2432.8131935924293,
+            "156233": 2489.297532221675
+          },
+          "mean": 2474.980844479799,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2305.9589962989094,
+            "156217": 2144.89177582562,
+            "156233": 2257.5041852518916
+          },
+          "mean": 2236.1183191254736,
+          "routing_mode_accuracy": null,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2624.5610220223666,
+            "156217": 2463.4803244799377,
+            "156233": 2597.0179637044666
+          },
+          "mean": 2561.68643673559,
+          "routing_mode_accuracy": 0.9969969969969968,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2508.5692956745625,
+            "156217": 2503.739943215251,
+            "156233": 2223.9898030918093
+          },
+          "mean": 2412.099680660541,
+          "routing_mode_accuracy": 0.9939879759519038,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2508.0123504310845,
+            "156217": 2405.03717161417,
+            "156233": 2550.168126872182
+          },
+          "mean": 2487.739216305812,
+          "routing_mode_accuracy": 0.9879518072289156,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2430.5354159235953,
+            "156217": 2428.0664890185,
+            "156233": 2149.5810815457253
+          },
+          "mean": 2336.0609954959405,
+          "routing_mode_accuracy": 0.9758064516129034,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2558.231227940321,
+            "156217": 2556.428517577052,
+            "156233": 2579.4852673768996
+          },
+          "mean": 2564.715004298091,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        }
+      },
+      "best_delay_4_retention": 0.8516228178534299,
+      "delay_4_retains_headroom": true,
+      "delay_retention": {
+        "1": {
+          "robust_handoff": 0.9493376715275638,
+          "stale": 0.9907833289282575
+        },
+        "2": {
+          "robust_handoff": 0.6413976703937203,
+          "stale": 0.5355542812083486
+        },
+        "4": {
+          "robust_handoff": 0.8516228178534299,
+          "stale": 0.7657438694129177
+        },
+        "8": {
+          "robust_handoff": 0.7269170266548699,
+          "stale": 0.30414998349105454
+        }
+      },
+      "headroom_available": true,
+      "posterior_recovers_headroom": false,
+      "posterior_recovery": 0.42031588248073654,
+      "relative_safe_oracle_headroom": 0.14694959670163107
+    },
+    "61039": {
+      "arms": {
+        "posterior_map_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 0.9916,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": null,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 0.9969969969969968,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 0.9939879759519038,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 0.9879518072289156,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 0.9758064516129034,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2338.352062726021,
+            "156217": 2401.538141232729,
+            "156233": 2362.6145899713038
+          },
+          "mean": 2367.5015979766845,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        }
+      },
+      "best_delay_4_retention": null,
+      "delay_4_retains_headroom": false,
+      "delay_retention": {
+        "1": {
+          "robust_handoff": null,
+          "stale": null
+        },
+        "2": {
+          "robust_handoff": null,
+          "stale": null
+        },
+        "4": {
+          "robust_handoff": null,
+          "stale": null
+        },
+        "8": {
+          "robust_handoff": null,
+          "stale": null
+        }
+      },
+      "headroom_available": false,
+      "posterior_recovers_headroom": false,
+      "posterior_recovery": null,
+      "relative_safe_oracle_headroom": 0.0
+    },
+    "61057": {
+      "arms": {
+        "posterior_map_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 0.9904666666666667,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": null,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 0.9969969969969968,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 0.9939879759519038,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 0.9879518072289156,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 0.9758064516129034,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 2815.146307113767,
+            "156217": 2634.137608245015,
+            "156233": 2768.4389577805996
+          },
+          "mean": 2739.240957713127,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        }
+      },
+      "best_delay_4_retention": null,
+      "delay_4_retains_headroom": false,
+      "delay_retention": {
+        "1": {
+          "robust_handoff": null,
+          "stale": null
+        },
+        "2": {
+          "robust_handoff": null,
+          "stale": null
+        },
+        "4": {
+          "robust_handoff": null,
+          "stale": null
+        },
+        "8": {
+          "robust_handoff": null,
+          "stale": null
+        }
+      },
+      "headroom_available": false,
+      "posterior_recovers_headroom": false,
+      "posterior_recovery": null,
+      "relative_safe_oracle_headroom": 0.0
+    },
+    "61079": {
+      "arms": {
+        "posterior_map_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 1995.2574961267412,
+            "156217": 1902.3441202148795,
+            "156233": 2052.330897049606
+          },
+          "mean": 1983.3108377970755,
+          "routing_mode_accuracy": 0.9906666666666667,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 1888.8323660843075,
+            "156217": 1489.919214546308,
+            "156233": 1930.0762043520808
+          },
+          "mean": 1769.6092616608987,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 1707.6085644703358,
+            "156217": 1706.273734638095,
+            "156233": 1940.284602369368
+          },
+          "mean": 1784.7223004925995,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 1752.7215022206306,
+            "156217": 1471.9929629592225,
+            "156233": 2008.3884003888816
+          },
+          "mean": 1744.3676218562448,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_handoff_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 1849.7466333851219,
+            "156217": 1916.190312420577,
+            "156233": 2110.0496581614016
+          },
+          "mean": 1958.6622013223669,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 1414.76118112728,
+            "156217": 1332.8741730101406,
+            "156233": 1190.6864840313792
+          },
+          "mean": 1312.7739460562666,
+          "routing_mode_accuracy": null,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_1": {
+          "delayed_action_fraction": 0.004,
+          "event_returns": {
+            "156201": 2086.0239442914726,
+            "156217": 1649.059291037172,
+            "156233": 2035.6089423902333
+          },
+          "mean": 1923.564059239626,
+          "routing_mode_accuracy": 0.9969969969969968,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_2": {
+          "delayed_action_fraction": 0.008,
+          "event_returns": {
+            "156201": 1632.8675981037318,
+            "156217": 1812.2139559991658,
+            "156233": 1779.5300820974633
+          },
+          "mean": 1741.5372120667869,
+          "routing_mode_accuracy": 0.9939879759519038,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_4": {
+          "delayed_action_fraction": 0.016,
+          "event_returns": {
+            "156201": 1791.3786945961415,
+            "156217": 1593.1928775321692,
+            "156233": 1977.2907279849053
+          },
+          "mean": 1787.287433371072,
+          "routing_mode_accuracy": 0.9879518072289156,
+          "terminated_rate": 0.0
+        },
+        "stale_delay_8": {
+          "delayed_action_fraction": 0.032,
+          "event_returns": {
+            "156201": 1756.96885715127,
+            "156217": 1498.7418383453041,
+            "156233": 1567.510208056122
+          },
+          "mean": 1607.740301184232,
+          "routing_mode_accuracy": 0.9758064516129034,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "delayed_action_fraction": 0.0,
+          "event_returns": {
+            "156201": 1390.146068427898,
+            "156217": 1642.1979269988835,
+            "156233": 2080.327022498846
+          },
+          "mean": 1704.2236726418757,
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0
+        }
+      },
+      "best_delay_4_retention": 1.2121952196868642,
+      "delay_4_retains_headroom": true,
+      "delay_retention": {
+        "1": {
+          "robust_handoff": 1.167034448048652,
+          "stale": 1.560328368372946
+        },
+        "2": {
+          "robust_handoff": 1.2056423146667312,
+          "stale": 1.0953214088316672
+        },
+        "4": {
+          "robust_handoff": 1.1025519919620883,
+          "stale": 1.2121952196868642
+        },
+        "8": {
+          "robust_handoff": 1.6499903088445407,
+          "stale": 0.7535229560658717
+        }
+      },
+      "headroom_available": true,
+      "posterior_recovers_headroom": true,
+      "posterior_recovery": 1.7129578747940803,
+      "relative_safe_oracle_headroom": 0.2981851732825533
+    }
+  },
+  "status": "complete",
+  "training_seeds": [
+    61003,
+    61021,
+    61039,
+    61057,
+    61079
+  ]
+}

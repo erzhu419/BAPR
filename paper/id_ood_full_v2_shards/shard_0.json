@@ -1,0 +1,251 @@
+{
+  "algos": [
+    "bapr",
+    "escp",
+    "resac",
+    "sac"
+  ],
+  "envs": [
+    "HalfCheetah-v2",
+    "Ant-v2"
+  ],
+  "items": [
+    {
+      "algo": "bapr",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_bapr_HalfCheetah_dw60_s0\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1407.4197998046875,
+      "ood_episodes": 30,
+      "ood_mean": 1407.4197998046875,
+      "run_name": "paper_full_v2_bapr_HalfCheetah_dw60_s0",
+      "seed": 0
+    },
+    {
+      "algo": "bapr",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_bapr_HalfCheetah_dw60_s1\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1767.121337890625,
+      "ood_episodes": 30,
+      "ood_mean": 1767.121337890625,
+      "run_name": "paper_full_v2_bapr_HalfCheetah_dw60_s1",
+      "seed": 1
+    },
+    {
+      "algo": "bapr",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_bapr_HalfCheetah_dw60_s2\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2311.132080078125,
+      "ood_episodes": 30,
+      "ood_mean": 2311.132080078125,
+      "run_name": "paper_full_v2_bapr_HalfCheetah_dw60_s2",
+      "seed": 2
+    },
+    {
+      "algo": "bapr",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_bapr_HalfCheetah_dw60_s3\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1075.3463134765625,
+      "ood_episodes": 30,
+      "ood_mean": 1075.3463134765625,
+      "run_name": "paper_full_v2_bapr_HalfCheetah_dw60_s3",
+      "seed": 3
+    },
+    {
+      "algo": "bapr",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_bapr_HalfCheetah_dw60_s4\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2006.4820556640625,
+      "ood_episodes": 30,
+      "ood_mean": 2006.4820556640625,
+      "run_name": "paper_full_v2_bapr_HalfCheetah_dw60_s4",
+      "seed": 4
+    },
+    {
+      "algo": "escp",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_escp_HalfCheetah_dw60_s0\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 3563.572509765625,
+      "ood_episodes": 30,
+      "ood_mean": 3563.572509765625,
+      "run_name": "paper_full_v2_escp_HalfCheetah_dw60_s0",
+      "seed": 0
+    },
+    {
+      "algo": "escp",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_escp_HalfCheetah_dw60_s1\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2330.853271484375,
+      "ood_episodes": 30,
+      "ood_mean": 2330.853271484375,
+      "run_name": "paper_full_v2_escp_HalfCheetah_dw60_s1",
+      "seed": 1
+    },
+    {
+      "algo": "escp",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_escp_HalfCheetah_dw60_s2\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 3129.947509765625,
+      "ood_episodes": 30,
+      "ood_mean": 3129.947509765625,
+      "run_name": "paper_full_v2_escp_HalfCheetah_dw60_s2",
+      "seed": 2
+    },
+    {
+      "algo": "escp",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_escp_HalfCheetah_dw60_s3\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2132.833251953125,
+      "ood_episodes": 30,
+      "ood_mean": 2132.833251953125,
+      "run_name": "paper_full_v2_escp_HalfCheetah_dw60_s3",
+      "seed": 3
+    },
+    {
+      "algo": "escp",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_escp_HalfCheetah_dw60_s4\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2911.510498046875,
+      "ood_episodes": 30,
+      "ood_mean": 2911.510498046875,
+      "run_name": "paper_full_v2_escp_HalfCheetah_dw60_s4",
+      "seed": 4
+    },
+    {
+      "algo": "resac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_resac_HalfCheetah_dw60_s0\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 3436.335693359375,
+      "ood_episodes": 30,
+      "ood_mean": 3436.335693359375,
+      "run_name": "paper_full_v2_resac_HalfCheetah_dw60_s0",
+      "seed": 0
+    },
+    {
+      "algo": "resac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_resac_HalfCheetah_dw60_s1\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2957.92919921875,
+      "ood_episodes": 30,
+      "ood_mean": 2957.92919921875,
+      "run_name": "paper_full_v2_resac_HalfCheetah_dw60_s1",
+      "seed": 1
+    },
+    {
+      "algo": "resac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_resac_HalfCheetah_dw60_s2\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1671.16357421875,
+      "ood_episodes": 30,
+      "ood_mean": 1671.16357421875,
+      "run_name": "paper_full_v2_resac_HalfCheetah_dw60_s2",
+      "seed": 2
+    },
+    {
+      "algo": "resac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_resac_HalfCheetah_dw60_s3\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 3468.369384765625,
+      "ood_episodes": 30,
+      "ood_mean": 3468.369384765625,
+      "run_name": "paper_full_v2_resac_HalfCheetah_dw60_s3",
+      "seed": 3
+    },
+    {
+      "algo": "resac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_resac_HalfCheetah_dw60_s4\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 4141.24658203125,
+      "ood_episodes": 30,
+      "ood_mean": 4141.24658203125,
+      "run_name": "paper_full_v2_resac_HalfCheetah_dw60_s4",
+      "seed": 4
+    },
+    {
+      "algo": "sac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_sac_HalfCheetah_dw60_s0\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1607.874267578125,
+      "ood_episodes": 30,
+      "ood_mean": 1607.874267578125,
+      "run_name": "paper_full_v2_sac_HalfCheetah_dw60_s0",
+      "seed": 0
+    },
+    {
+      "algo": "sac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_sac_HalfCheetah_dw60_s1\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 4250.05029296875,
+      "ood_episodes": 30,
+      "ood_mean": 4250.05029296875,
+      "run_name": "paper_full_v2_sac_HalfCheetah_dw60_s1",
+      "seed": 1
+    },
+    {
+      "algo": "sac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_sac_HalfCheetah_dw60_s2\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 2577.23095703125,
+      "ood_episodes": 30,
+      "ood_mean": 2577.23095703125,
+      "run_name": "paper_full_v2_sac_HalfCheetah_dw60_s2",
+      "seed": 2
+    },
+    {
+      "algo": "sac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_sac_HalfCheetah_dw60_s3\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1752.0723876953125,
+      "ood_episodes": 30,
+      "ood_mean": 1752.0723876953125,
+      "run_name": "paper_full_v2_sac_HalfCheetah_dw60_s3",
+      "seed": 3
+    },
+    {
+      "algo": "sac",
+      "ckpt_dir": "jax_experiments/results_paper\\paper_full_v2_sac_HalfCheetah_dw60_s4\\checkpoints",
+      "env": "HalfCheetah-v2",
+      "id_episodes": 30,
+      "id_mean": 1545.456787109375,
+      "ood_episodes": 30,
+      "ood_mean": 1545.456787109375,
+      "run_name": "paper_full_v2_sac_HalfCheetah_dw60_s4",
+      "seed": 4
+    }
+  ],
+  "kind": "id_ood_shard",
+  "n_episodes": 3,
+  "n_results": 20,
+  "n_tasks": 10,
+  "ood_scale": 1.5,
+  "results_root": "jax_experiments/results_paper",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "shard_end": 20,
+  "shard_start": 0,
+  "tag_prefix": "paper_full_v2",
+  "total_items": 40
+}

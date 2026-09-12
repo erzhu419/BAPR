@@ -1,0 +1,190 @@
+{
+  "created_before_training": true,
+  "frozen_boundary": {
+    "environment_and_training_budget_unchanged": true,
+    "estimator_or_router_training": false,
+    "mode_2_and_3_policies_reused": true,
+    "robust_sources_reused": true,
+    "v22_training_and_audits_unchanged": true
+  },
+  "gate": {
+    "all_three_policy_seeds_pass": true,
+    "all_three_switching_events_win": true,
+    "minimum_per_mode_gain": 0.05,
+    "minimum_stationary_mode_wins_per_seed": 3,
+    "minimum_switching_gain": 0.1,
+    "selection": "highest mean safe switching return among passing variants; registered variant order breaks exact ties",
+    "zero_termination": true
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      188001,
+      188017,
+      188033
+    ],
+    "frozen_modes": [
+      2,
+      3
+    ],
+    "protocol_version": "v23-ant-matching-checkpoint-development",
+    "stationary_holdout_event_seeds": [
+      188101,
+      188117,
+      188133
+    ],
+    "switching_event_seeds": [
+      188201,
+      188217,
+      188233
+    ],
+    "switching_schedules": {
+      "188201": [
+        3,
+        0,
+        2,
+        1
+      ],
+      "188217": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "188233": [
+        2,
+        1,
+        3,
+        0
+      ]
+    },
+    "trained_modes": [
+      0,
+      1
+    ],
+    "training_seeds": [
+      85003,
+      85021,
+      85039
+    ],
+    "variants": [
+      "matching_best",
+      "period2_matching_best"
+    ]
+  },
+  "question": "whether correct matching-mode checkpoint selection, optionally with period-2 actor updates, stabilizes Ant modes 0 and 1",
+  "schema": "bapr.ant-matching-checkpoint-registration.v23",
+  "source_records": {
+    "jax_experiments/algos/sac_policy_stability.py": {
+      "sha256": "ab2d66f1899b33d3c78fb3a46e319333efe6075c1f7eb7d40cb8c89b24a81af4",
+      "size": 14010
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_ant_matching_checkpoint_v23.py": {
+      "sha256": "e6caa194cd273c0c2c6688681aaaed0c9aeb2007934135229c3618fe65cea115",
+      "size": 5242
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_specialist_stability_v19.py": {
+      "sha256": "9154981489b4f572250772cc6214c23a60910ed092f9df612dbdfd5e963a36c4",
+      "size": 13077
+    },
+    "jax_experiments/analysis/regime_polarity_ant_matching_checkpoint_v23.py": {
+      "sha256": "c22b1994b87769249ff4b52599a1b28ea42f49b178560b137536835c935bbeb9",
+      "size": 14449
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_matching_checkpoint_audit_v23.py": {
+      "sha256": "038916ea0b548026f41e5d06ec86ced0454263235faf698c7f3c14d277d09cfd",
+      "size": 1120
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_matching_checkpoint_v23.py": {
+      "sha256": "ccdaf8c3c94f9da01f261661f2712beb6355f92f8f43b95c30e513123e9c3cab",
+      "size": 3240
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "dd8e55eab65bb276b3df7ec5d2ec005ac559cd576a32b7022b5d0276232ab56e",
+      "size": 19338
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_audit_v19.py": {
+      "sha256": "cf8469a22f6a8baff7de7ebd14051907fa72fb1ec5213070f51b3ebbb72b3c07",
+      "size": 10146
+    },
+    "jax_experiments/analysis/train_regime_polarity_ant_matching_checkpoint_v23.py": {
+      "sha256": "7aa4f3214879f6bae23925d90842244b94fd0b6381c785567225d6596bd6a9eb",
+      "size": 2051
+    },
+    "jax_experiments/deployments/regime_polarity_ant_full_state_headroom_v22/registration.json": {
+      "sha256": "475bc76d7f85522b9bff138a94aee540704f503224f0e004b4288a9a2acb5804",
+      "size": 4524
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_full_state_v22/seed_85003/mode_2/bundle_manifest.json": {
+      "sha256": "296daa5a8de334206d3f0891a244b2362022dc5819b8a7eae107057ab390fdee",
+      "size": 1600
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_full_state_v22/seed_85003/mode_3/bundle_manifest.json": {
+      "sha256": "f911a192c6ac03640e8eb8aff229d000a8739a0613176af6509568c72a52f176",
+      "size": 1600
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_full_state_v22/seed_85021/mode_2/bundle_manifest.json": {
+      "sha256": "02cde54bf7d8c8e32f856a47652ca9b3a9270d448cb5502a59d611c27f9928a0",
+      "size": 1600
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_full_state_v22/seed_85021/mode_3/bundle_manifest.json": {
+      "sha256": "d11d67f37cb4dbc1cc1be2eff6550ca555634653987e99afdd15b0c0d16cbb54",
+      "size": 1600
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_full_state_v22/seed_85039/mode_2/bundle_manifest.json": {
+      "sha256": "cd1556bb5190cb9f4e17ce538c52f18cf02635c5f2bc21a237ff49082d56253b",
+      "size": 1600
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_full_state_v22/seed_85039/mode_3/bundle_manifest.json": {
+      "sha256": "cee8c43ce0f42d17ec17d308de3e051f249e8079697c1260d9dcea138a1d8802",
+      "size": 1600
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_robust_source_v22/seed_85003/bundle_manifest.json": {
+      "sha256": "825e5b085fe8e2127c5fb5783efd3d50c54fe4fd87eca5126baaa4e3e3fc7b57",
+      "size": 1150
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_robust_source_v22/seed_85021/bundle_manifest.json": {
+      "sha256": "7b6e11c56ad7f203090d79461e6c46c7583b30c4e4ce7e594782e23e89aac202",
+      "size": 1150
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_robust_source_v22/seed_85039/bundle_manifest.json": {
+      "sha256": "106ecb1c5b8a666cbc9a179e0a4629ca44841e70c8d3a89aacc6e51af3fc4a7a",
+      "size": 1150
+    },
+    "jax_experiments/results_regime_polarity_ant_full_state_headroom_analysis_v22/analysis.json": {
+      "sha256": "896162644228d8c5add5ed94032bb9dc85add7221e100fe0680caabf8a18f73f",
+      "size": 10170
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "scripts/submit_regime_polarity_ant_matching_checkpoint_v23.py": {
+      "sha256": "2743a2e04c5884eac576213e71b85542f2a77f77121a12b2e0c571077fb94f11",
+      "size": 11113
+    }
+  },
+  "status": "registered",
+  "sync_policy": "compact policy/provenance bundles and JSON only; never sync replay or full checkpoints",
+  "training": {
+    "matching_best": {
+      "actor_update_period": 1,
+      "selection": "best matching-fixed-mode trainer evaluation",
+      "trained_modes": [
+        0,
+        1
+      ]
+    },
+    "period2_matching_best": {
+      "actor_update_period": 2,
+      "selection": "best matching-fixed-mode trainer evaluation",
+      "trained_modes": [
+        0,
+        1
+      ]
+    }
+  }
+}

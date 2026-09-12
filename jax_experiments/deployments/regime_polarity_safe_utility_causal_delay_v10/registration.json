@@ -1,0 +1,73 @@
+{
+  "created_before_audit": true,
+  "data_policy": {
+    "checkpoint_only": true,
+    "new_training": false,
+    "result_payload": "json_and_markdown_only"
+  },
+  "decision_rule": {
+    "estimator_retraining_requires_causal_margin": true,
+    "minimum_delay_4_headroom_retention": 0.7,
+    "minimum_reproducible_seeds": 4,
+    "minimum_safe_oracle_gain": 0.1
+  },
+  "identity": {
+    "arms": [
+      "robust_sac",
+      "true_mode_safe_utility",
+      "posterior_map_safe_utility",
+      "stale_delay_1",
+      "stale_delay_2",
+      "stale_delay_4",
+      "stale_delay_8",
+      "robust_handoff_1",
+      "robust_handoff_2",
+      "robust_handoff_4",
+      "robust_handoff_8"
+    ],
+    "delays": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "event_seeds": [
+      156201,
+      156217,
+      156233
+    ],
+    "parent_protocol_version": "v9-independent-posterior-map-safe-utility-confirmation",
+    "protocol_version": "v10-safe-utility-causal-delay-diagnostic",
+    "training_seeds": [
+      61003,
+      61021,
+      61039,
+      61057,
+      61079
+    ]
+  },
+  "schema": "bapr.safe-utility-causal-delay-registration.v10",
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_safe_utility_causal_delay_v10.py": {
+      "sha256": "8a456e427b686efa2cb0cbe5ffde2eecd59e62cb3bdc9183f3859b270c9830f0",
+      "size": 8830
+    },
+    "jax_experiments/analysis/regime_polarity_safe_utility_causal_delay_v10.py": {
+      "sha256": "7051952be2f16249275c1ec4eb278dc3a97870e0dde59e6f6b5b96d24f4a095a",
+      "size": 6194
+    },
+    "jax_experiments/analysis/run_regime_polarity_safe_utility_causal_delay_audit_v10.py": {
+      "sha256": "002b327a9afc5bfcc0df6b819f1d69513c992055a9ac2fe7a22c0d1cc5f5b32d",
+      "size": 13878
+    },
+    "jax_experiments/deployments/regime_polarity_safe_utility_confirmation_v9/registration.json": {
+      "sha256": "f3ce23284e4f51462aa18f42836a72ede57365497f52c1f97d3eec62c5bb77e3",
+      "size": 3614
+    },
+    "reports/regime_polarity_safe_utility_causal_delay_v10_preregistration_2026-08-31.md": {
+      "sha256": "649f27ce86852743dbd0f62dc4eb1faefaf145b17fdc6bc26a580fa5fe381bb4",
+      "size": 1686
+    }
+  },
+  "status": "registered"
+}

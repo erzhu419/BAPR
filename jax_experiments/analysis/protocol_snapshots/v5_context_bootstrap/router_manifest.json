@@ -1,0 +1,644 @@
+{
+  "behavior_controllers": [
+    "robust",
+    "fixed_mode_0",
+    "fixed_mode_2",
+    "fixed_mode_3"
+  ],
+  "bundle_manifest_sha256": {
+    "robust": "baad82089b6a5d9f8e53385ca933942f473048f6e3d38d584e0dd03bca4042de",
+    "specialist_mode_0": "e3732b54b9f3977735e076720a7bd50f3e5dcdf0c3d7a549a7c566d6d15bc5e7",
+    "specialist_mode_1": "b6665b6196caa292d94cd1f2517429cb2f76bccf7133df62981811263ca99971",
+    "specialist_mode_2": "318ebe1cc4b937d80803f2706d8103abe82c484b2c6f23430bfc356793d3b7f4",
+    "specialist_mode_3": "9f4042921e868b95eed20c0f075a0415938810a6cab8265bcbbd01a99a40f8de"
+  },
+  "controller_map": [
+    0,
+    2,
+    2,
+    3
+  ],
+  "controller_map_file": {
+    "sha256": "c560918de8ce177a3ced845c7b180ca84634071a11d70dba40039fedf7c5080c",
+    "size": 6568
+  },
+  "controller_map_schema": "bapr.v3-control-equivalence-map.v1",
+  "data_policy": "stochastic actions from robust and selected specialist policies; commanded action only, never executed_action",
+  "env": "HalfCheetah-v2",
+  "family": "structured_channel",
+  "finalization": "vectorized-candidate-selection-v1",
+  "holdout_event_seeds": [
+    5100,
+    5200,
+    5300,
+    5400,
+    5500
+  ],
+  "model_config": {
+    "delta_scale": 1.0,
+    "ensemble_size": 5,
+    "fixed_variance": 0.02,
+    "hidden_dim": 128,
+    "mean_loss_weight": 1.0,
+    "reward_scale": 10.0,
+    "variance_ceiling": 0.5,
+    "variance_ema": 0.05,
+    "variance_floor": 0.0001,
+    "variance_model": "mode_empirical"
+  },
+  "parameter_file": {
+    "sha256": "64a2d41c05067c8605c6cbd9cbac277458596196838ba60c74e0749eef1435ee",
+    "size": 247166
+  },
+  "parameter_leaves": [
+    {
+      "dtype": "float32",
+      "key": "leaf_00000",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00001",
+      "shape": [
+        23,
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00002",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00003",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00004",
+      "shape": [
+        360
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00005",
+      "shape": [
+        128,
+        360
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00006",
+      "shape": [
+        4,
+        18
+      ]
+    }
+  ],
+  "router_config": {
+    "confidence_threshold": 0.8,
+    "evidence_scale": 0.25,
+    "hazard_rate": 0.005,
+    "hysteresis_margin": 0.02,
+    "margin_threshold": 0.02,
+    "min_history": 8
+  },
+  "schema": "bapr.v3-control-equivalence-router.v1",
+  "source_files": {
+    "jax_experiments/analysis/bapr_v3_learned_control_router.py": {
+      "sha256": "1af97df2bb0271b71f93c15f053474a879662a2a69463f45a84223effb875c64",
+      "size": 13458
+    },
+    "jax_experiments/analysis/finalize_bapr_v3_learned_control_router.py": {
+      "sha256": "a137d642b64bbbedb7c1ce1e9034267a4e8534bc5b3e8f29b180649d28d286ef",
+      "size": 13314
+    },
+    "jax_experiments/analysis/train_bapr_v3_learned_control_router.py": {
+      "sha256": "5b9a146213be68d247e36a93f48896e1eb8f40ebe595ed4f6011978450f5a8b2",
+      "size": 23953
+    },
+    "jax_experiments/networks/probabilistic_regime_context.py": {
+      "sha256": "c87294e43fd83e7ccfeb1b42c2662fb46de635d88bce2c0cf8b0a5710d3368af",
+      "size": 21763
+    }
+  },
+  "status": "complete",
+  "train_event_seeds": [
+    3100,
+    3200
+  ],
+  "training_config": {
+    "behavior_controllers": [
+      "robust",
+      "fixed_mode_0",
+      "fixed_mode_2",
+      "fixed_mode_3"
+    ],
+    "checkpoint_interval": 100,
+    "context_length": 64,
+    "learning_rate": 0.0003,
+    "train_event_seeds": [
+      3100,
+      3200
+    ],
+    "train_steps": 4000,
+    "updates": 1500,
+    "validation_event_seeds": [
+      4100,
+      4200
+    ],
+    "validation_steps": 2000
+  },
+  "training_history": [
+    {
+      "classifier_loss": 1.709374189376831,
+      "loss": 3.831669330596924,
+      "predictive_loss": 0.41292089223861694,
+      "update": 1
+    },
+    {
+      "classifier_loss": 1.2797226905822754,
+      "loss": 2.943664073944092,
+      "predictive_loss": 0.38421857357025146,
+      "update": 50
+    },
+    {
+      "classifier_loss": 1.2049139738082886,
+      "loss": 2.80562686920166,
+      "predictive_loss": 0.39579880237579346,
+      "update": 100
+    },
+    {
+      "classifier_loss": 1.1760679483413696,
+      "loss": 2.74482798576355,
+      "predictive_loss": 0.39269208908081055,
+      "update": 150
+    },
+    {
+      "classifier_loss": 1.1107937097549438,
+      "loss": 2.615577220916748,
+      "predictive_loss": 0.3939897119998932,
+      "update": 200
+    },
+    {
+      "classifier_loss": 1.085508108139038,
+      "loss": 2.548039436340332,
+      "predictive_loss": 0.37702327966690063,
+      "update": 250
+    },
+    {
+      "classifier_loss": 1.1131020784378052,
+      "loss": 2.6050329208374023,
+      "predictive_loss": 0.378828763961792,
+      "update": 300
+    },
+    {
+      "classifier_loss": 1.0859206914901733,
+      "loss": 2.544745445251465,
+      "predictive_loss": 0.37290406227111816,
+      "update": 350
+    },
+    {
+      "classifier_loss": 1.0229676961898804,
+      "loss": 2.385000705718994,
+      "predictive_loss": 0.3390652537345886,
+      "update": 400
+    },
+    {
+      "classifier_loss": 1.0184507369995117,
+      "loss": 2.373779535293579,
+      "predictive_loss": 0.33687812089920044,
+      "update": 450
+    },
+    {
+      "classifier_loss": 0.9439128637313843,
+      "loss": 2.212805986404419,
+      "predictive_loss": 0.32498034834861755,
+      "update": 500
+    },
+    {
+      "classifier_loss": 1.0223102569580078,
+      "loss": 2.384993553161621,
+      "predictive_loss": 0.34037309885025024,
+      "update": 550
+    },
+    {
+      "classifier_loss": 0.9430978298187256,
+      "loss": 2.211113691329956,
+      "predictive_loss": 0.32491812109947205,
+      "update": 600
+    },
+    {
+      "classifier_loss": 0.955703854560852,
+      "loss": 2.241544246673584,
+      "predictive_loss": 0.33013656735420227,
+      "update": 650
+    },
+    {
+      "classifier_loss": 0.9291990995407104,
+      "loss": 2.188626766204834,
+      "predictive_loss": 0.3302284777164459,
+      "update": 700
+    },
+    {
+      "classifier_loss": 0.9439176321029663,
+      "loss": 2.2188544273376465,
+      "predictive_loss": 0.3310192823410034,
+      "update": 750
+    },
+    {
+      "classifier_loss": 0.8846651315689087,
+      "loss": 2.0801124572753906,
+      "predictive_loss": 0.310782253742218,
+      "update": 800
+    },
+    {
+      "classifier_loss": 0.9246892333030701,
+      "loss": 2.177995204925537,
+      "predictive_loss": 0.32861679792404175,
+      "update": 850
+    },
+    {
+      "classifier_loss": 0.8697509765625,
+      "loss": 2.0510764122009277,
+      "predictive_loss": 0.31157439947128296,
+      "update": 900
+    },
+    {
+      "classifier_loss": 0.9967454671859741,
+      "loss": 2.336179494857788,
+      "predictive_loss": 0.34268850088119507,
+      "update": 950
+    },
+    {
+      "classifier_loss": 0.9442424774169922,
+      "loss": 2.216036558151245,
+      "predictive_loss": 0.3275516927242279,
+      "update": 1000
+    },
+    {
+      "classifier_loss": 0.9005709886550903,
+      "loss": 2.1215529441833496,
+      "predictive_loss": 0.3204110860824585,
+      "update": 1050
+    },
+    {
+      "classifier_loss": 0.8746024370193481,
+      "loss": 2.0739662647247314,
+      "predictive_loss": 0.32476139068603516,
+      "update": 1100
+    },
+    {
+      "classifier_loss": 0.912280797958374,
+      "loss": 2.1414976119995117,
+      "predictive_loss": 0.31693604588508606,
+      "update": 1150
+    },
+    {
+      "classifier_loss": 0.8560545444488525,
+      "loss": 2.023460865020752,
+      "predictive_loss": 0.3113517165184021,
+      "update": 1200
+    },
+    {
+      "classifier_loss": 0.9193392992019653,
+      "loss": 2.1620407104492188,
+      "predictive_loss": 0.3233621418476105,
+      "update": 1250
+    },
+    {
+      "classifier_loss": 0.8310083150863647,
+      "loss": 1.9703636169433594,
+      "predictive_loss": 0.30834701657295227,
+      "update": 1300
+    },
+    {
+      "classifier_loss": 0.8844163417816162,
+      "loss": 2.093677043914795,
+      "predictive_loss": 0.32484444975852966,
+      "update": 1350
+    },
+    {
+      "classifier_loss": 0.8725468516349792,
+      "loss": 2.0618700981140137,
+      "predictive_loss": 0.3167763352394104,
+      "update": 1400
+    },
+    {
+      "classifier_loss": 0.8878659009933472,
+      "loss": 2.096731662750244,
+      "predictive_loss": 0.3209999203681946,
+      "update": 1450
+    },
+    {
+      "classifier_loss": 0.9053667187690735,
+      "loss": 2.133659839630127,
+      "predictive_loss": 0.3229263424873352,
+      "update": 1500
+    }
+  ],
+  "training_seed": 0,
+  "validation": {
+    "physical_mode_accuracy": 0.8674775225928912,
+    "router_config": {
+      "confidence_threshold": 0.8,
+      "evidence_scale": 0.25,
+      "hazard_rate": 0.005,
+      "hysteresis_margin": 0.02,
+      "margin_threshold": 0.02,
+      "min_history": 8
+    },
+    "selection_score": 0.6845094214036149,
+    "stationary": {
+      "conditional_accuracy": 0.9511409852698672,
+      "coverage": 0.9257653709349596,
+      "effective_accuracy": 0.8898469258130083,
+      "wrong_route_rate": 0.03591844512195122
+    },
+    "switching": {
+      "conditional_accuracy": 0.9573521781329178,
+      "coverage": 0.9218104338842974,
+      "effective_accuracy": 0.8821022727272727,
+      "median_switch_delay": 49.4375,
+      "wrong_route_rate": 0.039708161157024795
+    },
+    "validation_gate_pass": true
+  },
+  "validation_event_seeds": [
+    4100,
+    4200
+  ],
+  "validation_gate_pass": true,
+  "validation_top_candidates": [
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.02,
+        "min_history": 8
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.05,
+        "min_history": 8
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.1,
+        "min_history": 8
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.02,
+        "min_history": 16
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.05,
+        "min_history": 16
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.1,
+        "min_history": 16
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.02,
+        "min_history": 32
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.05,
+        "min_history": 32
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.8,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.1,
+        "min_history": 32
+      },
+      "selection_score": 0.6845094214036149,
+      "stationary": {
+        "conditional_accuracy": 0.9511409852698672,
+        "coverage": 0.9257653709349596,
+        "effective_accuracy": 0.8898469258130083,
+        "wrong_route_rate": 0.03591844512195122
+      },
+      "switching": {
+        "conditional_accuracy": 0.9573521781329178,
+        "coverage": 0.9218104338842974,
+        "effective_accuracy": 0.8821022727272727,
+        "median_switch_delay": 49.4375,
+        "wrong_route_rate": 0.039708161157024795
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "physical_mode_accuracy": 0.8674775225928912,
+      "router_config": {
+        "confidence_threshold": 0.7,
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.005,
+        "hysteresis_margin": 0.02,
+        "margin_threshold": 0.02,
+        "min_history": 8
+      },
+      "selection_score": 0.6843975844923739,
+      "stationary": {
+        "conditional_accuracy": 0.9488489866558695,
+        "coverage": 0.9562372967479674,
+        "effective_accuracy": 0.9146023882113822,
+        "wrong_route_rate": 0.041634908536585365
+      },
+      "switching": {
+        "conditional_accuracy": 0.9493058337966811,
+        "coverage": 0.957967458677686,
+        "effective_accuracy": 0.9090909090909092,
+        "median_switch_delay": 45.875,
+        "wrong_route_rate": 0.048876549586776855
+      },
+      "validation_gate_pass": true
+    }
+  ]
+}

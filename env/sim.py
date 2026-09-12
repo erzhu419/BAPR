@@ -24,7 +24,8 @@ class env_bus(object):
     
     def __init__(self, path, debug=False, render=False, route_sigma=1.5,
                  enable_mode_switch=False, mode_profiles=None,
-                 mode_switch_interval=(1800, 7200)):
+                 mode_switch_interval=(1800, 7200), fixed_mode=None,
+                 random_initial_mode=False):
         """
         Args:
             path:                  环境数据目录
@@ -34,6 +35,8 @@ class env_bus(object):
             enable_mode_switch:    是否启用 BA-PR 模式切换
             mode_profiles:         模式配置字典, 默认使用 MODE_PROFILES
             mode_switch_interval:  模式切换间隔 (min_seconds, max_seconds)
+            fixed_mode:            整个 episode 固定使用的模式
+            random_initial_mode:   切换实验是否随机化 episode 初始模式
         """
         if render:
             pygame.init()
@@ -89,6 +92,13 @@ class env_bus(object):
         self.mode_profiles = mode_profiles if mode_profiles is not None else MODE_PROFILES
         self.mode_switch_interval = mode_switch_interval
         self.mode_names = list(self.mode_profiles.keys())
+        if fixed_mode is not None and fixed_mode not in self.mode_profiles:
+            raise ValueError(f"unknown fixed bus mode: {fixed_mode}")
+        if fixed_mode is not None and enable_mode_switch:
+            raise ValueError(
+                "fixed_mode and enable_mode_switch cannot both be enabled")
+        self.fixed_mode = fixed_mode
+        self.random_initial_mode = bool(random_initial_mode)
 
         # BA-PR state (initialized in reset)
         self.current_mode_name = "normal"
@@ -141,7 +151,7 @@ class env_bus(object):
         return total_station
 
     # return default state and reward
-    def reset(self):
+    def reset(self, initial_mode=None):
 
         self.current_time = 0
 
@@ -164,14 +174,24 @@ class env_bus(object):
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
 
         # ===== BA-PR: 重置模式状态 =====
-        self.current_mode_name = "normal"
+        if initial_mode is not None:
+            if initial_mode not in self.mode_profiles:
+                raise ValueError(f"unknown initial bus mode: {initial_mode}")
+            reset_mode = initial_mode
+        elif self.fixed_mode is not None:
+            reset_mode = self.fixed_mode
+        elif self.enable_mode_switch and self.random_initial_mode:
+            reset_mode = random.choice(self.mode_names)
+        else:
+            reset_mode = "normal"
+        self.current_mode_name = reset_mode
         self.mode_switch_count = 0
-        self.mode_history = [("normal", 0)]
+        self.mode_history = [(reset_mode, 0)]
         if self.enable_mode_switch:
             self.next_switch_time = random.randint(*self.mode_switch_interval)
         else:
             self.next_switch_time = float('inf')
-        self._apply_mode("normal")
+        self._apply_mode(reset_mode)
 
     def initialize_state(self, render=False):
         def count_non_empty_sublist(lst):

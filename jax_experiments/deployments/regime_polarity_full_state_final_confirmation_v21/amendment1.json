@@ -1,0 +1,11 @@
+{
+  "schema": "bapr.full-state-final-confirmation-amendment.v21",
+  "status": "registered_before_recovery",
+  "scope": "baseline bundle publication and audit loading only",
+  "failure": "The V21 adapter omitted the generic BUNDLE_SCHEMA name required by the reused V18 bundle publisher.",
+  "fix": "Bind BUNDLE_SCHEMA to the already-registered BASELINE_BUNDLE_SCHEMA at runtime.",
+  "training_changed": false,
+  "evaluation_protocol_changed": false,
+  "checkpoint_requirement": "iteration 1399, next_iteration 1400, 5600000 steps, and 350000 updates",
+  "recovery": "Publish compact evaluation bundles directly from completed remote checkpoints; do not resume training or synchronize checkpoints."
+}

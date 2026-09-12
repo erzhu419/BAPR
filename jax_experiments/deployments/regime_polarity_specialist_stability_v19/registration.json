@@ -1,0 +1,190 @@
+{
+  "created_before_training": true,
+  "development_gate": {
+    "paired_against_actor_only_control": {
+      "do_not_reduce_total_holdout_mode_passes": true,
+      "minimum_stationary_return_retention": 0.95,
+      "require_better_worst_seed_safe_gain": true,
+      "require_positive_mean_switching_delta": true,
+      "required_event_wins_of_9": 6,
+      "required_seed_wins_of_3": 2
+    },
+    "robust_relative_cell": {
+      "minimum_holdout_mode_gain": 0.05,
+      "minimum_holdout_mode_wins": 3,
+      "minimum_safe_switching_gain": 0.1,
+      "require_zero_termination": true,
+      "required_cell_passes": 3
+    },
+    "selection": "highest mean safe switching return among passing candidates; prefer full_state when within 2 percent"
+  },
+  "frozen_boundary": {
+    "development_question": "whether controller initialization reduces specialist-bank variance on fresh seeds",
+    "environment_changes": false,
+    "posterior_or_gate_changes": false,
+    "v18_candidate_and_holdouts_unchanged": true
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      184001,
+      184017,
+      184033
+    ],
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v19-specialist-training-stability-development",
+    "stationary_holdout_event_seeds": [
+      184101,
+      184117,
+      184133
+    ],
+    "switching_event_seeds": [
+      184201,
+      184217,
+      184233
+    ],
+    "switching_schedules": {
+      "184201": [
+        0,
+        2,
+        3,
+        1
+      ],
+      "184217": [
+        3,
+        1,
+        0,
+        2
+      ],
+      "184233": [
+        2,
+        0,
+        1,
+        3
+      ]
+    },
+    "training_seeds": [
+      82003,
+      82021,
+      82039
+    ],
+    "variants": [
+      "actor_only_control",
+      "full_state",
+      "critic_warmup"
+    ]
+  },
+  "schema": "bapr.specialist-training-stability-registration.v19",
+  "source_records": {
+    "jax_experiments/algos/sac_actor_delay.py": {
+      "sha256": "243a6f4ac99aaa1b1fb48254e21d4eb5545d8476a2fab50827270dbe07ae6e35",
+      "size": 8177
+    },
+    "jax_experiments/algos/sac_base.py": {
+      "sha256": "4bbdd0874454ca7a09b3b28fd798aa2f5f8256a4fd005b889364385bbd7b354e",
+      "size": 7835
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_specialist_stability_v19.py": {
+      "sha256": "9154981489b4f572250772cc6214c23a60910ed092f9df612dbdfd5e963a36c4",
+      "size": 13077
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_stability_v19.py": {
+      "sha256": "11487a146a1658c0cb1289af822a7efd750b4c6748d722a261671902b20b4dab",
+      "size": 17587
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v12.py": {
+      "sha256": "0ae15af3e9d3ac3d1298215d7131127c6b872cb21514f74ab789902acc6857fb",
+      "size": 9124
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v19.py": {
+      "sha256": "c7b718c1c6b7f525bc94d539bef2fc9286e17188a55d7cc8c9f2ad7a72945481",
+      "size": 7074
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_confirmation_audit_v12.py": {
+      "sha256": "6c095c935949802387a898db14b44416674083d96073fb5d286309fb5c9930ba",
+      "size": 14966
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_specialist_audit_v11.py": {
+      "sha256": "c580066aeb38bee9603d6057c385e123d97c763962152a659163ee1fefd8c73c",
+      "size": 16111
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_warmstart_specialist_v11.py": {
+      "sha256": "dd0bed1cc914a6d7b5377b9e68f8ac26b8d317bf65a2a76f248cc29962c7206c",
+      "size": 15612
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_audit_v19.py": {
+      "sha256": "cf8469a22f6a8baff7de7ebd14051907fa72fb1ec5213070f51b3ebbb72b3c07",
+      "size": 10146
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_v19.py": {
+      "sha256": "3f8f69dd224871339a5b83c46a0f18c7da498a022ddb7fac68ffc8d82bc43aaf",
+      "size": 12710
+    },
+    "jax_experiments/analysis/train_regime_polarity_sac_actor_delay_v19.py": {
+      "sha256": "b962bde652cee0604123bd1af5c399bfec2e9700fe9fb9f24840fb8931d8eabf",
+      "size": 865
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/deployments/regime_polarity_v5_final_comparison_v18/registration.json": {
+      "sha256": "9a44ea37b44cc8088956ecc2fa16364edd9084347492bdfe1bb8de9b04832240",
+      "size": 10057
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_specialist_analysis_v11/analysis.json": {
+      "sha256": "6f374a05d23f02b9c0a782abc68c6751a242aa6e9c7529dd14d231337ac11f81",
+      "size": 13575
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_specialist_analysis_v11/analysis.md": {
+      "sha256": "20daf5dc1ba8ccc3d9c89341f6846a401e0a698a65c83d7a36d98feb45d7d300",
+      "size": 1018
+    },
+    "jax_experiments/results_regime_polarity_v5_final_comparison_analysis_v18/analysis.json": {
+      "sha256": "c850c847639b11374cf75e640898b148b0e8caa6e0b99b11d82584403badbe53",
+      "size": 27566
+    },
+    "jax_experiments/results_regime_polarity_v5_final_comparison_analysis_v18/analysis.md": {
+      "sha256": "61efcbe4721b04efcc7e7aae5b71d5bac217c42fab12aa08a820ffe97d8f8fae",
+      "size": 1297
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_polarity_robust_warmstart_specialist_v11_2026-08-31.md": {
+      "sha256": "20daf5dc1ba8ccc3d9c89341f6846a401e0a698a65c83d7a36d98feb45d7d300",
+      "size": 1018
+    },
+    "reports/regime_polarity_specialist_stability_v19_preregistration_2026-09-07.md": {
+      "sha256": "369e0e187607a95037e51488e21bc3abf0dc5a456e5a6ec38831c621d5822c68",
+      "size": 2689
+    },
+    "reports/regime_polarity_v5_final_comparison_v18_2026-09-01.md": {
+      "sha256": "61efcbe4721b04efcc7e7aae5b71d5bac217c42fab12aa08a820ffe97d8f8fae",
+      "size": 1297
+    },
+    "reports/regime_polarity_v5_final_comparison_v18_diagnostic_2026-09-07.md": {
+      "sha256": "b19d5274f94d6f3be3055b29590f6a4db97d211bf2ca17850eee1761ef6c6b96",
+      "size": 2712
+    },
+    "scripts/submit_regime_polarity_specialist_stability_v19.py": {
+      "sha256": "4c1af6c2aaf7a053aa6369ba7f808ab16d40304bae14d1362b14c8c628b4e48e",
+      "size": 13489
+    }
+  },
+  "status": "registered",
+  "sync_policy": "JSON, protocol signature, policy parameters, and compact source controller state only; never sync replay or full checkpoints",
+  "training": {
+    "actor_only_control": "copy robust actor; fresh critic, target critic, and alpha",
+    "common": "empty specialist replay and reset Adam states",
+    "critic_warmup": "copy robust actor; fresh critic, target critic, and alpha; freeze actor and alpha for 25000 updates",
+    "full_state": "copy robust actor, critic, target critic, and alpha",
+    "robust_source_steps": 5600000,
+    "specialist_finetune_steps": 2800000
+  }
+}

@@ -1,0 +1,489 @@
+{
+  "authorize_transient_training": false,
+  "development_only": true,
+  "event_seeds": [
+    105301,
+    105331,
+    105367,
+    105399,
+    105451
+  ],
+  "minimum_reducible_fraction_of_robust": 0.02,
+  "minimum_students_for_training": 2,
+  "protocol_version": "v1-frozen-delayed-oracle-causal-ceiling",
+  "recommendation": "The frozen fallback is already close to the one-transition causal ceiling, or the remaining gap is not stable across initializations. Do not train another student; freeze fallback as the deployable mechanism and report the zero-delay oracle as noncausal headroom.",
+  "schema": "bapr.regime-polarity-transient-causal-ceiling-analysis.v1",
+  "status": "complete",
+  "students": {
+    "1709": {
+      "arm_means": {
+        "evidence_1p0_k1": 2032.3284723994136,
+        "robust_final_seed_719": 1913.944830711782,
+        "student_learned": 1971.8412756209075,
+        "student_oracle": 2085.3590336075426,
+        "student_oracle_delay_1": 2064.022658032477,
+        "student_oracle_delay_10": 1742.5394346565008,
+        "student_oracle_delay_2": 2042.7561942192913,
+        "student_oracle_delay_5": 1968.9706743353606
+      },
+      "comparisons": {
+        "delay10_minus_robust719": {
+          "candidate_mean": 1742.5394346565008,
+          "cluster_95pct_t_interval": [
+            -328.0058933306356,
+            -14.804898779926702
+          ],
+          "event_seed_deltas": {
+            "105301": -350.8276212334633,
+            "105331": -100.68617413938046,
+            "105367": -208.29316166639327,
+            "105399": -183.6803392007947,
+            "105451": -13.539684036374092
+          },
+          "event_seed_wins": 0,
+          "mean_delta": -171.40539605528116,
+          "reference_mean": 1913.944830711782
+        },
+        "delay1_minus_fallback": {
+          "candidate_mean": 2064.022658032477,
+          "cluster_95pct_t_interval": [
+            -35.26899142020417,
+            98.6573626863308
+          ],
+          "event_seed_deltas": {
+            "105301": -45.53167999237776,
+            "105331": 102.86308105885982,
+            "105367": 20.671381561458112,
+            "105399": 53.227429097890855,
+            "105451": 27.24071643948555
+          },
+          "event_seed_wins": 4,
+          "mean_delta": 31.694185633063316,
+          "reference_mean": 2032.3284723994136
+        },
+        "delay1_minus_robust719": {
+          "candidate_mean": 2064.022658032477,
+          "cluster_95pct_t_interval": [
+            106.87771642622427,
+            193.2779382151656
+          ],
+          "event_seed_deltas": {
+            "105301": 88.33766401261092,
+            "105331": 171.42576396614314,
+            "105367": 160.43222162276507,
+            "105399": 167.92803735584022,
+            "105451": 162.26544964611531
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 150.07782732069492,
+          "reference_mean": 1913.944830711782
+        },
+        "delay2_minus_robust719": {
+          "candidate_mean": 2042.7561942192913,
+          "cluster_95pct_t_interval": [
+            73.02022450074313,
+            184.60250251427536
+          ],
+          "event_seed_deltas": {
+            "105301": 50.201876766979694,
+            "105331": 134.28367662280797,
+            "105367": 145.77899465858937,
+            "105399": 156.2134843289852,
+            "105451": 157.5787851601839
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 128.81136350750924,
+          "reference_mean": 1913.944830711782
+        },
+        "delay5_minus_robust719": {
+          "candidate_mean": 1968.9706743353606,
+          "cluster_95pct_t_interval": [
+            6.452302261440586,
+            103.59938498571651
+          ],
+          "event_seed_deltas": {
+            "105301": 63.648806349933146,
+            "105331": 27.56541459709406,
+            "105367": 96.68524664193392,
+            "105399": 84.21691589355468,
+            "105451": 3.0128346353769304
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 55.025843623578545,
+          "reference_mean": 1913.944830711782
+        },
+        "fallback_minus_robust719": {
+          "candidate_mean": 2032.3284723994136,
+          "cluster_95pct_t_interval": [
+            81.81558194952814,
+            154.95170142573505
+          ],
+          "event_seed_deltas": {
+            "105301": 133.86934400498868,
+            "105331": 68.5626829072833,
+            "105367": 139.76084006130696,
+            "105399": 114.70060825794936,
+            "105451": 135.02473320662975
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 118.38364168763161,
+          "reference_mean": 1913.944830711782
+        },
+        "oracle_minus_delay1": {
+          "candidate_mean": 2085.3590336075426,
+          "cluster_95pct_t_interval": [
+            -44.078110203867205,
+            86.75086135399843
+          ],
+          "event_seed_deltas": {
+            "105301": 83.97517468631267,
+            "105331": -42.57439361810684,
+            "105367": -23.630343532562257,
+            "105399": 43.28506107032299,
+            "105451": 45.62637926936149
+          },
+          "event_seed_wins": 3,
+          "mean_delta": 21.336375575065613,
+          "reference_mean": 2064.022658032477
+        },
+        "oracle_minus_robust719": {
+          "candidate_mean": 2085.3590336075426,
+          "cluster_95pct_t_interval": [
+            123.62632939824513,
+            219.20207639327592
+          ],
+          "event_seed_deltas": {
+            "105301": 172.3128386989236,
+            "105331": 128.85137034803628,
+            "105367": 136.80187809020282,
+            "105399": 211.21309842616319,
+            "105451": 207.8918289154768
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 171.41420289576052,
+          "reference_mean": 1913.944830711782
+        }
+      },
+      "delay1_oracle_headroom_retention": 0.8755273762930801,
+      "fallback_causal_headroom_recovery": 0.7888150021965774,
+      "fallback_zero_delay_headroom_recovery": 0.6906291292537896,
+      "material_reducible_post_observation_gap": false,
+      "student_seed": 1709,
+      "zero_termination": true
+    },
+    "1811": {
+      "arm_means": {
+        "evidence_1p0_k1": 2005.841216238141,
+        "robust_final_seed_719": 1913.944830711782,
+        "student_learned": 1970.419240951091,
+        "student_oracle": 2058.4003328588606,
+        "student_oracle_delay_1": 2041.3063628426194,
+        "student_oracle_delay_10": 1690.1866610500217,
+        "student_oracle_delay_2": 2039.0511648407578,
+        "student_oracle_delay_5": 1950.9924812904
+      },
+      "comparisons": {
+        "delay10_minus_robust719": {
+          "candidate_mean": 1690.1866610500217,
+          "cluster_95pct_t_interval": [
+            -482.76516904417394,
+            35.24882972065325
+          ],
+          "event_seed_deltas": {
+            "105301": -366.4468785583973,
+            "105331": -373.16232724785806,
+            "105367": -10.647397504746914,
+            "105399": 19.24375995695591,
+            "105451": -387.7780049547553
+          },
+          "event_seed_wins": 1,
+          "mean_delta": -223.75816966176032,
+          "reference_mean": 1913.944830711782
+        },
+        "delay1_minus_fallback": {
+          "candidate_mean": 2041.3063628426194,
+          "cluster_95pct_t_interval": [
+            -19.149457340589215,
+            90.07975054954593
+          ],
+          "event_seed_deltas": {
+            "105301": 25.42928846925497,
+            "105331": 13.239942985773087,
+            "105367": 0.5819938942790032,
+            "105399": 111.8918880328536,
+            "105451": 26.18261964023113
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 35.465146604478356,
+          "reference_mean": 2005.841216238141
+        },
+        "delay1_minus_robust719": {
+          "candidate_mean": 2041.3063628426194,
+          "cluster_95pct_t_interval": [
+            52.91102068779493,
+            201.81204357387998
+          ],
+          "event_seed_deltas": {
+            "105301": 114.18783375769854,
+            "105331": 61.90726292431354,
+            "105367": 120.17046711593866,
+            "105399": 225.8991202056408,
+            "105451": 114.64297665059567
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 127.36153213083745,
+          "reference_mean": 1913.944830711782
+        },
+        "delay2_minus_robust719": {
+          "candidate_mean": 2039.0511648407578,
+          "cluster_95pct_t_interval": [
+            105.99388567981191,
+            144.21878257813984
+          ],
+          "event_seed_deltas": {
+            "105301": 134.81674151718616,
+            "105331": 110.78677697479725,
+            "105367": 112.18156276196241,
+            "105399": 146.67210343033076,
+            "105451": 121.07448596060276
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 125.10633412897587,
+          "reference_mean": 1913.944830711782
+        },
+        "delay5_minus_robust719": {
+          "candidate_mean": 1950.9924812904,
+          "cluster_95pct_t_interval": [
+            5.599404416281761,
+            68.49589674095434
+          ],
+          "event_seed_deltas": {
+            "105301": 70.6172432154417,
+            "105331": 11.251780387759208,
+            "105367": 51.24781064540148,
+            "105399": 38.91595062017441,
+            "105451": 13.20546802431345
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 37.04765057861805,
+          "reference_mean": 1913.944830711782
+        },
+        "fallback_minus_robust719": {
+          "candidate_mean": 2005.841216238141,
+          "cluster_95pct_t_interval": [
+            57.07359989634992,
+            126.71917115636825
+          ],
+          "event_seed_deltas": {
+            "105301": 88.75854528844357,
+            "105331": 48.66731993854046,
+            "105367": 119.58847322165965,
+            "105399": 114.00723217278718,
+            "105451": 88.46035701036453
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 91.89638552635908,
+          "reference_mean": 1913.944830711782
+        },
+        "oracle_minus_delay1": {
+          "candidate_mean": 2058.4003328588606,
+          "cluster_95pct_t_interval": [
+            -31.01086703311583,
+            65.19880706559798
+          ],
+          "event_seed_deltas": {
+            "105301": 41.030743128061296,
+            "105331": 50.1402586042881,
+            "105367": -27.896391436457634,
+            "105399": -22.389477637410163,
+            "105451": 44.58471742272377
+          },
+          "event_seed_wins": 3,
+          "mean_delta": 17.093970016241073,
+          "reference_mean": 2041.3063628426194
+        },
+        "oracle_minus_robust719": {
+          "candidate_mean": 2058.4003328588606,
+          "cluster_95pct_t_interval": [
+            90.35174265053223,
+            198.55926164362478
+          ],
+          "event_seed_deltas": {
+            "105301": 155.21857688575983,
+            "105331": 112.04752152860165,
+            "105367": 92.27407567948103,
+            "105399": 203.50964256823062,
+            "105451": 159.22769407331944
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 144.4555021470785,
+          "reference_mean": 1913.944830711782
+        }
+      },
+      "delay1_oracle_headroom_retention": 0.8816661895035549,
+      "fallback_causal_headroom_recovery": 0.7215395731260098,
+      "fallback_zero_delay_headroom_recovery": 0.6361570460140307,
+      "material_reducible_post_observation_gap": false,
+      "student_seed": 1811,
+      "zero_termination": true
+    },
+    "1901": {
+      "arm_means": {
+        "evidence_1p0_k1": 2003.1023713247478,
+        "robust_final_seed_719": 1913.944830711782,
+        "student_learned": 1947.8323370490969,
+        "student_oracle": 2053.7466017109155,
+        "student_oracle_delay_1": 2051.597757652402,
+        "student_oracle_delay_10": 1649.2785213203729,
+        "student_oracle_delay_2": 2035.5775300270318,
+        "student_oracle_delay_5": 1975.2409954112768
+      },
+      "comparisons": {
+        "delay10_minus_robust719": {
+          "candidate_mean": 1649.2785213203729,
+          "cluster_95pct_t_interval": [
+            -539.1422104841653,
+            9.809591701347017
+          ],
+          "event_seed_deltas": {
+            "105301": -287.8589724108577,
+            "105331": -258.21800208687785,
+            "105367": -589.2789030626416,
+            "105399": -218.97975744828582,
+            "105451": 31.004088051617146
+          },
+          "event_seed_wins": 1,
+          "mean_delta": -264.6663093914092,
+          "reference_mean": 1913.944830711782
+        },
+        "delay1_minus_fallback": {
+          "candidate_mean": 2051.597757652402,
+          "cluster_95pct_t_interval": [
+            8.92918813786438,
+            88.06158451744386
+          ],
+          "event_seed_deltas": {
+            "105301": 21.22883851826191,
+            "105331": 88.5093343257904,
+            "105367": 23.53824108839035,
+            "105399": 32.020929493010044,
+            "105451": 77.1795882128179
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 48.495386327654124,
+          "reference_mean": 2003.1023713247478
+        },
+        "delay1_minus_robust719": {
+          "candidate_mean": 2051.597757652402,
+          "cluster_95pct_t_interval": [
+            101.40020227532213,
+            173.90565160591777
+          ],
+          "event_seed_deltas": {
+            "105301": 114.25960720926523,
+            "105331": 152.96261698007584,
+            "105367": 119.44469800442457,
+            "105399": 119.56563245505095,
+            "105451": 182.03208005428314
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 137.65292694061995,
+          "reference_mean": 1913.944830711782
+        },
+        "delay2_minus_robust719": {
+          "candidate_mean": 2035.5775300270318,
+          "cluster_95pct_t_interval": [
+            60.613533807693116,
+            182.65186482280671
+          ],
+          "event_seed_deltas": {
+            "105301": 75.62719769328832,
+            "105331": 81.35870006084443,
+            "105367": 108.56952548921109,
+            "105399": 191.50959612429142,
+            "105451": 151.09847720861436
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 121.63269931524992,
+          "reference_mean": 1913.944830711782
+        },
+        "delay5_minus_robust719": {
+          "candidate_mean": 1975.2409954112768,
+          "cluster_95pct_t_interval": [
+            22.280623867872215,
+            100.31170553111747
+          ],
+          "event_seed_deltas": {
+            "105301": 64.64271654635668,
+            "105331": 45.444763238728044,
+            "105367": 44.14154620319605,
+            "105399": 114.54967988282442,
+            "105451": 37.702117626369
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 61.29616469949484,
+          "reference_mean": 1913.944830711782
+        },
+        "fallback_minus_robust719": {
+          "candidate_mean": 2003.1023713247478,
+          "cluster_95pct_t_interval": [
+            70.32899601746892,
+            107.98608520846271
+          ],
+          "event_seed_deltas": {
+            "105301": 93.03076869100332,
+            "105331": 64.45328265428543,
+            "105367": 95.90645691603422,
+            "105399": 87.5447029620409,
+            "105451": 104.85249184146524
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 89.15754061296582,
+          "reference_mean": 1913.944830711782
+        },
+        "oracle_minus_delay1": {
+          "candidate_mean": 2053.7466017109155,
+          "cluster_95pct_t_interval": [
+            -38.55078361218479,
+            42.848471729212065
+          ],
+          "event_seed_deltas": {
+            "105301": -16.894518756866454,
+            "105331": -26.769705745577813,
+            "105367": 42.74415774643421,
+            "105399": 32.511922153830525,
+            "105451": -20.847635105252266
+          },
+          "event_seed_wins": 2,
+          "mean_delta": 2.1488440585136415,
+          "reference_mean": 2051.597757652402
+        },
+        "oracle_minus_robust719": {
+          "candidate_mean": 2053.7466017109155,
+          "cluster_95pct_t_interval": [
+            105.26225678516259,
+            174.34128521310453
+          ],
+          "event_seed_deltas": {
+            "105301": 97.36508845239878,
+            "105331": 126.19291123449803,
+            "105367": 162.18885575085878,
+            "105399": 152.07755460888148,
+            "105451": 161.18444494903088
+          },
+          "event_seed_wins": 5,
+          "mean_delta": 139.8017709991336,
+          "reference_mean": 1913.944830711782
+        }
+      },
+      "delay1_oracle_headroom_retention": 0.9846293502352924,
+      "fallback_causal_headroom_recovery": 0.6476981099822607,
+      "fallback_zero_delay_headroom_recovery": 0.6377425691804604,
+      "material_reducible_post_observation_gap": true,
+      "student_seed": 1901,
+      "zero_termination": true
+    }
+  },
+  "students_with_material_reducible_gap": 1,
+  "zero_termination": true
+}

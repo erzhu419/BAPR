@@ -31,6 +31,7 @@ import json
 import numpy as np
 import random
 from copy import deepcopy
+from bus_evaluation import evaluate_bus_policy_paired, write_bus_evaluation
 GPU = True
 device_idx = 0
 if GPU:
@@ -42,7 +43,10 @@ print(device)
 parser = argparse.ArgumentParser(description='Train or test neural net motor controller.')
 parser.add_argument('--max_episodes', type=int, default=500, help='number of episodes to train')
 parser.add_argument('--train', dest='train', action='store_true', default=True)
+parser.add_argument('--no-train', dest='train', action='store_false')
 parser.add_argument('--test', dest='test', action='store_true', default=False)
+parser.add_argument('--audit_eval_episodes', type=int, default=0)
+parser.add_argument('--audit_eval_seed_base', type=int, default=10000)
 parser.add_argument('--use_gradient_clip', type=bool, default=True, help="Trick 1:gradient clipping")
 parser.add_argument("--use_state_norm", type=bool, default=False, help="Trick 2:state normalization")
 parser.add_argument("--use_reward_norm", type=bool, default=False, help="Trick 3:reward normalization")
@@ -953,3 +957,32 @@ if __name__ == '__main__':
                 state_dict, reward_dict, done = env.step(action_dict)
                 # env.render()
             print('Episode: ', eps, '| Episode Reward: ', episode_reward)
+
+    if args.audit_eval_episodes > 0:
+        if not args.train:
+            sac_trainer.load_model(os.path.join(model_path, "final"))
+        audit = evaluate_bus_policy_paired(
+            sac_trainer,
+            lambda: env_bus(
+                path, debug=False, route_sigma=args.route_sigma,
+                enable_mode_switch=args.enable_mode_switch,
+                mode_switch_interval=(
+                    args.mode_switch_min, args.mode_switch_max)),
+            range(
+                args.audit_eval_seed_base,
+                args.audit_eval_seed_base + args.audit_eval_episodes),
+        )
+        write_bus_evaluation(
+            os.path.join(logs_path, "paired_eval.json"), audit,
+            metadata={
+                "script": "sac_ensemble_escp_stress.py",
+                "seed": int(args.seed),
+                "weight_reg": float(args.weight_reg),
+                "beta": float(args.beta),
+                "beta_ood": float(args.beta_ood),
+                "ensemble_size": int(args.ensemble_size),
+                "mode_switch": bool(args.enable_mode_switch),
+            })
+        print(
+            f"Paired bus eval: mean={audit['reward_mean']:.2f}, "
+            f"std={audit['reward_std']:.2f}")

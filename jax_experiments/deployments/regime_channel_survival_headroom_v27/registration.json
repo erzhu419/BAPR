@@ -1,0 +1,127 @@
+{
+  "created_before_training": true,
+  "environment": {
+    "action_noise_std": 0.04,
+    "affected_channel_patterns": [
+      "low_half",
+      "high_half",
+      "even",
+      "odd"
+    ],
+    "all_gains_positive_and_invertible": true,
+    "dwell_steps": 250,
+    "fixed_physics_within_dwell": true,
+    "impaired_gain": 0.45,
+    "nominal_gain": 1.0,
+    "severity_selected_before_hopper_walker_results": true
+  },
+  "gate": {
+    "decision": "each environment is judged independently",
+    "maximum_absolute_stationary_termination": 0.1,
+    "maximum_absolute_switching_termination": 0.1,
+    "maximum_termination_gap": 0.05,
+    "minimum_stationary_mode_wins": 3,
+    "minimum_switching_gain": 0.15,
+    "minimum_worst_mode_gain": 0.15,
+    "required_switching_seed_wins": 3,
+    "required_worst_mode_seed_wins": 3
+  },
+  "identity": {
+    "environments": [
+      "Hopper-v2",
+      "Walker2d-v2"
+    ],
+    "event_seeds": [
+      193101,
+      193117,
+      193133
+    ],
+    "family": "structured_channel",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v27-structured-channel-survival-headroom-development",
+    "roles": [
+      "robust",
+      "oracle"
+    ],
+    "training_seeds": [
+      86003,
+      86021,
+      86039
+    ]
+  },
+  "schema": "bapr.channel-survival-headroom-registration.v27",
+  "source_records": {
+    "jax_experiments/algos/regime_sac.py": {
+      "sha256": "5bd625594f72e3b887a1340fb9ce97db2b38f04627c9fe993ddfb11c7e3bed3e",
+      "size": 17881
+    },
+    "jax_experiments/analysis/analyze_regime_channel_survival_headroom_v27.py": {
+      "sha256": "8b018af2c4c1e6d091e21624966bc83a4b6dd5ac8b655818c5bcffed93abdce1",
+      "size": 5922
+    },
+    "jax_experiments/analysis/analyze_regime_control_headroom.py": {
+      "sha256": "c38a6e989ca91311d1d83894ac299d68064f7715966d235a615926cc300b30d8",
+      "size": 13321
+    },
+    "jax_experiments/analysis/final_task_sweep.py": {
+      "sha256": "e0c886c1530c01e3a7b8ae6105d1327ea7ec0fe7596c135c0bf390792de3b24d",
+      "size": 39594
+    },
+    "jax_experiments/analysis/regime_channel_survival_headroom_v27.py": {
+      "sha256": "c23f52321e43eccadd1971068b7578a150d34e2df33d24db251bf249b6c2f5bc",
+      "size": 10904
+    },
+    "jax_experiments/analysis/run_regime_channel_survival_headroom_audit_v27.py": {
+      "sha256": "e6794732b094aa1e6463de618a92cd0c41c92c197910edc1b48f74836acd5d8e",
+      "size": 1341
+    },
+    "jax_experiments/analysis/run_regime_channel_survival_headroom_controller_v27.py": {
+      "sha256": "67522234ffa0c0ec61d0019448ae9cad9f757cd1c60c158007b93221409cc7f4",
+      "size": 1205
+    },
+    "jax_experiments/analysis/run_regime_control_headroom_audit.py": {
+      "sha256": "a6f70eb53c237f4ade8f4657a49f1429135e92019c94309b7bd4082b75f17dea",
+      "size": 9511
+    },
+    "jax_experiments/analysis/run_regime_control_headroom_controller.py": {
+      "sha256": "b344ec56576a5ca53a653bcf30e5e3e95c01cd9cd753d65c6552660d4c6916a8",
+      "size": 7883
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/results_regime_polarity_headroom_analysis_v1/analysis.json": {
+      "sha256": "9ef4220865cafe6039fe713b9e172a22324ebc57d56f6609270f63bf156cd9ff",
+      "size": 27841
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "scripts/submit_regime_channel_survival_headroom_v27.py": {
+      "sha256": "ee670a95e6b5620d813ead41cde510a2baba9fb804ae7aca1a04266b442a461d",
+      "size": 10875
+    }
+  },
+  "status": "registered",
+  "stopping_rule": "Only a passing environment may receive the frozen V21 BAPR recipe. A failed environment is retained without tuning channel gain, noise, dwell, or the BAPR algorithm on these seeds.",
+  "sync_policy": "minimal evaluation bundles and JSON only; never sync replay or raw run checkpoints",
+  "training": {
+    "environment_steps": 5600000,
+    "equal_budget_roles": true,
+    "gradient_updates": 350000,
+    "iterations": 1400,
+    "oracle_context": "true current one-hot mode",
+    "robust_context": "all-zero vector"
+  }
+}

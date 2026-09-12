@@ -1,0 +1,567 @@
+{
+  "aggregate": {
+    "event_wins": 12,
+    "headroom_banks": 4,
+    "map_event_wins": 12,
+    "map_max_terminated_rate": 0.0,
+    "map_mean": 2842.234824093779,
+    "map_mean_oracle_recovery_headroom_banks": 0.8798644982900075,
+    "map_mean_relative_gain": 0.31879457510869386,
+    "map_paired_difference_ci95": [
+      -249.30986170086783,
+      1483.7563189436846
+    ],
+    "map_paired_difference_mean": 617.2232286214085,
+    "map_seed_wins": 4,
+    "max_terminated_rate": 0.0,
+    "mean_oracle_recovery_headroom_banks": 0.8312676478092951,
+    "mean_relative_gain": 0.32044584617004135,
+    "paired_difference_ci95": [
+      -317.9166197470895,
+      1550.764082314081
+    ],
+    "paired_difference_mean": 616.4237312834957,
+    "primary_mean": 2841.4353267558663,
+    "robust_mean": 2225.0115954723706,
+    "safe_oracle_mean": 2935.4034968131036,
+    "seed_wins": 4
+  },
+  "calibration_event_seeds": [
+    155401,
+    155417,
+    155433
+  ],
+  "conclusion": "the simpler posterior-MAP safe-utility router passes every fresh bank; confirm-3 is an unnecessary source of transient loss",
+  "holdout_event_seeds": [
+    155501,
+    155517,
+    155533
+  ],
+  "map_pass": true,
+  "next_step": "freeze posterior-MAP safe utility as the candidate and run a fully new policy-bank confirmation with explicit training-cost accounting",
+  "primary_arm": "posterior_sticky_confirm3_safe_utility",
+  "primary_pass": false,
+  "protocol_version": "v8-robust-inclusive-specialist-utility",
+  "schema": "bapr.regime-polarity-safe-utility-analysis.v8",
+  "source_seed_map_pass": {
+    "5003": true,
+    "5021": true,
+    "5039": true,
+    "5051": true,
+    "5077": true
+  },
+  "source_seed_metrics": {
+    "5003": {
+      "arm_pass": {
+        "dynamic_specialist_oracle": false,
+        "posterior_map_safe_utility": true,
+        "posterior_sticky_confirm3_safe_utility": true,
+        "robust_sac": true,
+        "true_mode_safe_utility": true
+      },
+      "arms": {
+        "dynamic_specialist_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 1,
+          "event_returns": {
+            "155501": 2784.142391298711,
+            "155517": 2877.697451493144,
+            "155533": 2821.5301708102224
+          },
+          "event_wins": 1,
+          "fallback_action_fraction": 0.0,
+          "mean": 2827.790004534026,
+          "oracle_recovery": null,
+          "relative_gain": -0.051264429124695685,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_safe_utility": {
+          "adaptive_mode_accuracy": 0.9901333333333332,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2598.370082480088,
+            "155517": 3150.6151341825725,
+            "155533": 3192.7792475655674
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 0.0,
+          "mean": 2980.588154742743,
+          "oracle_recovery": null,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3_safe_utility": {
+          "adaptive_mode_accuracy": 0.9808599259652158,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2598.370082480088,
+            "155517": 3150.6151341825725,
+            "155533": 3192.7792475655674
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 0.0038,
+          "mean": 2980.588154742743,
+          "oracle_recovery": null,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2598.370082480088,
+            "155517": 3150.6151341825725,
+            "155533": 3192.7792475655674
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 2980.588154742743,
+          "oracle_recovery": null,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2598.370082480088,
+            "155517": 3150.6151341825725,
+            "155533": 3192.7792475655674
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 0.0,
+          "mean": 2980.588154742743,
+          "oracle_recovery": null,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        }
+      },
+      "calibration_origin": {
+        "audit_manifest": {
+          "sha256": "2c2e866e52ab12ee3940aee9a9d698391feacd68e0be150193a51b1962f2b2be",
+          "size": 1368
+        },
+        "kind": "frozen_v7_capacity_audit"
+      },
+      "headroom_available": false,
+      "safe_oracle_headroom_gain": 0.0,
+      "utility_map": {
+        "0": "robust_sac",
+        "1": "robust_sac",
+        "2": "robust_sac",
+        "3": "robust_sac"
+      }
+    },
+    "5021": {
+      "arm_pass": {
+        "dynamic_specialist_oracle": false,
+        "posterior_map_safe_utility": true,
+        "posterior_sticky_confirm3_safe_utility": true,
+        "robust_sac": false,
+        "true_mode_safe_utility": true
+      },
+      "arms": {
+        "dynamic_specialist_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2504.9567080914976,
+            "155517": 2506.811987748742,
+            "155533": 2441.2959659039975
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2484.354887248079,
+          "oracle_recovery": 0.6254992930572827,
+          "relative_gain": 0.14773050593970613,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_safe_utility": {
+          "adaptive_mode_accuracy": 0.9904000000000001,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2703.9521666347982,
+            "155517": 2605.3922126084567,
+            "155533": 2495.2041491087525
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2601.516176117336,
+          "oracle_recovery": 0.8546742029652564,
+          "relative_gain": 0.20185706653725907,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3_safe_utility": {
+          "adaptive_mode_accuracy": 0.9820747138311822,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2512.1469391673804,
+            "155517": 2682.8125930041074,
+            "155533": 2654.2463452473285
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0032666666666666664,
+          "mean": 2616.4019591396054,
+          "oracle_recovery": 0.8837917384239625,
+          "relative_gain": 0.20873404992121639,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2174.0761540219187,
+            "155517": 2189.467976267636,
+            "155533": 2130.196885718405
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 2164.58033866932,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2705.1323550105094,
+            "155517": 2655.649515530467,
+            "155533": 2666.651759326458
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2675.8112099558116,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.23618013254281503,
+          "terminated_rate": 0.0
+        }
+      },
+      "calibration_origin": {
+        "audit_manifest": {
+          "sha256": "e7847688f602f7738f6c8af774dbaa7186644e154f507bc39c8f3b57113e36b3",
+          "size": 1368
+        },
+        "kind": "frozen_v7_capacity_audit"
+      },
+      "headroom_available": true,
+      "safe_oracle_headroom_gain": 0.23618013254281503,
+      "utility_map": {
+        "0": "specialist_0",
+        "1": "robust_sac",
+        "2": "specialist_2",
+        "3": "robust_sac"
+      }
+    },
+    "5039": {
+      "arm_pass": {
+        "dynamic_specialist_oracle": true,
+        "posterior_map_safe_utility": true,
+        "posterior_sticky_confirm3_safe_utility": true,
+        "robust_sac": false,
+        "true_mode_safe_utility": true
+      },
+      "arms": {
+        "dynamic_specialist_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2804.0832471698523,
+            "155517": 2756.200537863374,
+            "155533": 2692.1399374365806
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2750.8079074899356,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.2076426358879391,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_safe_utility": {
+          "adaptive_mode_accuracy": 0.9913333333333334,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2885.3818834871054,
+            "155517": 2526.8011613845824,
+            "155533": 2956.30683722198
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2789.4966273645564,
+          "oracle_recovery": 1.0817986243710835,
+          "relative_gain": 0.22462751786435828,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3_safe_utility": {
+          "adaptive_mode_accuracy": 0.9834536427007313,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2660.2906908869745,
+            "155517": 2730.3019753828644,
+            "155533": 2668.170702877641
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0048,
+          "mean": 2686.2544563824936,
+          "oracle_recovery": 0.8635162001713425,
+          "relative_gain": 0.1793027799355148,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2346.5384953022003,
+            "155517": 2191.2362147569656,
+            "155533": 2295.7234434753655
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 2277.832717844844,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2804.0832471698523,
+            "155517": 2756.200537863374,
+            "155533": 2692.1399374365806
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2750.8079074899356,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.2076426358879391,
+          "terminated_rate": 0.0
+        }
+      },
+      "calibration_origin": {
+        "kind": "v8_in_task_stationary_calibration"
+      },
+      "headroom_available": true,
+      "safe_oracle_headroom_gain": 0.2076426358879391,
+      "utility_map": {
+        "0": "specialist_0",
+        "1": "specialist_1",
+        "2": "robust_sac",
+        "3": "specialist_3"
+      }
+    },
+    "5051": {
+      "arm_pass": {
+        "dynamic_specialist_oracle": true,
+        "posterior_map_safe_utility": true,
+        "posterior_sticky_confirm3_safe_utility": true,
+        "robust_sac": false,
+        "true_mode_safe_utility": true
+      },
+      "arms": {
+        "dynamic_specialist_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 3995.7455172806976,
+            "155517": 3917.474862584472,
+            "155533": 3933.232038795948
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 3948.8174728870395,
+          "oracle_recovery": 1.0,
+          "relative_gain": 1.1667050982852685,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_safe_utility": {
+          "adaptive_mode_accuracy": 0.9786,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 3582.963130825758,
+            "155517": 3521.093320310116,
+            "155533": 3810.4658552989363
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 3638.1741021449366,
+          "oracle_recovery": 0.8539055425632206,
+          "relative_gain": 0.9962559499625578,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3_safe_utility": {
+          "adaptive_mode_accuracy": 0.9783125449272322,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 3838.8605534136295,
+            "155517": 3716.1633793383835,
+            "155533": 3687.608675828576
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.004066666666666666,
+          "mean": 3747.544202860196,
+          "oracle_recovery": 0.9053419066666318,
+          "relative_gain": 1.056267018199265,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 1730.9207759916783,
+            "155517": 1866.905677382648,
+            "155533": 1869.6699899747969
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 1822.4988144497077,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 3995.7455172806976,
+            "155517": 3917.474862584472,
+            "155533": 3933.232038795948
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 3948.8174728870395,
+          "oracle_recovery": 1.0,
+          "relative_gain": 1.1667050982852685,
+          "terminated_rate": 0.0
+        }
+      },
+      "calibration_origin": {
+        "kind": "v8_in_task_stationary_calibration"
+      },
+      "headroom_available": true,
+      "safe_oracle_headroom_gain": 1.1667050982852685,
+      "utility_map": {
+        "0": "specialist_0",
+        "1": "specialist_1",
+        "2": "specialist_2",
+        "3": "specialist_3"
+      }
+    },
+    "5077": {
+      "arm_pass": {
+        "dynamic_specialist_oracle": false,
+        "posterior_map_safe_utility": true,
+        "posterior_sticky_confirm3_safe_utility": false,
+        "robust_sac": false,
+        "true_mode_safe_utility": true
+      },
+      "arms": {
+        "dynamic_specialist_oracle": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2148.694425868988,
+            "155517": 2218.722838073969,
+            "155533": 2074.085917726159
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2147.1677272230386,
+          "oracle_recovery": 0.6062272010403772,
+          "relative_gain": 0.14237910319930722,
+          "terminated_rate": 0.0
+        },
+        "posterior_map_safe_utility": {
+          "adaptive_mode_accuracy": 0.9898666666666666,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2085.2438274860383,
+            "155517": 2294.3042764663696,
+            "155533": 2224.649076345563
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2201.399060099324,
+          "oracle_recovery": 0.7290796232604692,
+          "relative_gain": 0.17123234117929406,
+          "terminated_rate": 0.0
+        },
+        "posterior_sticky_confirm3_safe_utility": {
+          "adaptive_mode_accuracy": 0.9822606557324368,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2223.2486009955405,
+            "155517": 2177.782725764811,
+            "155533": 2128.1322552025317
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.004066666666666667,
+          "mean": 2176.3878606542944,
+          "oracle_recovery": 0.6724207459752433,
+          "relative_gain": 0.15792538279421037,
+          "terminated_rate": 0.0
+        },
+        "robust_sac": {
+          "adaptive_mode_accuracy": null,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 1696.571034641564,
+            "155517": 1977.9840938441455,
+            "155533": 1964.1187264800071
+          },
+          "event_wins": 0,
+          "fallback_action_fraction": 1.0,
+          "mean": 1879.5579516552389,
+          "oracle_recovery": 0.0,
+          "relative_gain": 0.0,
+          "terminated_rate": 0.0
+        },
+        "true_mode_safe_utility": {
+          "adaptive_mode_accuracy": 1.0,
+          "event_no_regression": 3,
+          "event_returns": {
+            "155501": 2204.620319917798,
+            "155517": 2335.660496297479,
+            "155533": 2422.69740075469
+          },
+          "event_wins": 3,
+          "fallback_action_fraction": 0.0,
+          "mean": 2320.992738989989,
+          "oracle_recovery": 1.0,
+          "relative_gain": 0.23486096129464865,
+          "terminated_rate": 0.0
+        }
+      },
+      "calibration_origin": {
+        "audit_manifest": {
+          "sha256": "81b0d78c8af03283d2361a63b900b440c5a0cd0a0118edab6b79acd08ea522cf",
+          "size": 1368
+        },
+        "kind": "frozen_v7_capacity_audit"
+      },
+      "headroom_available": true,
+      "safe_oracle_headroom_gain": 0.23486096129464865,
+      "utility_map": {
+        "0": "specialist_0",
+        "1": "robust_sac",
+        "2": "specialist_2",
+        "3": "specialist_3"
+      }
+    }
+  },
+  "source_seed_primary_pass": {
+    "5003": true,
+    "5021": true,
+    "5039": true,
+    "5051": true,
+    "5077": false
+  },
+  "status": "complete",
+  "training_seeds": [
+    5003,
+    5021,
+    5039,
+    5051,
+    5077
+  ]
+}

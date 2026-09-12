@@ -25,6 +25,42 @@ def _to_jax_tree(pytree):
     return jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, pytree)
 
 
+def _restore_tree_like(template, saved, name: str, *,
+                       allow_fallback: bool = True):
+    """Restore saved leaves using the current runtime's pytree metadata.
+
+    Nearby Flax NNX releases encode different metadata in ``State`` and
+    ``VariableState`` treedefs. Optax only needs the moment values, so when the
+    ordered leaf shapes agree we rebuild the saved values with the freshly
+    initialized optimizer treedef. This preserves momentum across those
+    metadata-only changes.
+    """
+    candidate = _to_jax_tree(saved)
+    template_leaves, template_def = jax.tree.flatten(template)
+    saved_leaves, saved_def = jax.tree.flatten(candidate)
+    if template_def == saved_def:
+        return candidate
+    same_shapes = (
+        len(template_leaves) == len(saved_leaves)
+        and all(
+            getattr(current, "shape", None) == getattr(old, "shape", None)
+            for current, old in zip(template_leaves, saved_leaves)
+        )
+    )
+    if same_shapes:
+        print(
+            f"  Checkpoint compatibility: remapped {name} leaves to the "
+            "current Flax pytree metadata")
+        return jax.tree.unflatten(template_def, saved_leaves)
+    if not allow_fallback:
+        raise ValueError(
+            f"Checkpoint {name} does not match the current architecture")
+    print(
+        f"  Checkpoint compatibility: {name} structure changed; "
+        "using the current initialization")
+    return template
+
+
 def _patch_flax_variablestate_unpickle():
     """Allow Flax NNX to read checkpoints saved by nearby NNX builds."""
     try:
@@ -223,6 +259,9 @@ def save_checkpoint(ckpt_dir: str, agent, replay_buffer, logger,
     if hasattr(agent, 'context_net'):
         params['context_net'] = _to_numpy_tree(nnx.state(agent.context_net, nnx.Param))
         params['context_opt_state'] = _to_numpy_tree(agent.context_opt_state)
+        signature_fn = getattr(agent, 'context_checkpoint_signature', None)
+        if callable(signature_fn):
+            params['context_signature'] = signature_fn()
 
     # Belief tracker state (BAPR variants)
     if hasattr(agent, 'belief_tracker'):
@@ -289,6 +328,9 @@ def save_checkpoint(ckpt_dir: str, agent, replay_buffer, logger,
         params['pseudo_label'] = agent._current_pseudo_label
         params['last_lambda_was_high'] = agent._last_lambda_was_high
 
+    if hasattr(agent, 'checkpoint_state'):
+        params['custom_agent_state'] = agent.checkpoint_state()
+
     # Save params
     with open(os.path.join(ckpt_dir, 'params.pkl'), 'wb') as f:
         pickle.dump(params, f)
@@ -344,21 +386,57 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str,
         params = pickle.load(f)
 
     # Restore networks
-    nnx.update(agent.policy, _to_jax_tree(params['policy']))
-    nnx.update(agent.critic, _to_jax_tree(params['critic']))
-    nnx.update(agent.target_critic, _to_jax_tree(params['target_critic']))
+    nnx.update(agent.policy, _restore_tree_like(
+        nnx.state(agent.policy, nnx.Param), params['policy'],
+        "policy parameters", allow_fallback=False))
+    nnx.update(agent.critic, _restore_tree_like(
+        nnx.state(agent.critic, nnx.Param), params['critic'],
+        "critic parameters", allow_fallback=False))
+    nnx.update(agent.target_critic, _restore_tree_like(
+        nnx.state(agent.target_critic, nnx.Param), params['target_critic'],
+        "target critic parameters", allow_fallback=False))
     agent.log_alpha = jnp.array(params['log_alpha'])
     agent.update_count = params['update_count']
 
     # Restore optimizer states
-    agent.policy_opt_state = _to_jax_tree(params['policy_opt_state'])
-    agent.critic_opt_state = _to_jax_tree(params['critic_opt_state'])
-    agent.alpha_opt_state = _to_jax_tree(params['alpha_opt_state'])
+    agent.policy_opt_state = _restore_tree_like(
+        agent.policy_opt_state, params['policy_opt_state'],
+        "policy optimizer")
+    agent.critic_opt_state = _restore_tree_like(
+        agent.critic_opt_state, params['critic_opt_state'],
+        "critic optimizer")
+    agent.alpha_opt_state = _restore_tree_like(
+        agent.alpha_opt_state, params['alpha_opt_state'],
+        "alpha optimizer")
+
+    reset_context_requested = bool(getattr(
+        getattr(agent, "config", None),
+        "bapr_v3_reset_context_on_resume", False))
+    signature_fn = getattr(agent, 'context_checkpoint_signature', None)
+    current_context_signature = (
+        signature_fn() if callable(signature_fn) else None)
+    saved_context_signature = params.get('context_signature')
+    reset_context = bool(
+        reset_context_requested
+        and saved_context_signature != current_context_signature)
 
     # Context network
     if hasattr(agent, 'context_net') and 'context_net' in params:
-        nnx.update(agent.context_net, _to_jax_tree(params['context_net']))
-        agent.context_opt_state = _to_jax_tree(params['context_opt_state'])
+        if reset_context:
+            print(
+                "  Checkpoint context reset requested: preserving the "
+                "controller/replay state and using a fresh context model")
+        else:
+            if reset_context_requested:
+                print(
+                    "  Checkpoint context signature matches: preserving "
+                    "the learned context model")
+            nnx.update(agent.context_net, _restore_tree_like(
+                nnx.state(agent.context_net, nnx.Param), params['context_net'],
+                "context parameters", allow_fallback=False))
+            agent.context_opt_state = _restore_tree_like(
+                agent.context_opt_state, params['context_opt_state'],
+                "context optimizer")
 
     # Belief tracker
     if hasattr(agent, 'belief_tracker') and 'belief_state' in params:
@@ -412,7 +490,9 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str,
 
     # EMA policy
     if hasattr(agent, 'ema_policy') and 'ema_policy' in params:
-        nnx.update(agent.ema_policy, _to_jax_tree(params['ema_policy']))
+        nnx.update(agent.ema_policy, _restore_tree_like(
+            nnx.state(agent.ema_policy, nnx.Param), params['ema_policy'],
+            "EMA policy parameters", allow_fallback=False))
 
     # Performance gating
     if hasattr(agent, '_eval_history') and 'eval_history' in params:
@@ -425,6 +505,11 @@ def load_checkpoint(ckpt_dir: str, agent, replay_buffer, logger, algo: str,
     if hasattr(agent, '_current_pseudo_label') and 'pseudo_label' in params:
         agent._current_pseudo_label = params['pseudo_label']
         agent._last_lambda_was_high = params['last_lambda_was_high']
+
+    if hasattr(agent, 'load_checkpoint_state') and 'custom_agent_state' in params:
+        agent.load_checkpoint_state(params['custom_agent_state'])
+    if reset_context and hasattr(agent, 'reset_adaptation'):
+        agent.reset_adaptation()
 
     # --- Load replay buffer ---
     if load_replay_buffer:

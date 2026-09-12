@@ -1,0 +1,39 @@
+{
+  "amendment_version": "v19-amendment1-bundle-signature-lookup",
+  "created_before_replacement_audits": true,
+  "original_registration": {
+    "sha256": "886cf66576175ade7bf50f4e8f9bb6d539f0cbbe5174012aa4d5eb2f5a2c3bd7",
+    "size": 7078
+  },
+  "schema": "bapr.specialist-stability-amendment-registration.v19a1",
+  "scope": {
+    "change": "validate the staged specialist protocol signature at its bundle path instead of the GPU-only training-run path",
+    "decision_gate_changed": false,
+    "evaluation_changed": false,
+    "event_streams_changed": false,
+    "training_changed": false
+  },
+  "source_records": {
+    "jax_experiments/analysis/regime_polarity_specialist_stability_v19_amendment1.py": {
+      "sha256": "37aa32416451415030e28eb6e0e4452ad7218600275cea6b945c269006f20390",
+      "size": 3105
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_audit_v19_amendment1.py": {
+      "sha256": "b155aa999d5b56641295e190ebab53366499b98b53f3a31d473a43b93c5697b1",
+      "size": 3227
+    },
+    "jax_experiments/deployments/regime_polarity_specialist_stability_v19/registration.json": {
+      "sha256": "886cf66576175ade7bf50f4e8f9bb6d539f0cbbe5174012aa4d5eb2f5a2c3bd7",
+      "size": 7078
+    },
+    "reports/regime_polarity_specialist_stability_v19_amendment1_2026-09-08.md": {
+      "sha256": "8ae55efad0b90915538623ae3d659fba5b6a44d0c18277aa2e69507b1200de12",
+      "size": 838
+    },
+    "scripts/resubmit_regime_polarity_specialist_stability_audits_v19_amendment1.py": {
+      "sha256": "99c411819044316103388582903a67201583df19faf7c3965ad2d334786ba78f",
+      "size": 5401
+    }
+  },
+  "status": "registered"
+}

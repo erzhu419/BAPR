@@ -1,0 +1,1642 @@
+{
+  "calibration": {
+    "congestion_severe": {
+      "robust": -466967.2069566244,
+      "specialist:congestion_severe": -512243.9532231031,
+      "specialist:demand_surge": -541793.6484486912,
+      "specialist:extreme_weather": -582215.9192071074,
+      "specialist:normal": -557719.0336113377,
+      "specialist:partial_closure": -593518.8923804256
+    },
+    "demand_surge": {
+      "robust": -416518.70537230105,
+      "specialist:congestion_severe": -475373.3211097694,
+      "specialist:demand_surge": -470822.007496528,
+      "specialist:extreme_weather": -544102.7641945725,
+      "specialist:normal": -497874.8121137541,
+      "specialist:partial_closure": -510964.9327240237
+    },
+    "extreme_weather": {
+      "robust": -1060871.58859864,
+      "specialist:congestion_severe": -1119045.7350297752,
+      "specialist:demand_surge": -1088148.7147860525,
+      "specialist:extreme_weather": -1087210.951495192,
+      "specialist:normal": -1125712.3008130826,
+      "specialist:partial_closure": -1163141.383754119
+    },
+    "normal": {
+      "robust": -407927.79502686835,
+      "specialist:congestion_severe": -452778.553549059,
+      "specialist:demand_surge": -452273.7496925659,
+      "specialist:extreme_weather": -526641.8894704367,
+      "specialist:normal": -447306.4920526919,
+      "specialist:partial_closure": -522260.4924977823
+    },
+    "partial_closure": {
+      "robust": -400074.90196451574,
+      "specialist:congestion_severe": -453163.19093008025,
+      "specialist:demand_surge": -462226.33992743806,
+      "specialist:extreme_weather": -516782.59254966263,
+      "specialist:normal": -490670.51599424414,
+      "specialist:partial_closure": -489316.6636582463
+    }
+  },
+  "passes_policy_seed_gate": false,
+  "policy_selection": {
+    "congestion_severe": "robust",
+    "demand_surge": "robust",
+    "extreme_weather": "robust",
+    "normal": "robust",
+    "partial_closure": "robust"
+  },
+  "protocol_version": "bus-policy-bank-headroom-v1-development",
+  "schema": "bapr.bus-policy-bank-headroom-audit.v1",
+  "stationary_holdout": {
+    "congestion_severe": {
+      "controller_matrix": {
+        "robust": {
+          "reward_mean": -467862.0657842474,
+          "rewards": [
+            -461565.45261573535,
+            -466930.65366302384,
+            -475090.0910739832
+          ]
+        },
+        "specialist:congestion_severe": {
+          "reward_mean": -503024.89999630745,
+          "rewards": [
+            -508375.25121857703,
+            -497051.1571176755,
+            -503648.29165266984
+          ]
+        },
+        "specialist:demand_surge": {
+          "reward_mean": -539356.281006048,
+          "rewards": [
+            -543751.5226768864,
+            -540429.7483811299,
+            -533887.5719601274
+          ]
+        },
+        "specialist:extreme_weather": {
+          "reward_mean": -570042.9638636189,
+          "rewards": [
+            -575082.3789560384,
+            -578280.4469515404,
+            -556766.065683278
+          ]
+        },
+        "specialist:normal": {
+          "reward_mean": -555599.105138117,
+          "rewards": [
+            -562839.6833960341,
+            -553758.6004564171,
+            -550199.0315618999
+          ]
+        },
+        "specialist:partial_closure": {
+          "reward_mean": -589943.0706716211,
+          "rewards": [
+            -594401.7211590986,
+            -598607.6694302526,
+            -576819.821425512
+          ]
+        }
+      },
+      "oracle_reward_mean": -467862.0657842474,
+      "passes_gain": false,
+      "relative_gain": 0.0,
+      "robust_reward_mean": -467862.0657842474,
+      "selected_controller": "robust"
+    },
+    "demand_surge": {
+      "controller_matrix": {
+        "robust": {
+          "reward_mean": -427046.36691061273,
+          "rewards": [
+            -426057.55580428115,
+            -432059.3302365666,
+            -423022.2146909906
+          ]
+        },
+        "specialist:congestion_severe": {
+          "reward_mean": -487422.35338488687,
+          "rewards": [
+            -485313.82431058865,
+            -471555.49532162194,
+            -505397.74052244995
+          ]
+        },
+        "specialist:demand_surge": {
+          "reward_mean": -479612.22446759866,
+          "rewards": [
+            -475640.8625744045,
+            -460825.8048179475,
+            -502370.0060104439
+          ]
+        },
+        "specialist:extreme_weather": {
+          "reward_mean": -556235.7667624531,
+          "rewards": [
+            -536181.5485349895,
+            -556242.0017541143,
+            -576283.7499982556
+          ]
+        },
+        "specialist:normal": {
+          "reward_mean": -518843.7723824563,
+          "rewards": [
+            -520112.16003375576,
+            -505101.43164715276,
+            -531317.7254664602
+          ]
+        },
+        "specialist:partial_closure": {
+          "reward_mean": -518101.33190284664,
+          "rewards": [
+            -509414.32163253677,
+            -508803.35827631364,
+            -536086.3157996894
+          ]
+        }
+      },
+      "oracle_reward_mean": -427046.36691061273,
+      "passes_gain": false,
+      "relative_gain": 0.0,
+      "robust_reward_mean": -427046.36691061273,
+      "selected_controller": "robust"
+    },
+    "extreme_weather": {
+      "controller_matrix": {
+        "robust": {
+          "reward_mean": -1028523.170848356,
+          "rewards": [
+            -1079575.0489189432,
+            -1017234.3093254099,
+            -988760.154300715
+          ]
+        },
+        "specialist:congestion_severe": {
+          "reward_mean": -1071880.932626057,
+          "rewards": [
+            -1104144.2445222458,
+            -1075486.4303435897,
+            -1036012.1230123354
+          ]
+        },
+        "specialist:demand_surge": {
+          "reward_mean": -1045056.1567083132,
+          "rewards": [
+            -1091715.0449789725,
+            -1036310.0362711345,
+            -1007143.3888748324
+          ]
+        },
+        "specialist:extreme_weather": {
+          "reward_mean": -1058059.0659200433,
+          "rewards": [
+            -1131369.8359766558,
+            -1031307.2545573681,
+            -1011500.1072261058
+          ]
+        },
+        "specialist:normal": {
+          "reward_mean": -1070338.4607657862,
+          "rewards": [
+            -1138272.6232234992,
+            -1051413.9733790325,
+            -1021328.7856948272
+          ]
+        },
+        "specialist:partial_closure": {
+          "reward_mean": -1123290.2803415388,
+          "rewards": [
+            -1175597.3152155143,
+            -1092974.5179856727,
+            -1101299.0078234298
+          ]
+        }
+      },
+      "oracle_reward_mean": -1028523.170848356,
+      "passes_gain": false,
+      "relative_gain": 0.0,
+      "robust_reward_mean": -1028523.170848356,
+      "selected_controller": "robust"
+    },
+    "normal": {
+      "controller_matrix": {
+        "robust": {
+          "reward_mean": -418805.87065713113,
+          "rewards": [
+            -411851.1767458951,
+            -419550.7227926809,
+            -425015.7124328175
+          ]
+        },
+        "specialist:congestion_severe": {
+          "reward_mean": -453035.04599014035,
+          "rewards": [
+            -455520.4293005788,
+            -442909.9847125991,
+            -460674.7239572431
+          ]
+        },
+        "specialist:demand_surge": {
+          "reward_mean": -470416.45841538376,
+          "rewards": [
+            -468976.8968974886,
+            -456097.09337208804,
+            -486175.38497657457
+          ]
+        },
+        "specialist:extreme_weather": {
+          "reward_mean": -541265.7534380183,
+          "rewards": [
+            -535193.1499331073,
+            -538038.6401048846,
+            -550565.4702760628
+          ]
+        },
+        "specialist:normal": {
+          "reward_mean": -474169.82983958814,
+          "rewards": [
+            -479198.97794336913,
+            -456643.26822722045,
+            -486667.24334817496
+          ]
+        },
+        "specialist:partial_closure": {
+          "reward_mean": -530838.3158554524,
+          "rewards": [
+            -528645.7765608967,
+            -518895.74207043747,
+            -544973.428935023
+          ]
+        }
+      },
+      "oracle_reward_mean": -418805.87065713113,
+      "passes_gain": false,
+      "relative_gain": 0.0,
+      "robust_reward_mean": -418805.87065713113,
+      "selected_controller": "robust"
+    },
+    "partial_closure": {
+      "controller_matrix": {
+        "robust": {
+          "reward_mean": -408758.146116705,
+          "rewards": [
+            -405441.2983052355,
+            -415651.0676842372,
+            -405182.07236064214
+          ]
+        },
+        "specialist:congestion_severe": {
+          "reward_mean": -445699.31971758866,
+          "rewards": [
+            -446756.9590944026,
+            -439776.7619861995,
+            -450564.23807216395
+          ]
+        },
+        "specialist:demand_surge": {
+          "reward_mean": -464951.6874734496,
+          "rewards": [
+            -456121.4374672039,
+            -461338.01296978135,
+            -477395.6119833636
+          ]
+        },
+        "specialist:extreme_weather": {
+          "reward_mean": -536043.729108077,
+          "rewards": [
+            -520604.2969407313,
+            -534990.0253896561,
+            -552536.8649938436
+          ]
+        },
+        "specialist:normal": {
+          "reward_mean": -508066.1440882019,
+          "rewards": [
+            -498436.5555643173,
+            -502919.13926000556,
+            -522842.7374402829
+          ]
+        },
+        "specialist:partial_closure": {
+          "reward_mean": -495571.72609169944,
+          "rewards": [
+            -485857.27740349254,
+            -494455.5959818347,
+            -506402.3048897712
+          ]
+        }
+      },
+      "oracle_reward_mean": -408758.146116705,
+      "passes_gain": false,
+      "relative_gain": 0.0,
+      "robust_reward_mean": -408758.146116705,
+      "selected_controller": "robust"
+    }
+  },
+  "stationary_summary": {
+    "mode_wins_at_threshold": 0,
+    "oracle_reward_mean": -550199.1240634104,
+    "relative_gain": 0.0,
+    "required_mode_wins": 4,
+    "robust_reward_mean": -550199.1240634104
+  },
+  "switching_holdout": {
+    "dynamic": {
+      "reward_mean": -545886.4225053316,
+      "rewards": [
+        -569783.6851087773,
+        -488694.8182654183,
+        -579180.7641417991
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -569783.6851087773,
+          "selector": "dynamic",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -488694.8182654183,
+          "selector": "dynamic",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -579180.7641417991,
+          "selector": "dynamic",
+          "true_mode": null
+        }
+      ]
+    },
+    "robust": {
+      "reward_mean": -545886.4225053316,
+      "rewards": [
+        -569783.6851087773,
+        -488694.8182654183,
+        -579180.7641417991
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -569783.6851087773,
+          "selector": "robust",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -488694.8182654183,
+          "selector": "robust",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -579180.7641417991,
+          "selector": "robust",
+          "true_mode": null
+        }
+      ]
+    },
+    "specialist:congestion_severe": {
+      "reward_mean": -602237.6316403974,
+      "rewards": [
+        -631269.0905790314,
+        -518468.69951018447,
+        -656975.1048319762
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -631269.0905790314,
+          "selector": "specialist:congestion_severe",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -518468.69951018447,
+          "selector": "specialist:congestion_severe",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -656975.1048319762,
+          "selector": "specialist:congestion_severe",
+          "true_mode": null
+        }
+      ]
+    },
+    "specialist:demand_surge": {
+      "reward_mean": -613453.148829196,
+      "rewards": [
+        -651407.6539957864,
+        -538064.5935761129,
+        -650887.1989156886
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -651407.6539957864,
+          "selector": "specialist:demand_surge",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -538064.5935761129,
+          "selector": "specialist:demand_surge",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -650887.1989156886,
+          "selector": "specialist:demand_surge",
+          "true_mode": null
+        }
+      ]
+    },
+    "specialist:extreme_weather": {
+      "reward_mean": -649164.4671086798,
+      "rewards": [
+        -668493.1020398242,
+        -593972.3584373465,
+        -685027.9408488685
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -668493.1020398242,
+          "selector": "specialist:extreme_weather",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -593972.3584373465,
+          "selector": "specialist:extreme_weather",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -685027.9408488685,
+          "selector": "specialist:extreme_weather",
+          "true_mode": null
+        }
+      ]
+    },
+    "specialist:normal": {
+      "reward_mean": -640104.5509388762,
+      "rewards": [
+        -666902.5219462046,
+        -567344.9723624019,
+        -686066.158508022
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -666902.5219462046,
+          "selector": "specialist:normal",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -567344.9723624019,
+          "selector": "specialist:normal",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -686066.158508022,
+          "selector": "specialist:normal",
+          "true_mode": null
+        }
+      ]
+    },
+    "specialist:partial_closure": {
+      "reward_mean": -655799.7373117333,
+      "rewards": [
+        -687866.921448331,
+        -583060.0159697827,
+        -696472.274517086
+      ],
+      "rows": [
+        {
+          "event_seed": 188201,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "partial_closure",
+              4222
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              12967
+            ],
+            [
+              "partial_closure",
+              17325
+            ],
+            [
+              "extreme_weather",
+              20341
+            ],
+            [
+              "normal",
+              26272
+            ],
+            [
+              "partial_closure",
+              30472
+            ],
+            [
+              "congestion_severe",
+              37321
+            ],
+            [
+              "normal",
+              39635
+            ],
+            [
+              "congestion_severe",
+              42662
+            ],
+            [
+              "partial_closure",
+              47083
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -687866.921448331,
+          "selector": "specialist:partial_closure",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188217,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "normal",
+              0
+            ],
+            [
+              "demand_surge",
+              6189
+            ],
+            [
+              "partial_closure",
+              9376
+            ],
+            [
+              "normal",
+              11572
+            ],
+            [
+              "partial_closure",
+              17423
+            ],
+            [
+              "demand_surge",
+              23959
+            ],
+            [
+              "extreme_weather",
+              30656
+            ],
+            [
+              "congestion_severe",
+              32526
+            ],
+            [
+              "extreme_weather",
+              34338
+            ],
+            [
+              "normal",
+              37595
+            ],
+            [
+              "demand_surge",
+              42552
+            ],
+            [
+              "extreme_weather",
+              49236
+            ]
+          ],
+          "mode_switch_count": 11,
+          "phase": "switching_holdout",
+          "reward": -583060.0159697827,
+          "selector": "specialist:partial_closure",
+          "true_mode": null
+        },
+        {
+          "event_seed": 188233,
+          "kind": "switching",
+          "mode_history": [
+            [
+              "extreme_weather",
+              0
+            ],
+            [
+              "normal",
+              5426
+            ],
+            [
+              "extreme_weather",
+              10221
+            ],
+            [
+              "demand_surge",
+              14916
+            ],
+            [
+              "partial_closure",
+              21928
+            ],
+            [
+              "demand_surge",
+              25993
+            ],
+            [
+              "extreme_weather",
+              32528
+            ],
+            [
+              "partial_closure",
+              37995
+            ],
+            [
+              "congestion_severe",
+              43148
+            ],
+            [
+              "normal",
+              45968
+            ],
+            [
+              "partial_closure",
+              48452
+            ]
+          ],
+          "mode_switch_count": 10,
+          "phase": "switching_holdout",
+          "reward": -696472.274517086,
+          "selector": "specialist:partial_closure",
+          "true_mode": null
+        }
+      ]
+    }
+  },
+  "switching_summary": {
+    "best_fixed_controller": "robust",
+    "best_fixed_reward_mean": -545886.4225053316,
+    "dynamic_beats_every_fixed": false,
+    "dynamic_oracle_reward_mean": -545886.4225053316,
+    "event_wins": 0,
+    "relative_gain": 0.0,
+    "required_event_wins": 3,
+    "robust_reward_mean": -545886.4225053316
+  },
+  "training_seed": 86003
+}

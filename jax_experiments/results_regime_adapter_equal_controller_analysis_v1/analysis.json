@@ -1,0 +1,323 @@
+{
+  "budget": {
+    "adapter_bank_aggregate_total_steps": 16800000,
+    "per_controller_post_fork_steps": 2800000,
+    "robust_total_steps": 8400000,
+    "shared_pretrain_steps": 5600000
+  },
+  "compute_matched": false,
+  "decision": "reject_independent_adapter_optimization",
+  "decision_gate": {
+    "beats_best_fixed_stationary_with_positive_ci": false,
+    "beats_best_fixed_switching_with_positive_ci": false,
+    "identity_beats_robust_all_four_seeds": false,
+    "pass": false,
+    "stationary_gain_at_least_5pct": false,
+    "stationary_gain_ci_above_zero": false,
+    "switching_gain_at_least_10pct": false,
+    "switching_gain_ci_above_zero": false,
+    "termination_noninferior": true
+  },
+  "diagnostic_only": true,
+  "diagonal_optimal_modes": 12,
+  "event_seeds": [
+    77100,
+    77200,
+    77300,
+    77400,
+    77500
+  ],
+  "inferential_scope": "Five event streams are averaged within each independently trained policy seed; n=4 training seeds is the inferential unit.",
+  "interpretation": "This deliberately spends four times the robust post-fork data. A pass only establishes controller specialization headroom and authorizes a compute-efficient shared-backbone redesign; it is not a publishable BAPR comparison.",
+  "paired_results": {
+    "identity_minus_best_fixed_stationary": {
+      "ci95_high": 307.1136751925889,
+      "ci95_low": -49.70178134863687,
+      "mean": 128.70594692197602,
+      "n_training_seeds": 4,
+      "relative_gain": 0.06338568012952107,
+      "wins": 3
+    },
+    "identity_minus_best_fixed_switching": {
+      "ci95_high": 274.15673674705533,
+      "ci95_low": -150.80703291348303,
+      "mean": 61.67485191678617,
+      "n_training_seeds": 4,
+      "relative_gain": 0.03131671787871487,
+      "wins": 2
+    },
+    "identity_minus_frozen_base_stationary": {
+      "ci95_high": 635.6268563607073,
+      "ci95_low": 111.29088978901285,
+      "mean": 373.4588730748601,
+      "n_training_seeds": 4,
+      "relative_gain": 0.2091306838128208,
+      "wins": 4
+    },
+    "identity_minus_frozen_base_switching": {
+      "ci95_high": 507.21608751463236,
+      "ci95_low": 71.34867543415638,
+      "mean": 289.28238147439436,
+      "n_training_seeds": 4,
+      "relative_gain": 0.16608404067493557,
+      "wins": 4
+    },
+    "identity_minus_robust_stationary": {
+      "ci95_high": 282.8576436201287,
+      "ci95_low": -542.687279512807,
+      "mean": -129.91481794633916,
+      "n_training_seeds": 4,
+      "relative_gain": -0.05675263402937419,
+      "wins": 1
+    },
+    "identity_minus_robust_switching": {
+      "ci95_high": 281.7060110013781,
+      "ci95_low": -615.7952310688644,
+      "mean": -167.04461003374314,
+      "n_training_seeds": 4,
+      "relative_gain": -0.07599465004988572,
+      "wins": 1
+    },
+    "robust_minus_frozen_base_stationary": {
+      "ci95_high": 882.9621931602998,
+      "ci95_low": 123.78518888209874,
+      "mean": 503.37369102119925,
+      "n_training_seeds": 4,
+      "relative_gain": 0.2818807954672571,
+      "wins": 4
+    },
+    "robust_minus_frozen_base_switching": {
+      "ci95_high": 878.8444757719254,
+      "ci95_low": 33.80950724434956,
+      "mean": 456.3269915081375,
+      "n_training_seeds": 4,
+      "relative_gain": 0.2619884081167828,
+      "wins": 4
+    },
+    "termination_delta": {
+      "ci95_high": 0.0,
+      "ci95_low": 0.0,
+      "mean": 0.0,
+      "n_training_seeds": 4
+    }
+  },
+  "protocol_version": "v1",
+  "residual_delta": 0.5,
+  "schema": "bapr.regime-adapter-equal-controller-analysis.v1",
+  "seed_rows": [
+    {
+      "best_fixed_stationary": 2412.8696573731677,
+      "best_fixed_switching": 2319.7479418545963,
+      "identity_minus_best_fixed_stationary": 138.6119927723703,
+      "identity_minus_best_fixed_switching": 92.58392340004457,
+      "identity_stationary": 2551.481650145538,
+      "identity_switching": 2412.331865254641,
+      "identity_termination": 0.0,
+      "robust_stationary": 2295.1820788913965,
+      "robust_switching": 2163.818022941649,
+      "robust_termination": 0.0,
+      "stationary_relative_gain": 0.11166851362744065,
+      "switching_relative_gain": 0.11484969608264216,
+      "training_seed": 16
+    },
+    {
+      "best_fixed_stationary": 1638.9748433175682,
+      "best_fixed_switching": 1641.5509258425234,
+      "identity_minus_best_fixed_stationary": -30.25217461649322,
+      "identity_minus_best_fixed_switching": -48.32845195308323,
+      "identity_stationary": 1608.722668701075,
+      "identity_switching": 1593.2224738894402,
+      "identity_termination": 0.0,
+      "robust_stationary": 1993.3655499723554,
+      "robust_switching": 1932.256258174181,
+      "robust_termination": 0.0,
+      "stationary_relative_gain": -0.19296153747445607,
+      "switching_relative_gain": -0.1754600523872021,
+      "training_seed": 24
+    },
+    {
+      "best_fixed_stationary": 1805.6916903569922,
+      "best_fixed_switching": 1639.0989567581564,
+      "identity_minus_best_fixed_stationary": 284.0849728840585,
+      "identity_minus_best_fixed_switching": 265.68838152699163,
+      "identity_stationary": 2089.7766632410508,
+      "identity_switching": 1904.787338285148,
+      "identity_termination": 0.0,
+      "robust_stationary": 2431.2750733204184,
+      "robust_switching": 2395.545186968595,
+      "robust_termination": 0.0,
+      "stationary_relative_gain": -0.14046062242269428,
+      "switching_relative_gain": -0.2048626973738987,
+      "training_seed": 32
+    },
+    {
+      "best_fixed_stationary": 2264.547324281335,
+      "best_fixed_switching": 2277.1648442310097,
+      "identity_minus_best_fixed_stationary": 122.3789966479685,
+      "identity_minus_best_fixed_switching": -63.2444453068083,
+      "identity_stationary": 2386.9263209293035,
+      "identity_switching": 2213.9203989242014,
+      "identity_termination": 0.0,
+      "robust_stationary": 2436.7438726181535,
+      "robust_switching": 2300.8210484039782,
+      "robust_termination": 0.0,
+      "stationary_relative_gain": -0.020444311873994238,
+      "switching_relative_gain": -0.03776940824670289,
+      "training_seed": 40
+    }
+  ],
+  "specialization_rows": [
+    {
+      "diagonal_minus_best_by_mode": [
+        0.0,
+        -78.28069090634608,
+        0.0,
+        0.0
+      ],
+      "diagonal_optimal_modes": 3,
+      "fixed_controller_matrix": [
+        [
+          2242.761293141842,
+          2034.5967215695975,
+          2212.458990164697,
+          2034.2280037170647
+        ],
+        [
+          1722.2572635304928,
+          2585.1436757336555,
+          2168.221833615601,
+          2663.4243666400016
+        ],
+        [
+          2553.18546948202,
+          2446.055536690056,
+          2987.0678449761867,
+          2562.872472405136
+        ],
+        [
+          1579.5288316428662,
+          2138.5274495220183,
+          1763.6193509995937,
+          2390.9537867304684
+        ]
+      ],
+      "training_seed": 16
+    },
+    {
+      "diagonal_minus_best_by_mode": [
+        0.0,
+        -320.8418144793809,
+        0.0,
+        -44.359119747429986
+      ],
+      "diagonal_optimal_modes": 2,
+      "fixed_controller_matrix": [
+        [
+          1378.0093921971322,
+          1088.7055056340992,
+          1133.8171564362942,
+          1138.1303281430155
+        ],
+        [
+          1939.576972529292,
+          1733.1377747391161,
+          2053.979589218497,
+          1735.4453842229395
+        ],
+        [
+          1204.1765050943195,
+          963.5024425189197,
+          1469.9882601520417,
+          1103.42808738105
+        ],
+        [
+          1843.4333499574664,
+          1578.3254680480065,
+          1898.1143674634397,
+          1853.7552477160098
+        ]
+      ],
+      "training_seed": 24
+    },
+    {
+      "diagonal_minus_best_by_mode": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diagonal_optimal_modes": 4,
+      "fixed_controller_matrix": [
+        [
+          1385.5363151045142,
+          782.4029441675171,
+          1136.9905757787078,
+          1030.1234731965512
+        ],
+        [
+          1536.9182229048013,
+          2486.1494850057366,
+          1565.3422877000273,
+          2083.958892003149
+        ],
+        [
+          1395.433645865917,
+          1186.5962923254071,
+          1579.4315825116635,
+          1200.6951258859783
+        ],
+        [
+          1956.0398398964105,
+          2663.984196605682,
+          1658.4144785006345,
+          2907.9892703422906
+        ]
+      ],
+      "training_seed": 32
+    },
+    {
+      "diagonal_minus_best_by_mode": [
+        0.0,
+        -333.7751257170735,
+        0.0,
+        0.0
+      ],
+      "diagonal_optimal_modes": 3,
+      "fixed_controller_matrix": [
+        [
+          2317.527376482785,
+          1875.2490052816272,
+          1949.2485725885629,
+          1875.0195031660794
+        ],
+        [
+          2255.231959474385,
+          2185.818154422194,
+          2129.2363239502906,
+          2519.5932801392673
+        ],
+        [
+          2176.903522355854,
+          2038.4340046522018,
+          2465.1762903802096,
+          2084.3930513879654
+        ],
+        [
+          2199.9463050530853,
+          1891.763591302633,
+          2226.136544688642,
+          2579.1834624320268
+        ]
+      ],
+      "training_seed": 40
+    }
+  ],
+  "status": "complete",
+  "total_mode_rows": 16,
+  "training_seeds": [
+    16,
+    24,
+    32,
+    40
+  ]
+}

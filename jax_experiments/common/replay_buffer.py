@@ -41,15 +41,22 @@ class ReplayBuffer:
         self.next_obs = jnp.zeros((capacity, obs_dim), dtype=jnp.float32)
         self.done = jnp.zeros((capacity, 1), dtype=jnp.float32)
         self.task_id = jnp.zeros((capacity,), dtype=jnp.int32)
+        # True when this observation starts a fresh simulator trajectory.
+        # Recurrent ESCP uses it to prevent replay histories from crossing
+        # episode or rollout-reset boundaries.
+        self.episode_start = jnp.zeros((capacity,), dtype=jnp.bool_)
         # GPT-5.5 advice #2: per-transition belief storage. When belief_dim==0
         # the array is empty and sampling returns zero-width belief tensors,
         # preserving backward compat with non-belief-conditioned algos.
         self.belief = jnp.zeros((capacity, belief_dim), dtype=jnp.float32)
+        self.next_belief = jnp.zeros(
+            (capacity, belief_dim), dtype=jnp.float32)
 
     # ------------------------------------------------------------------
     # Single-transition push (random exploration phase — infrequent)
     # ------------------------------------------------------------------
-    def push(self, obs, act, rew, next_obs, done, task_id=0):
+    def push(self, obs, act, rew, next_obs, done, task_id=0,
+             belief=None, next_belief=None, episode_start=False):
         """Push one transition. Accepts numpy arrays (auto-converts)."""
         i = self.ptr
         self.obs = self.obs.at[i].set(jnp.asarray(obs, dtype=jnp.float32))
@@ -58,6 +65,15 @@ class ReplayBuffer:
         self.next_obs = self.next_obs.at[i].set(jnp.asarray(next_obs, dtype=jnp.float32))
         self.done = self.done.at[i].set(jnp.float32(done))
         self.task_id = self.task_id.at[i].set(jnp.int32(task_id))
+        self.episode_start = self.episode_start.at[i].set(
+            jnp.bool_(episode_start))
+        if self.belief_dim > 0:
+            if belief is not None:
+                self.belief = self.belief.at[i].set(
+                    jnp.asarray(belief, dtype=jnp.float32))
+            if next_belief is not None:
+                self.next_belief = self.next_belief.at[i].set(
+                    jnp.asarray(next_belief, dtype=jnp.float32))
         self.ptr = (self.ptr + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
 
@@ -65,7 +81,7 @@ class ReplayBuffer:
     # Batch push — accepts JAX arrays directly (zero-copy from rollout)
     # ------------------------------------------------------------------
     def push_batch_jax(self, obs, act, rew, next_obs, done, task_id=None,
-                       belief=None):
+                       belief=None, next_belief=None, episode_start=None):
         """Push a batch of transitions from JAX arrays (no CPU transfer).
 
         Args:
@@ -79,6 +95,8 @@ class ReplayBuffer:
                     that was active at rollout time so off-policy critic
                     updates can use the matching belief, not the current
                     iter's belief.
+            next_belief: context after observing each transition. BAPR-v2
+                    uses this for causal Bellman targets.
         """
         n = obs.shape[0]
         rew = rew.reshape(-1, 1) if rew.ndim == 1 else rew
@@ -87,16 +105,28 @@ class ReplayBuffer:
             task_id = jnp.zeros(n, dtype=jnp.int32)
         else:
             task_id = jnp.asarray(task_id, dtype=jnp.int32)
+        if episode_start is None:
+            episode_start = jnp.concatenate([
+                jnp.ones((1,), dtype=jnp.bool_),
+                done[:-1, 0] > 0.5,
+            ])
+        else:
+            episode_start = jnp.asarray(
+                episode_start, dtype=jnp.bool_).reshape((n,))
 
         if self.belief_dim > 0:
-            if belief is None:
-                belief_batch = jnp.zeros((n, self.belief_dim), dtype=jnp.float32)
-            else:
-                b = jnp.asarray(belief, dtype=jnp.float32)
+            def prepare(value):
+                if value is None:
+                    return jnp.zeros(
+                        (n, self.belief_dim), dtype=jnp.float32)
+                b = jnp.asarray(value, dtype=jnp.float32)
                 if b.ndim == 1:
-                    belief_batch = jnp.broadcast_to(b[None, :], (n, self.belief_dim))
-                else:
-                    belief_batch = b
+                    return jnp.broadcast_to(
+                        b[None, :], (n, self.belief_dim))
+                return b
+
+            belief_batch = prepare(belief)
+            next_belief_batch = prepare(next_belief)
 
         # Compute insertion indices (handles wrap-around)
         idx = (jnp.arange(n) + self.ptr) % self.capacity
@@ -107,11 +137,19 @@ class ReplayBuffer:
         self.next_obs = self.next_obs.at[idx].set(next_obs)
         self.done = self.done.at[idx].set(done)
         self.task_id = self.task_id.at[idx].set(task_id)
+        self.episode_start = self.episode_start.at[idx].set(episode_start)
         if self.belief_dim > 0:
             self.belief = self.belief.at[idx].set(belief_batch)
+            self.next_belief = self.next_belief.at[idx].set(
+                next_belief_batch)
 
         self.ptr = (self.ptr + n) % self.capacity
         self.size = min(self.size + n, self.capacity)
+
+    def clear(self):
+        """Logically clear replay without reallocating device storage."""
+        self.ptr = 0
+        self.size = 0
 
     # ------------------------------------------------------------------
     # Legacy batch push (numpy) — used by checkpoint restore & compat
@@ -152,7 +190,85 @@ class ReplayBuffer:
         }
         if self.belief_dim > 0:
             out["belief"] = self.belief[idx]  # [N, B, belief_dim]
+            out["next_belief"] = self.next_belief[idx]
         return out
+
+    def sample_stacked_sequences(self, n_batches: int, batch_size: int,
+                                 history_length: int, rng_key=None):
+        """Sample reset-aware causal histories for recurrent ESCP.
+
+        Each sampled update ends at one uniformly selected replay transition.
+        Prefix rows before the oldest available transition are zero padded.
+        ``episode_start`` clears the recurrent state, so a window may be
+        gathered efficiently across storage boundaries without leaking history
+        across independent simulator trajectories.
+        """
+        history_length = int(history_length)
+        if history_length <= 0:
+            raise ValueError("history_length must be positive")
+        if self.size <= 0:
+            raise ValueError("cannot sample an empty replay buffer")
+        if rng_key is None:
+            rng_key = jax.random.PRNGKey(np.random.randint(0, 2**31))
+
+        end_logical = jax.random.randint(
+            rng_key, (n_batches, batch_size), 0, self.size)
+        offsets = jnp.arange(
+            1 - history_length, 1, dtype=jnp.int32)
+        logical = end_logical[..., None] + offsets
+        valid = logical >= 0
+        oldest = self.ptr if self.size == self.capacity else 0
+        physical = (jnp.maximum(logical, 0) + oldest) % self.capacity
+
+        observations = self.obs[physical]
+        observations = jnp.where(
+            valid[..., None], observations, jnp.zeros_like(observations))
+        starts = jnp.logical_or(
+            ~valid, self.episode_start[physical])
+
+        previous_logical = logical - 1
+        previous_valid = previous_logical >= 0
+        previous_physical = (
+            jnp.maximum(previous_logical, 0) + oldest) % self.capacity
+        previous_actions = self.act[previous_physical]
+        previous_actions = jnp.where(
+            jnp.logical_and(previous_valid, ~starts)[..., None],
+            previous_actions,
+            jnp.zeros_like(previous_actions),
+        )
+
+        final_physical = (end_logical + oldest) % self.capacity
+        actions = self.act[final_physical]
+        rewards = self.rew[final_physical]
+        next_observation = self.next_obs[final_physical]
+        dones = self.done[final_physical]
+        task_ids = self.task_id[final_physical]
+
+        next_observations = jnp.concatenate([
+            observations[..., 1:, :],
+            next_observation[..., None, :],
+        ], axis=-2)
+        next_previous_actions = jnp.concatenate([
+            previous_actions[..., 1:, :],
+            actions[..., None, :],
+        ], axis=-2)
+        next_starts = jnp.concatenate([
+            starts[..., 1:],
+            jnp.zeros(dones.shape[:-1] + (1,), dtype=jnp.bool_),
+        ], axis=-1)
+
+        return {
+            "obs": observations,
+            "prev_act": previous_actions,
+            "reset_before": starts,
+            "act": actions,
+            "rew": rewards,
+            "next_obs": next_observations,
+            "next_prev_act": next_previous_actions,
+            "next_reset_before": next_starts,
+            "done": dones,
+            "task_id": task_ids,
+        }
 
     def sample_stacked_mixed(self, n_batches: int, batch_size: int,
                              rng_key=None, recent_frac: float = 0.0,
@@ -200,6 +316,7 @@ class ReplayBuffer:
         }
         if self.belief_dim > 0:
             out["belief"] = self.belief[idx]
+            out["next_belief"] = self.next_belief[idx]
         return out
 
     def sample(self, batch_size: int, rng: np.random.Generator = None):
@@ -218,6 +335,7 @@ class ReplayBuffer:
         }
         if self.belief_dim > 0:
             out["belief"] = self.belief[idx]
+            out["next_belief"] = self.next_belief[idx]
         return out
 
     # ------------------------------------------------------------------
@@ -233,11 +351,13 @@ class ReplayBuffer:
             'next_obs': np.array(self.next_obs[:s]),
             'done': np.array(self.done[:s]),
             'task_id': np.array(self.task_id[:s]),
+            'episode_start': np.array(self.episode_start[:s]),
             'ptr': self.ptr,
             'size': self.size,
         }
         if self.belief_dim > 0:
             out['belief'] = np.array(self.belief[:s])
+            out['next_belief'] = np.array(self.next_belief[:s])
         return out
 
     def from_numpy(self, buf_dict):
@@ -251,9 +371,20 @@ class ReplayBuffer:
         self.next_obs = self.next_obs.at[idx].set(jnp.array(buf_dict['next_obs']))
         self.done = self.done.at[idx].set(jnp.array(buf_dict['done']))
         self.task_id = self.task_id.at[idx].set(jnp.array(buf_dict['task_id']))
+        if 'episode_start' in buf_dict:
+            starts = jnp.asarray(buf_dict['episode_start'], dtype=jnp.bool_)
+        else:
+            dones = jnp.asarray(buf_dict['done'])[:s, 0] > 0.5
+            starts = jnp.concatenate([
+                jnp.ones((1,), dtype=jnp.bool_), dones[:-1]
+            ]) if s > 0 else jnp.zeros((0,), dtype=jnp.bool_)
+        self.episode_start = self.episode_start.at[idx].set(starts)
         # Belief: load if present (forward compat with non-belief checkpoints)
         if self.belief_dim > 0 and 'belief' in buf_dict:
             self.belief = self.belief.at[idx].set(jnp.array(buf_dict['belief']))
+        if self.belief_dim > 0 and 'next_belief' in buf_dict:
+            self.next_belief = self.next_belief.at[idx].set(
+                jnp.array(buf_dict['next_belief']))
         self.ptr = int(buf_dict['ptr'])
         self.size = s
 

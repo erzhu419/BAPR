@@ -1,0 +1,225 @@
+{
+  "confirmatory": true,
+  "env": "HalfCheetah-v2",
+  "event_means": {
+    "102019": {
+      "fixed_robust": 1940.6014173328876,
+      "robust_population": 1188.2329070258513,
+      "student": 1884.228618568927,
+      "student_minus_fixed": -56.372798763960645,
+      "student_minus_population": 695.9957115430757
+    },
+    "102043": {
+      "fixed_robust": 1983.186320747435,
+      "robust_population": 1167.7030264931545,
+      "student": 1987.5303221266718,
+      "student_minus_fixed": 4.344001379236715,
+      "student_minus_population": 819.8272956335172
+    },
+    "102069": {
+      "fixed_robust": 1939.4343144863844,
+      "robust_population": 1187.4629378459974,
+      "student": 1996.5368460355326,
+      "student_minus_fixed": 57.102531549148125,
+      "student_minus_population": 809.0739081895351
+    },
+    "102103": {
+      "fixed_robust": 1904.6003902792932,
+      "robust_population": 1191.2924289661087,
+      "student": 1977.7501266241075,
+      "student_minus_fixed": 73.1497363448143,
+      "student_minus_population": 786.4576976579988
+    },
+    "102151": {
+      "fixed_robust": 1937.5800818681716,
+      "robust_population": 1150.4936023324356,
+      "student": 1969.246337946132,
+      "student_minus_fixed": 31.66625607796027,
+      "student_minus_population": 818.7527356136964
+    }
+  },
+  "event_seeds": [
+    102019,
+    102043,
+    102069,
+    102103,
+    102151
+  ],
+  "family": "actuator_polarity",
+  "fixed_robust_stationary": {
+    "by_mode": {
+      "0": 1784.9301101744175,
+      "1": 2154.3846070596574,
+      "2": 2093.171439499855,
+      "3": 1780.4281543204188
+    },
+    "worst_mode": 1780.4281543204188
+  },
+  "fixed_strongest_robust_arm": "robust_final_seed_719",
+  "frozen_selection_analysis": {
+    "sha256": "a2d9aed89262f687d60042837d698fd5968627d8e120262cc11a989a5f1947d9",
+    "size": 53210
+  },
+  "frozen_student_manifest": {
+    "sha256": "4f3f8cce988e9e546b6009bbaefb3a235f8085c91955fdc7da957c28b744ec75",
+    "size": 26975
+  },
+  "frozen_student_parameters": {
+    "sha256": "2f54b0a40352a68349b52ee36ede26f0bbe97085e37b595ed9f7c37b400104d8",
+    "size": 287370
+  },
+  "frozen_student_seed": 1811,
+  "frozen_teacher_group": "mode_heads",
+  "gates": {
+    "fixed_robust_cluster_ci_positive": false,
+    "fixed_robust_event_wins": true,
+    "population_cluster_ci_positive": true,
+    "population_event_wins": true,
+    "teacher_headroom_recovery": true,
+    "zero_termination": true
+  },
+  "oracle_vs_robust_population": {
+    "candidate_mean": 2061.4581031379103,
+    "cluster_95pct_t_interval": [
+      852.3720101952835,
+      916.4702350151182
+    ],
+    "cluster_count": 5,
+    "cluster_mean_delta": 884.4211226052008,
+    "cluster_sem": 11.543218466634924,
+    "cluster_unit": "event_seed_mean",
+    "episode_wins": 25,
+    "event_seed_deltas": {
+      "102019": 893.8590632867441,
+      "102043": 902.7202028838171,
+      "102069": 910.6270347185806,
+      "102103": 850.4027793121898,
+      "102151": 864.4965328246728
+    },
+    "event_seed_wins": 5,
+    "mean_delta": 884.4211226052008,
+    "n_episodes": 25,
+    "reference_mean": 1177.0369805327095
+  },
+  "promotion": false,
+  "protocol_version": "v2-mode-heads-frozen-five-event",
+  "recommendation": "The frozen student confirms a robust-population improvement but not superiority to the preregistered strongest robust controller. Retain this as an ensemble-distillation result, not a stronger BAPR control claim.",
+  "schema": "bapr.regime-polarity-policy-distillation-control-confirmation-analysis.v2",
+  "status": "complete",
+  "student_posterior": {
+    "brier_score": 0.0014349244728853886,
+    "median_switch_delay": 6.4,
+    "mode_accuracy": 0.9994782608695651,
+    "p90_switch_delay": 14.719999999999999
+  },
+  "student_stationary": {
+    "by_mode": {
+      "0": 2034.4420830855147,
+      "1": 2105.7639282450823,
+      "2": 2037.1112730633467,
+      "3": 2327.6660192242266
+    },
+    "worst_mode": 2034.4420830855147
+  },
+  "student_switching_terminated_rate": 0.0,
+  "student_vs_fixed_strongest_robust": {
+    "candidate_mean": 1963.0584502602742,
+    "cluster_95pct_t_interval": [
+      -41.32240679962963,
+      85.2782974345091
+    ],
+    "cluster_count": 5,
+    "cluster_mean_delta": 21.977945317439733,
+    "cluster_sem": 22.7990648900511,
+    "cluster_unit": "event_seed_mean",
+    "episode_wins": 14,
+    "event_seed_deltas": {
+      "102019": -56.3727987639606,
+      "102043": 4.344001379236579,
+      "102069": 57.10253154914826,
+      "102103": 73.1497363448143,
+      "102151": 31.666256077960135
+    },
+    "event_seed_wins": 4,
+    "mean_delta": 21.977945317439733,
+    "n_episodes": 25,
+    "reference_mean": 1941.0805049428343
+  },
+  "student_vs_learned_teacher": {
+    "candidate_mean": 1963.0584502602742,
+    "cluster_95pct_t_interval": [
+      -25.92867036586418,
+      253.7198084910007
+    ],
+    "cluster_count": 5,
+    "cluster_mean_delta": 113.89556906256826,
+    "cluster_sem": 50.36088744080215,
+    "cluster_unit": "event_seed_mean",
+    "episode_wins": 19,
+    "event_seed_deltas": {
+      "102019": 303.7423499889672,
+      "102043": 35.5889721378684,
+      "102069": 64.69190455358475,
+      "102103": 36.97397668287158,
+      "102151": 128.48064194954932
+    },
+    "event_seed_wins": 5,
+    "mean_delta": 113.89556906256824,
+    "n_episodes": 25,
+    "reference_mean": 1849.162881197706
+  },
+  "student_vs_robust_population": {
+    "candidate_mean": 1963.0584502602742,
+    "cluster_95pct_t_interval": [
+      721.3523115621731,
+      850.6906278929562
+    ],
+    "cluster_count": 5,
+    "cluster_mean_delta": 786.0214697275646,
+    "cluster_sem": 23.29207159339257,
+    "cluster_unit": "event_seed_mean",
+    "episode_wins": 25,
+    "event_seed_deltas": {
+      "102019": 695.9957115430758,
+      "102043": 819.8272956335171,
+      "102069": 809.0739081895351,
+      "102103": 786.4576976579987,
+      "102151": 818.7527356136964
+    },
+    "event_seed_wins": 5,
+    "mean_delta": 786.0214697275645,
+    "n_episodes": 25,
+    "reference_mean": 1177.0369805327095
+  },
+  "teacher_headroom_recovery": 1.169455706066201,
+  "teacher_vs_robust_population": {
+    "candidate_mean": 1849.162881197706,
+    "cluster_95pct_t_interval": [
+      473.4283360439639,
+      870.8234652860289
+    ],
+    "cluster_count": 5,
+    "cluster_mean_delta": 672.1259006649964,
+    "cluster_sem": 71.5654576598866,
+    "cluster_unit": "event_seed_mean",
+    "episode_wins": 24,
+    "event_seed_deltas": {
+      "102019": 392.25336155410855,
+      "102043": 784.2383234956488,
+      "102069": 744.3820036359505,
+      "102103": 749.4837209751271,
+      "102151": 690.272093664147
+    },
+    "event_seed_wins": 5,
+    "mean_delta": 672.1259006649963,
+    "n_episodes": 25,
+    "reference_mean": 1177.0369805327095
+  },
+  "thresholds": {
+    "cluster_95pct_t_critical": 2.7764451051977987,
+    "max_terminated_rate": 0.0,
+    "min_event_wins_vs_fixed_robust": 4,
+    "min_event_wins_vs_population": 5,
+    "min_teacher_headroom_recovery": 0.8
+  }
+}

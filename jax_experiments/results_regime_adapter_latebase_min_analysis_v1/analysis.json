@@ -1,0 +1,150 @@
+{
+  "alpha_frozen": true,
+  "budget": {
+    "adapter_bank_aggregate_total_steps": 11200000,
+    "late_robust_base_steps": 8400000,
+    "per_controller_post_fork_steps": 700000,
+    "per_controller_total_steps": 9100000
+  },
+  "compute_matched": false,
+  "critic_target_mode": "min",
+  "decision": "reject_latebase_fixed_mode_residual_headroom",
+  "decision_gate": {
+    "canonical_base_copy_within_1pct_all_seeds": true,
+    "diagonal_optimal_at_least_3_of_4_each_seed": false,
+    "pass": false,
+    "stationary_gain_at_least_5pct_each_seed": false
+  },
+  "diagnostic_only": true,
+  "event_seeds": [
+    79100,
+    79200,
+    79300,
+    79400,
+    79500
+  ],
+  "inferential_scope": "Five event streams are averaged within each policy seed. Only two deliberately difficult training seeds are used, so this is a fail-fast mechanism diagnostic, not final inference.",
+  "interpretation": "A pass only shows that a mature robust controller has usable fixed-mode residual headroom under matched critic targets and a fixed entropy temperature. It authorizes switch-distribution training; it is not a publishable BAPR result.",
+  "mean_stationary_relative_gain": 0.07464564000172792,
+  "mean_switching_relative_gain": 0.05002174143839005,
+  "protocol_version": "v1",
+  "schema": "bapr.regime-adapter-latebase-analysis.v1",
+  "secondary_checks": {
+    "switching_termination_noninferior": true
+  },
+  "seed_rows": [
+    {
+      "best_fixed_stationary": 2067.7990466716515,
+      "best_fixed_switching": 1961.3500694949926,
+      "diagonal_optimal_modes": 4,
+      "frozen_base_copy_relative_error": 0.0,
+      "identity_minus_best_fixed_stationary": 179.1762428716197,
+      "identity_minus_best_fixed_switching": 140.36019842788573,
+      "identity_stationary": 2246.975289543271,
+      "identity_switching": 2101.7102679228783,
+      "identity_termination": 0.0,
+      "late_robust_stationary": 2009.1280656309798,
+      "late_robust_switching": 1935.1870635667444,
+      "late_robust_termination": 0.0,
+      "stationary_relative_gain": 0.11838330665974442,
+      "switching_relative_gain": 0.08605018475537701,
+      "training_seed": 24
+    },
+    {
+      "best_fixed_stationary": 2454.144094234779,
+      "best_fixed_switching": 2376.67032882005,
+      "diagonal_optimal_modes": 2,
+      "frozen_base_copy_relative_error": 0.0,
+      "identity_minus_best_fixed_stationary": 31.305344691425944,
+      "identity_minus_best_fixed_switching": 41.45280460387448,
+      "identity_stationary": 2485.449438926205,
+      "identity_switching": 2418.1231334239246,
+      "identity_termination": 0.0,
+      "late_robust_stationary": 2410.932404436395,
+      "late_robust_switching": 2384.752579631358,
+      "late_robust_termination": 0.0,
+      "stationary_relative_gain": 0.030907973343711415,
+      "switching_relative_gain": 0.013993298121403078,
+      "training_seed": 32
+    }
+  ],
+  "specialization_rows": [
+    {
+      "diagonal_minus_best_by_mode": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diagonal_optimal_modes": 4,
+      "fixed_controller_matrix": [
+        [
+          1660.7120567953584,
+          1353.3930080917478,
+          1491.02789723441,
+          1387.2895305590332
+        ],
+        [
+          2104.2058210371433,
+          2576.422348737121,
+          2169.0551404067874,
+          2504.8988387414815
+        ],
+        [
+          1782.0953243023155,
+          1520.5574408107993,
+          2099.3013008391854,
+          1727.5423655846716
+        ],
+        [
+          2046.8703153955935,
+          2234.5921253067254,
+          2096.2467865964772,
+          2651.465451801419
+        ]
+      ],
+      "training_seed": 24
+    },
+    {
+      "diagonal_minus_best_by_mode": [
+        0.0,
+        -32.830044105946854,
+        -105.32595772087643,
+        0.0
+      ],
+      "diagonal_optimal_modes": 2,
+      "fixed_controller_matrix": [
+        [
+          2015.6202308344843,
+          1858.3118939909339,
+          1843.0225817430019,
+          1958.309484922588
+        ],
+        [
+          2614.1636767214536,
+          2744.0450058910255,
+          2776.8750499969724,
+          2744.4023695358637
+        ],
+        [
+          2104.222144456506,
+          1802.7478547620772,
+          1998.8961867356297,
+          1930.6281902369853
+        ],
+        [
+          2725.788520654738,
+          2878.3866224431995,
+          2975.5078751397136,
+          3183.2363322436804
+        ]
+      ],
+      "training_seed": 32
+    }
+  ],
+  "status": "complete",
+  "training_seeds": [
+    24,
+    32
+  ]
+}

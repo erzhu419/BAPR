@@ -282,6 +282,16 @@ class DiscreteModePiecewiseEnv(BraxNonstationaryEnv):
             self._next_switch_step = self._step_counter + self._sample_dwell()
             self._switch_history.append((self._step_counter, self.current_task_id))
 
+    def task_id_for_next_step(self) -> int:
+        """Peek at the random mode used by the next step without consuming RNG."""
+        if self._step_counter + 1 < self._next_switch_step:
+            return int(self.current_task_id)
+        rng_state = self._mode_rng.get_state()
+        try:
+            return int(self._sample_next_mode())
+        finally:
+            self._mode_rng.set_state(rng_state)
+
     def sample_tasks(self, n_tasks: int) -> List[Dict]:
         """Returns K mode descriptors (n_tasks arg ignored).
 

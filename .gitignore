@@ -1,10 +1,30 @@
-bapr_experiments
-jax_experiments/results
-jax_experiments/logs
-jax_experiments/**/__pycache__
-jax_experiments/sensitivity_runs
-jax_experiments/jax_experiments
-bapr_server.tar.gz
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.log
+
+# Generated training state and raw experiment outputs. Compact aggregate
+# analyses are force-added when they are selected as sources of record.
+bapr_experiments/
+bus_experiments_bapr_bus_gate/
+bus_experiments_paper_v2/
+bus_policy_bank_bundles_v1/
+jax_experiments/results*/
+jax_experiments/eval_bundles*/
+jax_experiments/logs*/
+jax_experiments/sensitivity_runs/
+jax_experiments/jax_experiments/
+jax_experiments/archive_paper/
+test_escp/model/
+test_escp/logs/
+test_escp/pic/
+transit_hrl/results/
+**/checkpoints/
+*.pkl
+*.npz
+*.npy
+*.tar.gz
+
 paper/*.pdf
 paper/*.png
 paper/*.aux
@@ -13,4 +33,3 @@ paper/*.blg
 # paper.bbl IS the bibliography source (no .bib file); commit it
 paper/*.out
 paper/*.synctex.gz
-jax_experiments/archive_paper/

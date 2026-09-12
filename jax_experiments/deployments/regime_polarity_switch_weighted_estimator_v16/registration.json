@@ -1,0 +1,306 @@
+{
+  "created_before_training": true,
+  "data_policy": {
+    "candidate_forbidden_inputs": [
+      "mode_id",
+      "switch_clock",
+      "dwell_boundary"
+    ],
+    "candidate_router": "plain posterior MAP",
+    "deployed_inputs": [
+      "observation",
+      "commanded_action",
+      "next_observation"
+    ],
+    "result_payload": "model_parameters_json_and_audit_json_only",
+    "true_mode_use": "offline target and metric construction only"
+  },
+  "decision_rule": {
+    "minimum_delay_4_headroom_retention": 0.7,
+    "minimum_safe_oracle_gain": 0.1,
+    "minimum_v16_gain": 0.1,
+    "minimum_v16_headroom_recovery": 0.7,
+    "require_positive_paired_mean_over_frozen_v5": true,
+    "require_zero_termination": true,
+    "required_event_wins": 3,
+    "required_seed_passes": 4,
+    "required_seed_wins_over_frozen_v5": 4,
+    "required_validation_policy_wins": 2
+  },
+  "identity": {
+    "audit_event_seeds": [
+      171201,
+      171217,
+      171233
+    ],
+    "audit_policy_seeds": [
+      71003,
+      71021,
+      71039,
+      71057,
+      71079
+    ],
+    "parent_protocol_version": "v15-conflict-fallback-confirmation",
+    "protocol_version": "v16-switch-weighted-expected-action-estimator",
+    "switching_schedules": {
+      "171001": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "171013": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "171101": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "171113": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "171201": [
+        0,
+        2,
+        3,
+        1
+      ],
+      "171217": [
+        0,
+        3,
+        2,
+        1
+      ],
+      "171233": [
+        0,
+        2,
+        1,
+        3
+      ]
+    },
+    "train_event_seeds": [
+      171001,
+      171013
+    ],
+    "train_policy_seeds": [
+      71003,
+      71021,
+      71039
+    ],
+    "validation_event_seeds": [
+      171101,
+      171113
+    ],
+    "validation_policy_seeds": [
+      71057,
+      71079
+    ]
+  },
+  "schema": "bapr.switch-weighted-expected-action-registration.v16",
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_switch_weighted_estimator_v16.py": {
+      "sha256": "4f42b76896b708e67c78528b5c81c59a9affd8274fbd09e8e52ce0226e363904",
+      "size": 12730
+    },
+    "jax_experiments/analysis/regime_polarity_switch_weighted_estimator_model_v16.py": {
+      "sha256": "288cdcdb3f1fa2d804bfea7b0158cc8843f0add7489450066532a97d3b19e2fb",
+      "size": 4047
+    },
+    "jax_experiments/analysis/regime_polarity_switch_weighted_estimator_v16.py": {
+      "sha256": "434c6edcb1289059cf7efc0966afd192a605ab253cd4d6c2da93365d5b0c25c5",
+      "size": 13249
+    },
+    "jax_experiments/analysis/run_regime_polarity_switch_weighted_estimator_audit_v16.py": {
+      "sha256": "523cb8bae1fa0a9264b8354df9dd9568089d28c759bc409510a29947bc072d57",
+      "size": 17902
+    },
+    "jax_experiments/analysis/train_regime_polarity_switch_weighted_estimator_v16.py": {
+      "sha256": "d4fcd86e531d5d556a0a41e6895425e8350d022b74fcbcc17a2eaaff93ea935a",
+      "size": 23084
+    },
+    "jax_experiments/deployments/regime_polarity_conflict_fallback_confirmation_v15/registration.json": {
+      "sha256": "137e3d6150d13b2aa1fcb25e7244ec2e74a46a7681f34b4e838d0441c60e169a",
+      "size": 3566
+    },
+    "jax_experiments/deployments/regime_polarity_robust_warmstart_confirmation_v12/registration.json": {
+      "sha256": "5e19ba418b5344df9f4a94a630243e07404bc22342b13077108d426110022025",
+      "size": 4465
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71003/bundle_manifest.json": {
+      "sha256": "cc716854f4e8e9d1abfa1dfbc789f849f8dbd644543c6f97a42a0f22ef9eb833",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71021/bundle_manifest.json": {
+      "sha256": "ff17a320226a514a1f0d146008d7773eca1395986cfe98ea48c98634e759f89f",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71039/bundle_manifest.json": {
+      "sha256": "61d20a041a2b683e5bea7b0b32a9148ec1b95a9c753cffed6f3a0b03805fc941",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71057/bundle_manifest.json": {
+      "sha256": "b541ed07c6586bbcd6dcb0d6e2330985b66a0132052320956dcfce9288cd4907",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71079/bundle_manifest.json": {
+      "sha256": "248fb2603b86a3320f63c21fc4f78a8f7227de2b6bf3453cf9eebab501a2a7dd",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_0/bundle_manifest.json": {
+      "sha256": "15613fd10aa12cf2374e6319b05b4fbf0a0a1a3b95766261ed243c802bb94d99",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_1/bundle_manifest.json": {
+      "sha256": "030a595e3e582de0b375dc92511d7aaf903eb40203a649837f34977628481534",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_2/bundle_manifest.json": {
+      "sha256": "68eb65722cfff1bbd5fd47d14c6f7532286efadc21ba7388c70a606064c3274b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_3/bundle_manifest.json": {
+      "sha256": "88837fa94bb6d6a10e104f5b42b065bda1f5044a486ed22e8807f0964db45e1b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_0/bundle_manifest.json": {
+      "sha256": "187d62bdef8a209c9f3222ff939588e6c717748873212e1f2c3d8e0f69a71d10",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_1/bundle_manifest.json": {
+      "sha256": "69ee25f00ac8c2c7c258eb474918ae9706a5a4e624079be078286c9e53c51ced",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_2/bundle_manifest.json": {
+      "sha256": "5a74d5b55efd96bdc372c069d5ba7227f045ad555c6ef4cc3594f4e94f97c889",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_3/bundle_manifest.json": {
+      "sha256": "79ef66b33428fc9ea17ee79ef89e85e4b04d33ceaf6e3de935050aad3c2f921b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_0/bundle_manifest.json": {
+      "sha256": "1e26dd51a0238dfc1d2b46d24934f757c52506b8511db653abcf6c444ecdddf7",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_1/bundle_manifest.json": {
+      "sha256": "b8d0f5903da8b1efc224a0e953b97af2304431630403387e06f9361256b4553e",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_2/bundle_manifest.json": {
+      "sha256": "103705dcd807aa5f24aa9faa3f6323fe5a33742bcb5bfdf7e6961a636063f5a4",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_3/bundle_manifest.json": {
+      "sha256": "7534c669478a7f93cacd58c666d0e95f35a218d9dbad3a1da9f127a2dc73f0fc",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_0/bundle_manifest.json": {
+      "sha256": "7b3bc3c9ae2dca04aa7a92ac0310b7be2c09406b7460661d623e1f0fa357aaf0",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_1/bundle_manifest.json": {
+      "sha256": "88a0a115e4e6a9d94ad2c998c7542787ebbfd418d1a93f43637e798ba3320a6b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_2/bundle_manifest.json": {
+      "sha256": "39511cfc4de7dc860d1efe9ce9727139a45062be25746d462b23851f3baa2f98",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_3/bundle_manifest.json": {
+      "sha256": "131719d1448349283ead4b42a47a74958231b330c14906b45496a86bd28f0c6c",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_0/bundle_manifest.json": {
+      "sha256": "47f2f61ec526a7ae2006dafd32225bb13a7fe4b67beb43547f567ab0b1d713ea",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_1/bundle_manifest.json": {
+      "sha256": "b59ebc32021edc26f05423cfbf96d1535edb1e087e4f9e5eb824cf72f6cb9071",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_2/bundle_manifest.json": {
+      "sha256": "63f8507019522d276966fcbe611f7de25241a46174855a4db95b910925f5ee93",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_3/bundle_manifest.json": {
+      "sha256": "478077dccd5dcc65be9487e4fe6dee8474a7b341822aaa265a010ea75741b501",
+      "size": 1363
+    },
+    "jax_experiments/results_regime_polarity_conflict_fallback_confirmation_analysis_v15/analysis.json": {
+      "sha256": "c6b668d5969e4cef18cfbe2e1cf04a64665c3324a72da196c15f007beb7aa262",
+      "size": 20823
+    },
+    "jax_experiments/results_regime_polarity_conflict_fallback_confirmation_analysis_v15/analysis.md": {
+      "sha256": "af111ad14be08ad706a58d8678b526b03928ba963e61557d224a14d916fdec92",
+      "size": 1079
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_analysis_v12/analysis.json": {
+      "sha256": "1864bac6b87089760b7a867eebe2971094a782d4757a768b69fd2ce9fdb4d479",
+      "size": 15868
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_analysis_v12/analysis.md": {
+      "sha256": "fc9c2fdf4c729f70d89e27ffcd8044a8a28e0fb524adb630b9df063c462f93aa",
+      "size": 1006
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "reports/regime_polarity_conflict_fallback_confirmation_v15_2026-09-01.md": {
+      "sha256": "af111ad14be08ad706a58d8678b526b03928ba963e61557d224a14d916fdec92",
+      "size": 1079
+    },
+    "reports/regime_polarity_robust_warmstart_confirmation_v12_2026-08-31.md": {
+      "sha256": "fc9c2fdf4c729f70d89e27ffcd8044a8a28e0fb524adb630b9df063c462f93aa",
+      "size": 1006
+    },
+    "reports/regime_polarity_specialist_expected_action_v5_2026-08-29.md": {
+      "sha256": "7aab8ef2b4778e6828773d8ca0b45e4e2ac29c80fa9096dd5b7b6e0d06cde238",
+      "size": 1354
+    },
+    "reports/regime_polarity_switch_weighted_estimator_v16_preregistration_2026-09-01.md": {
+      "sha256": "a47808c916b705b0a7d78e29bce80498e73c96cef4d61ef85d8ca2dcbaf4ab6c",
+      "size": 1572
+    }
+  },
+  "status": "registered",
+  "training": {
+    "batch_size_per_head": 256,
+    "classification_loss_weight": 0.1,
+    "episodes_per_event": 4,
+    "filter_config": {
+      "evidence_scale": 1.0,
+      "hazard_rate": 0.002,
+      "posterior_decay": 0.98
+    },
+    "initialization": "frozen_v5_expected_action_model",
+    "model_config": {
+      "delta_scale": 0.1,
+      "ensemble_size": 5,
+      "hidden_dim": 256,
+      "learning_rate": 5e-05,
+      "n_layers": 3,
+      "obs_scale": 5.0,
+      "variance_ceiling": 0.25,
+      "variance_floor": 0.0001,
+      "weight_decay": 1e-05
+    },
+    "model_seed": 20260901,
+    "policy_updates": false,
+    "switch_sample_weight": 8.0,
+    "switch_window_steps": 8,
+    "updates": 2000
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "audits": {
+    "86003": {
+      "policy_selection": {
+        "congestion_severe": "robust",
+        "demand_surge": "robust",
+        "extreme_weather": "robust",
+        "normal": "robust",
+        "partial_closure": "robust"
+      },
+      "stationary": {
+        "mode_wins_at_threshold": 0,
+        "oracle_reward_mean": -550199.1240634104,
+        "relative_gain": 0.0,
+        "required_mode_wins": 4,
+        "robust_reward_mean": -550199.1240634104
+      },
+      "switching": {
+        "best_fixed_controller": "robust",
+        "best_fixed_reward_mean": -545886.4225053316,
+        "dynamic_beats_every_fixed": false,
+        "dynamic_oracle_reward_mean": -545886.4225053316,
+        "event_wins": 0,
+        "relative_gain": 0.0,
+        "required_event_wins": 3,
+        "robust_reward_mean": -545886.4225053316
+      }
+    },
+    "86021": {
+      "policy_selection": {
+        "congestion_severe": "specialist:congestion_severe",
+        "demand_surge": "robust",
+        "extreme_weather": "specialist:congestion_severe",
+        "normal": "specialist:congestion_severe",
+        "partial_closure": "specialist:congestion_severe"
+      },
+      "stationary": {
+        "mode_wins_at_threshold": 0,
+        "oracle_reward_mean": -527525.8478323532,
+        "relative_gain": 0.017691089699097003,
+        "required_mode_wins": 4,
+        "robust_reward_mean": -537026.4305866475
+      },
+      "switching": {
+        "best_fixed_controller": "specialist:congestion_severe",
+        "best_fixed_reward_mean": -527664.7420017556,
+        "dynamic_beats_every_fixed": true,
+        "dynamic_oracle_reward_mean": -527283.0828912252,
+        "event_wins": 1,
+        "relative_gain": 0.008928494281667428,
+        "required_event_wins": 3,
+        "robust_reward_mean": -532033.3395207931
+      }
+    },
+    "86039": {
+      "policy_selection": {
+        "congestion_severe": "robust",
+        "demand_surge": "robust",
+        "extreme_weather": "robust",
+        "normal": "robust",
+        "partial_closure": "robust"
+      },
+      "stationary": {
+        "mode_wins_at_threshold": 0,
+        "oracle_reward_mean": -543411.7251922884,
+        "relative_gain": 0.0,
+        "required_mode_wins": 4,
+        "robust_reward_mean": -543411.7251922884
+      },
+      "switching": {
+        "best_fixed_controller": "robust",
+        "best_fixed_reward_mean": -534943.1003650461,
+        "dynamic_beats_every_fixed": false,
+        "dynamic_oracle_reward_mean": -534943.1003650461,
+        "event_wins": 0,
+        "relative_gain": 0.0,
+        "required_event_wins": 3,
+        "robust_reward_mean": -534943.1003650461
+      }
+    }
+  },
+  "authorize_frozen_estimator_training": false,
+  "decision": "policy-bank headroom failed; do not fit an estimator or claim frozen BAPR bus effectiveness",
+  "policy_seed_pass_count": 0,
+  "protocol_version": "bus-policy-bank-headroom-v1-development",
+  "required_policy_seed_pass_count": 3,
+  "schema": "bapr.bus-policy-bank-headroom-analysis.v1",
+  "seed_passes": {
+    "86003": false,
+    "86021": false,
+    "86039": false
+  },
+  "stationary_relative_gain_mean": 0.005897029899699001,
+  "stationary_relative_gain_min": 0.0,
+  "switching_relative_gain_mean": 0.002976164760555809,
+  "switching_relative_gain_min": 0.0,
+  "training_seeds": [
+    86003,
+    86021,
+    86039
+  ]
+}
