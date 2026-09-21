@@ -4635,3 +4635,179 @@ POSIX command syntax. Linux retries then exposed a validation-only missing
 robust sentinel (`action_task_id=-1`). Runtime amendment tasks
 `t93018-t93023` completed without changing evaluation data, and aggregate
 `t93031` produced the final `FAIL` artifact.
+
+## HalfCheetah action-coordinate compensation audit v28 result (2026-09-12)
+
+V28 performs no training. It reuses the five frozen V21 HalfCheetah policy
+seeds and the frozen v5 causal estimator, selects one safe reference specialist
+from independent calibration events, and tests whether mode-dependent action
+sign compensation can replace policy switching on new stationary and switching
+event streams.
+
+| Arm | Switching return | Stationary return |
+|---|---:|---:|
+| robust SAC | 1424.8 | 1442.6 |
+| reference, no compensation | 513.3 | 777.4 |
+| reference + true-mode compensation | 4291.8 | 4283.8 |
+| reference + causal v5 compensation | 4076.2 | 4266.1 |
+| V21 policy bank + causal v5 | 3246.0 | 3478.0 |
+| SAC5 + causal v5 | 2301.4 | 2519.5 |
+
+Causal compensation beats the uncompensated reference by 3563.0 switching
+return (95% CI 2961.1 to 4164.9), robust SAC by 2651.4 (2201.2 to 3101.6),
+and the V21 policy bank by 830.2 (669.2 to 991.3). Every comparison wins all
+five policy seeds and all 15 paired switching events. The true-mode transform
+is exactly trajectory-equivalent to running the reference policy in its native
+mode (maximum return error 0). The causal estimator reaches 98.84% mode
+accuracy, a three-step median switch delay, and recovers 91.6%-97.0% of oracle
+headroom for every seed.
+
+The registered mechanism claim therefore passes. In this actuator-polarity
+benchmark, the principal loss was not mode inference but switching among
+independently optimized policies whose control coordinates and gaits were not
+aligned. A single policy in one reference coordinate system plus causal command
+compensation is both simpler and materially stronger. This result is specific
+to the invertible polarity symmetry: HalfCheetah has no health termination, and
+the result does not transfer automatically to bus uncertainty or non-invertible
+actuator gain loss.
+
+The first five audit tasks failed before producing results because the frozen
+protocol imported a metadata-only v5 module that did not expose
+`make_estimator`. Execution amendment 1 binds that symbol to the already frozen
+v5 model implementation; it changes no seed, policy, estimator parameter,
+rollout, or decision threshold. Valid Linux retries are `t93046-t93049` and
+`t93051`; aggregate `t93044` completed. A mistaken Windows placement and its
+cancelled retry produced no scientific output and are excluded.
+
+## Ant oracle action-coordinate compensation audit v29 result (2026-09-12)
+
+V29 performs no training. It reuses the three frozen V22 Ant policy seeds,
+selects one reference specialist per seed using new calibration events, and
+compares robust SAC, the uncompensated reference, true-mode action compensation,
+and the true-mode V22 specialist bank on disjoint stationary and switching
+events. Unlike HalfCheetah, every Ant arm records all health terminations and
+time to first termination.
+
+| Arm | Switching return | Stationary return | Switching term. | Stationary term. |
+|---|---:|---:|---:|---:|
+| robust SAC | 2588.6 | 2745.3 | 11.1% | 4.4% |
+| reference, no compensation | -266.3 | 24.7 | 97.8% | 59.4% |
+| reference + true-mode compensation | 4510.7 | 4698.5 | 4.4% | 6.7% |
+| V22 dynamic specialist oracle | 4464.4 | 4522.0 | 28.9% | 12.2% |
+
+Action compensation has substantial Ant return headroom: it beats robust SAC by
+1922.1 switching return (95% CI 191.1 to 3653.0), wins all three policy seeds
+and all nine seed-event cells, and gives per-seed gains of 55.8%, 103.3%, and
+62.8%. It is exactly equivalent to running the selected reference policy in its
+native mode: maximum executed-signal and paired-return errors are both zero.
+The specialist bank adds no reliable advantage; compensation is higher on
+average, but its three-seed interval versus the bank spans zero.
+
+The preregistered estimator-authorization gate nevertheless fails. Seed 85003
+has 13.3% stationary termination and seed 85021 has 6.7% stationary plus 13.3%
+switching termination; only seed 85039 satisfies the absolute zero-termination
+gate. The failure is reference-policy stability across stochastic event streams,
+not action-transform correctness or lack of return headroom. Calibration used
+15 native episodes per specialist, yet two specialists that were termination-
+free there terminated on holdout. The dynamic bank is materially less safe,
+confirming that switching independently optimized Ant gaits is not the repair.
+
+Accordingly, V29 supports action-coordinate compensation as a mechanism on Ant
+but does not authorize an Ant causal-estimator experiment. The current Ant
+evidence remains a safety/reliability counterexample. Any later Ant confirmation
+must use new policy seeds and a preregistered reference-policy reliability
+criterion; the V29 holdout cannot be reused to select a more favorable mode.
+Scheduler audits `t93054-t93056` and aggregate `t93057` all completed on Linux
+CPU nodes and synchronized only compact JSON artifacts.
+
+## Ant finite-horizon paired branch-risk screen v30 result (2026-09-12)
+
+V30 follows the safety diagnosis in `markdown/GPT_diagnosis.md` without tuning
+another gate or risk penalty. From new event streams it snapshots states visited
+by each seed's frozen V29 reference policy, then uses common future actuator
+noise to compare full true-mode-compensated continuation against full robust-SAC
+continuation over horizons 1 through 250. It records physical termination,
+rescue/harm, return, and torso-health margin; horizon ends are truncations. The
+old V25/V26 compact bundles omit risk-critic parameters, so this first tests the
+necessary fallback-headroom premise without pulling obsolete checkpoints.
+
+All nine source trajectories survive 1,000 steps, and only two of 576 unique
+candidate continuations terminate. The compensated candidate has 0.3% pooled
+250-step termination, compared with 9.9% for full robust continuation. Robust
+fallback is worse for all three policy seeds and all four actuator modes, harms
+9.9% of candidate-surviving pairs, and loses about 582.5 return on average. Its
+extra termination begins by horizon 16. Candidate compensation remains exactly
+mode invariant with zero cumulative-return error and zero termination-trace
+mismatches.
+
+The risk-model gate fails: there are zero informative seeds under the frozen
+minimum-positive rule, and the proposed fallback has negative rather than
+positive net rescue headroom. The Ant fallback/shield route is therefore closed;
+the two rare rescued candidate failures cannot be reused to tune a classifier.
+Audits `t93066-t93068` and aggregate `t93069` completed on `node004`, `node006`,
+and `node002`. Only compact JSON was synchronized; no local/GPU worker, Slurm,
+auto-adopt, policy update, checkpoint pull, simulator state, or trajectory array
+was used.
+
+## HalfCheetah fresh-policy canonical compensation v31 result (2026-09-13)
+
+V31 freezes actuator-polarity mode 0 as the reference, uses five entirely new
+policy seeds and three new switching event streams, and gives the compensation
+path and SAC/ESCP/RE-SAC comparators the same 8.4M interactions per seed. The v5
+causal estimator is unchanged. All 25 GPU bundles, five amended CPU audits, and
+aggregate `t93155` completed; only compact bundles and JSON were synchronized.
+
+| Arm | Switching return | Stationary return |
+|---|---:|---:|
+| causal canonical compensation | 3400.6 | 3508.5 |
+| true-mode canonical compensation | 3642.5 | 3631.5 |
+| equal-budget SAC | 2594.3 | 2738.2 |
+| equal-budget ESCP | 1901.8 | 1963.1 |
+| equal-budget RE-SAC | 1916.1 | 1957.9 |
+| canonical reference without compensation | 325.4 | 623.7 |
+
+The independent confirmation is **FAIL** under its preregistered two-sided
+gate. Causal compensation beats ESCP by 1498.8 (95% CI 611.8 to 2385.7), but
+its differences versus SAC and RE-SAC are 806.3 (CI -30.2 to 1642.8) and
+1484.5 (CI -23.8 to 2992.8). Both comparisons win 4/5 policy seeds and 12/15
+events, but the CI requirements do not pass. This outcome must not be relabeled
+as a successful confirmation despite the large mean gains.
+
+The mechanism diagnostics remain strong: exact true-mode trajectory error is
+zero, v5 mode accuracy is 98.26%, median detection delay is three steps, oracle
+recovery passes 5/5 seeds, and stationary retention passes 4/5. The failure is
+concentrated in seed 87021, where even true-mode compensation has only 2.1%
+headroom over equal-budget SAC and causal compensation trails SAC by 73.0 and
+RE-SAC by 554.5. V31 therefore points to reference-controller training variance,
+not mode inference or compensation correctness. Amendment 1 only repairs NNX
+state loading, the canonical-reference alias, and the already registered v5
+estimator binding; it changes no scientific setting or output.
+
+## HalfCheetah prospective power confirmation v32 result (2026-09-19)
+
+V32 freezes the V31 algorithm and uses the failed V31 result only to plan a
+clean ten-seed cohort; V31 results are not pooled. Ten new policy seeds and new
+stationary/switching streams test equal-budget SAC, recurrent ESCP, RE-SAC,
+true-mode compensation, and frozen-v5 causal compensation. Success requires a
+positive paired mean with a positive two-sided 95% CI lower bound against all
+three comparators, plus at least 8/10 seed wins and 24/30 event wins.
+
+All 50 independent GPU runs, ten CPU audits, and the aggregate completed. Causal
+compensation reaches 3297.1 switching return, compared with 2287.1 for SAC,
+2046.0 for ESCP, and 2360.2 for RE-SAC. Its paired advantages are respectively
+1009.9 (95% CI 391.7 to 1628.2), 1251.1 (553.5 to 1948.7), and 936.9 (337.1 to
+1536.7). Thus the ten-seed mean advantage is positive and statistically resolved
+against every equal-budget comparator.
+
+The preregistered overall decision remains **FAIL** because the SAC comparison
+wins 7/10 policy seeds and 23/30 seed-event cells, just below the frozen 8/10
+and 24/30 consistency thresholds. ESCP and RE-SAC comparisons pass at 9/10,
+25/30 and 9/10, 27/30. Oracle recovery and stationary retention both pass
+10/10; frozen-v5 mode accuracy is 98.55% with a three-step median delay.
+
+The three SAC non-wins are seeds 88021, 88039, and 88179. Their true-mode oracle
+headroom over SAC is only +2.3%, -2.3%, and +4.1%, while causal recovery remains
+95.4%, 95.4%, and 95.5%. The limiting factor is therefore canonical-controller
+training variance, not mode inference or causal compensation. V31 and V32 must
+still be reported separately, and neither failed registered decision may be
+relabeled as PASS.

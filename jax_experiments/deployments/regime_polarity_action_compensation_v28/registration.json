@@ -1,0 +1,185 @@
+{
+  "accounting": {
+    "estimator_training_reported_separately": true,
+    "new_training_interactions": 0,
+    "reused_policy_count_bapr": 5,
+    "reused_policy_count_sac5": 5,
+    "v21_bapr_training_interactions": 16800000,
+    "v21_sac5_training_interactions": 28000000
+  },
+  "created_before_evaluation": true,
+  "decision_gate": {
+    "bank_necessity_rule": "positive paired mean and 95% interval plus at least 4/5 seed wins decides either V21-bank or compensation superiority; otherwise unresolved",
+    "exact_action_tolerance": 1e-06,
+    "exact_return_tolerance": 0.001,
+    "exact_trajectory_tolerance": 1e-05,
+    "minimum_oracle_headroom_recovery": 0.7,
+    "primary_comparators": [
+      "reference_no_compensation",
+      "robust_sac"
+    ],
+    "required_event_wins_of_15": 12,
+    "required_recovery_seeds": 4,
+    "required_seed_wins_of_5": 4
+  },
+  "frozen_boundary": {
+    "causal_action_uses_posterior_before_current_transition": true,
+    "holdout_events_not_used_for_selection": true,
+    "no_parameter_training": true,
+    "oracle_mode_used_only_by_oracle_arm": true,
+    "reference_selected_on_calibration_only": true,
+    "v21_policy_bundles_unchanged": true,
+    "v5_estimator_unchanged": true
+  },
+  "identity": {
+    "arms": [
+      "robust_sac",
+      "reference_no_compensation",
+      "reference_true_mode_compensation",
+      "reference_v5_map_compensation",
+      "bapr_v21_posterior_map",
+      "sac5_v21_posterior_map"
+    ],
+    "calibration_event_seeds": [
+      194001,
+      194017,
+      194033
+    ],
+    "environment": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v28-polarity-action-compensation-audit",
+    "stationary_holdout_event_seeds": [
+      194101,
+      194117,
+      194133
+    ],
+    "switching_event_seeds": [
+      194201,
+      194217,
+      194233
+    ],
+    "switching_schedules": {
+      "194201": [
+        1,
+        0,
+        3,
+        2
+      ],
+      "194217": [
+        3,
+        2,
+        0,
+        1
+      ],
+      "194233": [
+        2,
+        3,
+        1,
+        0
+      ]
+    },
+    "training_seeds": [
+      84003,
+      84021,
+      84039,
+      84057,
+      84079
+    ]
+  },
+  "schema": "bapr.regime-polarity-action-compensation-registration.v28",
+  "scope": {
+    "ant_causal_estimator_available": false,
+    "does_not_generalize_sign_symmetry_to_bus_or_gain_loss": true,
+    "halfcheetah_direct_causal_audit": true
+  },
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_action_compensation_v28.py": {
+      "sha256": "78a5f0158edac0c7fd2b0b8bd9d7e163d41a80d1a7d9a177034edfc527daf502",
+      "size": 12828
+    },
+    "jax_experiments/analysis/regime_polarity_action_compensation_v28.py": {
+      "sha256": "5e5e444f83dd213d4687f1f3eaca1e8227d1b3dbff563bf62a010dcbdc3f2bcb",
+      "size": 13368
+    },
+    "jax_experiments/analysis/regime_polarity_full_state_final_confirmation_v21.py": {
+      "sha256": "a923cc79848eab2e4406ce24b98743fee2d876573602273162afb4c68b1e7814",
+      "size": 24089
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_expected_action_system_id_v5.py": {
+      "sha256": "b8a598feaca8559702bb452c57d78824d25395ebc0a8b649d9ff231a7b11b9d4",
+      "size": 3946
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_audit_v28.py": {
+      "sha256": "24664cfffc45582e2756f3c6d87211bb13251a18ac64a8ea584cb01afdb7e355",
+      "size": 28129
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_structural_v28.py": {
+      "sha256": "c7473ab68ddb63d7f1b6acc3bcbc8f3599d93bc85c66930cd134980a313da59a",
+      "size": 11721
+    },
+    "jax_experiments/analysis/run_regime_polarity_full_state_confirmation_audit_v21.py": {
+      "sha256": "e6300d42971f9ca9ad2ecbceb32635a53364c38a391e5f20228daa2f70128a30",
+      "size": 2085
+    },
+    "jax_experiments/analysis/run_regime_polarity_v5_final_comparison_audit_v18.py": {
+      "sha256": "d7ca298a089c69c9199c399553aff281317118a8062b6dec6d04649df8853cf7",
+      "size": 39072
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/deployments/regime_polarity_full_state_final_confirmation_v21/registration.json": {
+      "sha256": "db6e7e8420e93a72196fce4675a390cce238c6be3a79f2a28967fa11ca5848c4",
+      "size": 9205
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/networks/executed_action_inverse.py": {
+      "sha256": "7af26a7c49ae1fedc4be0f49b0a5a9a856e43390e3ae8f55cada0e0486ed57d5",
+      "size": 5820
+    },
+    "jax_experiments/results_regime_polarity_full_state_final_confirmation_analysis_v21/analysis.json": {
+      "sha256": "1798aeabf2dd1ae85847ce17afd2b30131e45a47d6544ea18272639dc944ee0c",
+      "size": 27521
+    },
+    "jax_experiments/results_regime_polarity_full_state_final_confirmation_analysis_v21/analysis.md": {
+      "sha256": "500f253c576e8ae1fc6771319e01960c5d1c2f81e01398fd46dd73e180d0f63c",
+      "size": 1336
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "reports/regime_polarity_action_compensation_v28_preregistration_2026-09-12.md": {
+      "sha256": "e0a3086a9d5657bbcb8991f9875517341b0271065fb77ba84d580af74d6abce1",
+      "size": 3981
+    },
+    "reports/regime_polarity_full_state_final_confirmation_v21_2026-09-09.md": {
+      "sha256": "500f253c576e8ae1fc6771319e01960c5d1c2f81e01398fd46dd73e180d0f63c",
+      "size": 1336
+    },
+    "scripts/submit_regime_polarity_action_compensation_v28.py": {
+      "sha256": "d12823fe9ef167732e831fb1948b67d6c1f54ef8cfb27b599b77c6a21ba7cb3b",
+      "size": 9875
+    }
+  },
+  "status": "registered",
+  "sync_policy": "compact policy parameters, model parameters, manifests, and JSON audits only; no replay buffers or checkpoints"
+}

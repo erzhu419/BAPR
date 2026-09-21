@@ -1,8 +1,0 @@
-run,algo,seed,episodes,mean_last_episodes,std_last_episodes,best_reward,q_stds_episode_last_mean,q_stds_episode_final,mode_switches_episode_last_mean,mode_switches_episode_final,mode_id_episode_last_mean,mode_id_episode_final,weighted_lambdas_episode_last_mean,weighted_lambdas_episode_final,belief_entropies_episode_last_mean,belief_entropies_episode_final,effective_windows_episode_last_mean,effective_windows_episode_final
-bapr_mode_s2,bapr,2,491,-556486.978,55291.386,-423211.735,30.800,57.556,10.480,12.000,1.900,1.000,0.409,0.409,2.922,2.923,10.830,10.823
-escp_mode_s0,escp,0,41,-680359.867,118831.091,-536981.475,18.854,23.270,10.610,10.000,1.512,1.000,,,,,,
-escp_mode_s1,escp,1,11,-1025458.844,257387.741,-696204.074,33.902,29.725,10.091,10.000,2.091,0.000,,,,,,
-escp_mode_s2,escp,2,491,-539965.684,57989.143,-423790.287,149.866,247.423,10.840,14.000,1.880,0.000,,,,,,
-sac_mode_s0,sac,0,491,-542805.477,63866.019,-413607.271,397.297,450.093,10.580,10.000,2.360,2.000,,,,,,
-sac_mode_s1,sac,1,491,-543157.690,61562.596,-412646.890,530.496,452.214,10.600,10.000,1.740,1.000,,,,,,
-sac_mode_s2,sac,2,491,-558363.320,63584.880,-410937.831,897.640,1156.283,10.600,9.000,1.940,0.000,,,,,,

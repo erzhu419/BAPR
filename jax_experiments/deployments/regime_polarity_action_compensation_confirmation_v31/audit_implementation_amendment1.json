@@ -1,0 +1,49 @@
+{
+  "corrections": [
+    "Accept the nnx.State tree emitted by the registered reference publisher.",
+    "Alias canonical_reference to the specialist_0 key expected by the frozen V28 helper.",
+    "Bind the frozen helper to the registered v5 estimator implementation module."
+  ],
+  "created_after_failed_execution_before_successful_audit": true,
+  "discarded_outputs": "All failed attempts exited before writing an audit result or manifest.",
+  "failed_root_task_ids": {
+    "canonical_reference_alias": [
+      "t93189",
+      "t93190",
+      "t93191",
+      "t93192",
+      "t93193"
+    ],
+    "nnx_state_loader": [
+      "t93130",
+      "t93136",
+      "t93142",
+      "t93148",
+      "t93154"
+    ],
+    "v5_estimator_binding": [
+      "t93218",
+      "t93219",
+      "t93220",
+      "t93221",
+      "t93222"
+    ]
+  },
+  "parent_registration": {
+    "sha256": "a2a899093fd2f14abbd8e352d9c3a388938c1d5de0629de278b382c6ff05115c",
+    "size": 11502
+  },
+  "schema": "bapr.canonical-compensation-audit-amendment.v31.1",
+  "scientific_protocol_changes": [],
+  "source_records": {
+    "compatibility_runner": {
+      "sha256": "4ee6b77fdf9adfa77d9305368294938a6214fd241c18b4cc7384a602bebcd380",
+      "size": 5054
+    },
+    "estimator_implementation": {
+      "sha256": "b25114a539109a38022571b001bbb2f1ca97b0b1426796894c70ae01688ea518",
+      "size": 4039
+    }
+  },
+  "status": "registered"
+}

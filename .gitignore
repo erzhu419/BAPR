@@ -23,9 +23,21 @@ transit_hrl/results/
 *.pkl
 *.npz
 *.npy
+*.csv
+*.xlsx
 *.tar.gz
 
+# Local and generated experiment data. Markdown reports remain tracked.
+bus_policy_bank_audits_v1/
+bus_policy_bank_analysis_v1/*.json
+paper/id_ood_*/
+paper/source_data/
+test_escp/pic/
+
 paper/*.pdf
+!paper/fig_v32_method.pdf
+!paper/fig_v32_results.pdf
+!paper/fig_v32_diagnostics.pdf
 paper/*.png
 paper/*.aux
 paper/*.log

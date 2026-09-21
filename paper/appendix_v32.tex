@@ -1,0 +1,190 @@
+\clearpage
+\appendix
+
+\section{Actuator-regime benchmark}
+\label{app:benchmark}
+
+The prospective confirmation benchmark keeps HalfCheetah morphology, gravity, reward, observation space, and episode horizon fixed. Only the actuator-coordinate transform changes. Before each physics step, the environment applies
+\begin{equation}
+    u_t=\clip(\gain_{z_t}a_t+\varepsilon_t,-1,1),
+    \qquad \varepsilon_t\sim\mathcal{N}(0,0.02^2 I).
+\end{equation}
+For six action dimensions, the four fixed transforms are:
+\begin{center}
+\begin{tabular}{clc}
+\toprule
+Mode & Affected channels & $\operatorname{diag}(\gain_z)$ \\
+\midrule
+0 & lower half & $(-1,-1,-1,+1,+1,+1)$ \\
+1 & upper half & $(+1,+1,+1,-1,-1,-1)$ \\
+2 & even indices & $(-1,+1,-1,+1,-1,+1)$ \\
+3 & odd indices & $(+1,-1,+1,-1,+1,-1)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The environment holds the active mode fixed for 250 steps. A switching episode contains four blocks and lasts 1,000 steps. The simulator state is preserved at a switch; the robot is not reset. Each mode therefore defines a persistent stochastic transition distribution rather than a per-step resampling of robot morphology.
+
+\section{Proofs for the action-compensation mechanism}
+\label{app:proofs}
+
+\subsection{Benchmark assumptions and pathwise equivalence}
+
+The theoretical claim is deliberately limited to the structure implemented by the actuator-polarity benchmark. All modes use common transition and reward maps and differ only in the action transform $\gain_z$. Each $\gain_z$ is a diagonal sign matrix, so $\gain_z^{-1}=\gain_z$ and $\gain_z^2=I$. The canonical deployment policy is deterministic, and its output lies in $[-1,1]^d$. For a pathwise comparison, the reference and switched rollouts use the same initial simulator state and the same realization of actuator noise. Any additional simulator or reset randomness can be included in this common exogenous-noise sequence. These assumptions hold for the prospective HalfCheetah evaluator: the transformed, noisy action is passed to both the physics step and the control-cost term in the reward.
+
+Fix an arbitrary horizon $H$ and mode sequence $(z_t)_{t=0}^{H-1}$. Write the fixed-reference rollout as
+\begin{align}
+    a_t^{\mathrm{ref}} &= \pi_r(s_t^{\mathrm{ref}}), \\
+    u_t^{\mathrm{ref}} &= \clip\!\left(
+        \gain_r a_t^{\mathrm{ref}}+\varepsilon_t,-1,1\right),
+\end{align}
+and the switched, true-mode-compensated rollout as
+\begin{align}
+    a_t^{\mathrm{comp}} &=
+        \gain_{z_t}\gain_r\pi_r(s_t^{\mathrm{comp}}), \\
+    u_t^{\mathrm{comp}} &= \clip\!\left(
+        \gain_{z_t}a_t^{\mathrm{comp}}+\varepsilon_t,-1,1\right).
+\end{align}
+
+\begin{proof}[Detailed proof of Proposition~\ref{prop:equivalence}]
+At $t=0$, the states are equal by construction. Suppose
+$s_t^{\mathrm{comp}}=s_t^{\mathrm{ref}}$. Deterministic deployment then gives the same canonical output in both rollouts. A sign matrix maps $[-1,1]^d$ onto itself, so the compensated command is admissible without changing its value through command clipping. Using $\gain_{z_t}^2=I$,
+\begin{align}
+u_t^{\mathrm{comp}}
+&=\clip\!\left(
+\gain_{z_t}\gain_{z_t}\gain_r
+\pi_r(s_t^{\mathrm{comp}})+\varepsilon_t,-1,1\right)\\
+&=\clip\!\left(
+\gain_r\pi_r(s_t^{\mathrm{ref}})+\varepsilon_t,-1,1\right)
+=u_t^{\mathrm{ref}}.
+\end{align}
+Because the transition and reward maps are common across modes, equal current states, executed actions, and coupled exogenous noise imply equal rewards and equal next states. This closes the induction for every $t<H$, irrespective of when or how often $z_t$ changes. The finite-horizon returns are therefore equal for every coupled sample path. Sampling the coupled noise sequence from its common law gives equality of the return distributions and hence of their expectations.
+\end{proof}
+
+The result is an exact structural equivalence, not a performance theorem for the learned mode estimator. In particular, mode-classification accuracy alone does not imply a return-gap bound: errors can occur at dynamically sensitive states and compound through later states. The causal estimator's recovery must therefore remain an empirical quantity.
+
+\subsection{Information ordering and causal execution}
+
+Before selecting action $a_t$, deployment has observed
+$\mathcal{H}_t=\sigma\!\left(s_0,(a_\tau,r_\tau,s_{\tau+1})_{\tau=0}^{t-1}\right)$.
+The posterior $b_t$ contains emissions only through transition $t-1$. The state $s_{t+1}$ first appears after $a_t$ has been executed and may affect $b_{t+1}$ and $a_{t+1}$, but not $a_t$.
+
+\begin{proof}[Detailed proof of Proposition~\ref{prop:causality}]
+The initialization $b_0=1/M$ is deterministic and therefore $\mathcal{H}_0$-measurable. Assume $b_t$ is $\mathcal{H}_t$-measurable. Fixed tie-breaking makes $\hat z_t=\arg\max_z b_t(z)$ a deterministic function of $b_t$, and the frozen policy and known transform make $a_t$ a deterministic function of $(s_t,b_t)$. Thus $a_t$ is $\mathcal{H}_t$-measurable. Once the transition is complete, $(a_t,r_t,s_{t+1})$ belongs to $\mathcal{H}_{t+1}$. The frozen inverse model computes its predictions from $(s_t,s_{t+1})$, the emission score additionally uses the already selected $a_t$, and Eq.~\eqref{eq:posterior} deterministically maps these quantities and $b_t$ to $b_{t+1}$. Hence $b_{t+1}$ is $\mathcal{H}_{t+1}$-measurable, completing the induction.
+\end{proof}
+
+This proposition establishes absence of deployment-time look-ahead or true-mode leakage. It does not remove the separately reported supervision used to pretrain the inverse model, nor does it claim that the posterior is calibrated or accurate.
+
+\subsection{Why the legacy contraction theory is excluded}
+
+Earlier BAPR development variants used BOCD, lower-confidence-bound critic penalties, RMDM context losses, and belief-weighted Bellman operators. The final deployment mechanism uses none of these components and performs no online actor, critic, or Bellman update. A contraction theorem for a frozen belief-weighted Bellman operator would therefore describe a different algorithm, even if the theorem were mathematically valid. The present theory is restricted to the two properties used by the implemented mechanism: exact pathwise equivalence under the true transform and causal measurability of learned-transform execution.
+
+\section{Estimator details}
+\label{app:estimator}
+
+The frozen inverse model has five independently parameterized heads. Every head is a three-hidden-layer MLP of width 256 with sigmoid linear unit (SiLU) activations and a final $\tanh$. The transition feature is
+\begin{equation}
+    x_t=\left[
+      \tanh(s_t/5),
+      \tanh(s_{t+1}/5),
+      \tanh((s_{t+1}-s_t)/0.1)
+    \right].
+\end{equation}
+Training uses Adam with learning rate $10^{-4}$, weight decay $10^{-5}$, 1,500 updates, and bootstrap batches of 256 per head. The six empirical inverse-residual variances are
+\begin{equation}
+ (0.1289,0.1030,0.1174,0.1357,0.1063,0.0967).
+\end{equation}
+Variance is clipped to $[10^{-4},0.25]$ in the model protocol.
+
+The estimator-training policy seed is 4021 and the validation policy seed is 4049. Training event seeds are 154001 and 154013; validation event seeds are 154101 and 154113. These precede and are disjoint from all pilot and prospective-confirmation policy and evaluation seeds. The prospective protocol does not refit the estimator.
+
+The frozen posterior parameters are hazard $0.002$, evidence scale $1.0$, and posterior decay $0.98$. The posterior used for action $t$ is recorded before incorporating transition $(s_t,a_t,r_t,s_{t+1})$. This convention prevents use of the current next state to choose the current action.
+
+\section{Prospective training and evaluation protocol}
+\label{app:v32_protocol}
+
+\subsection{Policy budgets}
+
+The canonical path has two stages. A source SAC controller trains for 1,400 iterations with 4,000 environment steps and 250 gradient updates per iteration, totaling 5.6M interactions and 350,000 updates. Its full actor, critic, target critic, and temperature state is then fine-tuned in fixed mode 0 for 700 iterations, adding 2.8M interactions and 175,000 updates. The final canonical policy therefore receives 8.4M interactions and 525,000 updates. No validation checkpoint is selected; the final policy is evaluated.
+
+SAC, recurrent ESCP, and RE-SAC each receive the same 8.4M interactions and 525,000 updates. This is an equal policy-training budget, not an equal end-to-end data budget, because BAPR also uses the separately pretrained frozen inverse model described in Appendix~\ref{app:estimator}.
+
+\subsection{Seeds and event streams}
+
+The ten prospective-confirmation policy seeds are
+\begin{equation}
+\begin{split}
+\{&88003,88021,88039,88057,88079,\\
+  &88103,88121,88139,88157,88179\}.
+\end{split}
+\end{equation}
+Stationary event seeds are 197101, 197117, and 197133. Switching event seeds and their base schedules are:
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+Event seed & Base mode schedule \\
+\midrule
+197201 & $(2,0,3,1)$ \\
+197217 & $(1,3,0,2)$ \\
+197233 & $(3,2,1,0)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Each event evaluates five episodes. Episode index cyclically rotates the base schedule so the result is not tied to one starting mode. Stationary evaluation uses five episodes per mode and event seed. All policies use deterministic deployment actions; environment noise remains stochastic.
+
+\subsection{Registered decision rule}
+
+The five-seed fresh-policy pilot failed its registered confirmation rule. It was used only to estimate a sample size of ten for the prospective confirmation; no pilot return is pooled with the confirmation. Before prospective training, the algorithm, reference mode, estimator, policy budgets, seeds, event streams, and decision rule were frozen.
+
+For each comparator, the prospective confirmation requires all of the following:
+\begin{enumerate}[leftmargin=*]
+    \item positive mean paired switching-return difference;
+    \item positive lower bound of a two-sided 95\% paired $t$ interval;
+    \item at least 8 of 10 positive policy-seed differences;
+    \item at least 24 of 30 positive policy-seed--event differences.
+\end{enumerate}
+The interval is computed from the ten policy-seed mean differences using the $t_{0.975,9}=2.2622$ critical value. Event wins are consistency diagnostics rather than independent samples in the confidence interval.
+
+The mechanism ladder also checks: (i) true-mode compensation has at least 10\% headroom where required; (ii) causal compensation recovers at least 70\% of positive oracle headroom; and (iii) causal stationary return retains at least 95\% of oracle stationary return. At least eight seeds must pass the latter two checks.
+
+\section{Additional result interpretation}
+\label{app:additional_results}
+
+\subsection{Why the registered decision fails}
+
+BAPR's mean switching advantages over SAC, ESCP, and RE-SAC all have positive lower 95\% confidence bounds. ESCP and RE-SAC also pass the frozen consistency counts. The SAC comparison is the only blocker: 7/10 seed wins and 23/30 event wins fall below 8/10 and 24/30.
+
+The three non-winning SAC policy seeds are 88021, 88039, and 88179. Their BAPR-minus-SAC switching differences are $-45.1$, $-228.0$, and $-1.2$. True-mode oracle headroom over SAC is only $+2.3\%$, $-2.3\%$, and $+4.1\%$, respectively. Causal-to-oracle recovery remains approximately 95.4--95.5\%. These paired controls locate the heterogeneity in canonical-controller training rather than mode estimation.
+
+\subsection{Developmental evidence is not pooled}
+
+\begin{table}[h]
+\centering
+\caption{Role of the developmental and confirmatory experiments. The first three rows are diagnostic and are not pooled with the primary ten-seed result.}
+\label{tab:development_history}
+\small
+\begin{tabular}{@{}p{0.18\textwidth}p{0.14\textwidth}p{0.27\textwidth}p{0.29\textwidth}@{}}
+\toprule
+Study & Environment & Purpose & Outcome \\
+\midrule
+Mechanism audit & HalfCheetah & reused-policy mechanism test & compensation passed \\
+Transfer audit & Ant & true-mode transfer and safety & headroom found; safety gate failed \\
+Fresh-policy pilot & HalfCheetah & five-seed sample-size pilot & confirmation failed \\
+Prospective test & HalfCheetah & ten-seed confirmatory test & mean CIs pass; SAC consistency fails \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the reused-policy mechanism audit, causal compensation obtained 4076.2 switching return, compared with 4291.8 for true-mode compensation, 3246.0 for a causally routed policy bank, and 1424.8 for robust SAC. Mode accuracy was 98.84\% and median delay was three steps. Because this audit reused policies selected during development, it establishes mechanism plausibility rather than independent confirmation.
+
+In the fresh-policy pilot, causal compensation obtained 3400.6 switching return, compared with 2594.3 for SAC, 1901.8 for ESCP, and 1916.1 for RE-SAC. The five-seed paired confidence intervals against SAC and RE-SAC crossed zero, so the pilot remained a failed confirmation and only informed the prospective sample size.
+
+\section{Cross-environment evidence boundary}
+\label{app:cross_environment}
+
+The current paper does not claim a homogeneous four-environment benchmark win.
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Ant.} A three-seed true-mode action-compensation audit obtained 4510.7 switching return versus 2588.6 for robust SAC, but only one seed passed the absolute zero-termination criterion. This demonstrates privileged headroom, not a safe causal deployment result.
+    \item \textbf{Hopper and Walker2d.} In the tested structured-channel screen, every robust and oracle switching episode terminated before the first scheduled switch. The benchmark therefore lacked a valid adaptation window and cannot support a BAPR comparison.
+    \item \textbf{Bus control.} The bus domain contains persistent changes in speed and demand distributions with per-step stochastic passenger arrivals and traffic variation. RE-SAC-derived robustness is effective there, but its modes are not known invertible actuator transforms. Bus evidence is relevant motivation for stochastic non-stationarity, not direct evidence for the action-compensation mechanism.
+\end{itemize}
