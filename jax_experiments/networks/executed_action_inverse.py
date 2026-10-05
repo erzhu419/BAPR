@@ -14,12 +14,14 @@ def _module_list(layers):
 
 
 class ExecutedActionInverse(nnx.Module):
-    """Infer the action applied to physics from one observed transition.
+    """Infer the nominal pre-noise actuator signal from one transition.
 
     The ensemble contains independent vectorized MLP heads. The commanded
     action is deliberately excluded from the network input so the model cannot
-    learn a policy-specific shortcut. It is used only after prediction to
-    score candidate actuator transforms.
+    learn a policy-specific shortcut. Offline labels use the known training
+    mode to construct ``clip(G_z a_t)``; sampled actuator noise is not part of
+    the target. The command is used only after prediction to score candidate
+    actuator transforms.
     """
 
     def __init__(
@@ -110,7 +112,8 @@ def candidate_action_evidence(
     Args:
         predicted_actions: ``[heads, batch, action]``.
         commanded_actions: ``[batch, action]``.
-        gain_vectors: ``[modes, action]``.
+        gain_vectors: diagonal gains ``[modes, action]`` or actuator matrices
+            ``[modes, action, action]``.
         residual_variance: empirical inverse residual variance ``[action]``.
 
     Returns:
@@ -125,17 +128,16 @@ def candidate_action_evidence(
         raise ValueError("predicted actions must have shape [heads,batch,action]")
     if commanded.shape != predicted.shape[1:]:
         raise ValueError("commanded-action shape mismatch")
-    if gains.ndim != 2 or gains.shape[1] != commanded.shape[1]:
+    if gains.ndim not in (2, 3) or gains.shape[1:] != (
+            (commanded.shape[1],) if gains.ndim == 2 else (commanded.shape[1],) * 2):
         raise ValueError("gain-vector shape mismatch")
     if variance.shape != (commanded.shape[1],):
         raise ValueError("residual-variance shape mismatch")
     variance = jnp.clip(variance, 1e-6, 1.0)
 
-    candidate = jnp.clip(
-        commanded[:, None, :] * gains[None, :, :],
-        -1.0,
-        1.0,
-    )
+    signal = (commanded[:, None, :] * gains[None, :, :] if gains.ndim == 2
+              else jnp.einsum("mij,bj->bmi", gains, commanded))
+    candidate = jnp.clip(signal, -1.0, 1.0)
     error = candidate[None, :, :, :] - predicted[:, :, None, :]
     head_log_likelihood = -0.5 * jnp.mean(
         jnp.square(error) / variance[None, None, None, :]

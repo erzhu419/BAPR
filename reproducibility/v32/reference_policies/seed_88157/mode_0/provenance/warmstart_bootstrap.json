@@ -1,0 +1,60 @@
+{
+  "actor_update_period": 1,
+  "controller_equivalence": {
+    "actor_max_abs_error": 0.0,
+    "atol": 1e-07,
+    "critic_max_abs_error": 0.0,
+    "log_alpha_abs_error": 0.0,
+    "pass": true,
+    "target_critic_max_abs_error": 0.0
+  },
+  "controller_initialization": [
+    "actor",
+    "critic",
+    "target_critic",
+    "alpha"
+  ],
+  "fork_checkpoint": {
+    "algo": "sac",
+    "iteration": 1399,
+    "next_iteration": 1400,
+    "total_steps": 5600000,
+    "update_count": 350000
+  },
+  "identity": {
+    "actor_update_period": 1,
+    "algo": "sac",
+    "benchmark_role": "power_confirmation_fixed_canonical_reference",
+    "env": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "final_next_iteration": 2100,
+    "final_total_steps": 8400000,
+    "final_update_count": 525000,
+    "fixed_mode": 0,
+    "protocol_version": "v32-canonical-action-compensation-power-confirmation",
+    "select_best_validation": false,
+    "source_next_iteration": 1400,
+    "training_seed": 88157,
+    "variant": "canonical_mode0_final"
+  },
+  "optimizer_reset": true,
+  "policy_selection": "final",
+  "registration": {
+    "sha256": "95c1c434989cb31e018e8df703f6664ba645c980270360311d1f28c415a8bd3d",
+    "size": 9754
+  },
+  "replay_reset": true,
+  "schema": "bapr.canonical-compensation-bootstrap.v32",
+  "source_bundle_manifest": {
+    "sha256": "1708eb9a35c438b7d6a9d3bf1d7ea70a1c94deee79e0ce141cb9beccb7af3d13",
+    "size": 1169
+  },
+  "source_checkpoint": {
+    "algo": "sac",
+    "iteration": 1399,
+    "next_iteration": 1400,
+    "total_steps": 5600000,
+    "update_count": 350000
+  },
+  "status": "complete"
+}

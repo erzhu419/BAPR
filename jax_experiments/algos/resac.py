@@ -11,17 +11,38 @@ from flax import nnx
 from jax_experiments.algos.sac_base import SACBase
 
 
+def reference_reg_norm(critic):
+    """Original RE-SAC L1 sum: all kernels and hidden biases, not output bias."""
+    total = jnp.zeros(critic.ensemble_size)
+    for index, layer in enumerate(critic.layers):
+        total += jnp.abs(layer.kernel.value).sum(axis=(1, 2))
+        if index < critic.n_hidden:
+            total += jnp.abs(layer.bias.value).sum(axis=(1, 2))
+    return total
+
+
+def regularization_bonus(critic, weight, mode):
+    bonus = weight * reference_reg_norm(critic)
+    if mode == "shared":
+        bonus = jnp.full_like(bonus, bonus.mean())
+    return bonus
+
+
 class RESAC(SACBase):
     """Ensemble SAC with LCB policy optimization.
 
     ``resac_independent_ratio=1`` preserves the legacy BAPR fork.  The
     completed MuJoCo B0 artifact used a 0.75 independent/min target blend,
     an EMA evaluation actor, and an anchor to the best evaluated actor.  These
-    are opt-in so an old checkpoint never changes semantics on resume.
+    compatibility controls are opt-in.
 
     The positive target shift used by the bus implementation is intentionally
     preserved.  MuJoCo B0 comparisons disable it with ``weight_reg=0`` rather
     than silently changing its sign.
+
+    The norm excludes output bias as in the original RE-SAC.  The completed
+    V39 regularized cohort included that bias; its checkpoints remain valid
+    for evaluation, but not an unchanged-semantics training continuation here.
     """
 
     def __init__(self, *args, **kwargs):
@@ -39,6 +60,9 @@ class RESAC(SACBase):
         gamma = self.config.gamma
         tau = self.config.tau
         weight_reg = float(getattr(self.config, "weight_reg", 0.0))
+        norm_mode = self.config.resac_reg_norm_mode
+        if norm_mode not in ("per_head", "shared"):
+            raise ValueError("resac_reg_norm_mode must be per_head or shared")
         beta_ood = float(getattr(self.config, "beta_ood", 0.0))
         beta_bc = float(getattr(self.config, "resac_beta_bc", 0.0))
         independent_ratio = float(getattr(
@@ -85,6 +109,8 @@ class RESAC(SACBase):
                 (obs, act, rew, next_obs, done, update_index) = batch_data
                 key, target_key, policy_key = jax.random.split(key, 3)
                 alpha = jnp.exp(log_a)
+                reg_bonus = regularization_bonus(
+                    nnx.merge(gd_target, target_p), weight_reg, norm_mode)[:, None]
 
                 def critic_loss_fn(candidate_critic_p):
                     target_model = nnx.merge(gd_target, target_p)
@@ -99,9 +125,6 @@ class RESAC(SACBase):
                     # Do not flip this sign.  It is the empirically validated
                     # bus implementation; deterministic MuJoCo B0 sets the
                     # coefficient to zero.
-                    reg_bonus = (
-                        weight_reg
-                        * target_model.compute_reg_norm()[:, None])
                     bootstrap = target_q + reg_bonus - alpha * next_log_prob
                     target = (
                         rew.squeeze(-1)
@@ -131,11 +154,7 @@ class RESAC(SACBase):
                     critic_model = nnx.merge(gd_critic, new_critic_p)
                     new_action, log_prob = policy_model.sample(
                         obs, policy_key)
-                    target_reg = (
-                        weight_reg
-                        * nnx.merge(
-                            gd_target, target_p).compute_reg_norm()[:, None])
-                    q_values = critic_model(obs, new_action) + target_reg
+                    q_values = critic_model(obs, new_action) + reg_bonus
                     q_mean = q_values.mean(axis=0)
                     q_std = q_values.std(axis=0)
                     lcb = q_mean + beta_lcb * q_std

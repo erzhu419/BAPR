@@ -29,6 +29,7 @@ BRAX_ENV_MAP = {
     'HalfCheetah-v2': 'halfcheetah', 'HalfCheetah-v4': 'halfcheetah', 'HalfCheetah-v5': 'halfcheetah',
     'Walker2d-v2': 'walker2d', 'Walker2d-v4': 'walker2d', 'Walker2d-v5': 'walker2d',
     'Ant-v2': 'ant', 'Ant-v4': 'ant', 'Ant-v5': 'ant',
+    'Swimmer-v2': 'swimmer', 'Swimmer-v4': 'swimmer', 'Swimmer-v5': 'swimmer',
 }
 
 
@@ -58,8 +59,9 @@ def apply_action_disturbance(
     burst_active = jax.random.bernoulli(burst_key, burst_prob)
     impulse = jax.random.normal(
         impulse_key, action.shape, dtype=action.dtype)
+    signal = gain @ action if gain.ndim == 2 and action.ndim == 1 else gain * action
     executed = (
-        gain * action * packet_kept
+        signal * packet_kept
         + noise_std * noise
         + burst_active * burst_std * impulse)
     return jnp.clip(executed, -1.0, 1.0)
@@ -72,6 +74,11 @@ def _build_core_fns(env, env_name):
     debug = env._debug
     dt = env.dt
     brax_name = BRAX_ENV_MAP.get(env_name, env_name.lower())
+    # Keep the native frame count; remove the GPU loop around those substeps.
+    physics_unroll = (
+        True if brax_name == 'halfcheetah' and env.backend == 'spring'
+        and any(device.platform == 'gpu' for device in env.sys.gravity.devices())
+        else 1)
 
     fwd_w = getattr(env, '_forward_reward_weight', 1.0)
     ctrl_w = getattr(env, '_ctrl_cost_weight', 1e-3)
@@ -86,7 +93,7 @@ def _build_core_fns(env, env_name):
     def physics_step(sys, ps, action):
         def f(s, _):
             return pipeline.step(sys, s, action, debug), None
-        return jax.lax.scan(f, ps, (), n_frames)[0]
+        return jax.lax.scan(f, ps, (), n_frames, unroll=physics_unroll)[0]
 
     def reward_obs(ps0, ps1, action):
         x_vel = (ps1.x.pos[0, 0] - ps0.x.pos[0, 0]) / dt
@@ -94,6 +101,12 @@ def _build_core_fns(env, env_name):
             reward = fwd_w * x_vel - ctrl_w * jnp.sum(jnp.square(action))
             done = jnp.float32(0.0)
             pos = ps1.q[1:] if exclude_pos else ps1.q
+            obs = jnp.concatenate([pos, ps1.qd])
+        elif brax_name == 'swimmer':
+            x_vel = (ps1.q[0] - ps0.q[0]) / dt
+            reward = fwd_w * x_vel - ctrl_w * jnp.sum(jnp.square(action))
+            done = jnp.float32(0.0)
+            pos = ps1.q[2:] if exclude_pos else ps1.q
             obs = jnp.concatenate([pos, ps1.qd])
         elif brax_name in ('hopper', 'walker2d'):
             z = ps1.x.pos[0, 2]
@@ -130,6 +143,9 @@ def _build_core_fns(env, env_name):
     def init_obs(ps):
         if brax_name == 'halfcheetah':
             pos = ps.q[1:] if exclude_pos else ps.q
+            return jnp.concatenate([pos, ps.qd])
+        elif brax_name == 'swimmer':
+            pos = ps.q[2:] if exclude_pos else ps.q
             return jnp.concatenate([pos, ps.qd])
         elif brax_name in ('hopper', 'walker2d'):
             pos = ps.q.at[1].set(ps.x.pos[0, 2])

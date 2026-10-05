@@ -50,7 +50,7 @@ from jax_experiments.common.logging import Logger
 from jax_experiments.common.checkpoint import save_checkpoint, load_checkpoint, has_checkpoint
 from jax_experiments.envs.brax_env import BraxNonstationaryEnv as NonstationaryEnv
 from jax_experiments.envs.discrete_mode_env import DiscreteModePiecewiseEnv
-from jax_experiments.envs.stochastic_mode_env import StochasticModeEnv
+from jax_experiments.envs.stochastic_mode_env import MODE_FAMILIES, StochasticModeEnv
 
 
 def make_env(config, seed_offset=0):
@@ -74,6 +74,8 @@ def make_env(config, seed_offset=0):
     if env_type == 'stochastic_mode':
         fixed_mode_id = int(getattr(
             config, 'stochastic_mode_fixed_id', -1))
+        canonical_reference_mode_id = int(getattr(
+            config, 'stochastic_mode_canonical_reference_id', -1))
         return StochasticModeEnv(
             env_name=config.env_name,
             family=config.stochastic_mode_family,
@@ -82,7 +84,10 @@ def make_env(config, seed_offset=0):
             seed=config.seed + seed_offset,
             backend=config.brax_backend,
             fixed_mode_id=(
-                None if fixed_mode_id < 0 else fixed_mode_id))
+                None if fixed_mode_id < 0 else fixed_mode_id),
+            canonical_reference_mode_id=(
+                None if canonical_reference_mode_id < 0
+                else canonical_reference_mode_id))
     return NonstationaryEnv(
         config.env_name, rand_params=config.varying_params,
         log_scale_limit=config.log_scale_limit,
@@ -97,6 +102,9 @@ def make_algo(algo_name: str, obs_dim: int, act_dim: int, config: Config):
     if algo_name == "resac":
         from jax_experiments.algos.resac import RESAC
         return RESAC(obs_dim, act_dim, config, seed=config.seed)
+    elif algo_name == "resac_torch":
+        from jax_experiments.algos.resac_torch import TorchEquationRESAC
+        return TorchEquationRESAC(obs_dim, act_dim, config, seed=config.seed)
     elif algo_name == "escp":
         from jax_experiments.algos.escp import ESCP
         return ESCP(obs_dim, act_dim, config, seed=config.seed)
@@ -1024,7 +1032,39 @@ def collect_samples(agent, env, replay_buffer, config, n_steps: int,
                     ep_reward = 0.0
             return ep_rewards, recent_rollout
 
-        if getattr(agent, "uses_recurrent_context", False):
+        fused_chunks = getattr(env, "rollout_mode_chunks", None)
+        recurrent = bool(getattr(agent, "uses_recurrent_context", False))
+        if (callable(fused_chunks)
+                and env.family in ("actuator_polarity", "actuator_polarity_2d")
+                and env.dwell_distribution == "fixed"
+                and n_steps % env.rollout_chunk_steps == 0
+                and (recurrent or not hasattr(agent, "context_net"))
+                and not getattr(agent, "uses_regime_context", False)):
+            context_params = nnx.state(agent.context_net, nnx.Param) if recurrent else None
+            hidden = agent.context_net.initial_hidden((1,)) if recurrent else None
+            previous_action = jnp.zeros((agent.act_dim,), dtype=jnp.float32) if recurrent else None
+            transitions, task_ids, mode_ids, _, _ = fused_chunks(
+                policy_params, n_steps, rng_key, context_params=context_params,
+                initial_hidden=hidden, previous_action=previous_action,
+                warmup=rollout_warmup,
+                context_noise_sigma=float(getattr(config, "escp_bottleneck_sigma", 0.0)))
+            obs, act, rew, nobs, done = transitions
+            replay_buffer.push_batch_jax(
+                obs, act, rew.reshape(-1, 1), nobs, done.reshape(-1, 1), task_ids)
+            episode_rewards, episode_reward = [], 0.0
+            for reward, terminal in zip(np.asarray(rew), np.asarray(done)):
+                episode_reward += float(reward)
+                if float(terminal) > 0.5:
+                    episode_rewards.append(episode_reward)
+                    episode_reward = 0.0
+            return episode_rewards, {
+                "obs": obs, "act": act, "rew": rew.reshape(-1, 1),
+                "next_obs": nobs, "done": done.reshape(-1, 1),
+                "task_id": task_ids, "rollout_task_id": int(mode_ids[-1]),
+                "rollout_task_ids": np.asarray(mode_ids, dtype=np.int32),
+            }
+
+        if recurrent:
             context_params = nnx.state(agent.context_net, nnx.Param)
             switch_steps = int(getattr(env, "rollout_chunk_steps", 0))
             if switch_steps <= 0 or switch_steps >= n_steps:
@@ -1600,7 +1640,7 @@ def train(config: Config):
                                     "bapr_unsupervised")
             _escp_like = _algo in ("escp", "bapr_no_bocd", "bapr_no_adapt_beta",
                                     "bapr_fixed_decay")
-            _resac_like = _algo == "resac"
+            _resac_like = _algo in ("resac", "resac_torch")
 
             # Change 3: belief-aware replay sampling for BAPR. When BOCD detects
             # a regime shift (high λ_w), sample more from recent transitions.
@@ -1812,7 +1852,7 @@ def train(config: Config):
 def main():
     parser = argparse.ArgumentParser(description="JAX RL Training")
     parser.add_argument("--algo", type=str, default="resac",
-                        choices=["resac", "escp", "bapr", "bapr_v2",
+                        choices=["resac", "resac_torch", "escp", "bapr", "bapr_v2",
                                  "bapr_v3", "bapr_regime", "bapr_v4",
                                  "bapr_v5", "bapr_v6",
                                  "anchored_regime_sac",
@@ -1838,6 +1878,9 @@ def main():
     parser.add_argument(
         "--lr", type=float, default=None,
         help="Override the actor/critic/temperature learning rate.")
+    parser.add_argument("--gamma", type=float, default=None)
+    parser.add_argument("--tau", type=float, default=None)
+    parser.add_argument("--alpha", type=float, default=None)
     parser.add_argument(
         "--clip_norm", type=float, default=None,
         help="Override gradient clipping norm; non-positive disables clipping.")
@@ -2065,6 +2108,8 @@ def main():
         help="RE-SAC critic updates per actor update.")
     parser.add_argument("--resac_independent_ratio", type=float, default=None,
                         help="Blend independent and shared-min critic targets.")
+    parser.add_argument("--resac_reg_norm_mode", choices=("per_head", "shared"), default=None,
+                        help="Use per-head or ensemble-mean positive RE-SAC norm shifts.")
     parser.add_argument("--resac_anchor_lambda", type=float, default=None)
     parser.add_argument("--resac_adaptive_beta", action="store_true")
     parser.add_argument("--resac_beta_start", type=float, default=None)
@@ -2073,6 +2118,8 @@ def main():
     parser.add_argument("--resac_critic_actor_ratio", type=int, default=None)
     parser.add_argument("--resac_beta_bc", type=float, default=None)
     parser.add_argument("--resac_clip_norm", type=float, default=None)
+    parser.add_argument("--resac_reward_transform", choices=("raw", "bus_standardized"), default=None,
+                        help="Torch-equation RE-SAC minibatch reward processing; replay/eval remain raw.")
     parser.add_argument("--ema_tau", type=float, default=None,
                         help="EMA policy update coefficient.")
     parser.add_argument("--use_ema_eval", action="store_true",
@@ -2335,10 +2382,7 @@ def main():
                              "'m_mild', 'mixed_mild' use milder MODE_VARIANTS "
                              "presets. See discrete_mode_env.MODE_VARIANTS.")
     parser.add_argument("--stochastic_mode_family", type=str, default=None,
-                        choices=["deterministic_mean", "variance_only",
-                                 "mean_variance", "packet_loss",
-                                 "burst_torque", "structured_channel",
-                                 "actuator_polarity"])
+                        choices=sorted(MODE_FAMILIES))
     parser.add_argument("--stochastic_mode_dwell_steps", type=int,
                         default=None)
     parser.add_argument("--stochastic_mode_dwell_distribution", type=str,
@@ -2351,6 +2395,12 @@ def main():
         choices=range(4),
         help="Lock stochastic-mode training to one persistent mode. Strict "
              "evaluation can explicitly re-enable switching.")
+    parser.add_argument(
+        "--stochastic_mode_canonical_reference_id", type=int, default=None,
+        choices=range(4),
+        help="For actuator_polarity only, keep the hidden mode clock but "
+             "present policy and replay actions in this reference mode's "
+             "canonical coordinates.")
     parser.add_argument("--early_kill_iter", type=int, default=None,
                         help="Sweep feasibility filter: if eval_reward stays "
                              "below --early_kill_reward through this iter, "
@@ -2398,6 +2448,10 @@ def main():
     config.ep_dim = args.ep_dim
     config.ensemble_size = args.ensemble_size
     config.hidden_dim = args.hidden_dim
+    for name in ("gamma", "tau", "alpha"):
+        value = getattr(args, name)
+        if value is not None:
+            setattr(config, name, value)
     if args.lr is not None:
         if not np.isfinite(args.lr) or args.lr <= 0.0:
             parser.error("--lr must be finite and positive")
@@ -2552,6 +2606,8 @@ def main():
         if not 0.0 <= args.resac_independent_ratio <= 1.0:
             parser.error("--resac_independent_ratio must be in [0, 1]")
         config.resac_independent_ratio = args.resac_independent_ratio
+    if args.resac_reg_norm_mode is not None:
+        config.resac_reg_norm_mode = args.resac_reg_norm_mode
     if args.resac_anchor_lambda is not None:
         if args.resac_anchor_lambda < 0.0:
             parser.error("--resac_anchor_lambda must be non-negative")
@@ -2575,6 +2631,10 @@ def main():
         if args.resac_clip_norm < 0.0:
             parser.error("--resac_clip_norm must be non-negative")
         config.resac_clip_norm = args.resac_clip_norm
+    if args.resac_reward_transform is not None:
+        if args.algo != "resac_torch":
+            parser.error("--resac_reward_transform requires --algo resac_torch")
+        config.resac_reward_transform = args.resac_reward_transform
     if args.ema_tau is not None:
         if not 0.0 <= args.ema_tau <= 1.0:
             parser.error("--ema_tau must be in [0, 1]")
@@ -2796,6 +2856,9 @@ def main():
         config.regime_context_source = args.regime_context_source
     if args.stochastic_mode_fixed_id is not None:
         config.stochastic_mode_fixed_id = args.stochastic_mode_fixed_id
+    if args.stochastic_mode_canonical_reference_id is not None:
+        config.stochastic_mode_canonical_reference_id = (
+            args.stochastic_mode_canonical_reference_id)
     if args.early_kill_iter is not None:
         config.early_kill_iter = args.early_kill_iter
     if args.early_kill_reward is not None:

@@ -115,7 +115,7 @@ def posterior_update(
     log_likelihood: np.ndarray,
     config: FilterConfig,
 ) -> np.ndarray:
-    """Apply one stable sticky-HMM Bayes update."""
+    """Apply one numerically stable tempered sticky-belief update."""
     posterior = np.asarray(posterior, dtype=np.float64)
     evidence = np.asarray(log_likelihood, dtype=np.float64)
     if posterior.shape != (len(MODES),) or evidence.shape != posterior.shape:

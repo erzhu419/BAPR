@@ -250,6 +250,32 @@ def test_stochastic_mode_fixed_id_is_validated():
             fixed_mode_id=4)
 
 
+def test_canonical_action_coordinates_keep_mode_clock_and_reference_gain():
+    env = StochasticModeEnv(
+        "HalfCheetah-v2", family="actuator_polarity", dwell_steps=8,
+        dwell_distribution="fixed", seed=41, backend="spring",
+        canonical_reference_mode_id=0)
+    tasks = env.sample_tasks(4)
+    reference_gain = np.asarray(tasks[0]["action_gain"])
+    env.set_task(tasks[2])
+    env.reset()
+    _, _, _, info = env.step(np.full(env.act_dim, 0.2, dtype=np.float32))
+    assert info["mode_used"] == 2
+    assert info["canonical_reference_mode_id"] == 0
+    np.testing.assert_allclose(info["action_gain"], reference_gain, atol=1e-7)
+    np.testing.assert_allclose(
+        info["mode_action_gain"], tasks[2]["action_gain"], atol=1e-7)
+    assert not np.array_equal(info["action_gain"], info["mode_action_gain"])
+
+
+def test_canonical_action_coordinates_reject_non_polarity_families():
+    with np.testing.assert_raises_regex(ValueError, "actuator_polarity"):
+        StochasticModeEnv(
+            "HalfCheetah-v2", family="structured_channel", dwell_steps=8,
+            dwell_distribution="fixed", seed=43, backend="spring",
+            canonical_reference_mode_id=0)
+
+
 def test_mode_latent_is_full_one_hot_posterior_coordinate():
     np.testing.assert_array_equal(
         _mode_latent({"mode_id": 2}, 4),

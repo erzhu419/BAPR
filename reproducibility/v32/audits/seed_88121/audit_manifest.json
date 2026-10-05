@@ -1,0 +1,89 @@
+{
+  "audit": {
+    "sha256": "f5df917eff6ab23aca2a884fb784773ce085d2e9ff866f4009b52f71bc14d131",
+    "size": 66057
+  },
+  "frozen_inputs": {
+    "canonical_reference": {
+      "sha256": "0da89f770e84a24081b61c9544066efbc6b38c000c11a679df5093932c54d66f",
+      "size": 1634
+    },
+    "escp_recurrent": {
+      "sha256": "dfc05de9d1d0fcaf52492bc92169fa581bd946cadc34981e31a3dde193489ae3",
+      "size": 1226
+    },
+    "resac_b0": {
+      "sha256": "d7fda7283f0fa8b1735001a70f9841f576757274bc3a503d19d2d7dbfa8e61da",
+      "size": 1222
+    },
+    "robust_long": {
+      "sha256": "3ce1843dd721f5e962cec36199bdda1a872ec75e268084c9825f805b8f121783",
+      "size": 1218
+    },
+    "robust_source": {
+      "sha256": "9e63a3019100ff75106ac882abaaa782124b14aa093c6a1e2576db9f378f8511",
+      "size": 1169
+    },
+    "v5_estimator": {
+      "manifest": {
+        "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+        "size": 111777
+      },
+      "parameters": {
+        "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+        "size": 2713311
+      }
+    }
+  },
+  "identity": {
+    "arms": [
+      "robust_sac_5p6m",
+      "robust_sac_8p4m",
+      "canonical_no_compensation",
+      "canonical_true_mode_compensation",
+      "canonical_v5_map_compensation",
+      "escp_recurrent_8p4m",
+      "resac_b0_8p4m"
+    ],
+    "benchmark_role": "power_confirmation_canonical_compensation",
+    "protocol_version": "v32-canonical-action-compensation-power-confirmation",
+    "reference_mode": 0,
+    "stationary_holdout_event_seeds": [
+      197101,
+      197117,
+      197133
+    ],
+    "switching_event_seeds": [
+      197201,
+      197217,
+      197233
+    ],
+    "switching_schedules": {
+      "197201": [
+        2,
+        0,
+        3,
+        1
+      ],
+      "197217": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "197233": [
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    "training_seed": 88121
+  },
+  "registration": {
+    "sha256": "95c1c434989cb31e018e8df703f6664ba645c980270360311d1f28c415a8bd3d",
+    "size": 9754
+  },
+  "schema": "bapr.canonical-compensation-power-audit.v32",
+  "status": "complete"
+}

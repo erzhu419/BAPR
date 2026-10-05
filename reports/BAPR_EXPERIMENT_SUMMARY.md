@@ -1,13 +1,78 @@
 # BAPR experiment summary
 
-Last updated: 2026-09-12
+Last updated: 2026-09-30
 
-This is the single retained experiment summary after deleting historical raw
+This is the retained historical experiment summary after deleting historical raw
 checkpoints, result arrays, plots, and intermediate reports. The final v82/v83
 artifacts were also removed after the corrected sweep was synchronized and
 audited; source code and scheduler metadata remain.
 
-## Bottom line
+## Current paper decision
+
+Retain **V32: one frozen reference policy plus causal action compensation**.
+It is the primary prospective ten-policy-seed result, not a new selection of
+the highest historical return. Its HalfCheetah switching mean is **3297.1**.
+
+| Comparator (8.4M policy interactions) | Switching mean | BAPR relative gain | Paired difference, 95% CI | Seed wins |
+|---|---:|---:|---:|---:|
+| Robust SAC | 2287.1 | +44.2% | +1009.9 [391.7, 1628.2] | 7/10 |
+| Recurrent ESCP | 2046.0 | +61.1% | +1251.1 [553.5, 1948.7] | 9/10 |
+| RE-SAC | 2360.2 | +39.7% | +936.9 [337.1, 1536.7] | 9/10 |
+
+All three paired intervals support positive average effects. The frozen
+composite remains negative: SAC consistency is 7/10 seeds and 23/30 events,
+and 10% oracle headroom holds for 7/10 seeds, below the registered requirements.
+Policy budgets are matched; separately trained estimator/provider costs are not.
+This supports a bounded average-effect claim for identifiable, invertible
+actuator regimes, not universal improvement across environments or seeds.
+
+V33's direct canonical training beats the original warm-start on only 3/5
+paired development seeds (difference +162.0, CI [-480.3, 804.3]); retain the
+original recipe. The independent Swimmer screen is now complete: true-mode
+50.30 versus robust 55.04 (-8.6%), with sufficient headroom in only 1/3 seeds.
+Full horizons and exact native/oracle return equivalence pass. No Swimmer
+estimator or additional training batch follows this negative screen.
+
+Current records: `reports/regime_polarity_action_compensation_power_v32_2026-09-13.md`,
+`reports/regime_polarity_canonical_training_v33_2026-09-22.md`, and
+`reports/swimmer_polarity_screen_v1_2026-09-27.md`. The evidence table is in
+`reports/BAPR_FOUR_ENVIRONMENT_EVIDENCE_2026-09-12.md`.
+
+## Pending mechanism-gap experiments (2026-09-30)
+
+Scheduler batch `t106712-t106751` contains 20 GPU and 20 CPU tasks. No scientific
+outcome is available yet. The first GPU smoke gates the new training; CPU audits
+and aggregates wait for compact output files, including successful retries.
+
+- Frozen V32 identification ablations: no temporal filter and frozen head 0,
+  plus fresh inverse/classifier pairs sharing calibration data and minibatches.
+  Nine policies are evaluated; provider policy 88003 is excluded. Three new
+  estimator seeds separate representation effects from one fitting seed.
+- Information-matched SAC: five fresh paired policy seeds, 8.4M interactions
+  and 525k updates per arm. Both use the frozen V5 inference model; conditioned
+  SAC trains on causal inferred beliefs, not privileged oracle mode labels.
+- Independent Reacher: three fresh equal-budget robust/reference pairs,
+  followed by dynamic-oracle, all-fixed-context and native-equivalence audits.
+  Estimator training follows only if the registered headroom screen passes.
+
+Protocol: `reports/mechanism_gap_v34_preregistration_2026-09-30.md`. Checkpoints
+and raw calibration trajectories remain remote; only compact downstream bundles
+and JSON audits are synchronized. Thirteen targeted tests pass, including matching
+the next SAC update after checkpoint restoration. No new Brax/Lean proofs or
+V32 outcome/claim changes are part of this batch.
+
+Runtime-only sampling benchmarks (`t106771-t106773`) execute identical
+4000-step inputs without policy updates. Physics-loop unroll 4 reduces HC
+reference median time from 7.211 to 6.684 s (RTX 2080) and conditioned time
+from 5.971 to 5.759 s (RTX 3080 Ti), with zero full-trajectory/posterior delta
+in both tests. Future V34 HC runs use this lowering; running jobs are not
+restarted. Outer-loop unroll is not adopted; Reacher remains native pending
+its timing result. Each benchmark synchronizes only a small `timing.json`.
+
+## Historical summary (through 2026-09-12)
+
+The following records preserve earlier decisions. They do not replace the
+current V32 paper result above; legacy return scales are not comparable to it.
 
 - The strongest completed legacy BAPR reference is **v45**, not any later
   controller variant. Its 3-seed tail-20 returns are HalfCheetah
@@ -42,9 +107,9 @@ audited; source code and scheduler metadata remain.
   changes cannot replace the bus implementation without bus smoke and
   multi-seed regression tests.
 
-## Current four-environment evidence
+## Four-environment snapshot (2026-09-12)
 
-The latest valid rows use different evidence tiers and must not be read as one
+These historical rows use different evidence tiers and must not be read as one
 homogeneous BAPR benchmark. The complete interpretation is in
 `reports/BAPR_FOUR_ENVIRONMENT_EVIDENCE_2026-09-12.md`.
 
@@ -4811,3 +4876,778 @@ headroom over SAC is only +2.3%, -2.3%, and +4.1%, while causal recovery remains
 training variance, not mode inference or causal compensation. V31 and V32 must
 still be reported separately, and neither failed registered decision may be
 relabeled as PASS.
+
+## Reacher runtime correction (2026-09-30)
+
+The long-running V34 Reacher jobs are dominated by native GPU simulation,
+not SAC updates. De-colocating the two jtl311linux jobs reduced warm rollout
+time from about 212 to 30--32 seconds per 4,000 interactions; `t107776`
+restored the complete iteration-50 checkpoint of `t106738` (30 iterations
+were replayed). CPU sampling measured about 36x faster, but failed the original
+closed-loop trajectory tolerance, so it was not substituted into old checkpoints.
+The operator authorized a separate six-run CPU-sampling/GPU-update comparison,
+with unchanged seeds/physics/budget and a matched JAX/Brax runtime, conditional
+on single-step and paired-return admission. Admission and replacement paths are
+specified in the V34 preregistration; old results remain a separate cohort.
+Admission `t107840` passed all six independent diagnostic cases: maximum
+single-step observation difference 2.21e-6, every paired return interval within
+the frozen 1% margin, and finite CPU-sampling/GPU-update smoke. Measured sampler
+speedups in that audit were 9.1--12.5x (including host-to-device delivery).
+The five remaining old Reacher trainers and their four queued downstream jobs
+were cancelled only after admission; old checkpoints/results were retained.
+Replacement trainers `t107866-t107871` completed from scratch, two each on
+jtl311linux/jtl110gpu2/jtl110gpu. Warm production rollout/update times are
+0.86--2.19/0.10--0.17 seconds per 4,000 samples/250 updates; observed full-budget
+training took 8.3--16.3 minutes. Every bundle records 400 iterations, 1.6M steps,
+and 100,000 updates. Audits `t107856,t107859,t107862` and aggregate `t107863`
+also completed.
+CPU evaluation uses a separate CPU-only environment with matching
+JAX/Brax/Flax/MuJoCo versions. The scheduler's CPU-device heuristic now excludes
+the sampling-device argument; eight policy tests passed and the watcher was
+reloaded without stopping unrelated training. No training checkpoint was pulled.
+
+## Other-environment sampler screen (2026-09-30)
+
+Scheduler diagnostics `t107891-t107894,t107909` timed identical-input, untrained
+actor rollouts on JAX 0.4.38 / Brax 0.10.5. Each row is a same-host comparison;
+medians cover three warm 4,000-step calls, actor refresh and delivery to GPU.
+
+| Sampler | GPU seconds | CPU seconds | CPU speedup |
+|---|---:|---:|---:|
+| HalfCheetah reference | 4.716 | 8.819 | 0.53x |
+| HalfCheetah with frozen online estimator | 5.214 | 8.974 | 0.58x |
+| Ant | 2.544 | 3.198 | 0.80x |
+| Hopper | 1.341 | 0.532 | 2.52x |
+| Walker2d | 1.290 | 0.628 | 2.05x |
+
+Next: validate CPU sampling for Hopper/Walker before any fresh matched training;
+retain GPU sampling for the current HC/Ant runs. All CPU closed-loop traces
+exceeded the original tolerance, so this screen admits no backend substitution.
+Only timing JSON was synchronized. Unlaunched `t107890` failed SSH startup and
+was replaced by `t107909`; no scientific run or checkpoint was restarted.
+
+## Mechanism-gap follow-up results (2026-09-30)
+
+All three final aggregates (`t106749`, `t106750`, `t107863`) completed and
+synchronized. No BAPR task remains active; terminal records are archived.
+All ten HC bundles contain 8.4M interactions/525,000 updates, and all six
+matched-runtime Reacher bundles contain 1.6M interactions/100,000 updates.
+
+- Temporal filtering is supported: on nine frozen-policy seeds, compensation
+  returns 3136.9 versus 1944.9 without the filter; paired gain 1192.0,
+  95% CI [711.7, 1672.3], 9/9 wins. Mode accuracy rises from 83.42% to 98.53%.
+- Five inverse heads are not established as necessary: the fixed single-head
+  arm returns 3175.8; ensemble-minus-single gain -39.0, CI [-85.4, 7.4].
+  Fresh paired inverse models outperform the specified small direct classifiers
+  on identical data, but the models differ in capacity (732,190 vs 77,316
+  parameters); this does not rule out stronger classifiers.
+- Information-matched HC SAC remains competitive: compensation 3444.3 versus
+  conditioned SAC 2853.0; paired gain 591.3, CI [-541.7, 1724.4], 3/5 wins.
+  The positive mean is not statistically resolved. Both use the frozen estimator.
+- Independent Reacher oracle headroom passes: oracle -4.44 versus robust -28.16;
+  paired gain 23.72, CI [21.80, 25.65], 3/3 wins. Oracle also beats every fixed
+  compensation; all oracle/robust episodes retain three switches and the 200-step
+  horizon, and oracle/native return differences are zero.
+
+Next: train a Reacher inverse estimator on disjoint provider trajectories and
+test causal compensation without changing its admitted CPU-sampling protocol.
+Keep V32 unchanged. These are diagnostics, not pooled V32 confirmation results;
+Reacher has no learned-estimator result yet, and HC bundles do not record runtime
+versions as the new Reacher group does. No additional tasks were submitted.
+
+## Reacher causal follow-up launched (2026-09-30)
+
+Frozen protocol: `reports/reacher_causal_v35_preregistration_2026-09-30.md`.
+Scheduler tasks `t109206-t109215` cover GPU smoke, disjoint provider seed 94003,
+one shared calibration dataset, three estimator fits, three CPU audits and
+aggregation. Smoke passed with the admitted JAX/Brax/Flax/MuJoCo versions.
+Original policies and V32 are unchanged; estimator seed 95103 is primary,
+95121/95139 are sensitivity repeats, not extra policy seeds. The new causal
+evaluation uses fresh event streams and includes no-filter/single-head controls.
+Both 110 SSH routes were unavailable at dispatch; calibration/fits were moved
+to jtl311linux before data generation. Provider t109207 was also pinned there
+after stale probe data selected the unreachable jtl110gpu2 route. Arrays/checkpoints stay remote; only
+compact models/JSON synchronize. Next: compare real causal recovery to the
+robust, oracle and fixed-context anchors after all three audits complete.
+At handoff the provider remains queued for scheduler checkpoint-scan completion;
+training has not been confirmed running. CPU audits also require a working 110
+SSH jump route; their outputs remain gated on the completed estimators.
+
+## Reacher causal follow-up completed (2026-09-30)
+
+All ten tasks t109206-t109215, including aggregation, finished without retries
+and synchronized. Source: `jax_experiments/results_reacher_causal_v35/analysis/analysis.json`
+and its three policy-seed audits (n=3, not nine estimator/policy combinations).
+
+| Switching route | Mean return (higher is better) |
+| --- | ---: |
+| Oracle / native reference | -4.377 |
+| Robust SAC | -24.356 |
+| Primary causal compensation, estimator seed 95103 | -6.494 |
+| Best fixed compensation (mode 0) | -45.033 |
+| No temporal filter | -6.043 |
+| Fixed inverse head 0 | -6.513 |
+
+The frozen screen passes: causal-minus-robust is 17.862, paired 95% CI
+[15.303,20.421], 3/3 wins, recovering 89.38% of oracle headroom on average.
+All 585 switching episodes retain 200 steps/three switches/no termination;
+oracle/native returns match. Controllers retain 1.6M interactions/100,000
+updates and matching runtimes. Stationary causal/robust/oracle: -7.050/-26.095/-4.940.
+
+Primary/no-filter mode accuracy: 81.60%/51.04%; Brier: 0.386/0.717;
+sustained detections: 129/135 versus 15/135. Median delays including missed
+switches censored at 50 steps: 9 versus 50. Causal-minus-no-filter return is
+-0.451, CI [-2.082,1.180]; causal-minus-head0 is 0.020, CI [-0.123,0.162].
+
+Extra estimator cost: provider 1.6M interactions (9.34 minutes), shared
+calibration 260,000 interactions (106 seconds), 4500 updates/model (~24 seconds).
+Times exclude queue waiting; analysis used existing JSON, no checkpoint/data pulls.
+
+Limitations: not fresh five-seed confirmation or equal-total-cost evidence.
+Neither filtering nor five heads establishes a return benefit. Old audits'
+switch-window mode-error field is inapplicable without an estimator and excluded;
+the exporter now emits null (five regression tests pass); original audits are retained.
+
+Next: freeze estimator/controls; confirm on five fresh policy seeds, retaining
+no-filter/head0 controls and explicit estimator cost. No new tasks submitted;
+V32, bus, manuscript and Lean unchanged.
+
+## Reacher fresh-five confirmation submitted (2026-09-30)
+
+Frozen protocol: `reports/reacher_confirmation_v36_preregistration_2026-09-30.md`.
+Reuse estimator 95103 without retraining; fresh policy seeds are
+96003/96021/96039/96057/96079. Tasks t109975-t109991 cover smoke, ten separate
+reference/robust trainings, five CPU audits and aggregation, with no local jobs.
+Remote smoke passed on jtl311linux; both 110gpu matching runtimes were checked.
+All ten trainings are running: two on jtl311linux, four on jtl110gpu and four
+on jtl110gpu2. Five CPU audits and aggregation remain gated on their outputs.
+37 regression tests passed; the local version-specific native-reset case was
+excluded, while remote smoke exercised the admitted CPU-sampling/GPU-update path.
+Keep no-filter/head0/fixed/oracle controls and the original decision criteria;
+report shared historical estimator cost separately. Training checkpoints and
+calibration arrays stay remote. Next: analyze only the five fresh seed audits;
+V32, bus, paper and Lean remain unchanged.
+
+## Reacher fresh-five confirmation completed (2026-10-01)
+
+All 17 tasks t109975-t109991 completed without retries and synchronized,
+including aggregation. Source: `jax_experiments/results_reacher_confirmation_v36/analysis/analysis.json`
+and five fresh policy-seed audits; exploratory seeds are not pooled.
+
+| Switching route | Mean return (higher is better) |
+| --- | ---: |
+| Oracle / native reference | -4.420 |
+| Frozen causal compensation | -6.248 |
+| Robust SAC | -23.158 |
+| Best fixed compensation (mode 2) | -55.796 |
+| No temporal filter | -5.707 |
+| Fixed inverse head 0 | -6.316 |
+
+The preregistered screen passes: causal-minus-robust 16.910, paired 95% CI
+[15.255,18.565], 5/5 wins; mean per-policy oracle-headroom recovery is 90.21%.
+All 825 switching route episodes retain 200 steps/three switches/no termination,
+oracle/native returns match, and all ten controllers complete 1.6M interactions/
+100,000 updates with the admitted runtime. Measured training takes 9.36-19.07
+minutes/controller, excluding queue/sync waiting. Stationary causal/robust/oracle
+returns are -6.493/-23.199/-4.818; causal beats robust in all four stationary modes.
+
+Negative ablation: causal-minus-no-filter is -0.541, CI [-0.751,-0.331], 0/5
+wins. Filtering improves mode accuracy (81.13% versus 52.43%), Brier (0.407
+versus 0.716) and sustained detection (215/225 versus 17/225), but lowers return.
+Median delays including undetected switches censored at 50 steps are 10/50.
+Ensemble-minus-head0 is 0.068, CI [-0.213,0.349], with no established advantage.
+
+Limitations: this confirms causal compensation versus memoryless robust SAC
+and fixed controls, not superiority over same-information SAC/ESCP/RE-SAC.
+Controller budgets match; historical estimator cost adds 1.6M provider plus
+260,000 calibration interactions and 4500 estimator updates. No checkpoints,
+CSV or calibration arrays were pulled for this analysis.
+
+Next: retain V32 as the main frozen configuration and use Reacher as independent
+task applicability evidence, with both negative ablations disclosed. The next
+comparison should use the same frozen estimator information, rather than retune
+on these confirmation seeds. No new tasks submitted; bus, paper and Lean unchanged.
+
+## Reacher same-information comparison submitted (2026-10-01)
+
+Protocol: `reports/reacher_information_v37_preregistration_2026-10-01.md`.
+Tasks t110054-t110070 use fresh development seeds 97007/97027/97047:
+12 separate native-reference/robust/filtered-conditioned/instant-conditioned
+SAC trainings, one remote smoke, three CPU audits and aggregation. Both
+same-information routes reuse frozen inverse 95103; controller budgets remain
+1.6M interactions/100,000 updates, with shared estimator cost disclosed.
+47 regression tests pass; the local version-specific native-reset case is
+excluded and the matched remote smoke exercises the actual CPU/GPU path.
+Smoke on jtl311linux passed both learner paths; steady 4000-step online-inference
+sampling takes 3.812/3.682 seconds, projecting ~25 minutes of pure sampling.
+These timings exclude updates and concurrent contention, not whole-task ETA.
+All twelve trainings are running without retries: two on jtl311linux, six on
+jtl110gpu, four on jtl110gpu2. CPU audits and aggregation wait for predecessors.
+No local jobs or checkpoint pulls; V32, V36 holdout, bus, paper and Lean unchanged.
+Next: compare filtered compensation with filtered SAC and the predefined
+instantaneous pair separately; retain negative outcomes, with no retuning.
+
+## Reacher same-information comparison completed (2026-10-01)
+
+All 17 tasks t110054-t110070 are done and synchronized, without retries.
+The aggregate waited on audit JSON availability and then input staging;
+staging the four small input directories and redispatching completed it on
+node001. No scheduler code changes or checkpoint/CSV pulls were needed.
+Source: `jax_experiments/results_reacher_information_v37/analysis/analysis.json`.
+
+Switching means: oracle -4.722; filtered compensation -6.723; filtered
+conditioned SAC -14.683; instantaneous compensation -6.078; instantaneous
+conditioned SAC -10.774; memoryless robust SAC -25.590.
+Filtered matched difference: +7.960, paired 95% CI [6.755,9.165], 3/3 wins.
+Instantaneous matched difference: +4.696, CI [3.746,5.646], 3/3 wins.
+Stationary filtered compensation/conditioned SAC: -5.471/-11.625.
+All 585 switching episodes retain 200 steps and three switches; oracle/native
+returns match. All 12 controllers complete 1.6M interactions/100,000 updates
+with the admitted runtime, taking 8.81-28.71 minutes excluding queue/staging.
+
+Limitations: three fresh development seeds, not independent five-seed confirmation
+or an ESCP/RE-SAC reproduction. Shared estimator costs match between the two
+information-matched routes, not against memoryless SAC. Conditioned actors have
+70,916 parameters versus 69,892; the temporal filter still does not establish a
+return benefit (the negative V36 ablation is retained).
+Next: freeze both matched comparisons for new five-seed confirmation; no retuning
+or new tasks submitted here. V32, V36 holdout, bus, manuscript and Lean unchanged.
+
+## Reacher matched five-seed confirmation submitted (2026-10-01)
+
+Protocol: `reports/reacher_information_confirmation_v38_preregistration_2026-10-01.md`.
+Tasks t116499-t116525 freeze V37 and estimator 95103 on untouched policy seeds
+99007/99027/99047/99067/99087 and fresh evaluation events. Twenty separate
+controller trainings retain 1.6M interactions/100,000 updates each; five CPU
+audits and aggregation consume compact exports/JSON, not full checkpoints.
+Primary remains filtered compensation minus filtered conditioned SAC; the
+instantaneous pair is secondary. Use the primary paired 95% CI across five
+seeds without an all-five-win rule or replacing it with the secondary result.
+23 focused tests pass. Remote smoke passed on jtl110gpu; steady online-inference
+sampling takes 1.986/1.335 seconds per 4000 steps, excluding updates/contention.
+All 20 trainings are running without retries: eight on jtl110gpu, eight on
+jtl110gpu2, four on jtl311linux. CPU evaluations remain gated on all four actors
+for their seed; aggregation waits for all five audits. No local jobs.
+Next: analyze only the untouched five-seed cohort without retuning or pooling
+development seeds. V32, V36, bus, manuscript and Lean remain unchanged.
+
+## Reacher matched five-seed confirmation completed (2026-10-01)
+
+All 27 tasks t116499-t116525 completed and synchronized, including aggregation,
+without retries. Source: `jax_experiments/results_reacher_information_confirmation_v38/analysis/analysis.json`
+and five untouched policy-seed audits; earlier cohorts are not pooled.
+
+| Switching route | Mean return (higher is better) |
+| --- | ---: |
+| Oracle / native reference | -4.457 |
+| Filtered compensation | -6.759 |
+| Filtered conditioned SAC | -14.400 |
+| Instantaneous compensation | -6.467 |
+| Instantaneous conditioned SAC | -10.395 |
+| Memoryless robust SAC | -27.079 |
+
+The preregistered primary comparison confirms: filtered compensation minus
+filtered conditioned SAC is +7.641, paired 95% CI [5.317,9.965], 5/5 wins.
+The predefined instantaneous secondary is +3.928, CI [2.816,5.040], 5/5 wins.
+Filtered compensation minus robust is +20.320, CI [18.357,22.283]; recovery of
+oracle headroom using the group means is 89.83%. Stationary filtered
+compensation/conditioned SAC returns are -5.683/-13.390.
+All 975 switching episodes retain 200 steps/three switches/no termination;
+700 stationary episodes are reported separately and oracle/native returns match.
+All 20 controllers complete 1.6M interactions/100,000 updates with the admitted
+runtime. Training takes 9.29-28.71 minutes/controller, excluding queue/staging.
+
+Limitations: filtering has no established return benefit here (filtered minus
+instantaneous -0.292, CI [-1.142,0.558]); the negative V36 ablation remains.
+Ensemble minus head 0 is -0.058, CI [-0.151,0.035], also no established gain.
+This confirms explicit compensation against same-information conditioned SAC
+in identifiable, reversible actuator regimes, not generic ESCP/RE-SAC superiority.
+Both matched routes carry the same historical 1.6M provider/260,000 calibration
+interactions and 4500 estimator updates; memoryless robust has no estimator cost.
+Conditioned actors have 70,916 parameters versus 69,892 for reference/robust.
+
+Next: integrate this independent confirmation into the paper with the shared
+costs and negative ablations, without retuning. Only existing compact JSON was
+read; no checkpoint/CSV pulls or new tasks. V32, bus, manuscript and Lean unchanged.
+
+## Independent Reacher evidence integrated into manuscript (2026-10-01)
+
+Added the untouched five-seed result to the abstract, contributions, Section 5.4,
+Table 3, Figure 4, discussion and protocol appendix. The paper retains the
+HalfCheetah record, inconclusive HalfCheetah matched comparison, negative filter
+ablation, estimator costs and interface/curriculum distinction. Compact JSON
+release: `reproducibility/reacher_confirmation`; plotting recomputes both paired
+intervals from its five audits. PDF compiles to 22 pages without unresolved
+references or box warnings; new table/figure pages were visually checked.
+No training, remote data pulls, algorithm or Lean changes. Next: submission-level
+claim, budget and reproducibility review, without retuning the confirmation cohorts.
+
+## Manuscript result and comparator audit (2026-10-01)
+
+Recomputed released episode means, paired intervals and wins for both cohorts;
+all reported statistics and controller budgets agree. Added the JSON-only checker
+`scripts/check_manuscript_results.py` and eight focused passing tests.
+Corrected the HalfCheetah comparator to RE-SAC-0: all ten runs disable both
+regularization terms. Corrected inverse fitting to AdamW and retained its costs.
+Released compact comparator configurations, budgets, interpreter paths and hosts.
+HalfCheetah spans two training profiles without historical dependency snapshots;
+this unresolved runtime confound is now explicit in the manuscript limitations.
+The independent Reacher confirmation retains matching recorded versions.
+PDF compiles to 22 pages without reference or box warnings; changed labels checked.
+Next: a matched-runtime regularized RE-SAC comparison, not more BAPR tuning.
+Frozen results/gates are unchanged; no jobs, remote pulls or Lean changes.
+
+## Matched-runtime regularized comparison submitted (2026-10-01)
+
+Frozen five new policy seeds and the unchanged V32 mechanism/events in
+`reports/regularized_comparison_v39_preregistration_2026-10-01.md`.
+Compare BAPR, SAC, recurrent ESCP, historical RE-SAC-0 and regularized RE-SAC
+at 8.4M interactions/525000 updates, with recorded JAX0.4.38/Brax0.10.5 profiles.
+RE-SAC regularizers both0.01; positive shift retained, fixed beta-2 and BC0.001.
+Corrected the old comparator's target-blend/annealing/anchor/EMA description;
+the full/zero recipe contrast is not a two-coefficient-only ablation.
+Main DAG t116663-t116698:30 independent GPU trains, five CPU audits, one aggregate.
+GPU smoke t116661 passed all four comparators; old failed smoke retries stopped.
+First dispatch launched17 trains: jtl110gpu8, jtl110gpu2 5, jtl311linux4.
+The remaining19 jobs wait for resources, source forks, model bundles or audits.
+Training excludes local/node007; compact evaluation inputs/JSON only, no CKPT pull.
+Five focused tests include exact source-fork checkpoint restoration; paper compiles.
+Next: inspect homogeneous-runtime paired results without retuning or pooling V32.
+
+## Runtime-matched comparison completed (2026-10-02)
+
+All30 trainers, five audits and aggregate t116698 completed; every compact
+bundle records the prescribed budget and identical dependency versions. Some
+jobs were subsequently admitted to node007 with that same recorded runtime.
+The five fresh seeds remain separate from V32 and reuse its evaluation windows.
+
+Switching means: BAPR3611.7, oracle3827.3, SAC2005.5, recurrent ESCP2059.1,
+RE-SAC-0 2218.2, regularized RE-SAC-148.0. BAPR wins5/5 against each baseline;
+paired95% intervals are +1606.2[571.8,2640.5] versus SAC,
++1552.6[543.3,2561.9] versus ESCP, +1393.5[562.0,2225.0] versus RE-SAC-0.
+Regularized RE-SAC fails stationary too (-149.0). In seed109003 its positive
+bonus reaches137.7 and Q mean13615/Q std320, versus117/0.84 for RE-SAC-0.
+This failed registered recipe is retained; it does not establish a successful
+original-paper RE-SAC reproduction. No sign change or coefficient retuning.
+
+Measured training lasts3.3-14.5h, with source/fork costs separated. Representative
+SAC/ESCP/RE-SAC runs spend80-91% collecting, 2-14% updating and5-6% evaluating.
+Next: validate fused mode-block collection with trained actors, unchanged keys,
+mode clocks, replay writes and causal recurrent carry; no new scientific cohort.
+
+Runtime checks t120469-t120471 completed on the two110 GPU servers; only three
+timing JSONs were synchronized. Every4000-step trained-policy trace, final state
+and mode history is bitwise identical, including recurrent ESCP.
+Adopted GPU HalfCheetah spring frame unrolling plus one-call polarity blocks:
+SAC5.287->4.465s, ESCP5.323->4.465s, RE-SAC5.349->4.422s (15.6-17.3% less
+sampling time). Frame counts, seeds, interaction/update budgets are unchanged.
+Initial compilation costs47-55s more; steady-state savings amortize this in
+about60 iterations. Peak benchmark VRAM868-890MB, not a4GB/8GB reservation.
+Twelve focused checks and25 existing regressions pass. Checkpoint layout,
+CPU physics/evaluation, bus and scheduler placement logic are unchanged.
+End-to-end savings under four-way GPU contention are not yet measured; the
+isolated sampler result is not a promise that a13h job now finishes in minutes.
+Next: inspect the RE-SAC norm/LCB scale failure separately, retain this frozen
+comparison, and measure actual throughput on the next required training batch.
+
+## Regularized RE-SAC isolated diagnosis (2026-10-02)
+
+All five full-RE-SAC checkpoints finish2099/8.4M/525000 with finite logged
+critic losses and Q. Remote-only, zero-update probes read256 own-replay transitions;
+only65,343 bytes of JSON were synced to `reports/resac_norm_lcb_diagnostics_2026-10-02`.
+Positive per-head bonuses135.9-137.7 dominate sampled absolute rewards0.55-0.69.
+Independent bootstraps accumulate offsets approximately gamma/(1-gamma)*bonus;
+head Q/bonus correlations exceed0.999. Raw/centered disagreement by seed:
+
+| Seed | Raw Q std | Head-mean-centered Q std | Offset share of disagreement variance |
+|---|---:|---:|---:|
+|109003|321.30|5.06|99.962%|
+|109023|346.09|2.51|99.993%|
+|109043|168.07|3.10|99.953%|
+|109063|239.17|2.14|99.990%|
+|109083|121.67|5.99|99.669%|
+
+Removing accumulated-offset estimates changes actor-gradient cosine to-0.068..0.509;
+merely removing the explicit actor bonus changes its gradient by only0.008-0.030%.
+Thus norm-induced offsets contaminate the fixed LCB, rather than just harmlessly
+adding a common Q constant. Mean-centering is a diagnostic, not a claimed improvement.
+Corrected RE-SAC-only L1 aggregation to exclude output bias, as in original bus/Torch
+code; its bonus contribution~0.006 is too small to explain the failure. Positive
+sign, shared critic/BAPR, bus, V39 recipes and completed results are unchanged.
+Ten checks pass locally and in pinned JAX0.4.38/Flax0.10.4. Historical positive-shift
+checkpoints are evaluation-only under this correction, not same-semantics resumptions.
+V39 also uses actor period1/clipping0 versus original Torch period2/clipping1, lacks
+its first-layer LayerNorm and uses population rather than sample ensemble std.
+Next: isolate per-head versus shared positive bootstrap shift versus no shift under
+one otherwise-identical recipe; separately align original implementation controls.
+Limitations: final-weight probes do not establish training-time causality or restored
+returns. No new training or scheduler tasks; no checkpoint/replay transfer.
+
+## Norm-shift causal comparison submitted (2026-10-02)
+
+Frozen three fresh development seeds110003/110023/110043 in
+`reports/resac_norm_causality_v40_preregistration_2026-10-02.md`.
+Compare per-head positive shift, ensemble-mean shared positive shift and no shift;
+all retain OOD0.01, BC0.001, fixed LCB-2 and independent bootstrap. Networks,
+initialization, runtime, rollout protocol and8.4M/525000 budgets match. Output
+bias is excluded from every norm; original positive sign is unchanged.
+This isolates the shift, unlike historical full-versus-RE-SAC-0 recipes.
+
+Scheduler DAG t120810-t120823: one GPU smoke, nine single-seed GPU trainers,
+three CPU strict audits and one aggregate. GPU training excludes local; CPU
+audits use node001-node007. GPU smoke t120810 passed all three arms on node007
+GPU1 with the pinned runtime; each completed8000 steps/500 updates and restored
+iter2. Shared bonus std is zero, and no-shift bonus is zero. Ready JSON synced;
+all nine trainers launched: node007 three, jtl110gpu four, jtl110gpu2 two.
+Audits wait for all three actors, aggregate for all three audits.
+Only compact actor bundles/diagnostic JSON are synchronized; full checkpoints
+and replay remain remote. Resume uses this cohort's own checkpoint only.
+Five new tests and fifteen existing regression checks pass locally.
+Next: compare paired switching/stationary returns and centered/raw Q disagreement;
+shared-shift recovery would support the per-head-offset hypothesis, while shared
+and per-head failure with no-shift recovery would implicate the common Q scale.
+No BAPR retuning, original-paper reproduction claim or new holdout claim.
+
+## Norm-shift causal comparison completed (2026-10-02)
+
+All nine final bundles validate2100 iterations/8.4M steps/525000 updates and
+identical pinned versions/non-treatment controls. Three strict audits and
+aggregate t120823 completed and synced; schedules, horizons and switching
+aggregation agree. Existing compact JSON sufficed; no new remote data pull.
+
+| Norm treatment | Switching mean +/- seed SD | Stationary mean +/- seed SD | Final own-replay Q std range |
+|---|---:|---:|---:|
+|Per-head positive| -55.5 +/-199.7 |4.6 +/-263.7 |232.0-529.1|
+|Shared positive| -29.0 +/-30.5 |-43.0 +/-37.2 |2.08-2.95|
+|No shift|2016.9 +/-127.4 |2078.1 +/-181.1 |0.63-1.17|
+
+Shared-minus-per-head switching gain26.6[-512.0,565.1] does not establish
+recovery. No-shift beats per-head3/3, gain2072.4[1287.5,2857.3], and shared3/3,
+gain2045.9[1720.0,2371.8]; intervals are descriptive paired95% t intervals.
+Per-head offsets explain99.965-99.998% of own-replay disagreement variance.
+Shared shift removes those large offsets, but Q means remain13738-13836 versus
+155-202 without shift. The per-head-offset diagnosis is real, but removing it
+alone is insufficient. Common positive-shift/optimization scale is implicated
+under this recipe; the precise remaining optimization mechanism is unresolved.
+Next: align original Torch initialization/first-layer LayerNorm, actor period,
+clipping and alpha initialization/update semantics with same-batch update tests
+before another training cohort. Its HalfCheetah config also uses10 rather than
+five critics. Keep the positive sign and retain these failed treatments.
+Limitations: three development seeds, reused event windows, different own-replay
+states and an unaligned Torch recipe; no original-method rejection or new BAPR
+confirmation claim. No additional tasks or manuscript-result replacement.
+
+## Original Torch-equation alignment launched (2026-10-02)
+
+V41 uses fresh seeds111003/111023/111043, unchanged HalfCheetah polarity/noise,
+strict event windows and2100 iterations/8.4M steps/525000 critic updates.
+Three arms: old positive per-head fork; original-Torch-equation positive shift;
+the aligned implementation without shift. BAPR and historical results are unchanged.
+Aligned arms match source initialization, shared LayerNorm, alpha initialization
+and update ordering, unbiased std, actor period2 and clipping1, with10 critics.
+They differ only in weight_reg0.01 versus0; the positive sign is preserved.
+Actor updates are262500 versus fork525000, so this is a bundled implementation
+diagnostic, not a parameter/FLOP-matched comparison or original-paper reproduction.
+Actual unmodified Torch trainer supplies fixed tensors/noise for both treatments.
+Pinned production GPU parity passes four updates per treatment: maximum parameter
+error5.96e-8 and Adam-moment error1.08e-7. All21 focused local tests pass,
+including actual CLI profiles and RNG/Adam/actor-phase checkpoint continuation.
+Smoke t124921 completed and synced both finite250-update-per-iteration traces,
+actor-update ratios0.5, positive/zero bonuses and restored checkpoints; peak
+GPU memory1216MB. All nine trainers t124900-t124902,t124904-t124906,t124908-t124910
+are running: node007 five, jtl110gpu two, jtl311linux two. Audits
+t124903/t124907/t124911 wait for all corresponding models, and aggregate t124912
+waits for all audits. No local/Windows training.
+Sync only compact actors and JSON, not training checkpoints/replay. Next compare
+aligned-full against aligned-no-shift and the old fork before any BAPR retuning.
+
+## Original Torch-equation alignment completed (2026-10-03)
+
+All nine V41 actor bundles validate2100 iterations/8.4M steps/525000 critic
+updates and registered actor counts. Three strict audits and aggregate are
+locally available; compact JSON sufficed, no new remote pull. Switching schedules match.
+
+| Arm | Switching mean +/- seed SD | Stationary mean +/- seed SD |
+|---|---:|---:|
+|Old positive fork|-189.0 +/-63.3|-216.2 +/-55.7|
+|Torch-equation positive|-201.3 +/-43.7|-177.9 +/-37.2|
+|Torch-equation no shift|2142.6 +/-625.4|2213.2 +/-717.2|
+
+Aligned-full minus no-shift:-2343.9[-3836.7,-851.2], wins0/3; aligned-full
+minus fork:-12.3[-94.7,70.2], wins1/3. Source-equation alignment did not restore
+returns. Full Q means9723-9940, bonuses99.2-101.1, raw disagreement126.8-339.8;
+head offsets still explain99.32-99.98% of disagreement variance. No-shift Q
+means141-266 and raw disagreement0.92-1.22. Retain all negative arms.
+Next V42: fixed-world2x2 update-density/norm diagnostic on new seeds, because
+the original online loop updates1:1 while V41 updates1:16. Equal interactions,
+explicitly unequal compute; not a new BAPR result or original-paper reproduction.
+
+## Update-density diagnostic launched (2026-10-03)
+
+V42 freezes four Torch-aligned arms: updates250/4000 crossed with positive
+weight_reg0.01/zero, each on new seeds112003/112023/112043. The common10000-step
+warmup plus250x4000 interactions totals1.01M steps; critic updates62500/1000000,
+actor updates31250/500000. Compare the paired density-by-norm interaction and
+absolute returns, not a favorable interaction alone. BAPR remains unchanged.
+All17 focused tests pass, including actual CLI controls, audit entry execution,
+factorial analysis and compiled frozen-policy action equivalence. Production
+smoke t128409 passed both high-density treatments, finite metrics, actor ratio0.5
+and restored8000-step/8000-update counters; peak GPU memory1582MB. Steady smoke
+updates take about4s per4000, whole iteration9.4s; not a full-run ETA.
+All12 trainers are running: node007 eight, jtl110gpu two, jtl110gpu2 two.
+CPU audits t128414/t128419/t128424 wait for their four complete actor bundles;
+aggregate t128425 waits for all audits. Scheduler-only, no local/Windows jobs.
+Sync compact actors/JSON only, with training checkpoints retained remotely.
+The preregistration records the1M pilot, unequal compute and source-interleaving
+limitations; analyze this frozen cohort before deciding another intervention.
+
+## Update-density diagnostic completed (2026-10-03)
+
+All17 V42 jobs completed and synced without retry. Twelve final bundles validate
+250 iterations/1.01M steps and registered critic/actor counts; three strict
+audits cover all modes and matched schedules, every episode reaches1000 steps.
+Recomputed paired summaries agree with the aggregate. Existing JSON sufficed;
+no additional remote pull, checkpoint transfer or new tasks.
+
+| Density / weight norm | Switching mean +/- seed SD | Stationary mean +/- seed SD |
+|---|---:|---:|
+|1:16 / positive|-223.5 +/-77.8|-228.8 +/-18.3|
+|1:16 / zero|610.0 +/-160.8|581.6 +/-107.0|
+|1:1 / positive|-184.1 +/-27.2|-152.7 +/-34.3|
+|1:1 / zero|1255.1 +/-259.8|1363.4 +/-305.5|
+
+Density gain: positive+39.3[-86.6,165.3], zero+645.1[346.5,943.7], wins2/3
+and3/3 respectively. Density-by-norm interaction-605.8[-952.7,-258.9], negative3/3;
+high-density full-minus-zero-1439.3[-2039.6,-838.9], wins0/3. These descriptive
+paired95% intervals do not support update density alone restoring the full recipe.
+High-density positive Q means11286-11562, bonuses114.8-117.2; own-replay raw
+std317-1660 versus centered3.12-4.51, with99.984-99.997% offset variance.
+Low-density positive offsets explain99.723-99.869%. Final sampled metrics are
+finite; neither numerical NaN failure nor early termination explains the low returns.
+Next: close the update-density branch and calibrate the unmodified original Torch
+trainer in its source environment/protocol before another JAX transfer intervention.
+Preserve the positive sign, V32 and the matched-runtime BAPR comparison.
+Limitations: three development seeds,1.01M interaction pilot, unequal compute,
+reused event windows, own-replay probes and blocked rather than source-interleaved
+updates. This is a failed transferred recipe, not rejection of the original method.
+
+## Native Torch calibration launched (2026-10-03)
+
+V43 runs the copied, unchanged RE-SAC Torch trainer in its source stationary
+Gym HalfCheetah-v2 world: no gravity switching, polarity or added actuator noise.
+Three new seeds113003/113023/113043 pair positive weight_reg0.01 with zero;
+other source YAML values and CUDA AMP are unchanged. Each run uses1.01M
+interactions,1M interleaved critic calls and500k actor-update opportunities.
+Record actual optimizer steps, including AMP skips, rather than assuming all
+calls update weights. Final evaluation is the source collector's eight1000-step
+deterministic episodes; this is not a BAPR or nonstationary-paper result.
+All five focused tests pass. Native smoke t129022 passes both arms' checkpoint
+continuation: next transition/four updates, models, Adam/alpha, scaler and replay
+prefetch agree. Measured process peak GPU memory427MB; isolated smoke projects
+5.7-5.9h, not a completion guarantee. Six trainers t129025-t129030 are updating
+on jtl110gpu(two) and jtl110gpu2(four), with initial epochs16-23s.
+CPU aggregate t129031 waits for all six complete JSON files. No local/Windows
+training; synchronize only compact JSON, retain replay/checkpoints remotely.
+The preregistration records pinned runtime and synchronous evaluation transport.
+Next compare native positive-minus-zero before selecting a matched-world bridge;
+preserve V32 and the failed transferred cohorts without replacing their scores.
+
+## Native Torch calibration completed (2026-10-03)
+
+All six V43 trainers and aggregate t129031 completed. Existing compact JSON
+validates1000 epochs/1.01M interactions/1M critic calls/500k actor opportunities,
+identical physics and eight1000-step final episodes per run without termination.
+Recomputed paired results match the aggregate; no checkpoint or extra data pull.
+
+| Arm | Final return mean +/- policy-seed SD | Per-seed means |
+|---|---:|---|
+|Positive weight_reg0.01|-287.5 +/-177.2|-278.3, -469.1, -115.1|
+|No weight shift|9723.3 +/-295.1|9461.9, 9664.8, 10043.3|
+
+Positive-minus-zero:-10010.8[-10593.8,-9427.9], wins0/3. The no-shift arm
+retains ensemble/LCB/OOD/BC and is not vanilla SAC. Both arms perform500k actor
+updates; critic AMP skips are412-420 versus406-438, about0.04%, not a meaningful
+missing-update explanation. Positive final Q means11089-11295, weighted norm
+bonuses112.9-115.1 and Q-std279-556; zero Q means678-792 and Q-std1.36-1.58.
+Training took4.82-5.72h, with measured process GPU peaks400-406MB.
+
+This reproduces failure in the unchanged Torch MuJoCo port without actuator
+switching: JAX translation or the switching benchmark alone cannot explain it.
+Source inspection clarifies that this port is not the bus core implementation:
+bus update standardizes each reward batch to scale10, uses log-alpha loss and
+alpha cap0.6, default hidden width64 and FP32; the port uses raw rewards,
+exp-alpha loss/no cap, width256 with LayerNorm and CUDA AMP. The positive shift
+sign agrees in both. Large norm offsets are consistent with the observed Q scale;
+these logs do not isolate which port change causes the return failure.
+Next audit objective/scale transfer against the bus core, then freeze a one-variable
+calibration before further BAPR retuning. No new tasks or V32 score replacement.
+Limitations: three development seeds and native stationary source-loop evaluation;
+this failed MuJoCo port is not a refutation of the original bus results.
+
+## Reward-only transfer diagnostic launched (2026-10-03)
+
+V44 restores only the bus-core per-batch reward transform:10*(r-mean)/sample_std,
+with its original small-std fallback. Three new seeds114003/114023/114043 cross
+raw/bus-standardized training rewards with positive weight_reg0.01/zero,12 runs.
+Keep V43 physics, width256, alpha recipe, AMP and1.01M-step/1M-call budget;
+replay and eight1000-step final evaluation returns remain raw Gym rewards.
+All12 focused tests pass. Four-arm smoke t130228 verifies restored-transition/
+four-update equivalence and actual transformed reward mean near0/std10;
+measured process GPU peak422MB, isolated training projections5.6-5.9h.
+Trainers t130232-t130243 are running on jtl110gpu(three)/jtl110gpu2(nine).
+CPU aggregate t130244 waits for all12 complete JSONs. Sync JSON only, keep full
+checkpoints/replay remote. Initial VRAM request600MB follows measured evidence.
+Compare the paired reward-by-shift interaction and both absolute reward gains;
+narrowing a gap only by hurting no-shift is not recovery. V32 stays frozen.
+
+## Reward-only transfer results (2026-10-04)
+
+V44 trainers t130232-t130243 and aggregate t130244 completed. All12 compact
+JSONs match protocol, 1.01M interactions/1M critic calls/500k actor opportunities,
+identical physics and eight1000-step raw final episodes. No extra data pull.
+
+| Training rewards / norm shift | Raw final return mean +/- policy-seed SD |
+|---|---:|
+|Raw / positive0.01|-393.4 +/-489.1|
+|Raw / zero|8843.0 +/-1501.5|
+|Bus standardized / positive0.01|9252.4 +/-808.4|
+|Bus standardized / zero|9857.5 +/-2399.6|
+
+Reward gain for positive shift:+9645.8 [7245.6,12046.0], improves3/3;
+reward-by-shift interaction:+8631.3 [4586.8,12675.8], positive3/3.
+Normalized positive-minus-zero:-605.1 [-7245.3,6035.1], wins1/3. Thus the
+omitted reward processing caused real native-port failure, but normalization
+does not establish positive-shift superiority. Normalized positive Q remains
+18556-18712 while returns recover: large Q alone is not a collapse diagnostic.
+Intervals are descriptive three-development-seed paired t intervals.
+Next transfer reward processing into JAX under frozen strict actuator switching,
+with new raw controls; no alpha/sign/environment change and no V32 replacement.
+
+## JAX reward transfer pilot (2026-10-04)
+
+V45 freezes the V42 high-density actuator-polarity world and crosses raw/bus
+rewards with positive0.01/zero shift on seeds115003/115023/115043. Each of12
+trainers keeps1.01M interactions/1M critic updates/500k actor updates; raw final
+strict stationary/switching windows stay unchanged. Preregistered contrasts are
+both norm gaps, both absolute reward gains and the reward-by-shift interaction.
+
+All30 local focused tests pass. Initial smoke t134460 exposed an actual Flax
+0.10.4 resume failure: deepcopy after the legacy pickle patch gave target Param
+metadata different from critic metadata. TorchEquationRESAC now clones via NNX
+split/merge without changing parameter values or RNG consumption. Replacement
+smoke t134556 passes all4 arms and exact next-update parameter/Adam/RNG/actor-phase
+restoration in the frozen runtime. Actual normalized reward mean is within5e-9
+of0 and sample std10; raw controls are exact. Synced only its3726-byte JSON.
+Trainers: t134461-t134464, t134466-t134469, t134471-t134474. CPU audits:
+t134465/t134470/t134475; aggregate t134476. Sync compact actor bundles/JSON only,
+not replay/full checkpoints. This remains a3-seed transfer pilot, not new paper
+results or a change to frozen BAPR/V32.
+All12 trainers are confirmed running: jtl110gpu3, jtl110gpu2 2, node0077,
+each already in its checkpointed10k random warmup. No local training. The3 CPU
+audits and aggregate remain queued on their registered final-result dependencies.
+
+## JAX reward transfer results (V45, 2026-10-04)
+
+V45 completed all12 trainers,3 strict CPU audits and the aggregate. Every arm
+used1.01M interactions,1M critic updates and500k actor updates; all stationary
+and switching episodes reached1000 steps with zero terminations and identical
+mode schedules. Compact artifacts were validated locally; no full checkpoints
+were pulled.
+
+| Training reward / positive shift | Switching return mean +/- seed SD |
+|---|---:|
+|Raw /0.01|-192.3 +/-44.6|
+|Raw /0|1308.2 +/-510.2|
+|Bus standardized /0.01|306.8 +/-274.4|
+|Bus standardized /0|1457.2 +/-288.1|
+
+The reward transform improved the positive arm by+499.0 per seed on average,
+with all3 seeds improving; the paired descriptive interval is[-251.6,1249.6].
+The interaction between reward processing and the positive shift is+350.0
+[-532.0,1232.0], positive in3/3 seeds. The normalized positive arm still trails
+the normalized no-shift arm by1150.5[-1714.5,-586.5], with zero wins. Thus the
+reward-scale defect is confirmed as a real cause of the raw positive-arm failure,
+while the remaining gap is a regularization-scale or strict-switching effect.
+The positive runs have Q-head common-offset variance fractions above0.998 and
+final regularization bonuses about115-165, so absolute Q size alone is not used
+as a failure criterion.
+
+V46 now measures positive weight_reg=0.001 and0.003 under the same normalized
+reward and budget, paired to the frozen V450.01 and no-shift actors. It is a
+calibration pilot before any BAPR algorithm change.
+
+## JAX regularization-scale results (V46, 2026-10-04)
+
+All six V46 trainers (t134721,t134722,t134724,t134725,t134727,t134728), three
+CPU audits (t134723,t134726,t134729) and aggregate t134730 completed. The
+protocol kept the V45 strict actuator-polarity world, bus reward standardization,
+1.01M interactions, 1M critic updates and 500k actor updates. Only compact
+JSON/actor bundles were synchronized; no full checkpoint was pulled.
+
+| Training arm | Switching return mean +/- seed SD | Stationary return mean +/- seed SD |
+|---|---:|---:|
+|Bus standardized / positive weight_reg=0.001|1519.4 +/-294.0|1674.0 +/-328.4|
+|Bus standardized / positive weight_reg=0.003|1362.7 +/-90.7|1435.7 +/-142.7|
+|V45 bus standardized / positive weight_reg=0.01|306.8 +/-274.4|335.0 +/-313.1|
+|V45 bus standardized / no shift|1457.2 +/-288.1|1382.0 +/-249.0|
+
+Relative to the paired V45 positive `.01` arm, `.001` improves all three
+switching seeds (mean +1212.6, descriptive 95% interval [86.6,2338.6]) and
+`.003` also improves all three (mean +1056.0, [233.7,1878.2]). This confirms
+that the normalized positive `.01` setting was too large for this strict
+switching protocol. It does not establish a positive regularizer gain: relative
+to V45 no-shift, `.001` is only +62.1 ([-641.1,765.4], wins1/3), while `.003`
+is -94.5 ([-783.0,594.0], wins2/3). The scale pilot therefore closes the
+regularization-scale calibration branch without replacing the frozen V32/BAPR
+result or claiming RE-SAC superiority in this MuJoCo transfer world.
+
+Next: preserve V46 as calibrated diagnostic evidence and stop blind weight-reg
+tuning. Any further paper claim should use the source-aligned bus result or a
+separately preregistered mechanism; these strict MuJoCo runs show that reward
+normalization and a smaller positive coefficient remove the catastrophic
+failure but leave no reliable improvement over no-shift.
+
+The follow-up source-fidelity audit is recorded in
+`reports/resac_bus_source_fidelity_audit_2026-10-04.md`: the bus policy-bank
+implementation preserves several RE-SAC numerical conventions but changes the
+environment and training/evaluation protocol, so its negative headroom result
+is not an original-RE-SAC replication and is not pooled with the BAPR claim.
+
+## Submission closure (2026-10-05)
+
+The fourteen environment-independent Lean sources now ship in
+`reproducibility/lean` with pinned dependencies; an independent `lake build`
+passed all targets. No Spring/Brax formalization was added. The separate
+runtime-matched five-seed HalfCheetah result is now in Appendix E.4 and
+`reproducibility/halfcheetah_runtime_comparison`: BAPR 3611.7 versus SAC 2005.5,
+ESCP 2059.1 and RE-SAC-0 2218.2, with positive paired intervals and 5/5 wins each.
+The failed regularized transfer arm remains reported, not treated as a faithful
+original-RE-SAC comparison. No cohorts were pooled and the ten-seed composite
+decision remains negative. The JSON/budget/runtime checker and 15 focused tests
+pass; the 24-page PDF compiles without warnings. Submission scope remains
+known, reversible and identifiable actuator regimes; no additional training
+was submitted.
+
+## Publication extensions submitted (2026-10-05)
+
+The subsequent user-authorized batch is frozen in
+`reports/submission_extensions_v47_preregistration_2026-10-05.md`. It adds:
+three estimator seeds crossed with five Reacher controller seeds, including
+ten newly trained matched conditioned-SAC controllers; an independent
+five-seed non-diagonal signed-permutation Reacher study with three fresh
+estimators; and five-seed original Torch RE-SAC/full versus no-shift controls
+on the shared HalfCheetah benchmark. The latter preserves the original
+positive regularization sign, networks and trainer, not the JAX transfer.
+Nine historical HalfCheetah policies also receive a separately labelled
+three-estimator calibration sensitivity audit, excluding provider 88003.
+
+There are 72 logical scheduler jobs under `BAPR/submission-extensions/v47/`;
+first-input staging was corrected before training. Retired input/runtime
+records are retained as operational history, not algorithmic failures.
+Both Reacher GPU smokes passed. Forty-seven focused tests passed. The three
+historical estimators were exported to compact NPZ with identical evidence;
+no full checkpoint was retrieved. Performance conclusions remain pending.
+No old scientific result, acceptance decision or manuscript claim is replaced.
+GPU2 became unreachable during runtime setup; the source comparison now waits
+only for the available jtl110gpu runtime. Source smokes/trainers were replaced
+before any source training began, without changing any scientific controls.

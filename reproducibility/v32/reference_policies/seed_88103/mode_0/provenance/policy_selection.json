@@ -1,0 +1,8 @@
+{
+  "actor_update_period": 1,
+  "best_validation_return": 764.7549620208641,
+  "final_update_count": 525000,
+  "selected_update_count": 525000,
+  "selection": "final",
+  "validation_observations": 14
+}

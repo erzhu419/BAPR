@@ -1,0 +1,3415 @@
+{
+  "audit_event_seeds": [
+    154211,
+    154223,
+    154237
+  ],
+  "audit_source_seeds": [
+    4021,
+    4049
+  ],
+  "env": "HalfCheetah-v2",
+  "family": "actuator_polarity",
+  "filter_config": {
+    "evidence_scale": 1.0,
+    "hazard_rate": 0.002,
+    "posterior_decay": 0.98
+  },
+  "initialization": {
+    "manifest": {
+      "sha256": "fc4b28662ac1f38081aab02723ebcbea2fa47fbe37eea27bb4e1a564b8d571d0",
+      "size": 56089
+    },
+    "parameters": {
+      "sha256": "c1ff9021a3d3684116464c421c852eb16cd7ab286b2fd53bcd764d9a50393af1",
+      "size": 2712127
+    }
+  },
+  "mode_gain_vectors": [
+    [
+      -1.0,
+      -1.0,
+      -1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      -1.0,
+      -1.0,
+      -1.0
+    ],
+    [
+      -1.0,
+      1.0,
+      -1.0,
+      1.0,
+      -1.0,
+      1.0
+    ],
+    [
+      1.0,
+      -1.0,
+      1.0,
+      -1.0,
+      1.0,
+      -1.0
+    ]
+  ],
+  "model_config": {
+    "delta_scale": 0.1,
+    "ensemble_size": 5,
+    "hidden_dim": 256,
+    "learning_rate": 0.0001,
+    "n_layers": 3,
+    "obs_scale": 5.0,
+    "variance_ceiling": 0.25,
+    "variance_floor": 0.0001,
+    "weight_decay": 1e-05
+  },
+  "model_seed": 20260732,
+  "parameter_file": {
+    "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+    "size": 2713311
+  },
+  "parameter_leaves": [
+    {
+      "dtype": "float32",
+      "key": "leaf_00000",
+      "shape": [
+        5,
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00001",
+      "shape": [
+        5,
+        51,
+        256
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00002",
+      "shape": [
+        5,
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00003",
+      "shape": [
+        5,
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00004",
+      "shape": [
+        5,
+        1,
+        256
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00005",
+      "shape": [
+        5,
+        256,
+        256
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00006",
+      "shape": [
+        5,
+        1,
+        6
+      ]
+    },
+    {
+      "dtype": "float32",
+      "key": "leaf_00007",
+      "shape": [
+        5,
+        256,
+        6
+      ]
+    }
+  ],
+  "parent_model_manifest": {
+    "env": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "filter_config": {
+      "evidence_scale": 1.0,
+      "hazard_rate": 0.002,
+      "posterior_decay": 0.98
+    },
+    "mode_gain_vectors": [
+      [
+        -1.0,
+        -1.0,
+        -1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      [
+        1.0,
+        1.0,
+        1.0,
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      [
+        -1.0,
+        1.0,
+        -1.0,
+        1.0,
+        -1.0,
+        1.0
+      ],
+      [
+        1.0,
+        -1.0,
+        1.0,
+        -1.0,
+        1.0,
+        -1.0
+      ]
+    ],
+    "model_config": {
+      "delta_scale": 0.1,
+      "ensemble_size": 5,
+      "hidden_dim": 256,
+      "learning_rate": 0.0003,
+      "n_layers": 3,
+      "obs_scale": 5.0,
+      "variance_ceiling": 0.25,
+      "variance_floor": 0.0001,
+      "weight_decay": 1e-05
+    },
+    "model_seed": 20260732,
+    "online_data_policy": "consecutive observations and commanded action only",
+    "parameter_file": {
+      "sha256": "c1ff9021a3d3684116464c421c852eb16cd7ab286b2fd53bcd764d9a50393af1",
+      "size": 2712127
+    },
+    "parameter_leaves": [
+      {
+        "dtype": "float32",
+        "key": "leaf_00000",
+        "shape": [
+          5,
+          1,
+          256
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00001",
+        "shape": [
+          5,
+          51,
+          256
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00002",
+        "shape": [
+          5,
+          1,
+          256
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00003",
+        "shape": [
+          5,
+          256,
+          256
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00004",
+        "shape": [
+          5,
+          1,
+          256
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00005",
+        "shape": [
+          5,
+          256,
+          256
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00006",
+        "shape": [
+          5,
+          1,
+          6
+        ]
+      },
+      {
+        "dtype": "float32",
+        "key": "leaf_00007",
+        "shape": [
+          5,
+          256,
+          6
+        ]
+      }
+    ],
+    "protocol_version": "v4",
+    "residual_variance": [
+      0.07132841646671295,
+      0.054890405386686325,
+      0.0818772092461586,
+      0.06459716707468033,
+      0.0523468516767025,
+      0.03918285667896271
+    ],
+    "schema": "bapr.regime-polarity-expected-action-system-id-model.v4",
+    "source_bundles": {
+      "train/oracle/seed_16": {
+        "sha256": "6e64a6ec7637b72f4f48bfef593ad0226c9ba5806250e30579e836e2497bd96c",
+        "size": 943
+      },
+      "train/oracle/seed_8": {
+        "sha256": "124fbbf7988fcb7f2e139143f4f302111aaa2ad0571dd847163b74470e3c0d1c",
+        "size": 942
+      },
+      "train/robust/seed_16": {
+        "sha256": "aa8bbe2a2b7049cdfa9674183b1c6a8ea1aeb26afe01d6b2b7caf3d9401d82b3",
+        "size": 943
+      },
+      "train/robust/seed_8": {
+        "sha256": "2b15eeb71dcaa59a38a22bca2b8cfad604b1e7f6cd4d03750a10a2cf87a4ecf5",
+        "size": 942
+      },
+      "validation/oracle/seed_24": {
+        "sha256": "cda265c50c9efe3677f49302de4c17395e80cadc7414bf0239ec913d2e709623",
+        "size": 943
+      },
+      "validation/robust/seed_24": {
+        "sha256": "edc3b139d717db50b4d44a58d88c7e9c571abea418445a2decb0d8a7799e63dd",
+        "size": 943
+      }
+    },
+    "source_files": {
+      "jax_experiments/analysis/regime_polarity_expected_action_system_id.py": {
+        "sha256": "8c9351b041a40df4c40d3b732965ed9a067e689e91b365703b03574d1de6f5cb",
+        "size": 2909
+      },
+      "jax_experiments/analysis/regime_polarity_expected_action_system_id_model.py": {
+        "sha256": "26f5789e23d826393562c15fae3b64a397c37d3635ee24576cb445775b8cb2d9",
+        "size": 3623
+      },
+      "jax_experiments/analysis/train_regime_polarity_expected_action_system_id.py": {
+        "sha256": "a28b555d7587fc6850e089f0f2ced90b8ff608f70b71fb12d7455c21c045846d",
+        "size": 21665
+      },
+      "jax_experiments/analysis/train_regime_polarity_inverse_system_id.py": {
+        "sha256": "07d1e1ee8458ffa0ea107180d69246a3356fea9d353acbfb9c5b06d388db8b58",
+        "size": 24086
+      },
+      "jax_experiments/envs/brax_env.py": {
+        "sha256": "1227a8e86605f04c563e56c87e6ac12bf5d92d55a093d586edaf5eae408e897f",
+        "size": 43154
+      },
+      "jax_experiments/envs/stochastic_mode_env.py": {
+        "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+        "size": 15716
+      },
+      "jax_experiments/networks/executed_action_inverse.py": {
+        "sha256": "7af26a7c49ae1fedc4be0f49b0a5a9a856e43390e3ae8f55cada0e0486ed57d5",
+        "size": 5820
+      }
+    },
+    "status": "complete",
+    "test_controller_seeds": [
+      101,
+      211,
+      307,
+      419,
+      523
+    ],
+    "test_event_seeds": [
+      94001,
+      94002,
+      94003
+    ],
+    "train_event_seeds": [
+      92001,
+      92002
+    ],
+    "training_config": {
+      "batch_size_per_head": 256,
+      "stationary_steps": 2000,
+      "switching_episodes": 4,
+      "updates": 3000
+    },
+    "training_controller_seeds": [
+      8,
+      16
+    ],
+    "training_data_policy": "target_action is computed only as clip(gain(true_training_mode) * commanded_action); rollout never requests or records realized executed_action",
+    "training_history": [
+      {
+        "ensemble_variance": 0.0016190691385418177,
+        "loss": 0.35351085662841797,
+        "rmse": 0.5945677757263184,
+        "update": 1
+      },
+      {
+        "ensemble_variance": 0.06121170148253441,
+        "loss": 0.18486681580543518,
+        "rmse": 0.4299614131450653,
+        "update": 50
+      },
+      {
+        "ensemble_variance": 0.09780682623386383,
+        "loss": 0.14052703976631165,
+        "rmse": 0.37486937642097473,
+        "update": 100
+      },
+      {
+        "ensemble_variance": 0.13035820424556732,
+        "loss": 0.11845101416110992,
+        "rmse": 0.3441671133041382,
+        "update": 150
+      },
+      {
+        "ensemble_variance": 0.13300059735774994,
+        "loss": 0.1147061213850975,
+        "rmse": 0.3386829197406769,
+        "update": 200
+      },
+      {
+        "ensemble_variance": 0.1421772986650467,
+        "loss": 0.11354688555002213,
+        "rmse": 0.3369671702384949,
+        "update": 250
+      },
+      {
+        "ensemble_variance": 0.14418773353099823,
+        "loss": 0.10042877495288849,
+        "rmse": 0.3169049918651581,
+        "update": 300
+      },
+      {
+        "ensemble_variance": 0.15555182099342346,
+        "loss": 0.09984393417835236,
+        "rmse": 0.3159809112548828,
+        "update": 350
+      },
+      {
+        "ensemble_variance": 0.15124301612377167,
+        "loss": 0.09774406999349594,
+        "rmse": 0.3126404881477356,
+        "update": 400
+      },
+      {
+        "ensemble_variance": 0.15769760310649872,
+        "loss": 0.09080852568149567,
+        "rmse": 0.30134451389312744,
+        "update": 450
+      },
+      {
+        "ensemble_variance": 0.16499432921409607,
+        "loss": 0.08492376655340195,
+        "rmse": 0.29141682386398315,
+        "update": 500
+      },
+      {
+        "ensemble_variance": 0.1609635055065155,
+        "loss": 0.09338605403900146,
+        "rmse": 0.30559131503105164,
+        "update": 550
+      },
+      {
+        "ensemble_variance": 0.16268639266490936,
+        "loss": 0.09360961616039276,
+        "rmse": 0.3059568703174591,
+        "update": 600
+      },
+      {
+        "ensemble_variance": 0.16299137473106384,
+        "loss": 0.08896990120410919,
+        "rmse": 0.29827821254730225,
+        "update": 650
+      },
+      {
+        "ensemble_variance": 0.16492719948291779,
+        "loss": 0.08675111830234528,
+        "rmse": 0.29453542828559875,
+        "update": 700
+      },
+      {
+        "ensemble_variance": 0.1632491797208786,
+        "loss": 0.08919195830821991,
+        "rmse": 0.29865023493766785,
+        "update": 750
+      },
+      {
+        "ensemble_variance": 0.163038969039917,
+        "loss": 0.08309067040681839,
+        "rmse": 0.2882545292377472,
+        "update": 800
+      },
+      {
+        "ensemble_variance": 0.1635124683380127,
+        "loss": 0.08181139826774597,
+        "rmse": 0.2860269248485565,
+        "update": 850
+      },
+      {
+        "ensemble_variance": 0.17162100970745087,
+        "loss": 0.07941103726625443,
+        "rmse": 0.28179964423179626,
+        "update": 900
+      },
+      {
+        "ensemble_variance": 0.1686837375164032,
+        "loss": 0.08112825453281403,
+        "rmse": 0.2848302125930786,
+        "update": 950
+      },
+      {
+        "ensemble_variance": 0.16737477481365204,
+        "loss": 0.08325827866792679,
+        "rmse": 0.2885451018810272,
+        "update": 1000
+      },
+      {
+        "ensemble_variance": 0.1678498238325119,
+        "loss": 0.08048705756664276,
+        "rmse": 0.28370240330696106,
+        "update": 1050
+      },
+      {
+        "ensemble_variance": 0.171376034617424,
+        "loss": 0.07730887085199356,
+        "rmse": 0.278044730424881,
+        "update": 1100
+      },
+      {
+        "ensemble_variance": 0.17121559381484985,
+        "loss": 0.0768691897392273,
+        "rmse": 0.2772529423236847,
+        "update": 1150
+      },
+      {
+        "ensemble_variance": 0.1705549657344818,
+        "loss": 0.07805345952510834,
+        "rmse": 0.2793805003166199,
+        "update": 1200
+      },
+      {
+        "ensemble_variance": 0.17188911139965057,
+        "loss": 0.0778677836060524,
+        "rmse": 0.27904799580574036,
+        "update": 1250
+      },
+      {
+        "ensemble_variance": 0.16947031021118164,
+        "loss": 0.08170277625322342,
+        "rmse": 0.28583696484565735,
+        "update": 1300
+      },
+      {
+        "ensemble_variance": 0.17537181079387665,
+        "loss": 0.07217638194561005,
+        "rmse": 0.2686566114425659,
+        "update": 1350
+      },
+      {
+        "ensemble_variance": 0.17727193236351013,
+        "loss": 0.07461688667535782,
+        "rmse": 0.2731609046459198,
+        "update": 1400
+      },
+      {
+        "ensemble_variance": 0.17512333393096924,
+        "loss": 0.07279722392559052,
+        "rmse": 0.2698096036911011,
+        "update": 1450
+      },
+      {
+        "ensemble_variance": 0.1716202348470688,
+        "loss": 0.07697062194347382,
+        "rmse": 0.2774357795715332,
+        "update": 1500
+      },
+      {
+        "ensemble_variance": 0.17560438811779022,
+        "loss": 0.07077635824680328,
+        "rmse": 0.26603826880455017,
+        "update": 1550
+      },
+      {
+        "ensemble_variance": 0.17379294335842133,
+        "loss": 0.07321720570325851,
+        "rmse": 0.2705867886543274,
+        "update": 1600
+      },
+      {
+        "ensemble_variance": 0.17477867007255554,
+        "loss": 0.07548654824495316,
+        "rmse": 0.27474814653396606,
+        "update": 1650
+      },
+      {
+        "ensemble_variance": 0.17701590061187744,
+        "loss": 0.07378621399402618,
+        "rmse": 0.2716361880302429,
+        "update": 1700
+      },
+      {
+        "ensemble_variance": 0.17291000485420227,
+        "loss": 0.06909234076738358,
+        "rmse": 0.2628542184829712,
+        "update": 1750
+      },
+      {
+        "ensemble_variance": 0.17977532744407654,
+        "loss": 0.07102642208337784,
+        "rmse": 0.2665078341960907,
+        "update": 1800
+      },
+      {
+        "ensemble_variance": 0.17971006035804749,
+        "loss": 0.07273754477500916,
+        "rmse": 0.26969897747039795,
+        "update": 1850
+      },
+      {
+        "ensemble_variance": 0.17570023238658905,
+        "loss": 0.06755061447620392,
+        "rmse": 0.25990501046180725,
+        "update": 1900
+      },
+      {
+        "ensemble_variance": 0.17731189727783203,
+        "loss": 0.07079881429672241,
+        "rmse": 0.26608046889305115,
+        "update": 1950
+      },
+      {
+        "ensemble_variance": 0.17562735080718994,
+        "loss": 0.07309440523386002,
+        "rmse": 0.2703597843647003,
+        "update": 2000
+      },
+      {
+        "ensemble_variance": 0.17639195919036865,
+        "loss": 0.06870312988758087,
+        "rmse": 0.2621128261089325,
+        "update": 2050
+      },
+      {
+        "ensemble_variance": 0.1773437112569809,
+        "loss": 0.06778152287006378,
+        "rmse": 0.2603488564491272,
+        "update": 2100
+      },
+      {
+        "ensemble_variance": 0.1806822270154953,
+        "loss": 0.06791321933269501,
+        "rmse": 0.26060163974761963,
+        "update": 2150
+      },
+      {
+        "ensemble_variance": 0.1870323121547699,
+        "loss": 0.07125046104192734,
+        "rmse": 0.2669278085231781,
+        "update": 2200
+      },
+      {
+        "ensemble_variance": 0.17395806312561035,
+        "loss": 0.07336518168449402,
+        "rmse": 0.27086007595062256,
+        "update": 2250
+      },
+      {
+        "ensemble_variance": 0.17886249721050262,
+        "loss": 0.07062256336212158,
+        "rmse": 0.2657490670681,
+        "update": 2300
+      },
+      {
+        "ensemble_variance": 0.17667675018310547,
+        "loss": 0.0706624835729599,
+        "rmse": 0.2658241391181946,
+        "update": 2350
+      },
+      {
+        "ensemble_variance": 0.18197199702262878,
+        "loss": 0.0669456496834755,
+        "rmse": 0.25873857736587524,
+        "update": 2400
+      },
+      {
+        "ensemble_variance": 0.17949536442756653,
+        "loss": 0.0699516013264656,
+        "rmse": 0.26448366045951843,
+        "update": 2450
+      },
+      {
+        "ensemble_variance": 0.18958672881126404,
+        "loss": 0.06626866012811661,
+        "rmse": 0.25742700695991516,
+        "update": 2500
+      },
+      {
+        "ensemble_variance": 0.1817566156387329,
+        "loss": 0.0641239732503891,
+        "rmse": 0.2532271146774292,
+        "update": 2550
+      },
+      {
+        "ensemble_variance": 0.19046220183372498,
+        "loss": 0.06622826308012009,
+        "rmse": 0.25734853744506836,
+        "update": 2600
+      },
+      {
+        "ensemble_variance": 0.18297147750854492,
+        "loss": 0.06335893273353577,
+        "rmse": 0.25171199440956116,
+        "update": 2650
+      },
+      {
+        "ensemble_variance": 0.17902152240276337,
+        "loss": 0.06531348824501038,
+        "rmse": 0.2555650472640991,
+        "update": 2700
+      },
+      {
+        "ensemble_variance": 0.18963722884655,
+        "loss": 0.0659237653017044,
+        "rmse": 0.2567562460899353,
+        "update": 2750
+      },
+      {
+        "ensemble_variance": 0.17333871126174927,
+        "loss": 0.06792860478162766,
+        "rmse": 0.26063117384910583,
+        "update": 2800
+      },
+      {
+        "ensemble_variance": 0.18576452136039734,
+        "loss": 0.061135388910770416,
+        "rmse": 0.24725571274757385,
+        "update": 2850
+      },
+      {
+        "ensemble_variance": 0.18506577610969543,
+        "loss": 0.0632207915186882,
+        "rmse": 0.2514374554157257,
+        "update": 2900
+      },
+      {
+        "ensemble_variance": 0.18336817622184753,
+        "loss": 0.06505323946475983,
+        "rmse": 0.25505536794662476,
+        "update": 2950
+      },
+      {
+        "ensemble_variance": 0.18606871366500854,
+        "loss": 0.06488081812858582,
+        "rmse": 0.2547171115875244,
+        "update": 3000
+      }
+    ],
+    "training_inverse_metrics": {
+      "ensemble_variance_mean": 0.0027704511303454638,
+      "mae": 0.1776490956544876,
+      "per_action_rmse": [
+        0.2670738101005554,
+        0.23428700864315033,
+        0.28614193201065063,
+        0.25415971875190735,
+        0.22879433631896973,
+        0.19794659316539764
+      ],
+      "rmse": 0.24638430774211884
+    },
+    "validation": {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9595378464456008,
+      "stationary": {
+        "brier_score": 0.0566993401285045,
+        "expected_calibration_error": 0.04556552738309704,
+        "mean_normalized_entropy": 0.06647023930835715,
+        "mean_true_probability": 0.9438154792056166,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9505063291139241,
+        "negative_log_likelihood": 0.08662483953100891,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.017013030532645718,
+        "expected_calibration_error": 0.0390434092117079,
+        "mean_normalized_entropy": 0.08227133341372972,
+        "mean_true_probability": 0.9586055798963459,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9969444444444444,
+        "negative_log_likelihood": 0.0471787804079323,
+        "p90_switch_delay": 12.900000000000013,
+        "switch_count": 48
+      },
+      "validation_gate_pass": true
+    },
+    "validation_candidates": [
+      {
+        "filter_config": {
+          "evidence_scale": 1.0,
+          "hazard_rate": 0.002,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9595378464456008,
+        "stationary": {
+          "brier_score": 0.0566993401285045,
+          "expected_calibration_error": 0.04556552738309704,
+          "mean_normalized_entropy": 0.06647023930835715,
+          "mean_true_probability": 0.9438154792056166,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9505063291139241,
+          "negative_log_likelihood": 0.08662483953100891,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.017013030532645718,
+          "expected_calibration_error": 0.0390434092117079,
+          "mean_normalized_entropy": 0.08227133341372972,
+          "mean_true_probability": 0.9586055798963459,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9969444444444444,
+          "negative_log_likelihood": 0.0471787804079323,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 1.0,
+          "hazard_rate": 0.004,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9585517900568583,
+        "stationary": {
+          "brier_score": 0.057843629139076175,
+          "expected_calibration_error": 0.04841754337054854,
+          "mean_normalized_entropy": 0.07426915850492169,
+          "mean_true_probability": 0.940095105942373,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9504430379746835,
+          "negative_log_likelihood": 0.09022460679961473,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.019965870714900445,
+          "expected_calibration_error": 0.04472090500920561,
+          "mean_normalized_entropy": 0.09329982914487886,
+          "mean_true_probability": 0.9526174853928675,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9965972222222221,
+          "negative_log_likelihood": 0.05427794072872591,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 1.0,
+          "hazard_rate": 0.004,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9584472610489866,
+        "stationary": {
+          "brier_score": 0.07907707126181056,
+          "expected_calibration_error": 0.047351089142373994,
+          "mean_normalized_entropy": 0.040566163540448494,
+          "mean_true_probability": 0.9458451315043717,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9459493670886077,
+          "negative_log_likelihood": 0.12134844491235121,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.007901180839215535,
+          "expected_calibration_error": 0.015820583823089866,
+          "mean_normalized_entropy": 0.04743059385376912,
+          "mean_true_probability": 0.9801143796535089,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9951388888888889,
+          "negative_log_likelihood": 0.023359208977644742,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 1.0,
+          "hazard_rate": 0.002,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9581389226621672,
+        "stationary": {
+          "brier_score": 0.08802006439755486,
+          "expected_calibration_error": 0.04860647803005141,
+          "mean_normalized_entropy": 0.028580963782150998,
+          "mean_true_probability": 0.9459217353317506,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9447784810126583,
+          "negative_log_likelihood": 0.14316515967145874,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.00713418276905235,
+          "expected_calibration_error": 0.011266092950041013,
+          "mean_normalized_entropy": 0.034318996212719416,
+          "mean_true_probability": 0.984994026811894,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.995,
+          "negative_log_likelihood": 0.018138584274771122,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 1.0,
+          "hazard_rate": 0.008,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9580950392927577,
+        "stationary": {
+          "brier_score": 0.07091141746564816,
+          "expected_calibration_error": 0.04770302472236902,
+          "mean_normalized_entropy": 0.05729059326654751,
+          "mean_true_probability": 0.9431710888991214,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9468670886075949,
+          "negative_log_likelihood": 0.10735776366811395,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.010053211324046064,
+          "expected_calibration_error": 0.024518143815688766,
+          "mean_normalized_entropy": 0.06835641053869687,
+          "mean_true_probability": 0.970969424732816,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9949305555555555,
+          "negative_log_likelihood": 0.03329600183123421,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 2.0,
+          "hazard_rate": 0.002,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9573434904499147,
+        "stationary": {
+          "brier_score": 0.07626425196984145,
+          "expected_calibration_error": 0.04547762020744928,
+          "mean_normalized_entropy": 0.04481650426013255,
+          "mean_true_probability": 0.9441061093091765,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.944873417721519,
+          "negative_log_likelihood": 0.12463603507382569,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.011223823010467603,
+          "expected_calibration_error": 0.018518053970200607,
+          "mean_normalized_entropy": 0.045165480482122725,
+          "mean_true_probability": 0.9782303422253958,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.994375,
+          "negative_log_likelihood": 0.03285517446977387,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 1.0,
+          "hazard_rate": 0.008,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9571509890713138,
+        "stationary": {
+          "brier_score": 0.05981849598434338,
+          "expected_calibration_error": 0.052511106985303084,
+          "mean_normalized_entropy": 0.08575048138152952,
+          "mean_true_probability": 0.9343043346079958,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9504113924050633,
+          "negative_log_likelihood": 0.09591067417330792,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.025344215304055506,
+          "expected_calibration_error": 0.054301169851716985,
+          "mean_normalized_entropy": 0.10981652080134557,
+          "mean_true_probability": 0.9428405794004202,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9965277777777778,
+          "negative_log_likelihood": 0.06604346998366448,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 2.0,
+          "hazard_rate": 0.004,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9563530866590516,
+        "stationary": {
+          "brier_score": 0.0772089464508291,
+          "expected_calibration_error": 0.048242325691401654,
+          "mean_normalized_entropy": 0.05238845164036253,
+          "mean_true_probability": 0.9406100434882843,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9436392405063291,
+          "negative_log_likelihood": 0.12708227159454485,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.013457590072653942,
+          "expected_calibration_error": 0.023329326007177485,
+          "mean_normalized_entropy": 0.056111419549298575,
+          "mean_true_probability": 0.9728027251622035,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.994375,
+          "negative_log_likelihood": 0.04010106468725707,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 2.0,
+          "hazard_rate": 0.004,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9554672925544166,
+        "stationary": {
+          "brier_score": 0.09342403050547185,
+          "expected_calibration_error": 0.049822091959594014,
+          "mean_normalized_entropy": 0.033265859664761,
+          "mean_true_probability": 0.9410929386729977,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9416455696202533,
+          "negative_log_likelihood": 0.16794443745683812,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.010184627250688237,
+          "expected_calibration_error": 0.010967370749894543,
+          "mean_normalized_entropy": 0.03130059202784634,
+          "mean_true_probability": 0.9849195205148871,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.99375,
+          "negative_log_likelihood": 0.02722335036137918,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 2.0,
+          "hazard_rate": 0.002,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9553981769744602,
+        "stationary": {
+          "brier_score": 0.09624261883607592,
+          "expected_calibration_error": 0.04961868434722714,
+          "mean_normalized_entropy": 0.024808607717026025,
+          "mean_true_probability": 0.9427971255521126,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9423734177215191,
+          "negative_log_likelihood": 0.18579625280441267,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.009674521356729533,
+          "expected_calibration_error": 0.007960313684343055,
+          "mean_normalized_entropy": 0.02145037134384878,
+          "mean_true_probability": 0.9883919892619402,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9930555555555556,
+          "negative_log_likelihood": 0.022600638933083214,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.5,
+          "hazard_rate": 0.004,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9546409581441941,
+        "stationary": {
+          "brier_score": 0.06784033668593964,
+          "expected_calibration_error": 0.04935373709634694,
+          "mean_normalized_entropy": 0.055730405697532334,
+          "mean_true_probability": 0.9455849191670395,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9446835443037975,
+          "negative_log_likelihood": 0.09738838552929266,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.013895907226317375,
+          "expected_calibration_error": 0.03317301247940053,
+          "mean_normalized_entropy": 0.08011045250554162,
+          "mean_true_probability": 0.9633854227770982,
+          "median_switch_delay": 3.0,
+          "mode_accuracy": 0.9953472222222223,
+          "negative_log_likelihood": 0.04119677886315253,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.5,
+          "hazard_rate": 0.008,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9545871155570314,
+        "stationary": {
+          "brier_score": 0.058807307862452404,
+          "expected_calibration_error": 0.052172369134709705,
+          "mean_normalized_entropy": 0.07831157481268965,
+          "mean_true_probability": 0.94076458929843,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9468987341772153,
+          "negative_log_likelihood": 0.09066222725579154,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.018476432286642794,
+          "expected_calibration_error": 0.0462516589459322,
+          "mean_normalized_entropy": 0.10652180652006081,
+          "mean_true_probability": 0.9502583280111474,
+          "median_switch_delay": 3.0,
+          "mode_accuracy": 0.9958333333333333,
+          "negative_log_likelihood": 0.05564635635261349,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 2.0,
+          "hazard_rate": 0.008,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9545391866591029,
+        "stationary": {
+          "brier_score": 0.078137197192713,
+          "expected_calibration_error": 0.051466722342673424,
+          "mean_normalized_entropy": 0.06289553026351233,
+          "mean_true_probability": 0.935751818915783,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9430696202531645,
+          "negative_log_likelihood": 0.13043362482309984,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.017387943940241207,
+          "expected_calibration_error": 0.030682141338130017,
+          "mean_normalized_entropy": 0.07175623463330494,
+          "mean_true_probability": 0.9643254452315011,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9934027777777779,
+          "negative_log_likelihood": 0.050983052113971784,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 2.0,
+          "hazard_rate": 0.008,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9545015054505742,
+        "stationary": {
+          "brier_score": 0.09011684444225082,
+          "expected_calibration_error": 0.05203545361929943,
+          "mean_normalized_entropy": 0.04526145132421021,
+          "mean_true_probability": 0.938081945885747,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9401898734177216,
+          "negative_log_likelihood": 0.15429396003759432,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.011648689871401451,
+          "expected_calibration_error": 0.016688094100061973,
+          "mean_normalized_entropy": 0.04699380080236,
+          "mean_true_probability": 0.9784478068552407,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.993611111111111,
+          "negative_log_likelihood": 0.03517186273305631,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.5,
+          "hazard_rate": 0.002,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9533235773766926,
+        "stationary": {
+          "brier_score": 0.07822419719940261,
+          "expected_calibration_error": 0.05070211185317005,
+          "mean_normalized_entropy": 0.039354756420109924,
+          "mean_true_probability": 0.9468413820644124,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9425632911392405,
+          "negative_log_likelihood": 0.11228455199490407,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.012197075865943732,
+          "expected_calibration_error": 0.026035670144761783,
+          "mean_normalized_entropy": 0.0634016783102114,
+          "mean_true_probability": 0.9704450432310214,
+          "median_switch_delay": 3.5,
+          "mode_accuracy": 0.9953472222222223,
+          "negative_log_likelihood": 0.03366921499183946,
+          "p90_switch_delay": 13.500000000000021,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.5,
+          "hazard_rate": 0.002,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9519210427546351,
+        "stationary": {
+          "brier_score": 0.057271683638836654,
+          "expected_calibration_error": 0.05864783772895822,
+          "mean_normalized_entropy": 0.0936983570081548,
+          "mean_true_probability": 0.9300628480259816,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9515189873417722,
+          "negative_log_likelihood": 0.09313097793115095,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.042161855704384806,
+          "expected_calibration_error": 0.07505911614463795,
+          "mean_normalized_entropy": 0.13128059024632938,
+          "mean_true_probability": 0.9221598421288301,
+          "median_switch_delay": 3.0,
+          "mode_accuracy": 0.9974305555555556,
+          "negative_log_likelihood": 0.09142874332513796,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.5,
+          "hazard_rate": 0.004,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.951097166847148,
+        "stationary": {
+          "brier_score": 0.05894244890927896,
+          "expected_calibration_error": 0.062070741698394626,
+          "mean_normalized_entropy": 0.10192225864692751,
+          "mean_true_probability": 0.9262678261661464,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9517405063291139,
+          "negative_log_likelihood": 0.09736485857676504,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.04558693036105614,
+          "expected_calibration_error": 0.08116107319770288,
+          "mean_normalized_entropy": 0.14245513789690337,
+          "mean_true_probability": 0.9160687003304766,
+          "median_switch_delay": 3.0,
+          "mode_accuracy": 0.9973611111111111,
+          "negative_log_likelihood": 0.09869004085598469,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.5,
+          "hazard_rate": 0.008,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9496978431264806,
+        "stationary": {
+          "brier_score": 0.06203122226134932,
+          "expected_calibration_error": 0.06736287700371094,
+          "mean_normalized_entropy": 0.11467047513004058,
+          "mean_true_probability": 0.9199452332419962,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.952246835443038,
+          "negative_log_likelihood": 0.1045532273387429,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.052073641558774905,
+          "expected_calibration_error": 0.09155744322274381,
+          "mean_normalized_entropy": 0.1596508104283021,
+          "mean_true_probability": 0.905718034114736,
+          "median_switch_delay": 3.0,
+          "mode_accuracy": 0.9974305555555556,
+          "negative_log_likelihood": 0.1112962960041243,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 4.0,
+          "hazard_rate": 0.002,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.948791202627724,
+        "stationary": {
+          "brier_score": 0.10548344286111279,
+          "expected_calibration_error": 0.055067958480326085,
+          "mean_normalized_entropy": 0.03236514972359364,
+          "mean_true_probability": 0.934675243820591,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9361708860759493,
+          "negative_log_likelihood": 0.24210786742263474,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.019282763328765797,
+          "expected_calibration_error": 0.014482987294048276,
+          "mean_normalized_entropy": 0.028809739633944627,
+          "mean_true_probability": 0.9803607937706703,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9885416666666667,
+          "negative_log_likelihood": 0.06356082644824854,
+          "p90_switch_delay": 12.600000000000009,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 4.0,
+          "hazard_rate": 0.002,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9485973218902293,
+        "stationary": {
+          "brier_score": 0.11517303368818968,
+          "expected_calibration_error": 0.058380608003461135,
+          "mean_normalized_entropy": 0.02273107272988576,
+          "mean_true_probability": 0.9338488183596632,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9338924050632911,
+          "negative_log_likelihood": 0.2872825700118783,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.01783507952769055,
+          "expected_calibration_error": 0.010593621290121629,
+          "mean_normalized_entropy": 0.017584029966074364,
+          "mean_true_probability": 0.9854003049617466,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9893750000000001,
+          "negative_log_likelihood": 0.058183488236710976,
+          "p90_switch_delay": 12.900000000000013,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 4.0,
+          "hazard_rate": 0.004,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9472371706089594,
+        "stationary": {
+          "brier_score": 0.11455553731670141,
+          "expected_calibration_error": 0.059393643480461666,
+          "mean_normalized_entropy": 0.028930439695368126,
+          "mean_true_probability": 0.9318889004319526,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9331012658227849,
+          "negative_log_likelihood": 0.2734549699455066,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.020118089716060876,
+          "expected_calibration_error": 0.013595791171954762,
+          "mean_normalized_entropy": 0.025343980367621144,
+          "mean_true_probability": 0.981633943214186,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.988125,
+          "negative_log_likelihood": 0.06612005324928028,
+          "p90_switch_delay": 12.600000000000009,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 4.0,
+          "hazard_rate": 0.004,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9468177859344348,
+        "stationary": {
+          "brier_score": 0.10613642187788366,
+          "expected_calibration_error": 0.056458806258513045,
+          "mean_normalized_entropy": 0.03876175349176234,
+          "mean_true_probability": 0.9318269298378712,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9350316455696204,
+          "negative_log_likelihood": 0.24143222332669886,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.022628715615284692,
+          "expected_calibration_error": 0.01820300638419529,
+          "mean_normalized_entropy": 0.03780034813368527,
+          "mean_true_probability": 0.9753016478974039,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9869444444444444,
+          "negative_log_likelihood": 0.07347859271034238,
+          "p90_switch_delay": 12.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 4.0,
+          "hazard_rate": 0.008,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9455537019727953,
+        "stationary": {
+          "brier_score": 0.11307532233808484,
+          "expected_calibration_error": 0.060258274547215884,
+          "mean_normalized_entropy": 0.03790114938523142,
+          "mean_true_probability": 0.9291112453650946,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.932246835443038,
+          "negative_log_likelihood": 0.2617756321591952,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.02354187284018367,
+          "expected_calibration_error": 0.01843983923021816,
+          "mean_normalized_entropy": 0.03736217535901526,
+          "mean_true_probability": 0.9754812535168963,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.986388888888889,
+          "negative_log_likelihood": 0.07747092400032553,
+          "p90_switch_delay": 12.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 4.0,
+          "hazard_rate": 0.008,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9434290168631152,
+        "stationary": {
+          "brier_score": 0.10674813104530129,
+          "expected_calibration_error": 0.057896404949125665,
+          "mean_normalized_entropy": 0.04738272778486212,
+          "mean_true_probability": 0.9279854267123933,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9322784810126582,
+          "negative_log_likelihood": 0.24188926142920997,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.02739047263192711,
+          "expected_calibration_error": 0.02396219400704439,
+          "mean_normalized_entropy": 0.050473213796615006,
+          "mean_true_probability": 0.9678688707373139,
+          "median_switch_delay": 2.0,
+          "mode_accuracy": 0.9845833333333333,
+          "negative_log_likelihood": 0.08688623205469645,
+          "p90_switch_delay": 12.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.25,
+          "hazard_rate": 0.004,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9427740090414104,
+        "stationary": {
+          "brier_score": 0.055420289916640574,
+          "expected_calibration_error": 0.053968173503548794,
+          "mean_normalized_entropy": 0.08107948104031408,
+          "mean_true_probability": 0.9416580020030851,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9433544303797469,
+          "negative_log_likelihood": 0.08557039990505486,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.033205721921559433,
+          "expected_calibration_error": 0.06468672116986134,
+          "mean_normalized_entropy": 0.1303546072665217,
+          "mean_true_probability": 0.9307550221169029,
+          "median_switch_delay": 5.0,
+          "mode_accuracy": 0.9956944444444444,
+          "negative_log_likelihood": 0.08001838159190985,
+          "p90_switch_delay": 16.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.25,
+          "hazard_rate": 0.008,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9425059421803311,
+        "stationary": {
+          "brier_score": 0.05345373705614709,
+          "expected_calibration_error": 0.06253314356745215,
+          "mean_normalized_entropy": 0.11126895399614652,
+          "mean_true_probability": 0.9303122922951138,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9458544303797468,
+          "negative_log_likelihood": 0.09273262249255551,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.04213910047698763,
+          "expected_calibration_error": 0.08174807351860114,
+          "mean_normalized_entropy": 0.16059291450006583,
+          "mean_true_probability": 0.9139406304712465,
+          "median_switch_delay": 4.5,
+          "mode_accuracy": 0.9958333333333333,
+          "negative_log_likelihood": 0.09974007479384286,
+          "p90_switch_delay": 16.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.25,
+          "hazard_rate": 0.002,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9424800454398731,
+        "stationary": {
+          "brier_score": 0.06218226951794935,
+          "expected_calibration_error": 0.049481972415194544,
+          "mean_normalized_entropy": 0.059065574357500095,
+          "mean_true_probability": 0.9469285944155168,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9429430379746835,
+          "negative_log_likelihood": 0.08834731921646927,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.02926396029395322,
+          "expected_calibration_error": 0.05541834493823068,
+          "mean_normalized_entropy": 0.11121888616744197,
+          "mean_true_probability": 0.9400451408110428,
+          "median_switch_delay": 5.5,
+          "mode_accuracy": 0.9954861111111111,
+          "negative_log_likelihood": 0.06948889466540001,
+          "p90_switch_delay": 16.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.25,
+          "hazard_rate": 0.004,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9359518657936681,
+        "stationary": {
+          "brier_score": 0.0731457541734678,
+          "expected_calibration_error": 0.08271000639044543,
+          "mean_normalized_entropy": 0.13592181622499722,
+          "mean_true_probability": 0.9041251308783478,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.951867088607595,
+          "negative_log_likelihood": 0.12304007157169575,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.08474534976484988,
+          "expected_calibration_error": 0.1279993644550427,
+          "mean_normalized_entropy": 0.19899634363571725,
+          "mean_true_probability": 0.8693241841530835,
+          "median_switch_delay": 4.5,
+          "mode_accuracy": 0.9973611111111111,
+          "negative_log_likelihood": 0.15950584908620516,
+          "p90_switch_delay": 15.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.25,
+          "hazard_rate": 0.002,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9358368180834634,
+        "stationary": {
+          "brier_score": 0.07087615491693594,
+          "expected_calibration_error": 0.07874699786594147,
+          "mean_normalized_entropy": 0.12574572356033242,
+          "mean_true_probability": 0.9085320244043644,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9516139240506329,
+          "negative_log_likelihood": 0.11779642762751169,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.08067055467036573,
+          "expected_calibration_error": 0.12162619043519868,
+          "mean_normalized_entropy": 0.1875135135363925,
+          "mean_true_probability": 0.8756209135401415,
+          "median_switch_delay": 5.0,
+          "mode_accuracy": 0.9972916666666667,
+          "negative_log_likelihood": 0.15170549204217576,
+          "p90_switch_delay": 15.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.25,
+          "hazard_rate": 0.008,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.935300472734527,
+        "stationary": {
+          "brier_score": 0.07735470655814221,
+          "expected_calibration_error": 0.08942251857541236,
+          "mean_normalized_entropy": 0.15248861886637596,
+          "mean_true_probability": 0.8965898491613197,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9524050632911393,
+          "negative_log_likelihood": 0.1321737276859296,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.09246519766948735,
+          "expected_calibration_error": 0.13889874370724298,
+          "mean_normalized_entropy": 0.21741470122618936,
+          "mean_true_probability": 0.8585054860248484,
+          "median_switch_delay": 4.0,
+          "mode_accuracy": 0.9975,
+          "negative_log_likelihood": 0.17323159181067949,
+          "p90_switch_delay": 15.300000000000004,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.125,
+          "hazard_rate": 0.008,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9261934028374575,
+        "stationary": {
+          "brier_score": 0.06038863880314958,
+          "expected_calibration_error": 0.0820241594213075,
+          "mean_normalized_entropy": 0.15669215788050847,
+          "mean_true_probability": 0.9096132392536033,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.945886075949367,
+          "negative_log_likelihood": 0.11367756928127304,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.08081411720150597,
+          "expected_calibration_error": 0.12844967936453072,
+          "mean_normalized_entropy": 0.22280721557828134,
+          "mean_true_probability": 0.8673427415648637,
+          "median_switch_delay": 7.5,
+          "mode_accuracy": 0.9959027777777778,
+          "negative_log_likelihood": 0.16041974609173468,
+          "p90_switch_delay": 17.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.125,
+          "hazard_rate": 0.004,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9252859754296945,
+        "stationary": {
+          "brier_score": 0.05190724494408698,
+          "expected_calibration_error": 0.06537276410141318,
+          "mean_normalized_entropy": 0.11661219932340733,
+          "mean_true_probability": 0.9293555113764258,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.943259493670886,
+          "negative_log_likelihood": 0.09209132030501899,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.06840550053157346,
+          "expected_calibration_error": 0.10918978084698705,
+          "mean_normalized_entropy": 0.18790386537492532,
+          "mean_true_probability": 0.8865144463859336,
+          "median_switch_delay": 9.0,
+          "mode_accuracy": 0.9957638888888889,
+          "negative_log_likelihood": 0.13659569510862324,
+          "p90_switch_delay": 17.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.125,
+          "hazard_rate": 0.002,
+          "posterior_decay": 1.0
+        },
+        "selection_score": 0.9246478005881609,
+        "stationary": {
+          "brier_score": 0.0514596428445239,
+          "expected_calibration_error": 0.054228812029472606,
+          "mean_normalized_entropy": 0.08678100207361206,
+          "mean_true_probability": 0.9411976424662871,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9429746835443038,
+          "negative_log_likelihood": 0.08212424377314434,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.06237891016493763,
+          "expected_calibration_error": 0.0984174716404238,
+          "mean_normalized_entropy": 0.16618982604607915,
+          "mean_true_probability": 0.8972070957098262,
+          "median_switch_delay": 10.0,
+          "mode_accuracy": 0.9956944444444444,
+          "negative_log_likelihood": 0.12372198974902184,
+          "p90_switch_delay": 17.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.125,
+          "hazard_rate": 0.008,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9151198984043926,
+        "stationary": {
+          "brier_score": 0.1007754135365628,
+          "expected_calibration_error": 0.11729064073122158,
+          "mean_normalized_entropy": 0.20033861022436655,
+          "mean_true_probability": 0.8674152683753964,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9524050632911393,
+          "negative_log_likelihood": 0.17036369384580674,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.14184582832335807,
+          "expected_calibration_error": 0.18786656820094422,
+          "mean_normalized_entropy": 0.274558994789846,
+          "mean_true_probability": 0.8093667101885392,
+          "median_switch_delay": 7.0,
+          "mode_accuracy": 0.9972916666666667,
+          "negative_log_likelihood": 0.2417900677667569,
+          "p90_switch_delay": 17.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.125,
+          "hazard_rate": 0.004,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9148366432888785,
+        "stationary": {
+          "brier_score": 0.09583512267192523,
+          "expected_calibration_error": 0.10906147775441297,
+          "mean_normalized_entropy": 0.175107221498017,
+          "mean_true_probability": 0.8766971281275364,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9519303797468355,
+          "negative_log_likelihood": 0.15865438801048135,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.13359206960116654,
+          "expected_calibration_error": 0.17725018062986836,
+          "mean_normalized_entropy": 0.25152321813906664,
+          "mean_true_probability": 0.8199731019969483,
+          "median_switch_delay": 8.0,
+          "mode_accuracy": 0.9970138888888889,
+          "negative_log_likelihood": 0.22736673338580687,
+          "p90_switch_delay": 17.0,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      },
+      {
+        "filter_config": {
+          "evidence_scale": 0.125,
+          "hazard_rate": 0.002,
+          "posterior_decay": 0.98
+        },
+        "selection_score": 0.9132428234991231,
+        "stationary": {
+          "brier_score": 0.09312372009394126,
+          "expected_calibration_error": 0.10462228300536033,
+          "mean_normalized_entropy": 0.16004329425543035,
+          "mean_true_probability": 0.881859983715786,
+          "median_switch_delay": 0.0,
+          "mode_accuracy": 0.9516139240506329,
+          "negative_log_likelihood": 0.1522088467362915,
+          "p90_switch_delay": 0.0,
+          "switch_count": 0
+        },
+        "switching": {
+          "brier_score": 0.1291243107855044,
+          "expected_calibration_error": 0.171008971496926,
+          "mean_normalized_entropy": 0.23774619041271278,
+          "mean_true_probability": 0.8259305010505548,
+          "median_switch_delay": 9.0,
+          "mode_accuracy": 0.9970138888888889,
+          "negative_log_likelihood": 0.21942279197507253,
+          "p90_switch_delay": 17.60000000000001,
+          "switch_count": 48
+        },
+        "validation_gate_pass": true
+      }
+    ],
+    "validation_controller_seeds": [
+      24
+    ],
+    "validation_event_seeds": [
+      93001,
+      93002
+    ],
+    "validation_gate_pass": true,
+    "validation_inverse_metrics": {
+      "ensemble_variance_mean": 0.004725337028503418,
+      "mae": 0.35196971893310547,
+      "per_action_rmse": [
+        0.5779102444648743,
+        0.45992517471313477,
+        0.5215083956718445,
+        0.5215510129928589,
+        0.3700830042362213,
+        0.354703426361084
+      ],
+      "rmse": 0.4747423827648163
+    }
+  },
+  "protocol_version": "v5-specialist-trajectory-expected-action-system-id",
+  "residual_variance": [
+    0.12892048060894012,
+    0.10295749455690384,
+    0.11742374300956726,
+    0.1356809437274933,
+    0.10632213205099106,
+    0.0967380702495575
+  ],
+  "schema": "bapr.regime-polarity-specialist-expected-action-model.v5",
+  "source_bundles": {
+    "train/robust_sac/seed_4021": {
+      "sha256": "c697bebddb0e2f0ba5c510ab9cf03538c117902c821bd6d2ffcd9cccac481362",
+      "size": 1010
+    },
+    "train/specialist_0/seed_4021": {
+      "sha256": "1cc123d54ff82b80bb864f680b906f8f11da435a904ca4cc3b7d815161d221d9",
+      "size": 1011
+    },
+    "train/specialist_1/seed_4021": {
+      "sha256": "4ed5e3d25c74303ff8cd30b7307968f059db530adcccd7c78bc9e29a4fef3b86",
+      "size": 1011
+    },
+    "train/specialist_2/seed_4021": {
+      "sha256": "5b3b9089bee43d94f212e8b20fccc0e64d56b1aebab9b9cf42bb7f7b4570b43c",
+      "size": 1011
+    },
+    "train/specialist_3/seed_4021": {
+      "sha256": "2b288e396df3be8e5bbdb94b4f42c9c69eab5b1d1dc09ec53a0ec20484196462",
+      "size": 1011
+    },
+    "validation/robust_sac/seed_4049": {
+      "sha256": "21f8ce185f09dd4ceb9df71a75232eb0a974b1597dd58d8069ee2970edc233e5",
+      "size": 1010
+    },
+    "validation/specialist_0/seed_4049": {
+      "sha256": "4f3acf28d66f86604a9b628ccf2efbf24c48994f76761a8ff2448a1bb67c4d13",
+      "size": 1011
+    },
+    "validation/specialist_1/seed_4049": {
+      "sha256": "857c6f9cce4e1f25b9a653575b430d6827b2c4bae89ecba05f9b25688297fa68",
+      "size": 1011
+    },
+    "validation/specialist_2/seed_4049": {
+      "sha256": "1913755b066e61709a15eb9086aa44c50c74c8deae43534ea0bae7a9e91c8524",
+      "size": 1011
+    },
+    "validation/specialist_3/seed_4049": {
+      "sha256": "faaba35855c9d006a6587cd76625938f93b1164dd26f284213251d12a21dcd16",
+      "size": 1011
+    }
+  },
+  "source_files": {
+    "jax_experiments/analysis/regime_polarity_specialist_expected_action_model_v5.py": {
+      "sha256": "b25114a539109a38022571b001bbb2f1ca97b0b1426796894c70ae01688ea518",
+      "size": 4039
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_expected_action_system_id_v5.py": {
+      "sha256": "b8a598feaca8559702bb452c57d78824d25395ebc0a8b649d9ff231a7b11b9d4",
+      "size": 3946
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_sticky_router_v3.py": {
+      "sha256": "46b12be150be486de09727e58ceeed1e05d36a57027d4a43224d473731f02ec1",
+      "size": 7162
+    },
+    "jax_experiments/analysis/train_regime_polarity_specialist_expected_action_v5.py": {
+      "sha256": "75949845bc1817be57286e2e14aeb8c40418170a0e6d3419d9639e2a2ca689a1",
+      "size": 19448
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/networks/executed_action_inverse.py": {
+      "sha256": "7af26a7c49ae1fedc4be0f49b0a5a9a856e43390e3ae8f55cada0e0486ed57d5",
+      "size": 5820
+    }
+  },
+  "stationary_arms": [
+    "robust_sac",
+    "specialist_0",
+    "specialist_1",
+    "specialist_2",
+    "specialist_3"
+  ],
+  "status": "complete",
+  "switching_arms": [
+    "robust_sac",
+    "specialist_0",
+    "specialist_1",
+    "specialist_2",
+    "specialist_3",
+    "dynamic_oracle",
+    "sticky_confirm3_v4"
+  ],
+  "train_event_seeds": [
+    154001,
+    154013
+  ],
+  "train_source_seeds": [
+    4021
+  ],
+  "training_config": {
+    "batch_size_per_head": 256,
+    "stationary_steps": 1000,
+    "switching_episodes": 3,
+    "updates": 1500
+  },
+  "training_data_policy": "true mode is used only offline to construct the supervised executed-action target; deployed inference consumes observation, commanded action, and next observation only",
+  "training_history": [
+    {
+      "ensemble_variance": 0.18333618342876434,
+      "loss": 0.4576374888420105,
+      "rmse": 0.6764890551567078,
+      "update": 1
+    },
+    {
+      "ensemble_variance": 0.22326527535915375,
+      "loss": 0.26393991708755493,
+      "rmse": 0.5137508511543274,
+      "update": 50
+    },
+    {
+      "ensemble_variance": 0.2629700303077698,
+      "loss": 0.22262290120124817,
+      "rmse": 0.4718293249607086,
+      "update": 100
+    },
+    {
+      "ensemble_variance": 0.2809177041053772,
+      "loss": 0.20221851766109467,
+      "rmse": 0.449687123298645,
+      "update": 150
+    },
+    {
+      "ensemble_variance": 0.3025762438774109,
+      "loss": 0.18860603868961334,
+      "rmse": 0.434287965297699,
+      "update": 200
+    },
+    {
+      "ensemble_variance": 0.31520339846611023,
+      "loss": 0.18114057183265686,
+      "rmse": 0.4256061315536499,
+      "update": 250
+    },
+    {
+      "ensemble_variance": 0.33467039465904236,
+      "loss": 0.17326581478118896,
+      "rmse": 0.41625210642814636,
+      "update": 300
+    },
+    {
+      "ensemble_variance": 0.349292129278183,
+      "loss": 0.15827246010303497,
+      "rmse": 0.3978347182273865,
+      "update": 350
+    },
+    {
+      "ensemble_variance": 0.34131091833114624,
+      "loss": 0.15727508068084717,
+      "rmse": 0.39657920598983765,
+      "update": 400
+    },
+    {
+      "ensemble_variance": 0.355807363986969,
+      "loss": 0.16000188887119293,
+      "rmse": 0.4000023603439331,
+      "update": 450
+    },
+    {
+      "ensemble_variance": 0.3584975600242615,
+      "loss": 0.1485770344734192,
+      "rmse": 0.385456919670105,
+      "update": 500
+    },
+    {
+      "ensemble_variance": 0.3629235029220581,
+      "loss": 0.15147985517978668,
+      "rmse": 0.38920411467552185,
+      "update": 550
+    },
+    {
+      "ensemble_variance": 0.3640180230140686,
+      "loss": 0.1482209414243698,
+      "rmse": 0.3849947154521942,
+      "update": 600
+    },
+    {
+      "ensemble_variance": 0.3623589873313904,
+      "loss": 0.1501249074935913,
+      "rmse": 0.38745954632759094,
+      "update": 650
+    },
+    {
+      "ensemble_variance": 0.3685360848903656,
+      "loss": 0.13730688393115997,
+      "rmse": 0.37054944038391113,
+      "update": 700
+    },
+    {
+      "ensemble_variance": 0.36241841316223145,
+      "loss": 0.14135253429412842,
+      "rmse": 0.3759687840938568,
+      "update": 750
+    },
+    {
+      "ensemble_variance": 0.3670334815979004,
+      "loss": 0.13178184628486633,
+      "rmse": 0.3630176782608032,
+      "update": 800
+    },
+    {
+      "ensemble_variance": 0.3707898259162903,
+      "loss": 0.13567619025707245,
+      "rmse": 0.36834248900413513,
+      "update": 850
+    },
+    {
+      "ensemble_variance": 0.36840569972991943,
+      "loss": 0.13785818219184875,
+      "rmse": 0.3712925910949707,
+      "update": 900
+    },
+    {
+      "ensemble_variance": 0.37417277693748474,
+      "loss": 0.13007719814777374,
+      "rmse": 0.36066216230392456,
+      "update": 950
+    },
+    {
+      "ensemble_variance": 0.36600837111473083,
+      "loss": 0.13292339444160461,
+      "rmse": 0.36458659172058105,
+      "update": 1000
+    },
+    {
+      "ensemble_variance": 0.3659743666648865,
+      "loss": 0.13757012784481049,
+      "rmse": 0.37090447545051575,
+      "update": 1050
+    },
+    {
+      "ensemble_variance": 0.37555575370788574,
+      "loss": 0.1328132599592209,
+      "rmse": 0.3644355237483978,
+      "update": 1100
+    },
+    {
+      "ensemble_variance": 0.3677757680416107,
+      "loss": 0.12272374331951141,
+      "rmse": 0.3503194749355316,
+      "update": 1150
+    },
+    {
+      "ensemble_variance": 0.37742936611175537,
+      "loss": 0.12088488787412643,
+      "rmse": 0.3476850390434265,
+      "update": 1200
+    },
+    {
+      "ensemble_variance": 0.3720383048057556,
+      "loss": 0.12077616900205612,
+      "rmse": 0.3475286662578583,
+      "update": 1250
+    },
+    {
+      "ensemble_variance": 0.37482571601867676,
+      "loss": 0.12290074676275253,
+      "rmse": 0.35057201981544495,
+      "update": 1300
+    },
+    {
+      "ensemble_variance": 0.37808382511138916,
+      "loss": 0.12397515773773193,
+      "rmse": 0.35210105776786804,
+      "update": 1350
+    },
+    {
+      "ensemble_variance": 0.3703235983848572,
+      "loss": 0.12653465569019318,
+      "rmse": 0.35571709275245667,
+      "update": 1400
+    },
+    {
+      "ensemble_variance": 0.36239156126976013,
+      "loss": 0.11837257444858551,
+      "rmse": 0.34405314922332764,
+      "update": 1450
+    },
+    {
+      "ensemble_variance": 0.3814195394515991,
+      "loss": 0.12052694708108902,
+      "rmse": 0.3471699059009552,
+      "update": 1500
+    }
+  ],
+  "training_inverse_metrics": {
+    "ensemble_variance_mean": 0.0036594485864043236,
+    "mae": 0.24295911192893982,
+    "per_action_rmse": [
+      0.3590549826622009,
+      0.32086989283561707,
+      0.3426714837551117,
+      0.36834895610809326,
+      0.32607075572013855,
+      0.3110274374485016
+    ],
+    "rmse": 0.338638037443161
+  },
+  "validation": {
+    "filter_config": {
+      "evidence_scale": 1.0,
+      "hazard_rate": 0.002,
+      "posterior_decay": 0.98
+    },
+    "selection_score": 0.9919912858405264,
+    "stationary": {
+      "brier_score": 8.207105056663295e-05,
+      "expected_calibration_error": 0.000726352247430019,
+      "mean_normalized_entropy": 0.0030579181712385188,
+      "mean_true_probability": 0.99927364775257,
+      "median_switch_delay": 0.0,
+      "mode_accuracy": 1.0,
+      "negative_log_likelihood": 0.0007528108160446575,
+      "p90_switch_delay": 0.0,
+      "switch_count": 0
+    },
+    "switching": {
+      "brier_score": 3.485663789412938e-05,
+      "expected_calibration_error": 0.0006145812434114969,
+      "mean_normalized_entropy": 0.0028281830270155783,
+      "mean_true_probability": 0.9993854187565884,
+      "median_switch_delay": 2.0,
+      "mode_accuracy": 1.0,
+      "negative_log_likelihood": 0.0006249781884033849,
+      "p90_switch_delay": 4.0,
+      "switch_count": 126
+    },
+    "validation_gate_pass": true
+  },
+  "validation_candidates": [
+    {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9919912858405264,
+      "stationary": {
+        "brier_score": 8.207105056663295e-05,
+        "expected_calibration_error": 0.000726352247430019,
+        "mean_normalized_entropy": 0.0030579181712385188,
+        "mean_true_probability": 0.99927364775257,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0007528108160446575,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 3.485663789412938e-05,
+        "expected_calibration_error": 0.0006145812434114969,
+        "mean_normalized_entropy": 0.0028281830270155783,
+        "mean_true_probability": 0.9993854187565884,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0006249781884033849,
+        "p90_switch_delay": 4.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.004,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9919817778224496,
+      "stationary": {
+        "brier_score": 0.00010954133607492657,
+        "expected_calibration_error": 0.000997861302364587,
+        "mean_normalized_entropy": 0.004159404804488419,
+        "mean_true_probability": 0.9990021386976355,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0010327825188044299,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 7.288871020184296e-05,
+        "expected_calibration_error": 0.0009422451844086153,
+        "mean_normalized_entropy": 0.004120636437336478,
+        "mean_true_probability": 0.9990577548155913,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0009651256291596559,
+        "p90_switch_delay": 4.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.004,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9919465661058843,
+      "stationary": {
+        "brier_score": 0.00019035692476035432,
+        "expected_calibration_error": 0.001279569305034078,
+        "mean_normalized_entropy": 0.005144343619010128,
+        "mean_true_probability": 0.9986787341350507,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9999230769230769,
+        "negative_log_likelihood": 0.0013872059064027086,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.00010604326877038378,
+        "expected_calibration_error": 0.001164312840429537,
+        "mean_normalized_entropy": 0.004883094423504812,
+        "mean_true_probability": 0.9988356871595705,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0011979241582877468,
+        "p90_switch_delay": 4.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.008,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9919096551713438,
+      "stationary": {
+        "brier_score": 0.00029383147045967695,
+        "expected_calibration_error": 0.0018281703201612127,
+        "mean_normalized_entropy": 0.007234003976838025,
+        "mean_true_probability": 0.9980895491257596,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9998974358974358,
+        "negative_log_likelihood": 0.0020135725898811968,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.00021778957103533962,
+        "expected_calibration_error": 0.0018238188640678115,
+        "mean_normalized_entropy": 0.00721822337330186,
+        "mean_true_probability": 0.9981761811359322,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0018976810850634004,
+        "p90_switch_delay": 4.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.008,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9918214000978107,
+      "stationary": {
+        "brier_score": 0.00042738403830654847,
+        "expected_calibration_error": 0.002269054623474623,
+        "mean_normalized_entropy": 0.008584718196740565,
+        "mean_true_probability": 0.9976062602619187,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9998461538461537,
+        "negative_log_likelihood": 0.002552624474567866,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0002926657870234166,
+        "expected_calibration_error": 0.0021807186886761516,
+        "mean_normalized_entropy": 0.008319021654751726,
+        "mean_true_probability": 0.9978190925524848,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.999920634920635,
+        "negative_log_likelihood": 0.0022813646677533475,
+        "p90_switch_delay": 4.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 2.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9914200272845961,
+      "stationary": {
+        "brier_score": 0.0019230615184338434,
+        "expected_calibration_error": 0.001314896145060716,
+        "mean_normalized_entropy": 0.003658949540099482,
+        "mean_true_probability": 0.9978469532048393,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9986153846153846,
+        "negative_log_likelihood": 0.0036357306520505206,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0016988896406152322,
+        "expected_calibration_error": 0.0017407837470354009,
+        "mean_normalized_entropy": 0.003906136138101792,
+        "mean_true_probability": 0.9978709050858027,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9989682539682543,
+        "negative_log_likelihood": 0.0034498961562163507,
+        "p90_switch_delay": 3.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 2.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9912151770377313,
+      "stationary": {
+        "brier_score": 0.002194986231512913,
+        "expected_calibration_error": 0.001486219407655106,
+        "mean_normalized_entropy": 0.004133784411769002,
+        "mean_true_probability": 0.9975572646948769,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9984871794871795,
+        "negative_log_likelihood": 0.0041728321480805014,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0019261050358882006,
+        "expected_calibration_error": 0.0018968745111561745,
+        "mean_normalized_entropy": 0.004396507008506084,
+        "mean_true_probability": 0.9975888811017213,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9988095238095239,
+        "negative_log_likelihood": 0.003910429018140128,
+        "p90_switch_delay": 3.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 1.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9909944961363174,
+      "stationary": {
+        "brier_score": 3.658771829897353e-05,
+        "expected_calibration_error": 0.0005142569725943614,
+        "mean_normalized_entropy": 0.0023573592017573724,
+        "mean_true_probability": 0.9994857430274056,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0005250128023284381,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 2.2015454730492364e-05,
+        "expected_calibration_error": 0.00048104003168203706,
+        "mean_normalized_entropy": 0.0023180363576365557,
+        "mean_true_probability": 0.9995189599683181,
+        "median_switch_delay": 2.5,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.000487578120718445,
+        "p90_switch_delay": 4.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 2.0,
+        "hazard_rate": 0.004,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9904245831229257,
+      "stationary": {
+        "brier_score": 0.0027853533240086276,
+        "expected_calibration_error": 0.0016612376569129824,
+        "mean_normalized_entropy": 0.005339326311316286,
+        "mean_true_probability": 0.9968678278079611,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.998025641025641,
+        "negative_log_likelihood": 0.005423758786691157,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.00258518399181397,
+        "expected_calibration_error": 0.0021972246959575774,
+        "mean_normalized_entropy": 0.005720698610292916,
+        "mean_true_probability": 0.9968162102530953,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9980952380952383,
+        "negative_log_likelihood": 0.005272399439211209,
+        "p90_switch_delay": 3.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 2.0,
+        "hazard_rate": 0.004,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.990185701814522,
+      "stationary": {
+        "brier_score": 0.0030857020558351803,
+        "expected_calibration_error": 0.0017605263547022334,
+        "mean_normalized_entropy": 0.005957907085579634,
+        "mean_true_probability": 0.9965095469020921,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9978461538461538,
+        "negative_log_likelihood": 0.00605915869842115,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0028767287614472146,
+        "expected_calibration_error": 0.0024719527121321453,
+        "mean_normalized_entropy": 0.006343876412885875,
+        "mean_true_probability": 0.9964495568273022,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9979365079365079,
+        "negative_log_likelihood": 0.0058718869624051154,
+        "p90_switch_delay": 3.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 2.0,
+        "hazard_rate": 0.008,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9895252115896613,
+      "stationary": {
+        "brier_score": 0.003956422861463925,
+        "expected_calibration_error": 0.0020868672611896945,
+        "mean_normalized_entropy": 0.007848544301533176,
+        "mean_true_probability": 0.995424972986348,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9975641025641024,
+        "negative_log_likelihood": 0.007983578665908719,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0038857226279238313,
+        "expected_calibration_error": 0.002862103510801158,
+        "mean_normalized_entropy": 0.00836443419436967,
+        "mean_true_probability": 0.9952470405595332,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9974603174603174,
+        "negative_log_likelihood": 0.007995752829639798,
+        "p90_switch_delay": 3.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 2.0,
+        "hazard_rate": 0.008,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9892568543497984,
+      "stationary": {
+        "brier_score": 0.004299592181990488,
+        "expected_calibration_error": 0.0022194388273154243,
+        "mean_normalized_entropy": 0.008639851509917201,
+        "mean_true_probability": 0.994973193897529,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9973589743589744,
+        "negative_log_likelihood": 0.008734398171335624,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.00425927368749733,
+        "expected_calibration_error": 0.0031733928385605766,
+        "mean_normalized_entropy": 0.009135971840141026,
+        "mean_true_probability": 0.9947753870023464,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9973015873015872,
+        "negative_log_likelihood": 0.008762654369521698,
+        "p90_switch_delay": 3.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.5,
+        "hazard_rate": 0.008,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.988990114821758,
+      "stationary": {
+        "brier_score": 6.474110499620545e-05,
+        "expected_calibration_error": 0.002719170634693994,
+        "mean_normalized_entropy": 0.013006633989523531,
+        "mean_true_probability": 0.9972808293653059,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.00273718255476202,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 3.95407129678334e-05,
+        "expected_calibration_error": 0.002589853800888997,
+        "mean_normalized_entropy": 0.012934790736379423,
+        "mean_true_probability": 0.997410146199111,
+        "median_switch_delay": 3.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.00260148818330066,
+        "p90_switch_delay": 5.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.5,
+        "hazard_rate": 0.008,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9879824872919787,
+      "stationary": {
+        "brier_score": 0.00021080802421719617,
+        "expected_calibration_error": 0.003779911867335571,
+        "mean_normalized_entropy": 0.016169514754904735,
+        "mean_true_probability": 0.9962200881326645,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0038378603006231577,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 7.005083208542664e-05,
+        "expected_calibration_error": 0.003228029035970076,
+        "mean_normalized_entropy": 0.015346661292691945,
+        "mean_true_probability": 0.9967719709640301,
+        "median_switch_delay": 3.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0032482586359617077,
+        "p90_switch_delay": 6.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.5,
+        "hazard_rate": 0.002,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9869993696671898,
+      "stationary": {
+        "brier_score": 4.291630278449711e-06,
+        "expected_calibration_error": 0.0006818776777591795,
+        "mean_normalized_entropy": 0.003935605082316229,
+        "mean_true_probability": 0.9993181223222407,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0006830424188308551,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 2.5213312407408516e-06,
+        "expected_calibration_error": 0.0006472883712363749,
+        "mean_normalized_entropy": 0.003877699988358783,
+        "mean_true_probability": 0.9993527116287636,
+        "median_switch_delay": 4.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.000648021436397721,
+        "p90_switch_delay": 5.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.5,
+        "hazard_rate": 0.004,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9869974964683441,
+      "stationary": {
+        "brier_score": 1.681265759105436e-05,
+        "expected_calibration_error": 0.001362319943530686,
+        "mean_normalized_entropy": 0.007187157648990564,
+        "mean_true_probability": 0.9986376800564694,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.001366923765502501,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 1.001412662335268e-05,
+        "expected_calibration_error": 0.001294576026641736,
+        "mean_normalized_entropy": 0.007109924330468582,
+        "mean_true_probability": 0.9987054239733583,
+        "median_switch_delay": 4.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0012974994807939176,
+        "p90_switch_delay": 5.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.5,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9859985754079174,
+      "stationary": {
+        "brier_score": 3.8404755884382166e-05,
+        "expected_calibration_error": 0.0012060297985470373,
+        "mean_normalized_entropy": 0.005757595974933383,
+        "mean_true_probability": 0.9987939702014529,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0012160501370895578,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 5.698368330726989e-06,
+        "expected_calibration_error": 0.0008734295081047298,
+        "mean_normalized_entropy": 0.004930517752897613,
+        "mean_true_probability": 0.9991265704918953,
+        "median_switch_delay": 4.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.000875031265610958,
+        "p90_switch_delay": 6.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.5,
+        "hazard_rate": 0.004,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9859950130025121,
+      "stationary": {
+        "brier_score": 8.608421441081445e-05,
+        "expected_calibration_error": 0.002103746477520075,
+        "mean_normalized_entropy": 0.009591113388030412,
+        "mean_true_probability": 0.9978962535224799,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.002126708835031944,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 1.9947989951640367e-05,
+        "expected_calibration_error": 0.001677090064696082,
+        "mean_normalized_entropy": 0.008723304964551811,
+        "mean_true_probability": 0.9983229099353037,
+        "median_switch_delay": 4.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0016827623817583402,
+        "p90_switch_delay": 6.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.004,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9829768093759238,
+      "stationary": {
+        "brier_score": 0.0005732595122828369,
+        "expected_calibration_error": 0.005428110141775741,
+        "mean_normalized_entropy": 0.022251488457916385,
+        "mean_true_probability": 0.9945718898582243,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.005589571653156033,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 9.276249630475218e-05,
+        "expected_calibration_error": 0.0042704947018731365,
+        "mean_normalized_entropy": 0.0207202876662755,
+        "mean_true_probability": 0.9957295052981268,
+        "median_switch_delay": 5.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.004297661453658611,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.008,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9829751709013571,
+      "stationary": {
+        "brier_score": 0.0001640691306280155,
+        "expected_calibration_error": 0.0061951917983797235,
+        "mean_normalized_entropy": 0.028830781431807097,
+        "mean_true_probability": 0.9938048082016202,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.006243389009484518,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 9.931639457139155e-05,
+        "expected_calibration_error": 0.0059809277113334535,
+        "mean_normalized_entropy": 0.02882392182927204,
+        "mean_true_probability": 0.9940190722886665,
+        "median_switch_delay": 5.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.006012749191047001,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.008,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9829368091974118,
+      "stationary": {
+        "brier_score": 0.0009247183071385857,
+        "expected_calibration_error": 0.009139435835060468,
+        "mean_normalized_entropy": 0.03663900200651654,
+        "mean_true_probability": 0.9908605641649395,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.009409326152878875,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0002527632103526837,
+        "expected_calibration_error": 0.00794107774522628,
+        "mean_normalized_entropy": 0.03558501929580469,
+        "mean_true_probability": 0.9920589222547738,
+        "median_switch_delay": 5.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.008018153771512333,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.002,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9799982071078973,
+      "stationary": {
+        "brier_score": 1.0770663525111729e-05,
+        "expected_calibration_error": 0.0015541158112609087,
+        "mean_normalized_entropy": 0.008769179044617884,
+        "mean_true_probability": 0.9984458841887391,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.001557202613256904,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 7.171568410543232e-06,
+        "expected_calibration_error": 0.0015097896445300954,
+        "mean_normalized_entropy": 0.008742450812183536,
+        "mean_true_probability": 0.9984902103554699,
+        "median_switch_delay": 6.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.001512016400657638,
+        "p90_switch_delay": 8.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.004,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9799935279882566,
+      "stationary": {
+        "brier_score": 4.2387878711079586e-05,
+        "expected_calibration_error": 0.0031047172283587277,
+        "mean_normalized_entropy": 0.015977597019345965,
+        "mean_true_probability": 0.9968952827716413,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0031169675682413906,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 2.5888046973853735e-05,
+        "expected_calibration_error": 0.002999037917862189,
+        "mean_normalized_entropy": 0.015925500239693618,
+        "mean_true_probability": 0.9970009620821378,
+        "median_switch_delay": 6.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.003007230369052561,
+        "p90_switch_delay": 8.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.25,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9799900071147608,
+      "stationary": {
+        "brier_score": 0.0004097545729680281,
+        "expected_calibration_error": 0.003454442215929319,
+        "mean_normalized_entropy": 0.013905481978054848,
+        "mean_true_probability": 0.9965455577840707,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0035673432746134285,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 3.9971540956676623e-05,
+        "expected_calibration_error": 0.002349045287303453,
+        "mean_normalized_entropy": 0.012125788395302059,
+        "mean_true_probability": 0.9976509547126966,
+        "median_switch_delay": 6.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0023602711478417173,
+        "p90_switch_delay": 8.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 4.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9787024762031277,
+      "stationary": {
+        "brier_score": 0.012120723598490457,
+        "expected_calibration_error": 0.005108141563260552,
+        "mean_normalized_entropy": 0.007209390170856017,
+        "mean_true_probability": 0.9911081272725543,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9925128205128205,
+        "negative_log_likelihood": 0.02904281607410041,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.013247726445120764,
+        "expected_calibration_error": 0.005629205150378671,
+        "mean_normalized_entropy": 0.008126094306526496,
+        "mean_true_probability": 0.9901705899344042,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9917460317460318,
+        "negative_log_likelihood": 0.03224329790482528,
+        "p90_switch_delay": 6.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 4.0,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.978005926058737,
+      "stationary": {
+        "brier_score": 0.01275520493915458,
+        "expected_calibration_error": 0.0053234099616843505,
+        "mean_normalized_entropy": 0.007632745035670437,
+        "mean_true_probability": 0.9906237980540322,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9919487179487179,
+        "negative_log_likelihood": 0.030317596256906033,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.014006088194844332,
+        "expected_calibration_error": 0.006169050760578726,
+        "mean_normalized_entropy": 0.008602257352369379,
+        "mean_true_probability": 0.9895929247733812,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9912698412698414,
+        "negative_log_likelihood": 0.03377315211792368,
+        "p90_switch_delay": 6.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.125,
+        "hazard_rate": 0.008,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9766097538551706,
+      "stationary": {
+        "brier_score": 0.002946233975045567,
+        "expected_calibration_error": 0.021384175699744667,
+        "mean_normalized_entropy": 0.0788231372727686,
+        "mean_true_probability": 0.9786158243002554,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0223473664521572,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0015609845793175794,
+        "expected_calibration_error": 0.02029182077593542,
+        "mean_normalized_entropy": 0.07919591550074853,
+        "mean_true_probability": 0.9797081792240648,
+        "median_switch_delay": 7.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.02079939495634397,
+        "p90_switch_delay": 9.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 4.0,
+        "hazard_rate": 0.004,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9752623558404893,
+      "stationary": {
+        "brier_score": 0.014778010561694388,
+        "expected_calibration_error": 0.005960690205098926,
+        "mean_normalized_entropy": 0.008903723546683086,
+        "mean_true_probability": 0.9891153874654638,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9908461538461539,
+        "negative_log_likelihood": 0.03461442688331905,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.016341541229007328,
+        "expected_calibration_error": 0.006677853855633166,
+        "mean_normalized_entropy": 0.010054035882333962,
+        "mean_true_probability": 0.9878260349395498,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.990079365079365,
+        "negative_log_likelihood": 0.03895029480019659,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.125,
+        "hazard_rate": 0.008,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9748814395534707,
+      "stationary": {
+        "brier_score": 0.0005984496514251932,
+        "expected_calibration_error": 0.014002773932024617,
+        "mean_normalized_entropy": 0.05958125126871757,
+        "mean_true_probability": 0.9859972260679755,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.014191091457511346,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0004742417861169535,
+        "expected_calibration_error": 0.013865871734368722,
+        "mean_normalized_entropy": 0.060139395955548756,
+        "mean_true_probability": 0.9861341282656313,
+        "median_switch_delay": 8.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.014024079224072731,
+        "p90_switch_delay": 9.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 4.0,
+        "hazard_rate": 0.004,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.974473401936126,
+      "stationary": {
+        "brier_score": 0.015465916975445143,
+        "expected_calibration_error": 0.006119259889835407,
+        "mean_normalized_entropy": 0.009362404985666916,
+        "mean_true_probability": 0.9885892930039357,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9905128205128205,
+        "negative_log_likelihood": 0.035998708118234045,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.017173547322650716,
+        "expected_calibration_error": 0.006763646899262021,
+        "mean_normalized_entropy": 0.010535777504099656,
+        "mean_true_probability": 0.9872081540790848,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9893650793650792,
+        "negative_log_likelihood": 0.040598758923201764,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.125,
+        "hazard_rate": 0.004,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9737801717938553,
+      "stationary": {
+        "brier_score": 0.002136390226775765,
+        "expected_calibration_error": 0.012886207150692877,
+        "mean_normalized_entropy": 0.04856762538000607,
+        "mean_true_probability": 0.987113792849307,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.013559172511009498,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0008793128245787327,
+        "expected_calibration_error": 0.01171372670915737,
+        "mean_normalized_entropy": 0.04835929558015161,
+        "mean_true_probability": 0.9882862732908426,
+        "median_switch_delay": 8.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.011982245206830836,
+        "p90_switch_delay": 10.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.125,
+        "hazard_rate": 0.004,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9719569143541865,
+      "stationary": {
+        "brier_score": 0.00015994487653234123,
+        "expected_calibration_error": 0.007046438939838964,
+        "mean_normalized_entropy": 0.03340846467438561,
+        "mean_true_probability": 0.992953561060161,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.00709528137671696,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.00017234258325365216,
+        "expected_calibration_error": 0.007109613491853356,
+        "mean_normalized_entropy": 0.03390811687003542,
+        "mean_true_probability": 0.9928903865081466,
+        "median_switch_delay": 9.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.00716414123856268,
+        "p90_switch_delay": 10.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 4.0,
+        "hazard_rate": 0.008,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9718826873382416,
+      "stationary": {
+        "brier_score": 0.018045535744960168,
+        "expected_calibration_error": 0.0070911609922534105,
+        "mean_normalized_entropy": 0.010991197356058371,
+        "mean_true_probability": 0.9866513443364155,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9886923076923078,
+        "negative_log_likelihood": 0.04147748148283641,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.020241656019438926,
+        "expected_calibration_error": 0.007732273143128177,
+        "mean_normalized_entropy": 0.012282556894374217,
+        "mean_true_probability": 0.9849476012195111,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9875396825396824,
+        "negative_log_likelihood": 0.047103537226442865,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.125,
+        "hazard_rate": 0.002,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9718431269274006,
+      "stationary": {
+        "brier_score": 0.0017820346708652267,
+        "expected_calibration_error": 0.008330221296135294,
+        "mean_normalized_entropy": 0.030546620550929153,
+        "mean_true_probability": 0.9916697787038646,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.008879236480728827,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.0006274922903975129,
+        "expected_calibration_error": 0.007165989979728948,
+        "mean_normalized_entropy": 0.030097961847688575,
+        "mean_true_probability": 0.9928340100202708,
+        "median_switch_delay": 9.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.007349028312833511,
+        "p90_switch_delay": 10.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 4.0,
+        "hazard_rate": 0.008,
+        "posterior_decay": 0.98
+      },
+      "selection_score": 0.9711291980638997,
+      "stationary": {
+        "brier_score": 0.01878145806469046,
+        "expected_calibration_error": 0.007386548742211128,
+        "mean_normalized_entropy": 0.011482011150722676,
+        "mean_true_probability": 0.9860865612152626,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 0.9882051282051283,
+        "negative_log_likelihood": 0.04297076002833101,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 0.02112911739031053,
+        "expected_calibration_error": 0.007441619877786641,
+        "mean_normalized_entropy": 0.012757736400739107,
+        "mean_true_probability": 0.9843053742415604,
+        "median_switch_delay": 2.0,
+        "mode_accuracy": 0.9869841269841269,
+        "negative_log_likelihood": 0.04886039752611262,
+        "p90_switch_delay": 7.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    },
+    {
+      "filter_config": {
+        "evidence_scale": 0.125,
+        "hazard_rate": 0.002,
+        "posterior_decay": 1.0
+      },
+      "selection_score": 0.9689774450658397,
+      "stationary": {
+        "brier_score": 4.138558972669137e-05,
+        "expected_calibration_error": 0.0035361941776136637,
+        "mean_normalized_entropy": 0.01850739788182524,
+        "mean_true_probability": 0.9964638058223864,
+        "median_switch_delay": 0.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0035486307511585205,
+        "p90_switch_delay": 0.0,
+        "switch_count": 0
+      },
+      "switching": {
+        "brier_score": 9.021973664102769e-05,
+        "expected_calibration_error": 0.0037266531788830186,
+        "mean_normalized_entropy": 0.019106302907335976,
+        "mean_true_probability": 0.9962733468211168,
+        "median_switch_delay": 10.0,
+        "mode_accuracy": 1.0,
+        "negative_log_likelihood": 0.0037535468864630865,
+        "p90_switch_delay": 11.0,
+        "switch_count": 126
+      },
+      "validation_gate_pass": true
+    }
+  ],
+  "validation_event_seeds": [
+    154101,
+    154113
+  ],
+  "validation_gate_pass": true,
+  "validation_inverse_metrics": {
+    "ensemble_variance_mean": 0.005637492518872023,
+    "mae": 0.3280176818370819,
+    "per_action_rmse": [
+      0.45579782128334045,
+      0.4647325277328491,
+      0.43671146035194397,
+      0.5024979710578918,
+      0.42667222023010254,
+      0.35097476840019226
+    ],
+    "rmse": 0.44200241565704346
+  },
+  "validation_source_seeds": [
+    4049
+  ]
+}

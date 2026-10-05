@@ -37,6 +37,10 @@ class Config:
     # -1 keeps the normal switching process. Values 0-3 lock training to one
     # persistent mode; strict evaluation may explicitly re-enable switching.
     stochastic_mode_fixed_id: int = -1
+    # -1 exposes the commanded action directly to the active mode. For the
+    # actuator-polarity family only, values 0-3 train in that reference action
+    # coordinate while the hidden mode clock continues to switch.
+    stochastic_mode_canonical_reference_id: int = -1
 
     # Equal-budget control-headroom diagnostic. Both arms use the same
     # conditioned actor/critic; robust receives zero context and oracle receives
@@ -82,6 +86,7 @@ class Config:
     # RE-SAC compatibility controls.  Defaults preserve the legacy BAPR fork;
     # paper-B0 diagnostics opt into the blended target/EMA/anchor explicitly.
     resac_independent_ratio: float = 1.0
+    resac_reg_norm_mode: str = "per_head"  # per_head | shared positive norm shift
     resac_anchor_lambda: float = 0.0
     resac_adaptive_beta: bool = False
     resac_beta_start: float = -2.0
@@ -93,6 +98,7 @@ class Config:
     resac_critic_actor_ratio: int = 1
     resac_beta_bc: float = 0.0
     resac_clip_norm: float = 0.0
+    resac_reward_transform: str = "raw"  # Torch-equation diagnostic: raw | bus_standardized
     use_ema_eval: bool = False  # evaluate EMA policy only when explicitly enabled
     use_ema_rollout: bool = False  # collect training rollouts with EMA policy when explicitly enabled
     ema_rollout_start_iter: int = 0

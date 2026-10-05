@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import pickle
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -116,3 +117,94 @@ def test_v32_audit_accepts_publisher_state_and_aliases_reference(
 def test_v32_audit_binds_registered_v5_estimator():
     audit.install_runtime_bindings()
     assert audit.frozen.compensation.v5_model is estimator_model
+
+
+def test_v32_weighted_error_and_common_noise_clipping():
+    gains = np.asarray(protocol.mode_gain_vectors(6), dtype=np.float64)
+    q = np.array([-1.0, -0.75, -0.1, 0.0, 0.5, 1.0])
+    noise = np.array([0.05, -0.05, 0.02, -0.02, 0.01, 0.05])
+    reference_signal = gains[protocol.REFERENCE_MODE] * q
+    for actual in protocol.MODES:
+        for selected in protocol.MODES:
+            command = protocol.compensate_action(
+                q, protocol.REFERENCE_MODE, selected)
+            signal = gains[actual] * command
+            mismatch = gains[actual] != gains[selected]
+            np.testing.assert_allclose(
+                np.sum((signal - reference_signal) ** 2),
+                4.0 * np.sum(q[mismatch] ** 2), atol=1e-7)
+            deviation = np.linalg.norm(
+                np.clip(signal + noise, -1, 1)
+                - np.clip(reference_signal + noise, -1, 1))
+            assert deviation <= np.linalg.norm(signal - reference_signal) + 1e-7
+
+
+def test_v32_switching_actions_use_only_completed_transitions(monkeypatch):
+    audit.install_runtime_bindings()
+    evaluator = audit.frozen.compensation
+    monkeypatch.setattr(protocol, "MAX_EPISODE_STEPS", 4)
+    monkeypatch.setattr(protocol, "SWITCHING_EPISODES", 1)
+    q = np.array([-1.0, -0.75, -0.1, 0.0, 0.5, 1.0], dtype=np.float32)
+    histories = []
+
+    class Env:
+        obs_dim, act_dim = 1, 6
+
+        def __init__(self, modes):
+            self.modes = modes
+            self.commands = []
+            self.index = 0
+
+        def sample_tasks(self, count):
+            return list(range(count))
+
+        def configure_eval_mode_sequence(self, *args):
+            pass
+
+        def reset(self):
+            self.index = 0
+            return np.array([0.0])
+
+        def task_id_for_next_step(self):
+            return self.modes[self.index]
+
+        def step(self, command):
+            mode = self.task_id_for_next_step()
+            self.commands.append(command.copy())
+            self.index += 1
+            return np.array([float(self.index)]), 1.0, False, {"mode_used": mode}
+
+    for modes in ((0, 1, 2, 3), (3, 2, 1, 0)):
+        env = Env(modes)
+
+        class Estimator:
+            def initial_state(self):
+                return np.full(4, 0.25)
+
+            def probabilities(self, state):
+                return state
+
+            def step(self, state, obs, action, reward, next_obs):
+                assert env.index == int(obs[0]) + 1 == int(next_obs[0])
+                np.testing.assert_array_equal(action, env.commands[-1])
+                return np.eye(4)[env.index % 4], None, None, None
+
+        monkeypatch.setattr(evaluator, "make_env", lambda *a, **kw: env)
+        monkeypatch.setattr(
+            estimator_model, "make_estimator", lambda *a: Estimator())
+        stack = {
+            "config": SimpleNamespace(seed=protocol.TRAINING_SEEDS[0]),
+            "actions": {"specialist_0": lambda obs: q},
+        }
+        evaluator._compensated_switching(
+            stack, protocol.REFERENCE_MODE, "v5_posterior",
+            protocol.SWITCHING_EVENT_SEEDS[0])
+        histories.append(np.stack(env.commands))
+
+    # Changing hidden labels with the same observed history cannot change actions.
+    expected = np.stack([
+        protocol.compensate_action(q, protocol.REFERENCE_MODE, mode)
+        for mode in protocol.MODES
+    ])
+    np.testing.assert_array_equal(histories[0], expected)
+    np.testing.assert_array_equal(histories[1], expected)

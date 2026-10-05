@@ -1,0 +1,129 @@
+{
+  "accounting": {
+    "comparators_retrained": false,
+    "policy_interactions_per_final_recipe_seed": 8400000,
+    "v5_estimator_retrained": false,
+    "warmstart_fixed_mode_finetune_interactions": 2800000,
+    "warmstart_source_interactions": 5600000
+  },
+  "created_before_training": true,
+  "evaluation_boundary": {
+    "canonical_training_interface_disabled_during_audit": true,
+    "new_event_streams": true,
+    "same_frozen_v5_estimator": true
+  },
+  "identity": {
+    "environment": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "protocol_version": "v33-canonical-controller-training-ablation",
+    "recipes": [
+      "warmstart_mode0",
+      "robust_multimode",
+      "direct_mode0",
+      "canonicalized_multimode"
+    ],
+    "reference_mode": 0,
+    "stationary_event_seeds": [
+      198101,
+      198117,
+      198133
+    ],
+    "switching_event_seeds": [
+      198201,
+      198217,
+      198233
+    ],
+    "switching_schedules": {
+      "198201": [
+        2,
+        1,
+        3,
+        0
+      ],
+      "198217": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "198233": [
+        3,
+        0,
+        2,
+        1
+      ]
+    },
+    "training_seeds": [
+      89003,
+      89021,
+      89039,
+      89057,
+      89079
+    ]
+  },
+  "schema": "bapr.canonical-training-registration.v33",
+  "selection_rule": {
+    "candidate_must_improve_causal_mean_over_warmstart": true,
+    "minimum_stationary_causal_to_oracle_retention": 0.95,
+    "oracle_trajectory_equivalence_required": true,
+    "required_paired_seed_wins": 4,
+    "required_retention_seeds": 4,
+    "role": "development_recipe_selection_not_confirmation",
+    "select_by": "switching_causal_return_after_all_gates"
+  },
+  "source_files": {
+    "jax_experiments/analysis/analyze_regime_polarity_canonical_training_v33.py": {
+      "sha256": "f311f252c1f08254721d3e3f07f92560445028db22487c3b62123a38ca9d9ca9",
+      "size": 9361
+    },
+    "jax_experiments/analysis/regime_polarity_canonical_training_ablation_v33.py": {
+      "sha256": "11a97a317aa4dab306269c8eb99b64f454e90b1fca73467664e7235f4c69c0b0",
+      "size": 17702
+    },
+    "jax_experiments/analysis/run_regime_polarity_canonical_training_audit_v33.py": {
+      "sha256": "3164521031ddd9fbaafbc09efd5211866948a3618e09bb661797d454acc07426",
+      "size": 15174
+    },
+    "jax_experiments/analysis/run_regime_polarity_canonical_training_direct_v33.py": {
+      "sha256": "a5cc52910f9cf8b627429a5059a4ba75ddd56770d19c8034df8d4ac697b04159",
+      "size": 10370
+    },
+    "jax_experiments/analysis/run_regime_polarity_canonical_training_source_v33.py": {
+      "sha256": "8fe1b6dd0397ae62d7f448b40faa8c031c4b7b041bff75d766c8c50546854d1a",
+      "size": 1309
+    },
+    "jax_experiments/analysis/run_regime_polarity_canonical_training_warmstart_v33.py": {
+      "sha256": "2afbf0adc4a9d58fa1b4e217eac80fcb2d55ebf897b7dc2b093caeaa33bd12e1",
+      "size": 1571
+    },
+    "jax_experiments/configs/default.py": {
+      "sha256": "8172ed7720336a9e97d1a66a57ebcf86df8b82bd9eb963ff6db03880efef02c9",
+      "size": 28121
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "21ee77c855cfc2da06f79a5d02a163a73c394bee830876ec7a68795393054287",
+      "size": 17254
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "jax_experiments/train.py": {
+      "sha256": "a8d169111106c6b27b0d4ec7b6dbf57cfa3e929887bd4116b4c780ed0a783d03",
+      "size": 152205
+    },
+    "reports/regime_polarity_canonical_training_v33_preregistration_2026-09-22.md": {
+      "sha256": "19b0eec4fe07316b6553b3c22e258c50cd1c623685d9df5e9f5c0063ab737f81",
+      "size": 1983
+    },
+    "scripts/submit_regime_polarity_canonical_training_v33.py": {
+      "sha256": "3573f4ce561eb38e9a1073f267e2729d7ec78bd4a017bfaff4deaf0b35ff5d8f",
+      "size": 11305
+    }
+  },
+  "status": "registered"
+}

@@ -6,7 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 from flax import nnx
 
-from jax_experiments.algos.resac import RESAC
+from jax_experiments.algos.resac import RESAC, reference_reg_norm
 from jax_experiments.configs.default import Config
 
 
@@ -79,6 +79,45 @@ def test_positive_weight_regularizer_remains_configured():
     assert config.critic_actor_ratio == 2
     assert config.resac_beta_bc == 0.001
     assert config.resac_critic_actor_ratio == 2
+
+
+def test_original_norm_includes_hidden_bias_but_excludes_output_bias():
+    agent = RESAC(3, 2, _config(), seed=29)
+    for layer in agent.target_critic.layers:
+        layer.kernel.value = jnp.ones_like(layer.kernel.value)
+        layer.bias.value = jnp.ones_like(layer.bias.value)
+    expected = sum(layer.kernel.value[0].size for layer in agent.target_critic.layers)
+    expected += sum(layer.bias.value[0].size for layer in agent.target_critic.layers[:-1])
+    np.testing.assert_array_equal(reference_reg_norm(agent.target_critic), [expected] * 2)
+    agent.target_critic.layers[-1].bias.value += 100
+    np.testing.assert_array_equal(reference_reg_norm(agent.target_critic), [expected] * 2)
+    agent.target_critic.layers[0].bias.value += 2
+    np.testing.assert_array_equal(reference_reg_norm(agent.target_critic), [expected + 16] * 2)
+
+
+def test_real_update_uses_reference_norm_and_keeps_positive_bonus():
+    agent = RESAC(3, 2, _config(ratio=1), seed=31)
+    agent.target_critic.layers[-1].bias.value += 1000
+    expected = float(reference_reg_norm(agent.target_critic).mean()) * agent.config.weight_reg
+    metrics = agent.multi_update(_batch(1))
+    assert metrics["reg_bonus_mean"] > 0
+    assert np.isclose(metrics["reg_bonus_mean"], expected)
+
+
+def test_lcb_gradient_is_not_invariant_to_head_specific_constant_offsets():
+    slopes, offsets = jnp.array([1., 2., 3.]), jnp.array([300., 100., 0.])
+
+    def objective(action, shift, beta):
+        q = slopes * action + shift
+        return q.mean() + beta * q.std()
+
+    grad = jax.grad(objective)
+    plain = float(grad(1., jnp.zeros(3), -2.))
+    shared = float(grad(1., jnp.full(3, 100.), -2.))
+    per_head = float(grad(1., offsets, -2.))
+    assert np.isclose(plain, shared)
+    assert not np.isclose(plain, per_head)
+    assert np.isclose(grad(1., offsets, 0.), grad(1., jnp.zeros(3), 0.))
 
 
 def test_b0_controls_enable_target_blend_and_ema_without_reg_shift():

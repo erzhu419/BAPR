@@ -1,4 +1,7 @@
-# BAPR four-environment evidence
+# BAPR locomotion-environment evidence
+
+Updated 2026-09-27; retains the original report path and adds the independent
+Swimmer screen. V32 remains the primary paper cohort.
 
 This report consolidates the latest valid MuJoCo evidence. The rows are not all
 algorithm evaluations: HalfCheetah has a causal learned-estimator result, Ant is
@@ -10,12 +13,13 @@ four-environment BAPR claim.
 
 | Environment | Protocol and evidence tier | Adaptive / privileged switching return | Matched robust return | Relative gain | Termination | Registered decision |
 |---|---|---:|---:|---:|---:|---|
-| HalfCheetah-v2 | V32 prospective fixed-reference + causal v5 compensation, 10 x 3 seeds | 3297.1 | 2287.1 | +44.2% | 0.0% / 0.0% | **FAIL**: mean/CI passes, but SAC consistency is 7/10 seeds and 23/30 events |
+| HalfCheetah-v2 | V32 prospective fixed-reference + causal v5 compensation, 10 x 3 seeds | 3297.1 | 2287.1 | +44.2% | 0.0% / 0.0% | Positive mean effect; composite **FAIL**: SAC consistency 7/10 seeds, 23/30 events; 10% oracle headroom 7/10 |
 | Ant-v2 | V29 frozen reference + true-mode action compensation, 3 x 3 seeds | 4510.7 | 2588.6 | +74.3% | 4.4% / 11.1% | **FAIL**: return headroom passes, absolute safety gate fails |
 | Hopper-v2 | V27 equal-budget true-mode oracle headroom, 3 x 3 seeds | 2463.9 | 2424.0 | +1.6% | 100% / 100% | **FAIL**: no survival-valid adaptation window |
 | Walker2d-v2 | V27 equal-budget true-mode oracle headroom, 3 x 3 seeds | 2141.0 | 2186.7 | -2.1% | 100% / 100% | **FAIL**: no headroom and no survival-valid window |
+| Swimmer-v2 | Independent equal-budget true-mode screen, 3 x 3 seeds | 50.30 | 55.04 | -8.6% | 0.0% / 0.0% | **FAIL**: mean headroom negative; sufficient headroom in 1/3 seeds |
 
-Termination is shown as adaptive-or-privileged / robust. V28 uses a frozen
+Termination is shown as adaptive-or-privileged / robust. V32 uses a frozen
 causal learned estimator and is deployable under the audited information flow.
 V29 and V27 expose true mode and therefore measure mechanism or environment
 capacity, not deployable BAPR performance.
@@ -67,11 +71,18 @@ RE-SAC. ESCP and RE-SAC pass all registered comparison gates. SAC does not:
 The overall registered result is therefore still FAIL despite a statistically
 resolved average advantage.
 
-The V32 failure is again controller-side. True-mode oracle headroom over SAC is
-only +2.3%, -2.3%, and +4.1% for the three SAC non-winning seeds, whereas causal
-oracle recovery exceeds 95% in each, and both recovery and stationary-retention
-gates pass 10/10. Frozen-v5 mode accuracy is 98.55% with a three-step median
-delay. Further estimator or gate tuning is not supported by these results.
+True-mode oracle headroom over SAC is only +2.3%, -2.3%, and +4.1% for the
+three SAC non-winning seeds. Limited controller headroom and remaining causal
+inference loss jointly explain these outcomes: inference loss reverses the
+small positive oracle margins in two seeds. Causal oracle recovery exceeds 95%
+in each, and both recovery and stationary-retention gates pass 10/10.
+Frozen-v5 mode accuracy is 98.55% with a three-step median delay.
+
+V33's five fresh development seeds do not establish a better canonical-training
+recipe. Direct mode-0 training improves on warm-start by 162.0 on average, but
+its paired interval is [-480.3, 804.3] and it wins only 3/5 seeds. Retain V32's
+warm-start recipe and primary cohort; do not replace it with a higher
+exploratory mean from a different seed set.
 
 ## Negative and diagnostic evidence
 
@@ -89,20 +100,28 @@ controllers terminate in every stationary and switching audit. All 45 switching
 episodes per role and environment terminate before the first scheduled switch
 at step 250, so those protocols cannot identify causal online adaptation.
 
+The independent Swimmer screen completes all six 8.4M-interaction training runs
+and three strict audits. All episodes reach 1,000 steps, and true-mode and native
+reference-mode returns match exactly. However, oracle compensation obtains
+50.30 versus 55.04 for robust SAC, with sufficient headroom in only 1/3 seeds.
+The transform is correct, but the tested canonical-controller recipe provides
+no average oracle advantage. Retain this negative screen without fitting an
+estimator or retuning its modes.
+
 ## Claim boundary
 
-The defensible result is one confirmed causal policy-bank result (V21), one
-strong action-compensation development result (V28), and two independent
-fixed-reference cohorts (V31/V32) with large average gains but failed registered
-consistency decisions, plus one strong privileged
-mechanism result that misses its safety gate, and two invalid adaptation windows,
-not universal MuJoCo superiority. HalfCheetah supports learned causal action
-adaptation under V21, while the simpler compensation claim remains promising but
-not uniformly confirmed across policy seeds. Ant shows the same
-coordinate mechanism has large return headroom but lacks a reliably safe frozen
-reference policy. Hopper and Walker2d show that the tested structured channel is
-too failure-prone to evaluate adaptation. Bus remains a separate positive
-application domain and is not pooled into this MuJoCo table.
+The primary claim is V32's positive average causal-compensation effect against
+SAC, ESCP, and RE-SAC on ten independent HalfCheetah policy seeds, conditional
+on one frozen estimator. Its registered composite remains negative; its paired
+mean-effect intervals are all positive. V21's policy-bank result, V28's reused-
+policy development audit, V31's pilot, and V33's training diagnostic are separate
+evidence and are not pooled or used to select a replacement confirmation cohort.
+Ant supports privileged mechanism headroom but misses its safety gate;
+Hopper/Walker2d lack valid switching windows; Swimmer has a valid window but
+fails the tested oracle-headroom screen. The evidence does not establish
+universal locomotion superiority. Estimator and trajectory-provider training
+costs are additional to the matched policy budgets. Bus remains a separate
+application domain, not direct validation of the actuator-compensation mechanism.
 
 V30 additionally rules out the existing robust policy as an Ant safety shield.
 On states visited by the V29 compensated reference, its full 250-step
@@ -129,3 +148,6 @@ it does not alter V29's privileged return-headroom result.
 - `reports/regime_polarity_ant_action_compensation_v29_2026-09-12.md`
 - `reports/regime_polarity_ant_branch_risk_v30_2026-09-12.md`
 - `reports/regime_channel_survival_headroom_v27_2026-09-12.md`
+- `reports/regime_polarity_canonical_training_v33_2026-09-22.md`
+- `reports/swimmer_polarity_screen_v1_2026-09-27.md`
+- `results_swimmer_polarity_screen_v1/analysis/analysis.json`

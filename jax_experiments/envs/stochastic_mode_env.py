@@ -101,6 +101,20 @@ MODE_FAMILIES = {
          "action_gain_pattern": "odd", "impaired_gain": -1.00,
          "action_noise_std": 0.02},
     ),
+    "actuator_polarity_2d": (
+        {"gravity_scale": 1.00, "action_gain": 1.00,
+         "action_gain_pattern": "none", "impaired_gain": -1.00,
+         "action_noise_std": 0.02},
+        {"gravity_scale": 1.00, "action_gain": 1.00,
+         "action_gain_pattern": "low_half", "impaired_gain": -1.00,
+         "action_noise_std": 0.02},
+        {"gravity_scale": 1.00, "action_gain": 1.00,
+         "action_gain_pattern": "high_half", "impaired_gain": -1.00,
+         "action_noise_std": 0.02},
+        {"gravity_scale": 1.00, "action_gain": 1.00,
+         "action_gain_pattern": "all", "impaired_gain": -1.00,
+         "action_noise_std": 0.02},
+    ),
 }
 
 
@@ -110,7 +124,8 @@ class StochasticModeEnv(BraxNonstationaryEnv):
     def __init__(self, env_name: str, family: str = "mean_variance",
                  dwell_steps: int = 500, dwell_distribution: str = "fixed",
                  seed: int = 0, backend: str = "spring",
-                 fixed_mode_id: int | None = None):
+                 fixed_mode_id: int | None = None,
+                 canonical_reference_mode_id: int | None = None):
         if family not in MODE_FAMILIES:
             raise ValueError(
                 f"unknown stochastic mode family {family!r}; "
@@ -122,14 +137,29 @@ class StochasticModeEnv(BraxNonstationaryEnv):
             raise ValueError(
                 f"stochastic fixed_mode_id must be in [0,3], got "
                 f"{fixed_mode_id}")
+        if (canonical_reference_mode_id is not None
+                and not 0 <= int(canonical_reference_mode_id) < 4):
+            raise ValueError(
+                "stochastic canonical_reference_mode_id must be in [0,3], "
+                f"got {canonical_reference_mode_id}")
+        if (canonical_reference_mode_id is not None
+                and family not in ("actuator_polarity", "actuator_polarity_2d")):
+            raise ValueError(
+                "canonical action coordinates are defined only for the "
+                "actuator_polarity family")
         super().__init__(
             env_name, rand_params=["gravity"], log_scale_limit=0.0,
             seed=seed, backend=backend)
+        if family == "actuator_polarity_2d" and self.act_dim != 2:
+            raise ValueError("actuator_polarity_2d requires exactly two actuators")
         self.family = str(family)
         self.dwell_steps = max(1, int(dwell_steps))
         self.dwell_distribution = str(dwell_distribution)
         self.fixed_mode_id = (
             None if fixed_mode_id is None else int(fixed_mode_id))
+        self.canonical_reference_mode_id = (
+            None if canonical_reference_mode_id is None
+            else int(canonical_reference_mode_id))
         self._switching_enabled = self.fixed_mode_id is None
         self.rollout_chunk_steps = self.dwell_steps
         self._mode_rng = np.random.RandomState(seed + 73_001)
@@ -176,6 +206,10 @@ class StochasticModeEnv(BraxNonstationaryEnv):
         indices = np.arange(self.act_dim)
         if pattern == "low_half":
             affected = indices < self.act_dim // 2
+        elif pattern == "none":
+            affected = indices < 0
+        elif pattern == "all":
+            affected = indices >= 0
         elif pattern == "high_half":
             affected = indices >= self.act_dim // 2
         elif pattern == "even":
@@ -217,8 +251,17 @@ class StochasticModeEnv(BraxNonstationaryEnv):
         task = self._tasks[mode_id]
         self.current_task_id = mode_id
         self._set_sys(self._mode_sys[mode_id])
+        # In canonical-coordinate training, the policy and replay buffer use
+        # the reference command q. For polarity matrices, precompensating the
+        # physical command by G_z^-1 G_r makes the executed nominal signal
+        # G_r q. Supplying the reference gain here is exactly the same map at
+        # the physics boundary, while keeping task ids and the mode clock.
+        action_gain = task["action_gain"]
+        if self.canonical_reference_mode_id is not None:
+            action_gain = self._tasks[
+                self.canonical_reference_mode_id]["action_gain"]
         self._set_action_disturbance(
-            task["action_gain"], task["action_noise_std"],
+            action_gain, task["action_noise_std"],
             task.get("packet_loss_prob", 0.0),
             task.get("burst_prob", 0.0),
             task.get("burst_std", 0.0))
@@ -352,6 +395,10 @@ class StochasticModeEnv(BraxNonstationaryEnv):
                 "mode_used": mode_used,
                 "executed_action": np.asarray(executed_action),
                 "action_gain": np.asarray(gain_used),
+                "mode_action_gain": np.asarray(
+                    self._tasks[mode_used]["action_gain"]),
+                "canonical_reference_mode_id": (
+                    self.canonical_reference_mode_id),
                 "action_noise_std": np.asarray(noise_std_used),
                 "packet_loss_prob": float(packet_loss_prob_used),
                 "burst_prob": float(burst_prob_used),
@@ -361,3 +408,68 @@ class StochasticModeEnv(BraxNonstationaryEnv):
 
     def get_switch_history(self):
         return list(self._switch_history)
+
+    def rollout_mode_chunks(self, policy_params, n_steps, rng_key,
+                            context_params=None, initial_hidden=None,
+                            previous_action=None, warmup=False,
+                            context_noise_sigma=0.0):
+        """Fuse equal actuator-mode blocks without changing their keys or clock."""
+        chunk_steps = self.rollout_chunk_steps
+        if (self.family not in ("actuator_polarity", "actuator_polarity_2d")
+                or self.dwell_distribution != "fixed"
+                or n_steps % chunk_steps):
+            raise ValueError("fused mode rollout requires equal polarity blocks")
+        if not hasattr(self, "_mode_chunk_scan"):
+            recurrent = self._has_recurrent_context
+            ordinary_scan = self._rollout_scan
+            recurrent_scan = getattr(self, "_rollout_scan_recurrent", None)
+
+            @jax.jit
+            def scan(sys, policy, context, state, hidden, previous, keys,
+                     disturbances, warmup, context_noise_sigma):
+
+                def block(carry, inputs):
+                    current, hidden, previous = carry
+                    keys, disturbance = inputs
+                    gain, noise, packet, burst, burst_std = disturbance
+                    if recurrent:
+                        outgoing, transitions = recurrent_scan(
+                            sys, gain, noise, packet, burst, burst_std,
+                            policy, context, hidden, previous, current,
+                            keys, warmup, context_noise_sigma)
+                    else:
+                        following, transitions = ordinary_scan(
+                            sys, gain, noise, packet, burst, burst_std,
+                            policy, None, None, current, keys, warmup)
+                        outgoing = following, hidden, previous
+                    return outgoing, transitions
+
+                final, transitions = jax.lax.scan(
+                    block, (state, hidden, previous), (keys, disturbances))
+                transitions = jax.tree.map(
+                    lambda value: value.reshape((-1, *value.shape[2:])), transitions)
+                return final, transitions
+
+            self._mode_chunk_scan = scan
+
+        chunks = n_steps // chunk_steps
+        chunk_keys = jax.random.split(rng_key, chunks)
+        split_keys = jax.vmap(lambda key: jax.random.split(key, 3))(chunk_keys)
+        keys = jax.vmap(lambda key: jax.random.split(key, chunk_steps))(split_keys[:, 2])
+        sys = self._current_sys
+        initial_state = self._reset_fn(sys, split_keys[0, 1])
+        mode_ids, disturbances = [], []
+        # Advance the same Python mode RNG/clock once per original block.
+        for _ in range(chunks):
+            mode_ids.append(int(self.current_task_id))
+            disturbances.append(self.action_disturbance_params())
+            self._step_counter += chunk_steps
+            self._check_switch()
+        disturbances = jax.tree.map(lambda *values: jnp.stack(values), *disturbances)
+        final, transitions = self._mode_chunk_scan(
+            sys, policy_params, context_params, initial_state,
+            initial_hidden, previous_action, keys, disturbances,
+            jnp.asarray(warmup), jnp.asarray(context_noise_sigma, dtype=jnp.float32))
+        self._state, hidden, previous = final
+        task_ids = jnp.repeat(jnp.asarray(mode_ids, dtype=jnp.int32), chunk_steps)
+        return transitions[:5], task_ids, mode_ids, hidden, previous

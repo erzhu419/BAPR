@@ -1,0 +1,2737 @@
+{
+  "frozen_inputs": {
+    "canonical_reference": {
+      "sha256": "9171b7f1c09801c46b1fee599c0d88165d7af6cb3ca5caee0bcd44d78e5cdc5c",
+      "size": 1634
+    },
+    "escp_recurrent": {
+      "sha256": "21c165324711ace9c500cf123f5cd53da1398f3ec09c0695ecf6610dc925ce0b",
+      "size": 1226
+    },
+    "resac_b0": {
+      "sha256": "2888153950b93ac1cea6ba91d95a8209a531f49ac05e589ba18937254e3be3eb",
+      "size": 1222
+    },
+    "robust_long": {
+      "sha256": "1a40d81dc8d1757d5e2a591e9eb9406533da7fcdf0c0a2da41f52fe07f598cfa",
+      "size": 1218
+    },
+    "robust_source": {
+      "sha256": "f24c6cf132f318be1fa80535c2a063c9e30618b34d0a1e40f4c44002067cc1a9",
+      "size": 1169
+    },
+    "v5_estimator": {
+      "manifest": {
+        "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+        "size": 111777
+      },
+      "parameters": {
+        "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+        "size": 2713311
+      }
+    }
+  },
+  "identity": {
+    "arms": [
+      "robust_sac_5p6m",
+      "robust_sac_8p4m",
+      "canonical_no_compensation",
+      "canonical_true_mode_compensation",
+      "canonical_v5_map_compensation",
+      "escp_recurrent_8p4m",
+      "resac_b0_8p4m"
+    ],
+    "benchmark_role": "power_confirmation_canonical_compensation",
+    "protocol_version": "v32-canonical-action-compensation-power-confirmation",
+    "reference_mode": 0,
+    "stationary_holdout_event_seeds": [
+      197101,
+      197117,
+      197133
+    ],
+    "switching_event_seeds": [
+      197201,
+      197217,
+      197233
+    ],
+    "switching_schedules": {
+      "197201": [
+        2,
+        0,
+        3,
+        1
+      ],
+      "197217": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "197233": [
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    "training_seed": 88103
+  },
+  "oracle_equivalence": {
+    "197201": {
+      "max_abs_return_error": 0.0,
+      "native_reference_mode": 0,
+      "native_returns": [
+        3460.647799730301,
+        3292.9026250839233,
+        3460.1155171096325,
+        3136.5717356801033,
+        3192.549546301365
+      ],
+      "oracle_compensation_returns": [
+        3460.647799730301,
+        3292.9026250839233,
+        3460.1155171096325,
+        3136.5717356801033,
+        3192.549546301365
+      ],
+      "pass": true
+    },
+    "197217": {
+      "max_abs_return_error": 0.0,
+      "native_reference_mode": 0,
+      "native_returns": [
+        3240.312676370144,
+        3032.172145873308,
+        3165.3007409721613,
+        3070.957758873701,
+        3254.7623542249203
+      ],
+      "oracle_compensation_returns": [
+        3240.312676370144,
+        3032.172145873308,
+        3165.3007409721613,
+        3070.957758873701,
+        3254.7623542249203
+      ],
+      "pass": true
+    },
+    "197233": {
+      "max_abs_return_error": 0.0,
+      "native_reference_mode": 0,
+      "native_returns": [
+        3214.4848265349865,
+        3555.336083471775,
+        3445.230425029993,
+        3233.8393796235323,
+        3548.7823024988174
+      ],
+      "oracle_compensation_returns": [
+        3214.4848265349865,
+        3555.336083471775,
+        3445.230425029993,
+        3233.8393796235323,
+        3548.7823024988174
+      ],
+      "pass": true
+    }
+  },
+  "registration": {
+    "sha256": "95c1c434989cb31e018e8df703f6664ba645c980270360311d1f28c415a8bd3d",
+    "size": 9754
+  },
+  "schema": "bapr.canonical-compensation-power-audit.v32",
+  "stationary_holdout": {
+    "197101": {
+      "canonical_no_compensation": {
+        "0": {
+          "return_mean": 3304.0216722249984,
+          "returns": [
+            3314.1795181930065,
+            3150.612328737974,
+            3339.6212428808212,
+            3343.21681830287,
+            3372.4784530103207
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": -640.5367680072784,
+          "returns": [
+            -848.7852116525173,
+            -650.8503528386354,
+            -486.2062102109194,
+            -575.6960182935,
+            -641.1460470408201
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": -344.44384759068487,
+          "returns": [
+            -342.3028098344803,
+            -356.407111287117,
+            -337.18120685219765,
+            -344.5713903903961,
+            -341.7567195892334
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": -476.4765832334757,
+          "returns": [
+            -440.9160676598549,
+            -497.7101989239454,
+            -540.5430161505938,
+            -423.6875603199005,
+            -479.52607311308384
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "canonical_true_mode_compensation": {
+        "0": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3304.0216722249984,
+          "returns": [
+            3314.1795181930065,
+            3150.612328737974,
+            3339.6212428808212,
+            3343.21681830287,
+            3372.4784530103207
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3304.0216722249984,
+          "returns": [
+            3314.1795181930065,
+            3150.612328737974,
+            3339.6212428808212,
+            3343.21681830287,
+            3372.4784530103207
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3304.0216722249984,
+          "returns": [
+            3314.1795181930065,
+            3150.612328737974,
+            3339.6212428808212,
+            3343.21681830287,
+            3372.4784530103207
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3304.0216722249984,
+          "returns": [
+            3314.1795181930065,
+            3150.612328737974,
+            3339.6212428808212,
+            3343.21681830287,
+            3372.4784530103207
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "canonical_v5_map_compensation": {
+        "0": {
+          "max_abs_execution_signal_error": 0.6621592044830322,
+          "mean_abs_execution_signal_error": 0.0005156078815460205,
+          "posterior_metrics": {
+            "brier_score": 0.0025205953762471515,
+            "mode_accuracy": 0.9992
+          },
+          "return_mean": 3254.50880741775,
+          "returns": [
+            3329.0500788390636,
+            3074.4701588600874,
+            3339.6212428808212,
+            3339.9661029577255,
+            3189.436453551054
+          ],
+          "routing_mode_accuracy": 0.9992,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "max_abs_execution_signal_error": 1.9368000030517578,
+          "mean_abs_execution_signal_error": 0.002017478269338608,
+          "posterior_metrics": {
+            "brier_score": 0.0014270219458196959,
+            "mode_accuracy": 0.9986
+          },
+          "return_mean": 3357.0885960489513,
+          "returns": [
+            3332.5239467024803,
+            3410.343426629901,
+            3330.330949380994,
+            3423.5359259545803,
+            3288.7087315768003
+          ],
+          "routing_mode_accuracy": 0.9986,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "max_abs_execution_signal_error": 0.6597919464111328,
+          "mean_abs_execution_signal_error": 0.0007578712582588196,
+          "posterior_metrics": {
+            "brier_score": 0.001516560582301511,
+            "mode_accuracy": 0.9988
+          },
+          "return_mean": 3393.5106316924093,
+          "returns": [
+            3466.20009316504,
+            3320.759896636009,
+            3345.983005747199,
+            3438.5593630969524,
+            3396.050799816847
+          ],
+          "routing_mode_accuracy": 0.9988,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "max_abs_execution_signal_error": 1.277008056640625,
+          "mean_abs_execution_signal_error": 0.0015378845036029816,
+          "posterior_metrics": {
+            "brier_score": 0.00197546710781118,
+            "mode_accuracy": 0.9984
+          },
+          "return_mean": 3372.5018238276243,
+          "returns": [
+            3289.2650776803493,
+            3409.3969923704863,
+            3522.134119287133,
+            3258.0220634639263,
+            3383.6908663362265
+          ],
+          "routing_mode_accuracy": 0.9984,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "escp_recurrent_8p4m": {
+        "0": {
+          "return_mean": 2906.5770037442444,
+          "returns": [
+            3076.514720469713,
+            2890.7668237537146,
+            2868.429546505213,
+            2856.7471982240677,
+            2840.4267297685146
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 1732.9092546984552,
+          "returns": [
+            1783.0506829321384,
+            1817.5376715064049,
+            1760.2652891725302,
+            1587.111967124045,
+            1716.5806627571583
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 1053.9472922801972,
+          "returns": [
+            807.6386603713036,
+            1130.0357797443867,
+            666.0710014998913,
+            1382.551494538784,
+            1283.4395252466202
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1218.9659655988216,
+          "returns": [
+            1493.8905010223389,
+            1469.697180569172,
+            1074.8730687350035,
+            1738.6200758516788,
+            317.7490018159151
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "resac_b0_8p4m": {
+        "0": {
+          "return_mean": 1589.2178783893585,
+          "returns": [
+            1478.4289324060082,
+            1687.4312331527472,
+            1645.4992455095053,
+            1528.3117935657501,
+            1606.4181873127818
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 2915.45587567389,
+          "returns": [
+            2987.5417709350586,
+            2849.6846446692944,
+            2873.7252450734377,
+            2839.09221971035,
+            3027.23549798131
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 1231.4755303574725,
+          "returns": [
+            1236.371646657586,
+            1441.1870940178633,
+            1435.7376902997494,
+            565.791064648889,
+            1478.2901561632752
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 2430.0959660232065,
+          "returns": [
+            2210.5900812596083,
+            2525.429277792573,
+            2428.9297826588154,
+            2455.042278498411,
+            2530.4884099066257
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "robust_sac_5p6m": {
+        "0": {
+          "return_mean": 1326.9582287564874,
+          "returns": [
+            1231.5236182808876,
+            1215.2330477535725,
+            1410.910461127758,
+            1413.9692497178912,
+            1363.1547669023275
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 1696.8981201201677,
+          "returns": [
+            1635.2332727760077,
+            1767.4086258411407,
+            1597.6204332858324,
+            1685.9571771770716,
+            1798.2710915207863
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 982.866696068272,
+          "returns": [
+            1090.262202501297,
+            1005.3112318664789,
+            1131.4096793308854,
+            1072.794705748558,
+            614.5556608941406
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1832.877233582735,
+          "returns": [
+            1628.8660252690315,
+            2035.0351313352585,
+            1813.4580057263374,
+            1918.873047977686,
+            1768.153957605362
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "robust_sac_8p4m": {
+        "0": {
+          "return_mean": 2419.222401097417,
+          "returns": [
+            2612.3159721791744,
+            2530.2771451622248,
+            2139.9324404597282,
+            2550.8068909198046,
+            2262.7795567661524
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 2637.72091389969,
+          "returns": [
+            3154.7591083347797,
+            3414.9936585128307,
+            3079.7886612564325,
+            689.6486776359379,
+            2849.4144637584686
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 2463.03010699451,
+          "returns": [
+            2260.781302958727,
+            2406.442839026451,
+            2500.8727184832096,
+            2707.0913361757994,
+            2439.9623383283615
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1783.6382217749954,
+          "returns": [
+            1764.3510637432337,
+            1798.5351660102606,
+            1689.5393354445696,
+            1852.0377827361226,
+            1813.7277609407902
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      }
+    },
+    "197117": {
+      "canonical_no_compensation": {
+        "0": {
+          "return_mean": 3280.821324387193,
+          "returns": [
+            3330.4499170184135,
+            3275.6664099395275,
+            2988.6855097562075,
+            3488.0875734984875,
+            3321.2172117233276
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": -573.979022476077,
+          "returns": [
+            -689.9271550625563,
+            -579.4990045875311,
+            -509.8731720149517,
+            -526.5688489824533,
+            -564.026931732893
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": -287.5608028888702,
+          "returns": [
+            -354.97707107663155,
+            -349.70162948966026,
+            -353.48184414207935,
+            -352.2842253446579,
+            -27.359244391322136
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": -485.02486778497695,
+          "returns": [
+            -464.8720849901438,
+            -438.4586991518736,
+            -436.4656348526478,
+            -611.0664512217045,
+            -474.26146870851517
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "canonical_true_mode_compensation": {
+        "0": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3280.821324387193,
+          "returns": [
+            3330.4499170184135,
+            3275.6664099395275,
+            2988.6855097562075,
+            3488.0875734984875,
+            3321.2172117233276
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3280.821324387193,
+          "returns": [
+            3330.4499170184135,
+            3275.6664099395275,
+            2988.6855097562075,
+            3488.0875734984875,
+            3321.2172117233276
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3280.821324387193,
+          "returns": [
+            3330.4499170184135,
+            3275.6664099395275,
+            2988.6855097562075,
+            3488.0875734984875,
+            3321.2172117233276
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3280.821324387193,
+          "returns": [
+            3330.4499170184135,
+            3275.6664099395275,
+            2988.6855097562075,
+            3488.0875734984875,
+            3321.2172117233276
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "canonical_v5_map_compensation": {
+        "0": {
+          "max_abs_execution_signal_error": 1.316409707069397,
+          "mean_abs_execution_signal_error": 0.0002632819414138794,
+          "posterior_metrics": {
+            "brier_score": 0.0011657441853277185,
+            "mode_accuracy": 0.9998
+          },
+          "return_mean": 3321.330088248849,
+          "returns": [
+            3330.4499170184135,
+            3275.6664099395275,
+            3191.2293290644884,
+            3488.0875734984875,
+            3321.2172117233276
+          ],
+          "routing_mode_accuracy": 0.9998,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "max_abs_execution_signal_error": 1.9197558164596558,
+          "mean_abs_execution_signal_error": 0.002082396215200424,
+          "posterior_metrics": {
+            "brier_score": 0.0017377204727310215,
+            "mode_accuracy": 0.9986
+          },
+          "return_mean": 3236.1455825656653,
+          "returns": [
+            3221.834219381213,
+            3419.6983688026667,
+            2932.2866804152727,
+            3382.674549341202,
+            3224.234094887972
+          ],
+          "routing_mode_accuracy": 0.9986,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "max_abs_execution_signal_error": 0.659690797328949,
+          "mean_abs_execution_signal_error": 0.0006507086634635925,
+          "posterior_metrics": {
+            "brier_score": 0.0011028324590938246,
+            "mode_accuracy": 0.999
+          },
+          "return_mean": 3284.652392357588,
+          "returns": [
+            3242.3266970813274,
+            3390.4447904229164,
+            3275.95208953321,
+            3222.245454505086,
+            3292.2929302453995
+          ],
+          "routing_mode_accuracy": 0.999,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "max_abs_execution_signal_error": 1.6398940086364746,
+          "mean_abs_execution_signal_error": 0.0018024553060531617,
+          "posterior_metrics": {
+            "brier_score": 0.0015502853948142078,
+            "mode_accuracy": 0.9984
+          },
+          "return_mean": 3304.724504503608,
+          "returns": [
+            3340.4990609139204,
+            3429.202350601554,
+            3335.506153166294,
+            3265.3143843263388,
+            3153.1005735099316
+          ],
+          "routing_mode_accuracy": 0.9984,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "escp_recurrent_8p4m": {
+        "0": {
+          "return_mean": 2872.6563227534293,
+          "returns": [
+            2709.57255525887,
+            2916.251522898674,
+            2861.5660443902016,
+            2920.7071977704763,
+            2955.184293448925
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 1706.4643408089876,
+          "returns": [
+            1623.0036922693253,
+            1578.867622539401,
+            1800.5363038182259,
+            1795.2346201837063,
+            1734.6794652342796
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 508.12541534006596,
+          "returns": [
+            1212.5666473060846,
+            -37.31089873611927,
+            -116.66813771426678,
+            416.6021403372288,
+            1065.4373255074024
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1635.8271311670542,
+          "returns": [
+            1848.3672847747803,
+            1678.0032703876495,
+            1472.215281650424,
+            1572.6993874013424,
+            1607.8504316210747
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "resac_b0_8p4m": {
+        "0": {
+          "return_mean": 1476.91254343614,
+          "returns": [
+            1424.0851189941168,
+            1411.01021425426,
+            1464.4414880014956,
+            1432.4079387262464,
+            1652.6179572045803
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 2930.5469768047333,
+          "returns": [
+            2904.5616107583046,
+            2963.4468188732862,
+            2927.2163809984922,
+            3039.3798161149025,
+            2818.130257278681
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 1565.8291782036424,
+          "returns": [
+            1200.3927727490664,
+            1562.3645565360785,
+            1766.5284314900637,
+            1772.242581255734,
+            1527.6175489872694
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 2514.793246281147,
+          "returns": [
+            2551.240737065673,
+            2488.541615873575,
+            2452.916532471776,
+            2582.736502185464,
+            2498.530843809247
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "robust_sac_5p6m": {
+        "0": {
+          "return_mean": 1211.5856410115957,
+          "returns": [
+            1195.8524672985077,
+            1141.0439853668213,
+            1265.4917020052671,
+            1262.1946758329868,
+            1193.3453745543957
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 1451.9782014787197,
+          "returns": [
+            1821.3816217705607,
+            1636.3274170607328,
+            1697.256916552782,
+            486.0403105095029,
+            1618.88474150002
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 922.4591706976295,
+          "returns": [
+            815.2912396267056,
+            674.1466772034764,
+            933.785103008151,
+            1173.3310329690576,
+            1015.7418006807566
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1803.6084154576063,
+          "returns": [
+            1925.05882909894,
+            1971.3632830828428,
+            1770.9133661836386,
+            1730.6736620664597,
+            1620.0329368561506
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "robust_sac_8p4m": {
+        "0": {
+          "return_mean": 2576.123244190216,
+          "returns": [
+            2444.507477849722,
+            2877.5310852229595,
+            2693.8088769614697,
+            2547.0954956412315,
+            2317.6732852756977
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 3256.414679995179,
+          "returns": [
+            3416.0500868856907,
+            3406.4408767819405,
+            3009.0205203592777,
+            3101.040658339858,
+            3349.521257609129
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 2507.0796857953073,
+          "returns": [
+            2738.853097304702,
+            2418.4452702105045,
+            2558.7733555585146,
+            2438.159473568201,
+            2381.167232334614
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1845.0542355626822,
+          "returns": [
+            1936.1830103248358,
+            1700.2989635020494,
+            1848.1532862782478,
+            1835.0409053564072,
+            1905.5950123518705
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      }
+    },
+    "197133": {
+      "canonical_no_compensation": {
+        "0": {
+          "return_mean": 3367.033199971914,
+          "returns": [
+            3404.5167633593082,
+            3105.768714815378,
+            3328.60219925642,
+            3368.2425226271152,
+            3628.0357998013496
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": -484.14581472277644,
+          "returns": [
+            -455.9038781374693,
+            -623.1327937096357,
+            -472.2505651116371,
+            -481.92714519798756,
+            -387.51469145715237
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": -347.76805225014687,
+          "returns": [
+            -345.1120656132698,
+            -341.9865645468235,
+            -345.6475209593773,
+            -354.6931921541691,
+            -351.40091797709465
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": -448.3093850016594,
+          "returns": [
+            -471.2551296055317,
+            -410.9214491248131,
+            -500.25644885003567,
+            -443.66764011979103,
+            -415.4462573081255
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "canonical_true_mode_compensation": {
+        "0": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3367.033199971914,
+          "returns": [
+            3404.5167633593082,
+            3105.768714815378,
+            3328.60219925642,
+            3368.2425226271152,
+            3628.0357998013496
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3367.033199971914,
+          "returns": [
+            3404.5167633593082,
+            3105.768714815378,
+            3328.60219925642,
+            3368.2425226271152,
+            3628.0357998013496
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3367.033199971914,
+          "returns": [
+            3404.5167633593082,
+            3105.768714815378,
+            3328.60219925642,
+            3368.2425226271152,
+            3628.0357998013496
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "max_abs_execution_signal_error": 0.0,
+          "mean_abs_execution_signal_error": 0.0,
+          "return_mean": 3367.033199971914,
+          "returns": [
+            3404.5167633593082,
+            3105.768714815378,
+            3328.60219925642,
+            3368.2425226271152,
+            3628.0357998013496
+          ],
+          "routing_mode_accuracy": 1.0,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "canonical_v5_map_compensation": {
+        "0": {
+          "max_abs_execution_signal_error": 0.5355764031410217,
+          "mean_abs_execution_signal_error": 0.00010711528062820434,
+          "posterior_metrics": {
+            "brier_score": 0.0016104484218009412,
+            "mode_accuracy": 0.9998
+          },
+          "return_mean": 3268.547543734312,
+          "returns": [
+            3404.5167633593082,
+            3105.768714815378,
+            3328.60219925642,
+            3368.2425226271152,
+            3135.6075186133385
+          ],
+          "routing_mode_accuracy": 0.9998,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "max_abs_execution_signal_error": 1.9322690963745117,
+          "mean_abs_execution_signal_error": 0.002181519442796707,
+          "posterior_metrics": {
+            "brier_score": 0.002106306677133563,
+            "mode_accuracy": 0.9984
+          },
+          "return_mean": 3266.0802186787128,
+          "returns": [
+            3336.564089000225,
+            3250.6395166367292,
+            3018.3955924212933,
+            3428.022445574403,
+            3296.779449760914
+          ],
+          "routing_mode_accuracy": 0.9984,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "max_abs_execution_signal_error": 0.6578968167304993,
+          "mean_abs_execution_signal_error": 0.0007285594403743744,
+          "posterior_metrics": {
+            "brier_score": 0.0015491159971043767,
+            "mode_accuracy": 0.9988
+          },
+          "return_mean": 3332.296971938014,
+          "returns": [
+            3362.948206797242,
+            3387.3091728687286,
+            3372.965181529522,
+            3381.3662389814854,
+            3156.896059513092
+          ],
+          "routing_mode_accuracy": 0.9988,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "max_abs_execution_signal_error": 1.2746258974075317,
+          "mean_abs_execution_signal_error": 0.0015489655256271362,
+          "posterior_metrics": {
+            "brier_score": 0.0018235021265096342,
+            "mode_accuracy": 0.9984
+          },
+          "return_mean": 3195.2755190253256,
+          "returns": [
+            3018.633025765419,
+            3232.4772769361734,
+            3278.168874695897,
+            3041.7748790234327,
+            3405.3235387057066
+          ],
+          "routing_mode_accuracy": 0.9984,
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "escp_recurrent_8p4m": {
+        "0": {
+          "return_mean": 2825.2755365014077,
+          "returns": [
+            2673.6851932406425,
+            2927.732675909996,
+            2828.649095520377,
+            2833.3759190142155,
+            2862.934798821807
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 1715.5044741868974,
+          "returns": [
+            1763.7535526752472,
+            1709.7332118451595,
+            1713.2863324284554,
+            1588.7013385891914,
+            1802.0479353964329
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 1108.549566668272,
+          "returns": [
+            1025.5646521151066,
+            994.0847142934799,
+            1031.9274521321058,
+            1347.2590051442385,
+            1143.9120096564293
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1302.5156534284354,
+          "returns": [
+            1924.2347249984741,
+            1384.0166956335306,
+            1728.5093833208084,
+            1585.843213737011,
+            -110.02575054764748
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "resac_b0_8p4m": {
+        "0": {
+          "return_mean": 1570.9926975771784,
+          "returns": [
+            1689.0934806615114,
+            1608.6069121807814,
+            1481.3415521681309,
+            1672.7376590818167,
+            1403.183883793652
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 2900.173791527748,
+          "returns": [
+            3063.4003216326237,
+            2720.768646210432,
+            2943.416045099497,
+            2698.653753489256,
+            3074.630191206932
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 1422.8974149003625,
+          "returns": [
+            1208.9914089813828,
+            1498.4014867395163,
+            1345.5720794051886,
+            1512.42999266088,
+            1549.0921067148447
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 2482.421624651551,
+          "returns": [
+            2629.1525899469852,
+            2466.2668770849705,
+            2575.1172796189785,
+            2450.0103194117546,
+            2291.5610571950674
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "robust_sac_5p6m": {
+        "0": {
+          "return_mean": 1327.4143789559603,
+          "returns": [
+            1476.092858016491,
+            1505.9740602970123,
+            1236.2518316358328,
+            1124.6919969022274,
+            1294.061147928238
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 1806.6453995451332,
+          "returns": [
+            1844.9151131138206,
+            1829.6871277540922,
+            1806.1146247833967,
+            1897.1335105001926,
+            1655.3766215741634
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 1111.1881943292915,
+          "returns": [
+            1123.2895372360945,
+            1143.349669829011,
+            1094.2633164189756,
+            1032.7641252800822,
+            1162.2743228822947
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1910.290950718522,
+          "returns": [
+            1975.2163431346416,
+            1958.0880519747734,
+            1823.0429988205433,
+            1988.769944742322,
+            1806.33741492033
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      },
+      "robust_sac_8p4m": {
+        "0": {
+          "return_mean": 2412.7913604557516,
+          "returns": [
+            2300.1433899849653,
+            2148.6640251129866,
+            2737.6370206177235,
+            2405.1214390695095,
+            2472.3909274935722
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "1": {
+          "return_mean": 3279.6960839927197,
+          "returns": [
+            3352.2291775345802,
+            3436.4960636496544,
+            3028.785922393203,
+            3178.3548809587955,
+            3402.6143754273653
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "2": {
+          "return_mean": 2313.221513031423,
+          "returns": [
+            2317.37269552052,
+            2277.988854087889,
+            2331.8856377750635,
+            2407.908620208502,
+            2230.9517575651407
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        },
+        "3": {
+          "return_mean": 1607.1541227117182,
+          "returns": [
+            1750.8781188875437,
+            1553.0169536918402,
+            1059.8575084134936,
+            2008.4599917829037,
+            1663.5580407828093
+          ],
+          "terminated_rate": 0.0,
+          "total_actions": 5000
+        }
+      }
+    }
+  },
+  "status": "complete",
+  "switching_holdout": {
+    "197201": {
+      "canonical_no_compensation": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "return_mean": 318.81828139424323,
+        "returns": [
+          -225.52054178714752,
+          462.10834263265133,
+          316.4829087406397,
+          426.7139095515013,
+          614.3067878335714
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "canonical_true_mode_compensation": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "max_abs_execution_signal_error": 0.0,
+        "mean_abs_execution_signal_error": 0.0,
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "return_mean": 3308.557444781065,
+        "returns": [
+          3460.647799730301,
+          3292.9026250839233,
+          3460.1155171096325,
+          3136.5717356801033,
+          3192.549546301365
+        ],
+        "routing_mode_accuracy": 1.0,
+        "switch_detection_delay_median": 0.0,
+        "switch_detection_delays": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "terminated_rate": 0.0,
+        "total_actions": 5000,
+        "wrong_route_fraction_after_switch": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        }
+      },
+      "canonical_v5_map_compensation": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.012399999999999967,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "max_abs_execution_signal_error": 1.886343002319336,
+        "mean_abs_execution_signal_error": 0.008958549946546554,
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "posterior_metrics": {
+          "brier_score": 0.021999097189200643,
+          "mode_accuracy": 0.9876
+        },
+        "return_mean": 3121.608550050855,
+        "returns": [
+          3193.989974886179,
+          3135.568524837494,
+          3160.41029638052,
+          2985.3415839225054,
+          3132.7323702275753
+        ],
+        "routing_mode_accuracy": 0.9876,
+        "switch_detection_delay_median": 4.0,
+        "switch_detection_delays": [
+          5,
+          4,
+          4,
+          3,
+          4,
+          2,
+          4,
+          4,
+          4,
+          4,
+          1,
+          4,
+          7,
+          2,
+          3
+        ],
+        "terminated_rate": 0.0,
+        "total_actions": 5000,
+        "wrong_route_fraction_after_switch": {
+          "1": 1.0,
+          "2": 0.9666666666666667,
+          "4": 0.85,
+          "8": 0.475
+        }
+      },
+      "escp_recurrent_8p4m": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "return_mean": 1124.285008020699,
+        "returns": [
+          168.77239087969065,
+          1920.1373440623283,
+          -194.23028895258904,
+          2064.1113356351852,
+          1662.63425847888
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "resac_b0_8p4m": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "return_mean": 1632.9368420738726,
+        "returns": [
+          -103.67478551529348,
+          2116.20211212337,
+          2030.0586271137,
+          2088.003875076771,
+          2034.094381570816
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "robust_sac_5p6m": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "return_mean": 1435.5373476564885,
+        "returns": [
+          1428.2974152937531,
+          1403.6264685317874,
+          1531.255785152316,
+          1358.1532672941685,
+          1456.353802010417
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "robust_sac_8p4m": {
+        "base_schedule": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            2,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            3,
+            1,
+            2
+          ],
+          [
+            3,
+            1,
+            2,
+            0
+          ],
+          [
+            1,
+            2,
+            0,
+            3
+          ],
+          [
+            2,
+            0,
+            3,
+            1
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "4aa336a0ebc1807ad408fd9e45ebe5ffb5addf22f4a2d2a180e0be447898e62f",
+        "return_mean": 2560.688511799276,
+        "returns": [
+          2536.571095839143,
+          2647.291407227516,
+          2506.161674551666,
+          2521.991112202406,
+          2591.4272691756487
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      }
+    },
+    "197217": {
+      "canonical_no_compensation": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "return_mean": 297.6430942296982,
+        "returns": [
+          230.31293879449368,
+          387.33450305461884,
+          367.84719201922417,
+          260.6459333598614,
+          242.07490392029285
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "canonical_true_mode_compensation": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "max_abs_execution_signal_error": 0.0,
+        "mean_abs_execution_signal_error": 0.0,
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "return_mean": 3152.701135262847,
+        "returns": [
+          3240.312676370144,
+          3032.172145873308,
+          3165.3007409721613,
+          3070.957758873701,
+          3254.7623542249203
+        ],
+        "routing_mode_accuracy": 1.0,
+        "switch_detection_delay_median": 0.0,
+        "switch_detection_delays": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "terminated_rate": 0.0,
+        "total_actions": 5000,
+        "wrong_route_fraction_after_switch": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        }
+      },
+      "canonical_v5_map_compensation": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.012800000000000034,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "max_abs_execution_signal_error": 1.907335877418518,
+        "mean_abs_execution_signal_error": 0.009908909618854522,
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "posterior_metrics": {
+          "brier_score": 0.022963585583398567,
+          "mode_accuracy": 0.9872
+        },
+        "return_mean": 3206.903625637293,
+        "returns": [
+          3172.535629451275,
+          3164.4754058122635,
+          3265.684188321233,
+          3146.788413077593,
+          3285.0344915241003
+        ],
+        "routing_mode_accuracy": 0.9872,
+        "switch_detection_delay_median": 3.0,
+        "switch_detection_delays": [
+          4,
+          3,
+          4,
+          4,
+          3,
+          2,
+          5,
+          4,
+          3,
+          2,
+          3,
+          3,
+          7,
+          4,
+          3
+        ],
+        "terminated_rate": 0.0,
+        "total_actions": 5000,
+        "wrong_route_fraction_after_switch": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 0.8333333333333334,
+          "8": 0.48333333333333334
+        }
+      },
+      "escp_recurrent_8p4m": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "return_mean": 1772.374972102046,
+        "returns": [
+          1732.8946276307106,
+          1675.65712210536,
+          1778.513798981905,
+          1796.8974085748196,
+          1877.9119032174349
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "resac_b0_8p4m": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "return_mean": 1922.220043247938,
+        "returns": [
+          1988.7677121013403,
+          1528.4202639758587,
+          2172.6885058879852,
+          1940.2403078377247,
+          1980.9834264367819
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "robust_sac_5p6m": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "return_mean": 1162.0107530608773,
+        "returns": [
+          1270.6694844961166,
+          1462.6197383701801,
+          1369.1007805913687,
+          602.1173290759325,
+          1105.5464327707887
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "robust_sac_8p4m": {
+        "base_schedule": [
+          1,
+          3,
+          0,
+          2
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            1,
+            3,
+            0,
+            2
+          ],
+          [
+            3,
+            0,
+            2,
+            1
+          ],
+          [
+            0,
+            2,
+            1,
+            3
+          ],
+          [
+            2,
+            1,
+            3,
+            0
+          ],
+          [
+            1,
+            3,
+            0,
+            2
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "0874fe8400d719c4e2f929780c9252a2bafadd47ff1430551e416fa85b3ee583",
+        "return_mean": 2428.0030637174846,
+        "returns": [
+          2462.765069693327,
+          2344.520207822323,
+          2425.4154514223337,
+          2388.261870652437,
+          2519.0527189970016
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      }
+    },
+    "197233": {
+      "canonical_no_compensation": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "return_mean": 442.4945150613785,
+        "returns": [
+          512.3511830717325,
+          471.1428899914026,
+          320.47353126108646,
+          583.7099514007568,
+          324.79501958191395
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "canonical_true_mode_compensation": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "max_abs_execution_signal_error": 0.0,
+        "mean_abs_execution_signal_error": 0.0,
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "return_mean": 3399.534603431821,
+        "returns": [
+          3214.4848265349865,
+          3555.336083471775,
+          3445.230425029993,
+          3233.8393796235323,
+          3548.7823024988174
+        ],
+        "routing_mode_accuracy": 1.0,
+        "switch_detection_delay_median": 0.0,
+        "switch_detection_delays": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "terminated_rate": 0.0,
+        "total_actions": 5000,
+        "wrong_route_fraction_after_switch": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        }
+      },
+      "canonical_v5_map_compensation": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.009399999999999964,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "max_abs_execution_signal_error": 1.9618185758590698,
+        "mean_abs_execution_signal_error": 0.01148553570508957,
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "posterior_metrics": {
+          "brier_score": 0.016974229322936466,
+          "mode_accuracy": 0.9906
+        },
+        "return_mean": 3117.8062354654076,
+        "returns": [
+          3217.469374731183,
+          3164.9901302456856,
+          3072.2424178421497,
+          3093.9618126153946,
+          3040.367441892624
+        ],
+        "routing_mode_accuracy": 0.9906,
+        "switch_detection_delay_median": 3.0,
+        "switch_detection_delays": [
+          2,
+          5,
+          2,
+          3,
+          1,
+          3,
+          2,
+          3,
+          3,
+          3,
+          2,
+          4,
+          3,
+          3,
+          4
+        ],
+        "terminated_rate": 0.0,
+        "total_actions": 5000,
+        "wrong_route_fraction_after_switch": {
+          "1": 1.0,
+          "2": 0.9666666666666667,
+          "4": 0.7,
+          "8": 0.35833333333333334
+        }
+      },
+      "escp_recurrent_8p4m": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "return_mean": 1318.3262176707387,
+        "returns": [
+          1610.4807060062885,
+          1709.4208822995424,
+          1816.6947859227657,
+          1319.8429024368525,
+          135.19181168824434
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "resac_b0_8p4m": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "return_mean": 2135.7317341327666,
+        "returns": [
+          2192.6593877524137,
+          2078.460677936673,
+          2159.8139801621437,
+          2103.2137053087354,
+          2144.5109195038676
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "robust_sac_5p6m": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "return_mean": 1410.3275959149003,
+        "returns": [
+          1426.8691384643316,
+          1456.4643290489912,
+          1176.5117444247007,
+          1492.5564754381776,
+          1499.2362921983004
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      },
+      "robust_sac_8p4m": {
+        "base_schedule": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "controller_mismatch_action_fraction": 0.0,
+        "episode_sequences": [
+          [
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            0,
+            3,
+            2
+          ],
+          [
+            0,
+            3,
+            2,
+            1
+          ],
+          [
+            3,
+            2,
+            1,
+            0
+          ]
+        ],
+        "mode_counts": {
+          "0": 1250,
+          "1": 1250,
+          "2": 1250,
+          "3": 1250
+        },
+        "mode_trace_sha256": "9c829a63637c4a261c8c8e9a0de17c36bee574a065f2c094d94f1cd7c367f6f3",
+        "return_mean": 2459.1298307701945,
+        "returns": [
+          2523.7734868079424,
+          2449.7354575395584,
+          2379.8341295793653,
+          2524.6831097751856,
+          2417.622970148921
+        ],
+        "routing_mode_accuracy": null,
+        "terminated_rate": 0.0,
+        "total_actions": 5000
+      }
+    }
+  }
+}

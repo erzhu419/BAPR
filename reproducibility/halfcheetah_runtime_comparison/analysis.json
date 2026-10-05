@@ -1,0 +1,67 @@
+{
+  "protocol": "v39-matched-runtime-regularized-comparison",
+  "policy_seeds": [
+    109003,
+    109023,
+    109043,
+    109063,
+    109083
+  ],
+  "runtime_versions": {
+    "jax": "0.4.38",
+    "brax": "0.10.5",
+    "flax": "0.10.4",
+    "mujoco": "3.1.6"
+  },
+  "switching_means": {
+    "source": 1859.9275738884323,
+    "sac": 2005.5090205787121,
+    "escp": 2059.054766485045,
+    "resac_zero": 2218.188428722682,
+    "resac_full": -148.04652965314685,
+    "no_compensation": 513.4215353857478,
+    "oracle": 3827.298700051705,
+    "bapr": 3611.669857473473
+  },
+  "comparisons": {
+    "resac_full": {
+      "paired_mean": 3759.7163871266193,
+      "ci95": [
+        2814.095670031378,
+        4705.3371042218605
+      ],
+      "seed_wins": 5,
+      "primary": true
+    },
+    "sac": {
+      "paired_mean": 1606.1608368947607,
+      "ci95": [
+        571.8073039259648,
+        2640.5143698635566
+      ],
+      "seed_wins": 5,
+      "primary": false
+    },
+    "escp": {
+      "paired_mean": 1552.6150909884273,
+      "ci95": [
+        543.2877929891519,
+        2561.9423889877025
+      ],
+      "seed_wins": 5,
+      "primary": false
+    },
+    "resac_zero": {
+      "paired_mean": 1393.4814287507907,
+      "ci95": [
+        561.9833018576298,
+        2224.9795556439512
+      ],
+      "seed_wins": 5,
+      "primary": false
+    }
+  },
+  "historical_cohorts_pooled": false,
+  "estimator_refitted": false,
+  "total_data_matched": false
+}

@@ -17,6 +17,7 @@ from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans"]
 plt.rcParams["svg.fonttype"] = "none"
+plt.rcParams["svg.hashsalt"] = "bapr-v32"
 plt.rcParams["pdf.fonttype"] = 42
 plt.rcParams["font.size"] = 7.0
 plt.rcParams["axes.titlesize"] = 8.0
@@ -32,14 +33,9 @@ plt.rcParams["legend.fontsize"] = 6.2
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-AUDIT_ROOT = (
-    ROOT
-    / "jax_experiments/results_regime_polarity_action_compensation_power_audit_v32"
-)
-ANALYSIS_JSON = (
-    ROOT
-    / "jax_experiments/results_regime_polarity_action_compensation_power_analysis_v32/analysis.json"
-)
+COMPACT = ROOT / "reproducibility/v32"
+AUDIT_ROOT = COMPACT / "audits"
+ANALYSIS_JSON = COMPACT / "analysis.json"
 SOURCE_DIR = HERE / "source_data"
 
 T_CRITICAL_95_DF9 = 2.2621571627409915
@@ -58,7 +54,7 @@ ARM_LABELS = {
     "robust_sac_5p6m": "SAC (5.6M)",
     "robust_sac_8p4m": "SAC",
     "escp_recurrent_8p4m": "ESCP",
-    "resac_b0_8p4m": "RE-SAC",
+    "resac_b0_8p4m": "RE-SAC-0",
     "canonical_no_compensation": "No compensation",
     "canonical_true_mode_compensation": "True mode",
     "canonical_v5_map_compensation": "BAPR",
@@ -95,7 +91,7 @@ def load_payloads():
 def switching_seed_mean(audit: dict, arm: str) -> float:
     return float(
         np.mean(
-            [event[arm]["return_mean"] for event in audit["switching_holdout"].values()]
+            [np.mean(event[arm]["returns"]) for event in audit["switching_holdout"].values()]
         )
     )
 
@@ -103,13 +99,22 @@ def switching_seed_mean(audit: dict, arm: str) -> float:
 def stationary_seed_mean(audit: dict, arm: str) -> float:
     values = []
     for event in audit["stationary_holdout"].values():
-        values.extend(mode["return_mean"] for mode in event[arm].values())
+        values.extend(np.mean(mode["returns"]) for mode in event[arm].values())
     return float(np.mean(values))
 
 
 def validate_aggregate(
     aggregate: dict, seeds: list[int], audits: dict[int, dict]
 ) -> None:
+    for seed, audit in audits.items():
+        if audit["identity"]["training_seed"] != seed:
+            raise ValueError(f"released audit seed differs for {seed}")
+        cells = [row for event in audit["switching_holdout"].values() for row in event.values()]
+        cells.extend(row for event in audit["stationary_holdout"].values()
+                     for modes in event.values() for row in modes.values())
+        for row in cells:
+            if not np.isclose(np.mean(row["returns"]), row["return_mean"], atol=1e-9, rtol=0):
+                raise ValueError(f"released episode mean differs for {seed}")
     for arm in ARMS:
         switching = np.mean(
             [switching_seed_mean(audits[seed], arm) for seed in seeds]
@@ -118,13 +123,32 @@ def validate_aggregate(
             [stationary_seed_mean(audits[seed], arm) for seed in seeds]
         )
         if not np.isclose(
-            switching, aggregate["switching_return_means"][arm], atol=1e-9
+            switching, aggregate["switching_return_means"][arm], atol=1e-9, rtol=0
         ):
             raise ValueError(f"switching aggregate mismatch for {arm}")
         if not np.isclose(
-            stationary, aggregate["stationary_return_means"][arm], atol=1e-9
+            stationary, aggregate["stationary_return_means"][arm], atol=1e-9, rtol=0
         ):
             raise ValueError(f"stationary aggregate mismatch for {arm}")
+    for name, row in aggregate["comparisons"].items():
+        differences = np.asarray([switching_seed_mean(audits[seed], row["left"])
+                                  - switching_seed_mean(audits[seed], row["right"])
+                                  for seed in seeds])
+        mean = float(np.mean(differences))
+        radius = T_CRITICAL_95_DF9 * np.std(differences, ddof=1) / np.sqrt(len(seeds))
+        expected = [mean, mean - radius, mean + radius]
+        if not np.allclose(expected, [row["paired_mean"], row["ci95_low"], row["ci95_high"]],
+                           atol=1e-9, rtol=0):
+            raise ValueError(f"paired interval differs for {name}")
+        event_wins = sum(np.mean(event[row["left"]]["returns"])
+                         > np.mean(event[row["right"]]["returns"])
+                         for audit in audits.values() for event in audit["switching_holdout"].values())
+        seed_wins = int(np.sum(differences > 0))
+        if (seed_wins, event_wins) != (row["seed_wins"], row["event_wins"]):
+            raise ValueError(f"paired win counts differ for {name}")
+        passed = mean > 0 and mean - radius > 0 and seed_wins >= 8 and event_wins >= 24
+        if passed != row["gate_pass"]:
+            raise ValueError(f"frozen comparison gate differs for {name}")
 
 
 def write_source_data(aggregate: dict, seeds: list[int], audits: dict[int, dict]) -> None:
@@ -192,6 +216,40 @@ def write_source_data(aggregate: dict, seeds: list[int], audits: dict[int, dict]
                         ],
                     }
                 )
+
+    with (SOURCE_DIR / "fig_v32_decomposition.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=(
+                "seed",
+                "sac_switching_return",
+                "oracle_switching_return",
+                "causal_switching_return",
+                "oracle_headroom",
+                "inference_loss",
+                "causal_net_advantage",
+            ),
+        )
+        writer.writeheader()
+        for seed in seeds:
+            sac = switching_seed_mean(audits[seed], "robust_sac_8p4m")
+            oracle = switching_seed_mean(
+                audits[seed], "canonical_true_mode_compensation"
+            )
+            causal = switching_seed_mean(
+                audits[seed], "canonical_v5_map_compensation"
+            )
+            writer.writerow(
+                {
+                    "seed": seed,
+                    "sac_switching_return": sac,
+                    "oracle_switching_return": oracle,
+                    "causal_switching_return": causal,
+                    "oracle_headroom": oracle - sac,
+                    "inference_loss": oracle - causal,
+                    "causal_net_advantage": causal - sac,
+                }
+            )
 
     with (SOURCE_DIR / "fig_v32_paired_comparisons.csv").open(
         "w", newline=""
@@ -402,7 +460,7 @@ def make_method_figure() -> None:
         (0.00, 0.15),
         0.28,
         0.21,
-        "Sticky posterior\n$b_{t+1}(z)$",
+        "Tempered\nmode belief\n$b_{t+1}(z)$",
         COLORS["soft_green"],
         edgecolor=COLORS["oracle"],
     )
@@ -411,7 +469,7 @@ def make_method_figure() -> None:
     arrow(ax_b, (0.64, 0.71), (0.69, 0.71), text="command", text_xy=(0.665, 0.86))
     arrow(ax_b, (0.845, 0.60), (0.845, 0.36), text="observe", text_xy=(0.95, 0.48))
     arrow(ax_b, (0.68, 0.255), (0.64, 0.255))
-    arrow(ax_b, (0.35, 0.255), (0.28, 0.255), text="likelihood", text_xy=(0.315, 0.42))
+    arrow(ax_b, (0.35, 0.255), (0.28, 0.255), text="evidence", text_xy=(0.315, 0.42))
     arrow(
         ax_b,
         (0.14, 0.36),
@@ -501,7 +559,7 @@ def make_results_figure(aggregate: dict, seeds: list[int], audits: dict[int, dic
         "causal_vs_equal_budget_escp",
         "causal_vs_equal_budget_resac",
     )
-    comparison_labels = ("vs SAC", "vs ESCP", "vs RE-SAC")
+    comparison_labels = ("vs SAC", "vs ESCP", "vs RE-SAC-0")
     y = np.arange(3)[::-1]
     for ypos, key in zip(y, comparison_keys):
         row = aggregate["comparisons"][key]
@@ -544,7 +602,7 @@ def make_results_figure(aggregate: dict, seeds: list[int], audits: dict[int, dic
         ax_c.text(seed_ratio, row_y + 0.24, f"{row['seed_wins']}/8", ha="center", va="bottom", fontsize=5.5, color=seed_color)
         ax_c.text(event_ratio, row_y - 0.24, f"{row['event_wins']}/24", ha="center", va="top", fontsize=5.5, color=event_color)
     ax_c.axvline(1.0, color=COLORS["ink"], linewidth=0.85, linestyle="--")
-    ax_c.set_yticks(ypos, ("SAC", "ESCP", "RE-SAC"))
+    ax_c.set_yticks(ypos, ("SAC", "ESCP", "RE-SAC-0"))
     ax_c.set_xlim(0.82, 1.18)
     ax_c.set_ylim(-0.55, 2.55)
     ax_c.set_xlabel("Achieved / required wins")
@@ -588,40 +646,70 @@ def make_diagnostics_figure(aggregate: dict, seeds: list[int], audits: dict[int,
     add_panel_label(ax_a, "a")
 
     ax_b = fig.add_subplot(outer[0, 1])
-    headroom = np.asarray(
-        [100.0 * aggregate["equal_budget_oracle_headroom"][str(seed)]["relative_headroom"] for seed in seeds]
+    sac = np.asarray(
+        [switching_seed_mean(audits[seed], "robust_sac_8p4m") for seed in seeds]
     )
-    recovery = np.asarray(
-        [100.0 * aggregate["oracle_recovery"][str(seed)]["causal_recovery"] for seed in seeds]
+    oracle = np.asarray(
+        [
+            switching_seed_mean(audits[seed], "canonical_true_mode_compensation")
+            for seed in seeds
+        ]
     )
-    ax_b.axvspan(-10, 10, color="#F7E8E7", zorder=0)
-    ax_b.axvline(10, color=COLORS["fail"], linestyle="--", linewidth=0.8)
-    ax_b.axhline(70, color=COLORS["muted"], linestyle=":", linewidth=0.8)
-    passed = headroom >= 10
-    ax_b.scatter(headroom[passed], recovery[passed], s=28, color=COLORS["bapr"], edgecolor="white", linewidth=0.5, label="oracle headroom pass", zorder=3)
-    ax_b.scatter(headroom[~passed], recovery[~passed], s=31, marker="X", color=COLORS["fail"], edgecolor="white", linewidth=0.45, label="headroom fail", zorder=4)
-    ax_b.text(
-        70.0,
-        93.2,
-        "3 seeds below\n10% headroom",
-        ha="center",
-        va="top",
-        fontsize=5.5,
-        color=COLORS["fail"],
+    causal = np.asarray(
+        [
+            switching_seed_mean(audits[seed], "canonical_v5_map_compensation")
+            for seed in seeds
+        ]
     )
-    ax_b.set_xlim(-8, 160)
-    ax_b.set_ylim(68, 101)
-    ax_b.set_xlabel("True-mode headroom over SAC (%)")
-    ax_b.set_ylabel("Causal oracle recovery (%)")
-    ax_b.grid(color=COLORS["grid"], linewidth=0.6)
-    ax_b.set_title("Controller vs inference", loc="left")
+    headroom = oracle - sac
+    net_advantage = causal - sac
+    y = np.arange(len(seeds))[::-1]
+    for ypos, oracle_delta, causal_delta in zip(y, headroom, net_advantage):
+        ax_b.plot(
+            [causal_delta, oracle_delta],
+            [ypos, ypos],
+            color="#BFC0C8",
+            linewidth=1.0,
+            zorder=1,
+        )
+    ax_b.scatter(
+        headroom,
+        y,
+        s=24,
+        marker="o",
+        color=COLORS["oracle"],
+        edgecolor="white",
+        linewidth=0.45,
+        label="true-mode headroom",
+        zorder=3,
+    )
+    ax_b.scatter(
+        net_advantage,
+        y,
+        s=25,
+        marker="D",
+        color=COLORS["bapr"],
+        edgecolor="white",
+        linewidth=0.45,
+        label="causal net advantage",
+        zorder=4,
+    )
+    ax_b.axvline(0, color=COLORS["ink"], linewidth=0.8)
+    all_deltas = np.concatenate((headroom, net_advantage))
+    x_pad = max(150.0, 0.08 * float(np.ptp(all_deltas)))
+    ax_b.set_xlim(float(np.min(all_deltas) - x_pad), float(np.max(all_deltas) + x_pad))
+    ax_b.set_yticks(y, [str(seed)[-3:] for seed in seeds])
+    ax_b.set_xlabel("Return difference from SAC")
+    ax_b.set_ylabel("Policy seed suffix")
+    ax_b.grid(axis="x", color=COLORS["grid"], linewidth=0.6)
+    ax_b.set_title("Headroom and inference loss", loc="left")
     ax_b.legend(
         loc="lower right",
-        bbox_to_anchor=(1.0, 0.17),
-        borderaxespad=0,
+        borderaxespad=0.15,
         frameon=False,
-        fontsize=5.4,
-        handletextpad=0.35,
+        fontsize=5.1,
+        handletextpad=0.25,
+        labelspacing=0.25,
     )
     add_panel_label(ax_b, "b")
 

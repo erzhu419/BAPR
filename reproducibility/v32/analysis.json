@@ -1,0 +1,358 @@
+{
+  "accounting": {
+    "canonical_training_interactions_per_seed": 8400000,
+    "equal_budget_interactions_per_comparator_seed": 8400000,
+    "estimator_retrained": false,
+    "new_policy_seeds": 10,
+    "reference_policies_deployed_per_seed": 1
+  },
+  "causal_switch_diagnostics": {
+    "brier_score": 0.02463985636115073,
+    "mean_abs_execution_signal_error": 0.010356584806522977,
+    "median_detection_delay": 3.0,
+    "mode_accuracy": 0.9854866666666665
+  },
+  "comparisons": {
+    "causal_vs_equal_budget_escp": {
+      "ci95_high": 1948.738195525278,
+      "ci95_low": 553.4863141797789,
+      "event_wins": 25,
+      "gate_pass": true,
+      "left": "canonical_v5_map_compensation",
+      "paired_mean": 1251.1122548525284,
+      "paired_seed_differences": {
+        "88003": 2620.50497288704,
+        "88021": 856.0556956609091,
+        "88039": 1022.0289924477534,
+        "88057": 608.0633215556536,
+        "88079": 2028.4173044162494,
+        "88103": 1743.7774044533573,
+        "88121": 1143.1359959964952,
+        "88139": 2591.7717779686054,
+        "88157": 30.81376773168722,
+        "88179": -133.44668459246532
+      },
+      "right": "escp_recurrent_8p4m",
+      "seed_wins": 9
+    },
+    "causal_vs_equal_budget_resac": {
+      "ci95_high": 1536.7354315688317,
+      "ci95_low": 337.0671236852686,
+      "event_wins": 27,
+      "gate_pass": true,
+      "left": "canonical_v5_map_compensation",
+      "paired_mean": 936.9012776270501,
+      "paired_seed_differences": {
+        "88003": 1647.7489547933142,
+        "88021": 770.3606170244518,
+        "88039": 337.7571964651347,
+        "88057": 955.3037966450051,
+        "88079": 1842.8544665932654,
+        "88103": 1251.8099305663259,
+        "88121": 549.0360538681348,
+        "88139": 1713.2545272357688,
+        "88157": 1274.149515196309,
+        "88179": -973.2622821172076
+      },
+      "right": "resac_b0_8p4m",
+      "seed_wins": 9
+    },
+    "causal_vs_equal_budget_sac": {
+      "ci95_high": 1628.1506964722175,
+      "ci95_low": 391.7441459007165,
+      "event_wins": 23,
+      "gate_pass": false,
+      "left": "canonical_v5_map_compensation",
+      "paired_mean": 1009.947421186467,
+      "paired_seed_differences": {
+        "88003": 1145.3834224070115,
+        "88021": -45.05121958243308,
+        "88039": -228.03208820174177,
+        "88057": 2056.747721823056,
+        "88079": 1618.4807864258687,
+        "88103": 666.1656682888665,
+        "88121": 1181.3202143018445,
+        "88139": 1867.1755802517139,
+        "88157": 1838.4972807207457,
+        "88179": -1.2131545702618496
+      },
+      "right": "robust_sac_8p4m",
+      "seed_wins": 7
+    },
+    "causal_vs_no_compensation": {
+      "ci95_high": 3412.8424080235527,
+      "ci95_low": 2500.676334540718,
+      "event_wins": 30,
+      "gate_pass": true,
+      "left": "canonical_v5_map_compensation",
+      "paired_mean": 2956.7593712821354,
+      "paired_seed_differences": {
+        "88003": 3940.04307063371,
+        "88021": 2074.3037977208696,
+        "88039": 3021.8651557495195,
+        "88057": 3086.5508431985972,
+        "88079": 3663.9895899797484,
+        "88103": 2795.787506822745,
+        "88121": 2910.8877493908008,
+        "88139": 3271.887006068975,
+        "88157": 2969.8063072746004,
+        "88179": 1832.4726859817902
+      },
+      "right": "canonical_no_compensation",
+      "seed_wins": 10
+    },
+    "causal_vs_robust_source": {
+      "ci95_high": 2117.6084221956726,
+      "ci95_low": 1174.880495226088,
+      "event_wins": 30,
+      "gate_pass": true,
+      "left": "canonical_v5_map_compensation",
+      "paired_mean": 1646.2444587108803,
+      "paired_seed_differences": {
+        "88003": 2395.6076918239396,
+        "88021": 855.9277781073627,
+        "88039": 1767.3673479964332,
+        "88057": 1707.6878571684163,
+        "88079": 2483.514078267167,
+        "88103": 1812.814238173763,
+        "88121": 951.1658056820436,
+        "88139": 2223.3913918876406,
+        "88157": 1693.780350647122,
+        "88179": 571.1880473549168
+      },
+      "right": "robust_sac_5p6m",
+      "seed_wins": 10
+    }
+  },
+  "diagnosis": "canonical_controller_lacks_equal_budget_oracle_headroom",
+  "equal_budget_oracle_headroom": {
+    "88003": {
+      "equal_budget_sac_return": 3247.0651180808745,
+      "oracle_return": 4537.583670780063,
+      "pass": true,
+      "relative_headroom": 0.39744153744040966
+    },
+    "88021": {
+      "equal_budget_sac_return": 2389.6547502566127,
+      "oracle_return": 2444.287918585042,
+      "pass": false,
+      "relative_headroom": 0.022862368851635374
+    },
+    "88039": {
+      "equal_budget_sac_return": 3504.316103129586,
+      "oracle_return": 3422.433806445201,
+      "pass": false,
+      "relative_headroom": -0.023366127448165616
+    },
+    "88057": {
+      "equal_budget_sac_return": 1512.1758127649625,
+      "oracle_return": 3772.27831252416,
+      "pass": true,
+      "relative_headroom": 1.4946029956838658
+    },
+    "88079": {
+      "equal_budget_sac_return": 2569.616700102389,
+      "oracle_return": 4329.827909926574,
+      "pass": true,
+      "relative_headroom": 0.6850092505057455
+    },
+    "88103": {
+      "equal_budget_sac_return": 2482.607135428985,
+      "oracle_return": 3286.9310611585774,
+      "pass": true,
+      "relative_headroom": 0.32398357124298205
+    },
+    "88121": {
+      "equal_budget_sac_return": 1651.0617772385478,
+      "oracle_return": 2861.4674355392654,
+      "pass": true,
+      "relative_headroom": 0.7331074312223245
+    },
+    "88139": {
+      "equal_budget_sac_return": 1927.6577249869704,
+      "oracle_return": 3967.264575582743,
+      "pass": true,
+      "relative_headroom": 1.0580752091814218
+    },
+    "88157": {
+      "equal_budget_sac_return": 1515.5126496703676,
+      "oracle_return": 3441.1161511262258,
+      "pass": true,
+      "relative_headroom": 1.2705954660785495
+    },
+    "88179": {
+      "equal_budget_sac_return": 2071.4981390416624,
+      "oracle_return": 2157.2962701996166,
+      "pass": false,
+      "relative_headroom": 0.041418396445022654
+    }
+  },
+  "fresh_policy_confirmation_pass": false,
+  "oracle_equivalence_max_abs_return_error": 0.0,
+  "oracle_equivalence_pass": true,
+  "oracle_headroom_seed_passes": 7,
+  "oracle_recovery": {
+    "88003": {
+      "causal_recovery": 0.9644727541483301,
+      "oracle_headroom": 4085.178200925887,
+      "pass": true
+    },
+    "88021": {
+      "causal_recovery": 0.9541467664959296,
+      "oracle_headroom": 2173.988185631732,
+      "pass": true
+    },
+    "88039": {
+      "causal_recovery": 0.9538670764027033,
+      "oracle_headroom": 3168.0149472668763,
+      "pass": true
+    },
+    "88057": {
+      "causal_recovery": 0.9381882639338447,
+      "oracle_headroom": 3289.9056211347383,
+      "pass": true
+    },
+    "88079": {
+      "causal_recovery": 0.962758578429286,
+      "oracle_headroom": 3805.7200133780643,
+      "pass": true
+    },
+    "88103": {
+      "causal_recovery": 0.9529104255697076,
+      "oracle_headroom": 2933.9457642634707,
+      "pass": true
+    },
+    "88121": {
+      "causal_recovery": 0.9901069016328892,
+      "oracle_headroom": 2939.9731933896737,
+      "pass": true
+    },
+    "88139": {
+      "causal_recovery": 0.9499374748481051,
+      "oracle_headroom": 3444.318276413034,
+      "pass": true
+    },
+    "88157": {
+      "causal_recovery": 0.9715051641363696,
+      "oracle_headroom": 3056.912528009713,
+      "pass": true
+    },
+    "88179": {
+      "causal_recovery": 0.9546694387603036,
+      "oracle_headroom": 1919.4839717100062,
+      "pass": true
+    }
+  },
+  "oracle_recovery_seed_passes": 10,
+  "pilot_accounting": {
+    "planned_two_sided_power": {
+      "causal_vs_equal_budget_resac": 0.929,
+      "causal_vs_equal_budget_sac": 0.919
+    },
+    "v31_results_pooled": false,
+    "v31_used_for_sample_size_only": true,
+    "v32_new_policy_seeds": 10
+  },
+  "prospective_power_confirmation_pass": false,
+  "protocol_version": "v32-canonical-action-compensation-power-confirmation",
+  "reference_mode": 0,
+  "registration": {
+    "sha256": "95c1c434989cb31e018e8df703f6664ba645c980270360311d1f28c415a8bd3d",
+    "size": 9754
+  },
+  "schema": "bapr.canonical-compensation-power-analysis.v32",
+  "stationary_oracle_retention": {
+    "88003": {
+      "causal_return": 4522.065303935856,
+      "oracle_return": 4523.354416450859,
+      "pass": true,
+      "ratio": 0.9997150096153609
+    },
+    "88021": {
+      "causal_return": 2445.2133493142824,
+      "oracle_return": 2459.694600785772,
+      "pass": true,
+      "ratio": 0.9941125815103781
+    },
+    "88039": {
+      "causal_return": 3407.5727100969602,
+      "oracle_return": 3433.147258810203,
+      "pass": true,
+      "ratio": 0.9925506985907427
+    },
+    "88057": {
+      "causal_return": 3751.5969150841233,
+      "oracle_return": 3773.2606851165488,
+      "pass": true,
+      "ratio": 0.9942586076499095
+    },
+    "88079": {
+      "causal_return": 4293.341076119493,
+      "oracle_return": 4320.9294028619925,
+      "pass": true,
+      "ratio": 0.9936151868798814
+    },
+    "88103": {
+      "causal_return": 3298.8885566699005,
+      "oracle_return": 3317.2920655280345,
+      "pass": true,
+      "ratio": 0.9944522494569061
+    },
+    "88121": {
+      "causal_return": 2851.8008451044566,
+      "oracle_return": 2911.2363530635835,
+      "pass": true,
+      "ratio": 0.9795841007905177
+    },
+    "88139": {
+      "causal_return": 3876.552873398736,
+      "oracle_return": 3988.360111224652,
+      "pass": true,
+      "ratio": 0.9719666141702574
+    },
+    "88157": {
+      "causal_return": 3443.5124394762024,
+      "oracle_return": 3452.1340886294843,
+      "pass": true,
+      "ratio": 0.9975025161445265
+    },
+    "88179": {
+      "causal_return": 2144.289321869612,
+      "oracle_return": 2146.0442011942464,
+      "pass": true,
+      "ratio": 0.9991822725162615
+    }
+  },
+  "stationary_retention_seed_passes": 10,
+  "stationary_return_means": {
+    "canonical_no_compensation": 560.3154570023219,
+    "canonical_true_mode_compensation": 3432.5453183665377,
+    "canonical_v5_map_compensation": 3403.4833391069624,
+    "escp_recurrent_8p4m": 2116.999669162451,
+    "resac_b0_8p4m": 2435.9410900495805,
+    "robust_sac_5p6m": 1775.0479983046184,
+    "robust_sac_8p4m": 2382.609967322267
+  },
+  "status": "complete",
+  "switching_return_means": {
+    "canonical_no_compensation": 340.3046409744273,
+    "canonical_true_mode_compensation": 3422.0487111867465,
+    "canonical_v5_map_compensation": 3297.064012256563,
+    "escp_recurrent_8p4m": 2045.9517574040347,
+    "resac_b0_8p4m": 2360.1627346295127,
+    "robust_sac_5p6m": 1650.8195535456823,
+    "robust_sac_8p4m": 2287.1165910700956
+  },
+  "training_seeds": [
+    88003,
+    88021,
+    88039,
+    88057,
+    88079,
+    88103,
+    88121,
+    88139,
+    88157,
+    88179
+  ]
+}

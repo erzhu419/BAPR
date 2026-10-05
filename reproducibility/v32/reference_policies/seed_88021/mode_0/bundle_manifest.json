@@ -1,0 +1,50 @@
+{
+  "checkpoint": {
+    "algo": "sac",
+    "iteration": 2099,
+    "next_iteration": 2100,
+    "total_steps": 8400000,
+    "update_count": 525000
+  },
+  "contents": "selected policy parameters and provenance only; no critic, optimizer, or replay",
+  "files": {
+    "logs/protocol_signature.json": {
+      "sha256": "bdeed1d6b97a8affb6da167122d1138061a981e267c8983390ee2273e56ae021",
+      "size": 16507
+    },
+    "policy/policy_params.pkl": {
+      "sha256": "4d80b9176b0b1c13da51ac6638281f7718e4cb3876556fa2e753ed72f2bf667d",
+      "size": 294953
+    },
+    "provenance/policy_selection.json": {
+      "sha256": "34b84fa966a42aa76f315230ec7aab8a88c3e38c1f11266ba627df439a863d8d",
+      "size": 202
+    },
+    "provenance/warmstart_bootstrap.json": {
+      "sha256": "9fb481503c85576e3a9db02a1edb86ea4ef24ca3a7d667481d6834246ccac88a",
+      "size": 1612
+    }
+  },
+  "identity": {
+    "actor_update_period": 1,
+    "algo": "sac",
+    "benchmark_role": "power_confirmation_fixed_canonical_reference",
+    "env": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "final_next_iteration": 2100,
+    "final_total_steps": 8400000,
+    "final_update_count": 525000,
+    "fixed_mode": 0,
+    "protocol_version": "v32-canonical-action-compensation-power-confirmation",
+    "select_best_validation": false,
+    "source_next_iteration": 1400,
+    "training_seed": 88021,
+    "variant": "canonical_mode0_final"
+  },
+  "schema": "bapr.canonical-compensation-reference-bundle.v32",
+  "source_bundle_manifest": {
+    "sha256": "5af603b5f47dc584ba547a93f0d8169048f660e0609592aff4ad966463877f9c",
+    "size": 1169
+  },
+  "status": "complete"
+}

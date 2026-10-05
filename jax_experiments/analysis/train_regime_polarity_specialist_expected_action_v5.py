@@ -482,8 +482,9 @@ def main():
         "switching_arms": list(protocol.SWITCHING_ARMS),
         "training_data_policy": (
             "true mode is used only offline to construct the supervised "
-            "executed-action target; deployed inference consumes observation, "
-            "commanded action, and next observation only"
+            "nominal pre-noise signal target clip(G_z * commanded_action); "
+            "deployed inference consumes observation, commanded action, and "
+            "next observation only"
         ),
         "initialization": _parent_model_records(),
         "training_config": {

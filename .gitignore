@@ -22,6 +22,8 @@ transit_hrl/results/
 **/checkpoints/
 *.pkl
 *.npz
+!reproducibility/v32/estimator/inverse_params.npz
+!reproducibility/v32/reference_policies/**/policy/policy_params.pkl
 *.npy
 *.csv
 *.xlsx
@@ -38,6 +40,7 @@ paper/*.pdf
 !paper/fig_v32_method.pdf
 !paper/fig_v32_results.pdf
 !paper/fig_v32_diagnostics.pdf
+!paper/fig_reacher_confirmation.pdf
 paper/*.png
 paper/*.aux
 paper/*.log
@@ -45,3 +48,5 @@ paper/*.blg
 # paper.bbl IS the bibliography source (no .bib file); commit it
 paper/*.out
 paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls
