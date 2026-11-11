@@ -161,6 +161,7 @@ An exogenous random schedule can be handled by conditioning on its realization a
 
 The accompanying Lean development formalizes the compensation identities and conditional return arguments.
 It is supplied as a standalone package with fourteen environment-independent modules and pinned Lean/Mathlib dependencies.
+Its compensation identities concern diagonal polarity transforms; the signed-permutation extension uses the matrix argument following Proposition~\ref{prop:equivalence}.
 The recursive Bellman formalization uses sufficient integrability premises over all states and counterfactual signals at finite horizons, stronger than the visited-law conditions used above.
 The return bound retains its action-value sensitivity assumption.
 
@@ -326,6 +327,32 @@ These three comparisons corroborate the positive mean effects under matching rec
 The study matches policy-training budgets, not total estimator supervision or end-to-end data.
 It is reported separately and does not change the original ten-seed composite decision.
 
+\subsection{Original Torch trainer on the common benchmark}
+\label{app:source_trainer_comparison}
+
+A protocol frozen on 5 October 2026 compared the unmodified original Torch RE-SAC trainer and networks with the existing five canonical policies from Appendix~\ref{app:runtime_comparison}. The source used ten LayerNorm critics, $\beta=-2$, positive \texttt{weight\_reg}=0.01, \texttt{beta\_ood}=0.01, \texttt{beta\_bc}=0.001, gradient clipping at 1 and automatic entropy tuning. The paired no-shift arm changed only \texttt{weight\_reg} to zero; it retained the ensemble and OOD term and is distinct from both SAC and the historical \resacbaseline{} arm.
+
+Both source arms received 8.4M interactions including 10,000 warmup transitions, 525,000 critic calls and 262,500 actor opportunities. The original actor period of two was retained, rather than matching BAPR's 525,000 actor updates. Actual critic optimizer steps ranged from 524,774 to 524,790 because of mixed-precision skips; all 262,500 actor updates ran. Torch was pinned to 2.4.1+cu121, with the same JAX/Brax/Flax/MuJoCo versions as the runtime-matched study. The collector sampled common Brax physics on CPU and trained the source networks on CUDA. Rewards were unscaled, and BAPR's separate historical estimator cost remained additional.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Original source-trainer comparison on the common HalfCheetah actuator-polarity benchmark. The five policy seeds are reused from the runtime-matched cohort, with new event streams. Differences are BAPR minus each source arm; both paired comparisons win on all five seeds.}
+\label{tab:source_trainer_comparison}
+\begin{tabular}{lrrr}
+\toprule
+Route & Switching & Difference & 95\% CI \\
+\midrule
+\textbf{BAPR} & \textbf{3632.6} & --- & --- \\
+True-mode compensation & 3828.0 & --- & --- \\
+Source RE-SAC, positive shift & -195.5 & 3828.1 & $[2969.4,4686.8]$ \\
+Source RE-SAC, no shift & 2010.1 & 1622.5 & $[615.9,2629.2]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The full source arm degraded on all five seeds despite reaching the complete interaction budget and applying more than 99.95\% of its critic calls. The final seed109003 log showed Q prediction mean 9735.2 and head standard deviation 134.1, versus 141.0 and 0.9 for its no-shift pair. Thus the poor return is not specific to the earlier JAX port or explained by extensive skipped updates; this log alone does not identify a causal failure mechanism. The original trainer and networks were retained, but the block collector, Brax physics and persistent-coordinate protocol differ from the original Gym-paper experiment. This comparison addresses the source algorithm on the common benchmark, not reproduction of the original paper's performance.
+
 \section{Independent information-matched Reacher protocol}
 \label{app:reacher_protocol}
 
@@ -355,6 +382,54 @@ The full audit retained true-mode/native-reference, uncompensated, all four fixe
 Earlier cohorts remain separate: three-seed mechanism development, an independent five-seed compensation-versus-memoryless comparison, and a three-seed same-information development comparison. The latter informed the frozen design but was not pooled with the final five seeds. The earlier five-seed cohort found that filtering improved mode accuracy while reducing return; the final matched cohort did not establish a filtering or ensemble advantage either (Section~\ref{sec:reacher_confirmation}).
 
 For comparison, a separate five-seed HalfCheetah same-information diagnostic obtained a compensation-minus-conditioned-SAC mean difference of $+591.3$, with 95\% CI $[-541.7,1724.4]$ and three of five wins. Its recorded execution profiles do not supply a homogeneous historical runtime snapshot. This inconclusive diagnostic does not extend the positive Reacher matched-comparison claim to HalfCheetah or replace the original ten-seed three-comparator result.
+
+\section{Estimator robustness and coordinate extension}
+\label{app:coordinate_extension}
+
+\subsection{Crossed Reacher estimator initializations}
+
+The follow-up crossed the existing policy seeds $\{99007,99027,99047,99067,99087\}$ with inverse-ensemble seeds $\{95103,95121,95139\}$. These models used independent initializations, the same provider 94003, 178,000 prescribed training transitions, 82,000 validation transitions and 4,500 updates each. The primary-model conditioned policies already existed; ten additional conditioned-SAC controllers were trained from scratch for the other two estimators, with 1.6M interactions and 100,000 updates each. Each matched comparator used its own estimator throughout causal training and evaluation. Model indices 1--3 in Table~\ref{tab:coordinate_extension} denote the listed estimator seeds in order.
+
+Switching-event seeds were $\{211601,211617,211633\}$, with five episodes per stream; stationary-event base 211701 supplied five episodes per fixed mode. Statistical inference used the five paired policy-seed means separately for each model, with four degrees of freedom. The model-by-policy cells and episodes were not treated as independent observations. The frozen filter, noise, training budget and 200-step horizon were unchanged. The oracle/native reference averaged $-4.824$ and robust SAC $-26.274$. These are robustness results on the original policy cohort under new event streams, not another independent five-policy confirmation.
+
+\subsection{Independent signed-permutation study}
+
+The four transforms were fixed before training:
+\begin{equation}
+ G_0=I,\qquad
+ G_1=\begin{pmatrix}0&1\\-1&0\end{pmatrix},\qquad
+ G_2=-I,\qquad
+ G_3=\begin{pmatrix}0&-1\\1&0\end{pmatrix}.
+\end{equation}
+Their inverse is the transpose, not always the matrix itself. Reference mode was 0. Robot physics, observation, reward, noise standard deviation 0.02, 50-step mode persistence and 200-step episodes remained unchanged. Simulator state was retained at switches. All compared controllers and audits used JAX 0.4.38, Brax 0.10.5, Flax 0.10.4 and MuJoCo 3.1.6.
+
+Policy seeds were 117003, 117023, 117043, 117063 and 117083; estimator seeds were 118003, 118023 and 118043. Independent provider seed 116003 received the same training budget as the compared controllers. Reference, robust and conditioned SAC were each trained independently for every policy seed at 1.6M interactions and 100,000 updates. Each estimator received 178,000 training/82,000 validation transitions and 4,500 updates. Identical prescribed calibration data were regenerated on each learner node; repeated collection counts toward compute, not independent information. Calibration-event seeds 210001 and 210101 were disjoint from evaluation. Estimator 118003 was preselected for the primary conditioned-SAC comparison; the other models were secondary causal audits, not additional matched conditioned arms.
+
+The new event streams and episode counts matched the initialization audit above. Every switching route retained 200 steps and three observed switches, and every stationary route retained 200 steps without switches; no episode terminated early. True-mode and native-reference returns were equal episode by episode. The fixed-context switching means for modes 0--3 were $-48.110$, $-46.194$, $-47.699$ and $-46.122$, all below oracle $-4.986$ on every policy seed. The primary BAPR-minus-robust difference was $19.393$ ($[17.653,21.132]$), with five of five wins. Both secondary models also beat robust control on all seeds, while all three causal models remained below oracle. The primary model's switching accuracy was 78.85\%; its median first-correct delay of 12 steps describes only the 223 detected switches, with two of 225 unresolved. The corresponding conditioned route detected 203 switches, with median delay 14 and 22 unresolved.
+
+\subsection{Retrospective HalfCheetah calibration sensitivity}
+\label{app:hc_calibration_sensitivity}
+
+Three existing independently initialized estimators, seeds $\{94103,94121,94139\}$, were evaluated without refitting on nine historical policies $\{88021,88039,88057,88079,88103,88121,88139,88157,88179\}$. Provider 88003 was excluded. The models used the same architecture and 4,500 updates on 178,000 training/82,000 validation transitions, but a different calibration recipe from the original two-stage estimator. Historical model-training dependency versions were not recorded; this audit's evaluation runtime was pinned. It is a calibration sensitivity study, not nine new confirmation seeds or replication of the original estimator recipe.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Historical HalfCheetah calibration sensitivity across nine frozen policies. Delays are medians among detected switches; unresolved counts retain the censored cases.}
+\label{tab:hc_calibration_sensitivity}
+\begin{tabular}{lrrrr}
+\toprule
+Estimator & Switching & Stationary & Delay & Unresolved \\
+\midrule
+94103 & 2702.8 & 3255.1 & 7 & 31/405 \\
+94121 & 2718.5 & 3256.6 & 6 & 32/405 \\
+94139 & 2773.3 & 3255.9 & 7 & 23/405 \\
+Oracle/native & 3298.1 & 3313.3 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All three models exceeded uncompensated return 369.2 on all nine policies and fell below oracle on all nine. Their paired oracle deficits had strictly negative marginal intervals. The near-oracle stationary values coexist with a larger switching loss, identifying the transient as a remaining control-performance gap without isolating which calibration component caused it. No models or cohorts were selected, pooled or substituted for the original result.
 
 \section{Cross-environment evidence boundary}
 \label{app:cross_environment}

@@ -18,6 +18,7 @@ def test_released_statistics_and_budgets(capsys):
     assert "frozen composite outcome: False" in output
     assert "975 switching/700 stationary episodes" in output
     assert "30 training records agree" in output
+    assert "24 policy audits; four separate studies" in output
     assert check.hc.ANALYSIS_JSON == ROOT / "reproducibility/v32/analysis.json"
 
 
@@ -99,3 +100,24 @@ def test_runtime_comparison_checks_training_versions(monkeypatch):
     monkeypatch.setattr(check, "read", changed_read)
     with pytest.raises(ValueError, match="training identity/runtime/budget"):
         check.check_runtime_comparison()
+
+
+@pytest.mark.parametrize("change", ["episode", "interval", "model", "sign", "budget", "actor"])
+def test_extension_package_rejects_inconsistent_records(change):
+    summary = check.read(check.EXTENSION_PACKAGE)
+    if change == "episode":
+        summary["suites"]["permutation"]["audits"][0]["routes"]["causal_118003"]["switching_returns"][0] += 1
+    elif change == "interval":
+        contrast = summary["suites"]["estimator"]["comparisons"]["causal_95121-minus-conditioned_95121"]
+        contrast["ci95"][0] += 1
+    elif change == "model":
+        summary["suites"]["permutation"]["estimator_seeds"].pop()
+    elif change == "sign":
+        metadata = summary["suites"]["source"]["audits"][0]["source_metadata"]["full"]
+        metadata["config"]["trainer_kwargs"]["weight_reg"] = -.01
+    elif change == "budget":
+        summary["suites"]["source"]["audits"][0]["source_metadata"]["full"]["budget"]["total_steps"] -= 4000
+    else:
+        summary["suites"]["source"]["audits"][0]["source_metadata"]["full"]["optimizer_counts"]["actor"] -= 1
+    with pytest.raises(ValueError):
+        check.validate_extension_package(summary)

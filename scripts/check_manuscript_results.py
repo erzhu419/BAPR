@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "paper"))
 import plot_v32_figures as hc
 import plot_reacher_confirmation as reacher
+import summarize_submission_extensions_v47 as extensions
 
 RUNTIME_PACKAGE = ROOT / "reproducibility/halfcheetah_runtime_comparison"
 RUNTIME_PROTOCOL = "v39-matched-runtime-regularized-comparison"
@@ -21,6 +22,7 @@ RUNTIME_VERSIONS = {"jax": "0.4.38", "brax": "0.10.5", "flax": "0.10.4", "mujoco
 TRAIN_ARMS = ("source", "reference", "sac", "escp", "resac_zero", "resac_full")
 EVAL_ARMS = ("source", "sac", "escp", "resac_zero", "resac_full", "no_compensation", "oracle", "bapr")
 SWITCH_SCHEDULES = {"197201": [2, 0, 3, 1], "197217": [1, 3, 0, 2], "197233": [3, 2, 1, 0]}
+EXTENSION_PACKAGE = ROOT / "reproducibility/submission_extensions_v47/summary.json"
 
 
 def read(path):
@@ -174,10 +176,76 @@ def check_runtime_comparison():
               f"[{row['ci95'][0]:.3f},{row['ci95'][1]:.3f}], wins={row['seed_wins']}/5")
 
 
+def validate_extension_package(summary):
+    protocol = extensions.p
+    if (summary["protocol"] != protocol.PROTOCOL or summary["runtime_versions"] != protocol.RUNTIME
+            or summary["historical_cohorts_pooled"] is not False
+            or summary["event_seeds"] != list(protocol.EVENT_SEEDS)
+            or summary["stationary_event_seed"] != protocol.STATIONARY_EVENT_SEED
+            or set(summary["suites"]) != set(extensions.SUITES)):
+        raise ValueError("extension protocol or cohort definition differs")
+    models = {"estimator": list(protocol.REACHER_MODELS), "hc-estimator": list(protocol.HC_MODELS),
+              "permutation": list(protocol.PERMUTATION_MODELS), "source": None}
+    for suite, (seeds, horizon) in extensions.SUITES.items():
+        study = summary["suites"][suite]
+        if (study["policy_seeds"] != list(seeds) or study["estimator_seeds"] != models[suite]
+                or [row["seed"] for row in study["audits"]] != list(seeds)):
+            raise ValueError("extension policy/model roster differs")
+        values = {arm: [] for arm in study["means"]}
+        for audit in study["audits"]:
+            for arm, route in audit["routes"].items():
+                switching = np.asarray(route["switching_returns"])
+                stationary = np.asarray(route["stationary_returns"])
+                if (switching.shape != (15,) or stationary.shape != (20,)
+                        or not np.isfinite(switching).all() or not np.isfinite(stationary).all()
+                        or route["switching_horizon"] != horizon or route["switches_per_episode"] != 3
+                        or route["termination_count"] != 0
+                        or not np.allclose([switching.mean(), stationary.mean()],
+                            [route["switching_mean"], route["stationary_mean"]], atol=1e-8, rtol=0)):
+                    raise ValueError("extension episode coverage or mean differs")
+                values[arm].append(float(switching.mean()))
+            if "native_reference" in audit["routes"] and audit["routes"]["oracle"]["switching_returns"] != audit["routes"]["native_reference"]["switching_returns"]:
+                raise ValueError("extension oracle/native equivalence differs")
+            if suite == "source":
+                extensions.validate_source(audit["source_metadata"])
+                if audit["reference_budget"] != dict(next_iteration=2100, total_steps=8400000, update_count=525000):
+                    raise ValueError("extension reference budget differs")
+                for metadata in audit["source_metadata"].values():
+                    if metadata["optimizer_counts"]["actor"] != 262500:
+                        raise ValueError("extension source actor updates incomplete")
+            elif suite != "hc-estimator":
+                expected = dict(next_iteration=400, total_steps=1600000, update_count=100000)
+                if any(budget != expected for budget in audit["controller_budgets"].values()):
+                    raise ValueError("extension controller budget differs")
+        for arm, returns in values.items():
+            if not np.isclose(np.mean(returns), study["means"][arm], atol=1e-8, rtol=0):
+                raise ValueError("extension aggregate mean differs")
+        for name, saved in study["comparisons"].items():
+            left, right = name.split("-minus-")
+            computed = extensions.paired(values[left], values[right])
+            if (saved["n_policy_seeds"] != len(seeds) or saved["wins"] != computed["wins"]
+                    or not np.allclose([saved["mean"], *saved["ci95"]],
+                                       [computed["mean"], *computed["ci95"]], atol=1e-8, rtol=0)):
+                raise ValueError("extension paired interval or wins differ")
+
+
+def check_submission_extensions():
+    summary = read(EXTENSION_PACKAGE)
+    validate_extension_package(summary)
+    print("Publication extensions: 24 policy audits; four separate studies; no pooled cohorts")
+    for suite, study in summary["suites"].items():
+        for name, row in study["comparisons"].items():
+            if "conditioned" in name or "source_" in name:
+                print(f"  {suite}/{name}: {row['mean']:.3f} "
+                      f"[{row['ci95'][0]:.3f},{row['ci95'][1]:.3f}], "
+                      f"wins={row['wins']}/{row['n_policy_seeds']}")
+
+
 def main():
     check_halfcheetah()
     check_reacher()
     check_runtime_comparison()
+    check_submission_extensions()
     print("Released statistics and budget records agree; this is not a new performance decision.")
 
 

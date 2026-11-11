@@ -5651,3 +5651,37 @@ No old scientific result, acceptance decision or manuscript claim is replaced.
 GPU2 became unreachable during runtime setup; the source comparison now waits
 only for the available jtl110gpu runtime. Source smokes/trainers were replaced
 before any source training began, without changing any scientific controls.
+
+## Publication extensions completed (V47, 2026-10-05)
+
+All 72 logical jobs, including four aggregates, completed and synchronized. The compact
+package `reproducibility/submission_extensions_v47/summary.json` reproduces
+all paired intervals from 24 audits without checkpoints or calibration arrays.
+Details are in `reports/submission_extensions_v47_results_2026-10-05.md`.
+
+Three Reacher estimator initializations each beat their own matched conditioned
+SAC by +7.611, +6.745 and +8.167, respectively, with positive paired intervals
+and 5/5 policy-seed wins each. This crosses the existing policy cohort with
+model seeds, rather than supplying fifteen independent replicates. Independent
+non-diagonal signed permutations also succeeded: primary BAPR -6.436 versus
+matched conditioned SAC -11.109 and robust -25.828; primary gain +4.674
+[2.920,6.427], wins5/5, using fresh policy/model seeds.
+
+On common-Brax HalfCheetah, BAPR 3632.630 beat original Torch source full
+-195.463 and source no-shift 2010.103 in all five seeds. Full training budgets
+completed, with >99.95% critic optimizer calls applied and the positive sign
+preserved. This is a faithful source-trainer comparison on the shared world,
+not an original Gym-paper replication; actor budgets and estimator costs differ.
+The separate historical HC calibration recipe reached 2703-2773 versus oracle
+3298, retaining an inference gap. It does not replicate the original two-stage
+estimator recipe across model seeds. No old cohort is pooled or replaced; the
+original ten-seed composite gate remains FAIL. No additional tasks submitted.
+
+The manuscript now integrates these results: the main Reacher table separates
+crossed-model robustness from the fresh signed-permutation confirmation;
+appendices retain the source-trainer comparison and HC calibration deficit.
+The signed-permutation matrix argument is distinguished from the released
+polarity-specific Lean identities. The compact-result checker covers all four
+new studies; 21 focused tests passed. The 26-page PDF compiles without LaTeX
+warnings, and the three new tables were visually checked. No algorithm or
+registered acceptance threshold changed, and no new jobs were submitted.
