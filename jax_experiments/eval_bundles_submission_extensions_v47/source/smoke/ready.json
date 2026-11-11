@@ -1,0 +1,81 @@
+{
+  "passed": true,
+  "protocol": "submission-extensions-v47",
+  "runtime_versions": {
+    "jax": "0.4.38",
+    "brax": "0.10.5",
+    "flax": "0.10.4",
+    "mujoco": "3.1.6"
+  },
+  "torch": "2.4.1+cu121",
+  "arms": {
+    "full": {
+      "export_max_error": 1.3969838619232178e-09,
+      "distribution_max_error": 1.1641532182693481e-09,
+      "exact_next_update_resume": true,
+      "metrics": {
+        "QF Loss": 2023.4593505859375,
+        "OOD Loss": 0.9986763000488281,
+        "Policy Loss": -51.37736511230469,
+        "Q Std Mean": 1.030393362045288,
+        "Reg Norm Mean": 44.31560134887695,
+        "Q Predictions Mean": 3.493009090423584,
+        "Q Predictions Std": 0.20259679853916168,
+        "Q Predictions Max": 3.9661471843719482,
+        "Q Predictions Min": 3.07024884223938,
+        "Q Targets Mean": 48.46021270751953,
+        "Q Targets Std": 0.7574995160102844,
+        "Q Targets Max": 51.623939514160156,
+        "Q Targets Min": 46.32399368286133,
+        "Log Pis Mean": -4.023796081542969,
+        "Log Pis Std": 0.4336753189563751,
+        "Log Pis Max": -2.8016464710235596,
+        "Log Pis Min": -5.29179573059082,
+        "Policy mu Mean": -8.163368329405785e-05,
+        "Policy mu Std": 0.021610446274280548,
+        "Policy mu Max": 0.05859375,
+        "Policy mu Min": -0.05859375,
+        "Policy log std Mean": -0.04634280875325203,
+        "Policy log std Std": 0.010457869619131088,
+        "Policy log std Max": -0.023406982421875,
+        "Policy log std Min": -0.08404541015625,
+        "Alpha": 0.9979023933410645,
+        "Alpha Loss": 10.005769729614258
+      }
+    },
+    "no_shift": {
+      "export_max_error": 1.3969838619232178e-09,
+      "distribution_max_error": 1.1641532182693481e-09,
+      "exact_next_update_resume": true,
+      "metrics": {
+        "QF Loss": 2.4614243507385254,
+        "OOD Loss": 0.8822065591812134,
+        "Policy Loss": -7.858401775360107,
+        "Q Std Mean": 0.9008339047431946,
+        "Reg Norm Mean": 0.0,
+        "Q Predictions Mean": 5.917228698730469,
+        "Q Predictions Std": 0.23408246040344238,
+        "Q Predictions Max": 6.3977203369140625,
+        "Q Predictions Min": 5.456119060516357,
+        "Q Targets Mean": 4.6657514572143555,
+        "Q Targets Std": 0.7583375573158264,
+        "Q Targets Max": 7.82997989654541,
+        "Q Targets Min": 2.5277602672576904,
+        "Log Pis Mean": -4.023873805999756,
+        "Log Pis Std": 0.43348315358161926,
+        "Log Pis Max": -2.801321268081665,
+        "Log Pis Min": -5.289806365966797,
+        "Policy mu Mean": -0.0008131132344715297,
+        "Policy mu Std": 0.021830162033438683,
+        "Policy mu Max": 0.057464599609375,
+        "Policy mu Min": -0.059661865234375,
+        "Policy log std Mean": -0.046364109963178635,
+        "Policy log std Std": 0.010464208200573921,
+        "Policy log std Max": -0.023406982421875,
+        "Policy log std Min": -0.0841064453125,
+        "Alpha": 0.9979023933410645,
+        "Alpha Loss": 10.005847930908203
+      }
+    }
+  }
+}

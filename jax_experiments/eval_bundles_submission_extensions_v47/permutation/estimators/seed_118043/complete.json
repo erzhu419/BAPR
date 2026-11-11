@@ -1,0 +1,44 @@
+{
+  "provider_seed": 116003,
+  "excluded_policy_seeds": [
+    117003,
+    117023,
+    117043,
+    117063,
+    117083
+  ],
+  "train_rows": 178000,
+  "validation_rows": 82000,
+  "obs_dim": 11,
+  "act_dim": 2,
+  "horizon": 200,
+  "dwell": 50,
+  "noise_std": 0.02,
+  "runtime_versions": {
+    "jax": "0.4.38",
+    "brax": "0.10.5",
+    "flax": "0.10.4",
+    "mujoco": "3.1.6"
+  },
+  "calibration_interactions": 260000,
+  "elapsed_seconds": 57.23331248294562,
+  "model_seed": 118043,
+  "updates": 4500,
+  "batch_size": 256,
+  "inverse_heads": 5,
+  "parameters": 704010,
+  "validation_mse": [
+    0.015653371810913086,
+    0.04079623147845268
+  ],
+  "residual_variance": [
+    0.015653371810913086,
+    0.04079623147845268
+  ],
+  "filter_controls": [
+    0.002,
+    1.0,
+    0.98
+  ],
+  "elapsed_this_attempt_seconds": 9.433992364443839
+}

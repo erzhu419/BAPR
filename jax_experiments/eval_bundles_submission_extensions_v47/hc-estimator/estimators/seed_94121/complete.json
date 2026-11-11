@@ -1,0 +1,34 @@
+{
+  "seed": 94121,
+  "train_rows": 178000,
+  "validation_rows": 82000,
+  "updates_per_model": 4500,
+  "batch_size": 256,
+  "same_minibatch_indices": true,
+  "inverse_heads": 5,
+  "classifier_heads": 1,
+  "residual_variance": [
+    0.1762956827878952,
+    0.12881819903850555,
+    0.14795280992984772,
+    0.16694247722625732,
+    0.17614556849002838,
+    0.12484495341777802
+  ],
+  "filter_config": {
+    "hazard_rate": 0.002,
+    "evidence_scale": 1.0,
+    "posterior_decay": 0.98
+  },
+  "parameters": {
+    "inverse": 732190,
+    "classifier": 77316
+  },
+  "elapsed_this_attempt_seconds": 15.511854312382638,
+  "data_collection_seconds": 454.39905137289315,
+  "model_seed": 94121,
+  "obs_dim": 17,
+  "act_dim": 6,
+  "exported_without_training": true,
+  "original_training_runtime_recorded": false
+}

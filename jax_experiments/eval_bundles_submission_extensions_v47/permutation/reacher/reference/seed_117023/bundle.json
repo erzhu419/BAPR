@@ -1,0 +1,27 @@
+{
+  "kind": "reacher",
+  "arm": "reference",
+  "seed": 117023,
+  "protocol": "submission-extensions-v47/permutation/model-None",
+  "obs_dim": 11,
+  "act_dim": 2,
+  "policy_input_dim": 11,
+  "next_iteration": 400,
+  "total_steps": 1600000,
+  "update_count": 100000,
+  "policy_parameters": 69892,
+  "elapsed_this_attempt_seconds": 377.21754583204165,
+  "estimator_training_additional": false,
+  "belief_controls": null,
+  "temporal_filter": null,
+  "rollout_update_seconds_all_retained_iterations": 335.54172292305157,
+  "selection": "final",
+  "actor_update_period": 1,
+  "sampling_device": "cpu",
+  "runtime_versions": {
+    "jax": "0.4.38",
+    "brax": "0.10.5",
+    "flax": "0.10.4",
+    "mujoco": "3.1.6"
+  }
+}

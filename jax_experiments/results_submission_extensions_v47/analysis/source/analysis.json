@@ -1,0 +1,98 @@
+{
+  "protocol": "submission-extensions-v47",
+  "policy_seeds": [
+    109003,
+    109023,
+    109043,
+    109063,
+    109083
+  ],
+  "means": {
+    "causal": 3632.630143229167,
+    "oracle": 3827.995087890625,
+    "source_full": -195.46348495483397,
+    "source_no_shift": 2010.103026936849
+  },
+  "seed_means": {
+    "causal": [
+      3530.591243489583,
+      2652.6216959635417,
+      3398.309423828125,
+      4397.128190104167,
+      4184.500162760417
+    ],
+    "oracle": [
+      3615.905208333333,
+      2898.2177897135416,
+      3539.501432291667,
+      4663.323209635417,
+      4423.027799479167
+    ],
+    "source_full": [
+      -151.80895665486653,
+      -187.10633239746093,
+      -253.46846822102864,
+      -199.10072326660156,
+      -185.83294423421225
+    ],
+    "source_no_shift": [
+      1684.7056070963542,
+      2244.438614908854,
+      2164.6292805989583,
+      2058.443391927083,
+      1898.2982401529948
+    ]
+  },
+  "comparisons": {
+    "causal-minus-source_full": {
+      "n_policy_seeds": 5,
+      "mean": 3828.0936281840004,
+      "ci95": [
+        2969.3602429873968,
+        4686.8270133806045
+      ],
+      "wins": 5,
+      "differences": [
+        3682.4002001444496,
+        2839.7280283610025,
+        3651.7778920491537,
+        4596.228913370768,
+        4370.333106994629
+      ]
+    },
+    "causal-minus-source_no_shift": {
+      "n_policy_seeds": 5,
+      "mean": 1622.5271162923177,
+      "ci95": [
+        615.8851201685359,
+        2629.1691124161
+      ],
+      "wins": 5,
+      "differences": [
+        1845.8856363932289,
+        408.1830810546876,
+        1233.6801432291668,
+        2338.6847981770834,
+        2286.201922607422
+      ]
+    }
+  },
+  "scope": "Original Torch trainer/network on a common Brax benchmark, not original Gym-paper replication",
+  "budgets": {
+    "source": {
+      "next_iteration": 2100,
+      "total_steps": 8400000,
+      "critic_calls": 525000,
+      "actor_opportunities": 262500
+    },
+    "bapr": {
+      "next_iteration": 2100,
+      "total_steps": 8400000,
+      "update_count": 525000
+    }
+  },
+  "extra_estimator_cost_matched": false,
+  "source_actor_period": 2,
+  "bapr_actor_period": 1,
+  "historical_cohorts_pooled": false
+}
