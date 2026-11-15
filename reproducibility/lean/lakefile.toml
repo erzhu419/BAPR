@@ -1,0 +1,50 @@
+name = "baprMechanism"
+version = "0.1.0"
+defaultTargets = ["ActionCompensation", "ActionCompensationBelief", "ActionCompensationClosedLoop", "ActionCompensationFilter", "ActionCompensationEvidence", "ActionCompensationRecovery", "ActionCompensationReturn", "ActionCompensationWindows", "ActionCompensationCumulative", "ActionCompensationRetention", "ActionCompensationMeasure", "ActionCompensationKL", "ActionCompensationKLExtended", "GaussianSmoothing"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.28.0"
+
+[[lean_lib]]
+name = "ActionCompensation"
+
+[[lean_lib]]
+name = "ActionCompensationBelief"
+
+[[lean_lib]]
+name = "ActionCompensationClosedLoop"
+
+[[lean_lib]]
+name = "ActionCompensationFilter"
+
+[[lean_lib]]
+name = "ActionCompensationEvidence"
+
+[[lean_lib]]
+name = "ActionCompensationRecovery"
+
+[[lean_lib]]
+name = "ActionCompensationReturn"
+
+[[lean_lib]]
+name = "ActionCompensationWindows"
+
+[[lean_lib]]
+name = "ActionCompensationCumulative"
+
+[[lean_lib]]
+name = "ActionCompensationRetention"
+
+[[lean_lib]]
+name = "ActionCompensationMeasure"
+
+[[lean_lib]]
+name = "ActionCompensationKL"
+
+[[lean_lib]]
+name = "ActionCompensationKLExtended"
+
+[[lean_lib]]
+name = "GaussianSmoothing"

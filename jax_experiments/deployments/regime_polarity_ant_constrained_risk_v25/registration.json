@@ -1,0 +1,200 @@
+{
+  "created_before_training": true,
+  "evaluation": {
+    "immutable_robust_fallback": true,
+    "risk_critic_not_used_for_routing": true,
+    "transient_fallback_steps": 8,
+    "utility_fallback_calibrated_on_disjoint_events": true
+  },
+  "frozen_boundary": {
+    "all_four_specialists_retrained": true,
+    "new_disjoint_evaluation_streams": true,
+    "posterior_or_router_training": false,
+    "robust_sources_reused": true,
+    "same_v24_development_policy_seeds": true,
+    "v22_through_v24_artifacts_unchanged": true
+  },
+  "gate": {
+    "all_three_policy_seeds_pass": true,
+    "all_three_switching_events_win": true,
+    "minimum_per_mode_gain": 0.05,
+    "minimum_stationary_mode_wins_per_seed": 3,
+    "minimum_switching_gain": 0.1,
+    "selection": "highest mean transient-fallback switching return among passing variants; registered order breaks exact ties",
+    "zero_transient_fallback_termination": true
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      190001,
+      190017,
+      190033
+    ],
+    "environment": "Ant-v2",
+    "family": "actuator_polarity",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v25-ant-constrained-risk-development",
+    "stationary_holdout_event_seeds": [
+      190101,
+      190117,
+      190133
+    ],
+    "switching_event_seeds": [
+      190201,
+      190217,
+      190233
+    ],
+    "switching_schedules": {
+      "190201": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "190217": [
+        2,
+        1,
+        3,
+        0
+      ],
+      "190233": [
+        0,
+        2,
+        1,
+        3
+      ]
+    },
+    "training_seeds": [
+      85003,
+      85021,
+      85039
+    ],
+    "variants": [
+      "risk_q_absolute",
+      "risk_q_relative"
+    ]
+  },
+  "question": "whether a learned discounted termination-risk critic makes the V24 Ant switch-state specialists reliable, and whether risk relative to the immutable robust action preserves more utility than an absolute risk penalty",
+  "schema": "bapr.ant-constrained-risk-registration.v25",
+  "source_records": {
+    "jax_experiments/algos/sac_base.py": {
+      "sha256": "4bbdd0874454ca7a09b3b28fd798aa2f5f8256a4fd005b889364385bbd7b354e",
+      "size": 7835
+    },
+    "jax_experiments/algos/sac_switch_recovery.py": {
+      "sha256": "7af64da5ba97c9aee77b7c13f640c77ede686627b8259dac8305a09df04e13e0",
+      "size": 3186
+    },
+    "jax_experiments/algos/sac_switch_recovery_risk.py": {
+      "sha256": "25a61cb6191d82b67cff17e9e00fc362f890cf7823bb12727cb0e16d56c4c92b",
+      "size": 16890
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_ant_constrained_risk_v25.py": {
+      "sha256": "2791c8ab98b7b2da5aba2d60882711f2922005cfc93a3e09161ac4264532b76b",
+      "size": 5821
+    },
+    "jax_experiments/analysis/regime_polarity_ant_constrained_risk_v25.py": {
+      "sha256": "24a2a3bdd0ddeb32adbd0f6cf8d6869f666eaad5abbb6a6ed8b6b5bd63a7434c",
+      "size": 15902
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_constrained_risk_audit_v25.py": {
+      "sha256": "b5826735c317f9b886390376bd49166607f1ef2fb3ffa89a7463119cdf9b2576",
+      "size": 1302
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_constrained_risk_v25.py": {
+      "sha256": "eb36a351ddbd30849800fd7e71b88c56d995d0a66162d7149d3615e9a3bcc647",
+      "size": 8199
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_switch_recovery_audit_v24.py": {
+      "sha256": "5a45e3625cec923ee534cd9a1bfcf241c5b160e2377e1a623e71fab2ed41a768",
+      "size": 14779
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_switch_recovery_v24.py": {
+      "sha256": "8e428b3f9bcb24e02c5cd24ac76e7b20d050570b94053623b60c921e9b8c25a6",
+      "size": 18815
+    },
+    "jax_experiments/analysis/train_regime_polarity_ant_constrained_risk_v25.py": {
+      "sha256": "33d2f2915866724c44a285099dacf72b4a17acd224c8fe92f919203605c5a481",
+      "size": 5476
+    },
+    "jax_experiments/analysis/train_regime_polarity_ant_switch_recovery_v24.py": {
+      "sha256": "a56d93649c2156f71333af399c186dce2016f2a633f4b9fea2b43c5e8c5079e2",
+      "size": 5325
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/common/replay_buffer.py": {
+      "sha256": "b8f86ac4ed013797d681e5b070222004fd319fd63e06604cf33ffbe374cc97e2",
+      "size": 17329
+    },
+    "jax_experiments/deployments/regime_polarity_ant_switch_recovery_v24/registration.json": {
+      "sha256": "0988b638eb52afd6408ff0f23fa9ae6f6083cdd01336b131a9367cec08bb6596",
+      "size": 5876
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_robust_source_v22/seed_85003/bundle_manifest.json": {
+      "sha256": "825e5b085fe8e2127c5fb5783efd3d50c54fe4fd87eca5126baaa4e3e3fc7b57",
+      "size": 1150
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_robust_source_v22/seed_85021/bundle_manifest.json": {
+      "sha256": "7b6e11c56ad7f203090d79461e6c46c7583b30c4e4ce7e594782e23e89aac202",
+      "size": 1150
+    },
+    "jax_experiments/eval_bundles_regime_polarity_ant_robust_source_v22/seed_85039/bundle_manifest.json": {
+      "sha256": "106ecb1c5b8a666cbc9a179e0a4629ca44841e70c8d3a89aacc6e51af3fc4a7a",
+      "size": 1150
+    },
+    "jax_experiments/results_regime_polarity_ant_switch_recovery_analysis_v24/analysis.json": {
+      "sha256": "b58659b170f17318b37c98ca0fa58bd90223c98f4e809e540af67da8361b0007",
+      "size": 24827
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "scripts/submit_regime_polarity_ant_constrained_risk_v25.py": {
+      "sha256": "492996af99ef22b8be2d98a9fb62e1538ae7ee89cece1ef3bf3df1cc9b4c9e5b",
+      "size": 11429
+    }
+  },
+  "status": "registered",
+  "stopping_rule": "if neither learned-risk arm passes all three development seeds, close independent Ant specialist optimization and move to a joint robust-plus-mode controller",
+  "sync_policy": "compact policy/provenance bundles and JSON only; never sync replay or full checkpoints",
+  "training": {
+    "candidate_samples_per_iter": 4000,
+    "controller_initialization": [
+      "actor",
+      "critic",
+      "target_critic",
+      "alpha"
+    ],
+    "frozen_robust_prefix_actor": true,
+    "physical_samples_per_iter": 8000,
+    "replay_and_optimizers_reset": true,
+    "risk_critic_initialization": "fresh",
+    "risk_lambda": 500.0,
+    "risk_objectives": {
+      "risk_q_absolute": "absolute",
+      "risk_q_relative": "relative"
+    },
+    "risk_target": "discounted termination probability",
+    "risk_warmup_updates": 12500,
+    "segment_steps": 250,
+    "target_behavior_mix": {
+      "candidate_policy": 0.5,
+      "frozen_robust_policy": 0.5
+    },
+    "target_mode_samples_per_iter": 4000,
+    "termination_reward_shaping": false,
+    "updates_per_iter": 250
+  }
+}

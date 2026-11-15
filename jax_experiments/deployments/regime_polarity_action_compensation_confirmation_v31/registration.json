@@ -1,0 +1,299 @@
+{
+  "budgets": {
+    "canonical_compensation_training_path": {
+      "final_updates": 525000,
+      "reference_finetune_steps": 2800000,
+      "robust_source_steps": 5600000,
+      "total_unique_interactions": 8400000
+    },
+    "equal_interaction_baselines": {
+      "methods": [
+        "robust_sac",
+        "escp_recurrent",
+        "resac_b0"
+      ],
+      "steps_per_method": 8400000,
+      "updates_per_method": 525000
+    },
+    "robust_source_diagnostic": {
+      "steps": 5600000,
+      "updates": 350000
+    }
+  },
+  "claim_boundary": {
+    "confirms_halfcheetah_actuator_polarity_only": true,
+    "does_not_claim_general_invertible_dynamics": true,
+    "does_not_claim_termination_safety": true,
+    "training_cost_includes_robust_source": true
+  },
+  "created_before_training": true,
+  "decision_gate": {
+    "minimum_oracle_headroom": 0.1,
+    "minimum_oracle_recovery": 0.7,
+    "minimum_stationary_oracle_retention": 0.95,
+    "positive_paired_mean_and_ci95": true,
+    "primary_arm": "canonical_v5_map_compensation",
+    "primary_comparators": [
+      "robust_sac_8p4m",
+      "escp_recurrent_8p4m",
+      "resac_b0_8p4m"
+    ],
+    "required_event_wins_of_15": 12,
+    "required_recovery_seeds": 4,
+    "required_seed_wins_of_5": 4,
+    "required_stationary_retention_seeds": 4
+  },
+  "development_basis": {
+    "canonical_reference_choice": {
+      "all_five_old_policy_seeds_positive": true,
+      "role": "development_only_reference_choice",
+      "rows": {
+        "84003": {
+          "mode0_minus_robust": 1446.3113529639315,
+          "mode0_native_calibration_return": 2737.492933201293,
+          "robust_stationary_holdout_return": 1291.1815802373615
+        },
+        "84021": {
+          "mode0_minus_robust": 2045.5959830829045,
+          "mode0_native_calibration_return": 3649.418150968022,
+          "robust_stationary_holdout_return": 1603.8221678851176
+        },
+        "84039": {
+          "mode0_minus_robust": 1627.8835142090088,
+          "mode0_native_calibration_return": 3586.9694487096535,
+          "robust_stationary_holdout_return": 1959.0859345006447
+        },
+        "84057": {
+          "mode0_minus_robust": 1897.4414847782095,
+          "mode0_native_calibration_return": 2868.419461715553,
+          "robust_stationary_holdout_return": 970.9779769373436
+        },
+        "84079": {
+          "mode0_minus_robust": 2987.9625008939256,
+          "mode0_native_calibration_return": 4376.043608289627,
+          "robust_stationary_holdout_return": 1388.081107395701
+        }
+      },
+      "selected_reference_mode": 0
+    },
+    "v28_diagnosis": "causal_action_compensation_supported",
+    "v28_single_policy_superior_to_bank": true
+  },
+  "frozen_boundary": {
+    "causal_action_uses_posterior_before_current_transition": true,
+    "new_policy_and_event_seeds": true,
+    "no_checkpoint_selection": true,
+    "no_new_reference_calibration": true,
+    "reference_mode_selected_before_new_training": true,
+    "v21_full_state_final_recipe_unchanged": true,
+    "v5_estimator_policy_seeds_disjoint": true,
+    "v5_estimator_unchanged": true
+  },
+  "identity": {
+    "arms": [
+      "robust_sac_5p6m",
+      "robust_sac_8p4m",
+      "canonical_no_compensation",
+      "canonical_true_mode_compensation",
+      "canonical_v5_map_compensation",
+      "escp_recurrent_8p4m",
+      "resac_b0_8p4m"
+    ],
+    "environment": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v31-canonical-action-compensation-confirmation",
+    "reference_mode": 0,
+    "stationary_holdout_event_seeds": [
+      196101,
+      196117,
+      196133
+    ],
+    "switching_event_seeds": [
+      196201,
+      196217,
+      196233
+    ],
+    "switching_schedules": {
+      "196201": [
+        0,
+        2,
+        3,
+        1
+      ],
+      "196217": [
+        3,
+        1,
+        0,
+        2
+      ],
+      "196233": [
+        1,
+        3,
+        2,
+        0
+      ]
+    },
+    "training_seeds": [
+      87003,
+      87021,
+      87039,
+      87057,
+      87079
+    ]
+  },
+  "schema": "bapr.canonical-compensation-registration.v31",
+  "source_records": {
+    "jax_experiments/algos/escp.py": {
+      "sha256": "3fd49e3fe1680b01db474698133bd378f97c1d64e6297001b77c64985c0523c7",
+      "size": 38868
+    },
+    "jax_experiments/algos/resac.py": {
+      "sha256": "bc7ca0cc587ce2193043b237888fba610db96838e26d505dded93aa5c267fcea",
+      "size": 16247
+    },
+    "jax_experiments/algos/sac_base.py": {
+      "sha256": "4bbdd0874454ca7a09b3b28fd798aa2f5f8256a4fd005b889364385bbd7b354e",
+      "size": 7835
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_action_compensation_confirmation_v31.py": {
+      "sha256": "a39d1d5412cac1460fef482db4828af2cc0598ce26141237d97c1c9c059d1d1b",
+      "size": 13465
+    },
+    "jax_experiments/analysis/regime_polarity_action_compensation_confirmation_v31.py": {
+      "sha256": "2e2878cc41e9f22de8a57642d65c05bf9d9ac76c7c48b581b2dc3bc8c8c71df7",
+      "size": 23918
+    },
+    "jax_experiments/analysis/regime_polarity_action_compensation_reference_v31.py": {
+      "sha256": "a841835e93e470a089df053faf45c3f69ef4db20b0b7fa673c43afd9e79428ce",
+      "size": 4463
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_audit_v28.py": {
+      "sha256": "24664cfffc45582e2756f3c6d87211bb13251a18ac64a8ea584cb01afdb7e355",
+      "size": 28129
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_baseline_v31.py": {
+      "sha256": "e5e8554c7799bcd403f3103d6e63355e33e15507d0e530d41192639ccdd8881f",
+      "size": 1829
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_confirmation_audit_v31.py": {
+      "sha256": "f219a08ba9ed76ef3907e1995bfb5193123eb0b49d5cb89486f29544b921b486",
+      "size": 17133
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_reference_v31.py": {
+      "sha256": "2f0800a8715830c15e314e0ad4194ac07c78a68e6d14c420fea36bdab0f4d726",
+      "size": 1959
+    },
+    "jax_experiments/analysis/run_regime_polarity_action_compensation_source_v31.py": {
+      "sha256": "b674966fe8c5e351287474612255e13b34fa6cfc0b4abb94ee841a42580bf942",
+      "size": 1335
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v19.py": {
+      "sha256": "c7b718c1c6b7f525bc94d539bef2fc9286e17188a55d7cc8c9f2ad7a72945481",
+      "size": 7074
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "dd8e55eab65bb276b3df7ec5d2ec005ac559cd576a32b7022b5d0276232ab56e",
+      "size": 19338
+    },
+    "jax_experiments/analysis/run_regime_polarity_v5_final_baseline_v18.py": {
+      "sha256": "9ad47401cbd2046ee370881fa3b1eaa8febc2be8c78faf8a292f5f4a2e6f08b4",
+      "size": 17264
+    },
+    "jax_experiments/deployments/regime_polarity_action_compensation_v28/registration.json": {
+      "sha256": "3b7d0463427ddfb2550ab34c259229424054f51140b3d6dced8cc7c4de63f3a3",
+      "size": 6554
+    },
+    "jax_experiments/deployments/regime_polarity_full_state_final_confirmation_v21/registration.json": {
+      "sha256": "db6e7e8420e93a72196fce4675a390cce238c6be3a79f2a28967fa11ca5848c4",
+      "size": 9205
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_analysis_v28/analysis.json": {
+      "sha256": "7e5e0f5665c58e3f3ab7bc20f19daa022beda558bb0dd974634de40b7c8dd311",
+      "size": 5528
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_analysis_v28/analysis.md": {
+      "sha256": "acc23b99ad5175d4328f710f1376ea5d1cd63e0374ac2b4006dbc080484a5744",
+      "size": 2063
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84003/audit.json": {
+      "sha256": "a1d97f15c1c507afb71780e5aaff805d9262e676fafe700ffbd70e716942d4bc",
+      "size": 102480
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84003/audit_manifest.json": {
+      "sha256": "bc22d8a48dd522fd1acf27d3a020e6acdcc50419d1bd9bafa3742698ae82537b",
+      "size": 3145
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84021/audit.json": {
+      "sha256": "e038d82917f20b83b5218b29c71db307a40959ba47fdfe5db229b60c7a4ef6eb",
+      "size": 102217
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84021/audit_manifest.json": {
+      "sha256": "ff186ccd081ddcdf5a7050c789064146fa30d20fd72d954f075e8a5d4d261359",
+      "size": 3145
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84039/audit.json": {
+      "sha256": "b66517dc0dd2b87ea30fabcd9d45d1c18b5cfd94cffd70989af51bbac50396fe",
+      "size": 102380
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84039/audit_manifest.json": {
+      "sha256": "d80790afae7c08b4e2c7c8eea16a920e39038cf5b814bcdb34e60d96b70faec7",
+      "size": 3145
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84057/audit.json": {
+      "sha256": "a4e8214aab9d5dfd0d7568b71f90d75ae27cf833120393b1aa625d9036d7f244",
+      "size": 102357
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84057/audit_manifest.json": {
+      "sha256": "4b5ec534ee8854ff256b543b1bab4280c602dcf78f20000137646d4fb942b4f9",
+      "size": 3145
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84079/audit.json": {
+      "sha256": "9fbe4376d9a47b531ddfbee45ab2831c9e7eb0381731c2a3fb4e1f093fb4ef30",
+      "size": 102153
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_audit_v28/seed_84079/audit_manifest.json": {
+      "sha256": "5bb2ba4004d245eb413c2f556fd706a7924f63ff47f92c5b74095da2c093e99d",
+      "size": 3145
+    },
+    "jax_experiments/results_regime_polarity_action_compensation_structural_v28/structural_manifest.json": {
+      "sha256": "55d80fcbffb5d29307a5450ffae2cd508d167f21fb71ac7a3ea2e834f40ef242",
+      "size": 605
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_polarity_action_compensation_confirmation_v31_preregistration_2026-09-12.md": {
+      "sha256": "7d210a8f240ea097435cc3704661cde95224758be5bd782a55cd2c6416d98358",
+      "size": 1905
+    },
+    "scripts/submit_regime_polarity_action_compensation_confirmation_v31.py": {
+      "sha256": "de16684c73d49a09e7b5afa8b36b150f04cc5688d8e5b0e657d7a5f0c34b2b4d",
+      "size": 15269
+    }
+  },
+  "status": "registered",
+  "sync_policy": "compact policy/controller parameters, protocol signatures, provenance, and JSON audits only; no replay or checkpoints"
+}

@@ -1,0 +1,16 @@
+{
+  "created_before_fixed_audit": true,
+  "protocol_registration": {
+    "sha256": "5e19ba418b5344df9f4a94a630243e07404bc22342b13077108d426110022025",
+    "size": 4465
+  },
+  "schema": "bapr.robust-warmstart-specialist-audit-fix.v12.1",
+  "scientific_protocol_changed": false,
+  "scope": "audit-only call adapter: validate_bundle(variant, seed, mode) delegates to the frozen v12 validate_bundle(seed, mode)",
+  "source": {
+    "sha256": "f033b959ab109c787543d7ab8c2e2252a8f5b85e2163aa89f819108a94465177",
+    "size": 2990
+  },
+  "status": "registered",
+  "training_changed": false
+}

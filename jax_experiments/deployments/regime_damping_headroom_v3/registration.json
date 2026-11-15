@@ -1,0 +1,378 @@
+{
+  "amendment": {
+    "engineering_change": "declare the existing -1 robust trace sentinel and rerun only the failed CPU audits",
+    "failed_v2_robust_audits": [
+      "t79271",
+      "t79272",
+      "t79273",
+      "t79277",
+      "t79278",
+      "t79279",
+      "t79283",
+      "t79284",
+      "t79285",
+      "t79289",
+      "t79290",
+      "t79291"
+    ],
+    "failure": "v2 omitted ROBUST_TRACE_CONTEXT_MODE_ID=-1 and therefore validated the sealed all-zero robust context as if it were the dynamic oracle context",
+    "failure_stage": "post-rollout switching-trace validation",
+    "oracle_audit_reexecution": false,
+    "predecessor_registration": {
+      "sha256": "f552870a93c36e067157eee876ee617ae982343ac722590ce8062538ae4ff16e",
+      "size": 7149
+    },
+    "producer_retraining": false,
+    "reproduction": {
+      "env": "Hopper-v2",
+      "observed_action_task_ids": [
+        -1
+      ],
+      "observed_physics_action_task_ids": [
+        1,
+        3
+      ],
+      "role": "robust",
+      "seed": 32011,
+      "switching_trace_rows": 5000,
+      "v2_error": "robust action context is misaligned with the physics mode"
+    },
+    "scientific_changes": [],
+    "superseded_v2_analysis_task": "t79295"
+  },
+  "identity": {
+    "audit_event_seeds": [
+      132011,
+      132117,
+      132233
+    ],
+    "envs": [
+      "HalfCheetah-v2",
+      "Ant-v2",
+      "Hopper-v2",
+      "Walker2d-v2"
+    ],
+    "evaluation_only": true,
+    "family": "joint_damping_fault",
+    "protocol_version": "v3-robust-trace-validator-amendment",
+    "roles": [
+      "robust",
+      "oracle"
+    ],
+    "training_seeds": [
+      32011,
+      32117,
+      32233
+    ]
+  },
+  "predecessor_artifact_records": {
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Ant/oracle/seed_32011/bundle_manifest.json": {
+      "sha256": "ea250a9f719d7b3a88d82b00a6a57f40403e23da2a0e0f45e5cc524a0a52d074",
+      "size": 1175
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Ant/oracle/seed_32117/bundle_manifest.json": {
+      "sha256": "77849af56c0fe69739b311e45dbe6332d0b62379686c5bc308f23a5fdf32e84e",
+      "size": 1175
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Ant/oracle/seed_32233/bundle_manifest.json": {
+      "sha256": "988f73a4b45ad27814c09d6c691e4c360aceb0be0fc4674bd3ba0b58d264b8fd",
+      "size": 1175
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Ant/robust/seed_32011/bundle_manifest.json": {
+      "sha256": "a7d5fec1fc840c98348f293b4f8914be940fad95c1c28f0bf23efcf0079bae69",
+      "size": 1175
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Ant/robust/seed_32117/bundle_manifest.json": {
+      "sha256": "e920aac99e60876df652b40989e81a4cf03993c9ae1938443cd5b78c118a0781",
+      "size": 1175
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Ant/robust/seed_32233/bundle_manifest.json": {
+      "sha256": "c747a422e175388842e6b1b12e25f73daa45965424d7636cea22268c5547f1f6",
+      "size": 1175
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/HalfCheetah/oracle/seed_32011/bundle_manifest.json": {
+      "sha256": "0c3bb6200369c405304ea7c337e89cb4c5b4d2e12ce0a3328258e6d729bd977a",
+      "size": 1183
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/HalfCheetah/oracle/seed_32117/bundle_manifest.json": {
+      "sha256": "2e3509af469179a61020e6e1a3e24e49cfb9d235d8ddbb89d65c65a0efdf327e",
+      "size": 1183
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/HalfCheetah/oracle/seed_32233/bundle_manifest.json": {
+      "sha256": "95999dd267f8711e6236bb4d3dc703becb0b5f14cf77c04e94d8d4505796b381",
+      "size": 1183
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/HalfCheetah/robust/seed_32011/bundle_manifest.json": {
+      "sha256": "b48365c1617e83dd5cfa7e07079e0a9e78e841f14f146cbf64ccef1409f3ae2d",
+      "size": 1183
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/HalfCheetah/robust/seed_32117/bundle_manifest.json": {
+      "sha256": "ebc34fac8eb5ace2ea352e496dd0ecbf7f3152935a179e82f6b998604da689f4",
+      "size": 1183
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/HalfCheetah/robust/seed_32233/bundle_manifest.json": {
+      "sha256": "445c222779b74b0012f03773f74c5286ce9aa6d418a80d83f5e7b3e523e67436",
+      "size": 1183
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Hopper/oracle/seed_32011/bundle_manifest.json": {
+      "sha256": "b762774e2d255d94e52cc6ad7f986eb492c7fa9b6ab675c0bd115e8c4ed268c5",
+      "size": 1178
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Hopper/oracle/seed_32117/bundle_manifest.json": {
+      "sha256": "02737ad364ad68b0483a6155f8aaf11d3311e0057edf0c7cfbbf07793b7dce1a",
+      "size": 1178
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Hopper/oracle/seed_32233/bundle_manifest.json": {
+      "sha256": "2cdd514fd59919155af5b49598f1c6790dc11336e27a76926f9c188b87ddd691",
+      "size": 1178
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Hopper/robust/seed_32011/bundle_manifest.json": {
+      "sha256": "3e41be4da84413b4ec21d0fc39fffccc62190d0fcb9f4fa887af548f88807dc3",
+      "size": 1178
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Hopper/robust/seed_32117/bundle_manifest.json": {
+      "sha256": "b6717f96d6a47ca2e133256ccce4467ce4649ab2e35209500dac7a9c884afcf8",
+      "size": 1178
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Hopper/robust/seed_32233/bundle_manifest.json": {
+      "sha256": "eab454496c40e8adfc80bafc3a96d78966a411342201a18d1d946d644854023a",
+      "size": 1178
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Walker2d/oracle/seed_32011/bundle_manifest.json": {
+      "sha256": "3f26524bf727497c7ed3a8323dff68ec2710bdb1dcefd6be8071ce9adfdce706",
+      "size": 1180
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Walker2d/oracle/seed_32117/bundle_manifest.json": {
+      "sha256": "0e1a9840bfde8bdf94a0b31d1de7ffe87f4076aaee971993efcd2b6dfdf50222",
+      "size": 1180
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Walker2d/oracle/seed_32233/bundle_manifest.json": {
+      "sha256": "534ae4cf0d350b027d4c64f461eaca697ae88a41dc8a249085b4afae65ddc693",
+      "size": 1180
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Walker2d/robust/seed_32011/bundle_manifest.json": {
+      "sha256": "6eead65abe6581bba115204317d511182b04b94e992661fb84a15bebd5427135",
+      "size": 1180
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Walker2d/robust/seed_32117/bundle_manifest.json": {
+      "sha256": "ad2d8bbcb758dd5dfc5a0e7f20cf27147c280edef3de7092b8f1b28daf999c58",
+      "size": 1180
+    },
+    "jax_experiments/eval_bundles_regime_damping_headroom_v2/Walker2d/robust/seed_32233/bundle_manifest.json": {
+      "sha256": "c4450b219cf4dbde695ecd59c3ad029c607f63d56744cfe3b2d26788bfc71763",
+      "size": 1180
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Ant/oracle/seed_32011/audit_manifest.json": {
+      "sha256": "f5fc1787b274c13736fc1d8199c03257f3a06e5c29f4cd108d7aa5fce01a6dca",
+      "size": 6584
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Ant/oracle/seed_32117/audit_manifest.json": {
+      "sha256": "757447b5d868b6b3145a7f93932daa80ad18df85afa027c95b195424fb1b3587",
+      "size": 6583
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Ant/oracle/seed_32233/audit_manifest.json": {
+      "sha256": "ad8637d1ab93c43d05156b62695b1100e7ca99130aca17e98fdff9bd15e96856",
+      "size": 6582
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/HalfCheetah/oracle/seed_32011/audit_manifest.json": {
+      "sha256": "3c997b3099f9c3c7e7b116f1a80acb19e27bbc3e6fa9cc2cffd517a054db93e8",
+      "size": 6664
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/HalfCheetah/oracle/seed_32117/audit_manifest.json": {
+      "sha256": "5c92d80eecb545e403039fdfa4c8a8a796ef6d8104fd4dc9983928339d72412a",
+      "size": 6663
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/HalfCheetah/oracle/seed_32233/audit_manifest.json": {
+      "sha256": "a727ca42bd1ddca8156c50b114c72287a6c3873d38df6216ea236c9a5f372e90",
+      "size": 6662
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Hopper/oracle/seed_32011/audit_manifest.json": {
+      "sha256": "6d8143421a5381759215450f2ce38d0c44ba48093b38005ff196e6d3918d6221",
+      "size": 6614
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Hopper/oracle/seed_32117/audit_manifest.json": {
+      "sha256": "0141fd667cf1844d26df98685d4f31277b0771734a3bb3b2648620acbd8df446",
+      "size": 6613
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Hopper/oracle/seed_32233/audit_manifest.json": {
+      "sha256": "9a913349b547cd98aa12a0faef3ab10db035591dce351317fc9f663ef8a183c5",
+      "size": 6612
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Walker2d/oracle/seed_32011/audit_manifest.json": {
+      "sha256": "413169d9e1a90af456444ebbd91f28004204f028ca127f5ae44ad579cfae7c32",
+      "size": 6634
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Walker2d/oracle/seed_32117/audit_manifest.json": {
+      "sha256": "a59810c28bfc0ee1023f0218e5cc07554963cfc6cc70c6b5feaf3ffbcd59e85d",
+      "size": 6633
+    },
+    "jax_experiments/results_regime_damping_headroom_audit_v2/Walker2d/oracle/seed_32233/audit_manifest.json": {
+      "sha256": "287aa735d64a9e0c79370f46c55ab898194440af6f2c182d74e721e9497d629d",
+      "size": 6632
+    }
+  },
+  "schema": "bapr.regime-damping-headroom-registration.v3",
+  "source_records": {
+    "jax_experiments/algos/regime_sac.py": {
+      "sha256": "5bd625594f72e3b887a1340fb9ce97db2b38f04627c9fe993ddfb11c7e3bed3e",
+      "size": 17881
+    },
+    "jax_experiments/analysis/analyze_regime_control_headroom.py": {
+      "sha256": "c38a6e989ca91311d1d83894ac299d68064f7715966d235a615926cc300b30d8",
+      "size": 13321
+    },
+    "jax_experiments/analysis/analyze_regime_damping_headroom.py": {
+      "sha256": "347aac1286732c050be329357b19facf90ddbbf36aad6a9a14d5e29188ab6086",
+      "size": 930
+    },
+    "jax_experiments/analysis/analyze_regime_damping_headroom_v2.py": {
+      "sha256": "9d027a71aa86c2a725079083be4606e0149b78e6313ffbcbda94fb5a446553e1",
+      "size": 772
+    },
+    "jax_experiments/analysis/analyze_regime_damping_headroom_v3.py": {
+      "sha256": "3271cd9edeaddd556b00e377e72847214615918ae8a612acf1f90a1d0557bc2f",
+      "size": 1346
+    },
+    "jax_experiments/analysis/final_task_sweep.py": {
+      "sha256": "e0c886c1530c01e3a7b8ae6105d1327ea7ec0fe7596c135c0bf390792de3b24d",
+      "size": 39594
+    },
+    "jax_experiments/analysis/final_task_sweep_regime_damping.py": {
+      "sha256": "fbc5dac9ef508c6c3cc248ea62b7470ba34d0d05ca497ed817ae4be339805ee5",
+      "size": 410
+    },
+    "jax_experiments/analysis/regime_control_headroom.py": {
+      "sha256": "4e61df281c6be0bef10074c1d12599b2baeacfc4fbf159ad044d0c4d0fba83f9",
+      "size": 6127
+    },
+    "jax_experiments/analysis/regime_damping_headroom.py": {
+      "sha256": "d45e805603b51c42e4c345ab4aaf72aef48a04626841d5645832f26964ca23b3",
+      "size": 8756
+    },
+    "jax_experiments/analysis/regime_damping_headroom_v2.py": {
+      "sha256": "a633d28b8169b758d197986ee5160cb206032cee476246053ac3297125c6d2d5",
+      "size": 7913
+    },
+    "jax_experiments/analysis/regime_damping_headroom_v3.py": {
+      "sha256": "0edbff5dae76d6983d4dd77914a4f7ae1f5ac2783203ef72a749e47e6c3cc427",
+      "size": 10762
+    },
+    "jax_experiments/analysis/run_regime_control_headroom_audit.py": {
+      "sha256": "a6f70eb53c237f4ade8f4657a49f1429135e92019c94309b7bd4082b75f17dea",
+      "size": 9511
+    },
+    "jax_experiments/analysis/run_regime_control_headroom_controller.py": {
+      "sha256": "b344ec56576a5ca53a653bcf30e5e3e95c01cd9cd753d65c6552660d4c6916a8",
+      "size": 7883
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_audit.py": {
+      "sha256": "7ece3b0e967a28a8ae7ef0f2e5347658e269b5d5e4e351808fcdf2b6ddd6d6b4",
+      "size": 1594
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_audit_v2.py": {
+      "sha256": "cb5ecda805a44ad79655fd77121c59da865d07e724036cf9bff8517747446cde",
+      "size": 1716
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_audit_v3.py": {
+      "sha256": "73c82d4bde02cda234b37717b0c9a44166b2b9c0d50edb1a15bf719abdac7490",
+      "size": 1682
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_controller.py": {
+      "sha256": "47248be9a84865fe9a048bfb805a22b1e2286d69cb349305ec9428ab16bfe40f",
+      "size": 1363
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_controller_v2.py": {
+      "sha256": "09bab9c9b5416f52d5df425645107983097e6d52e8c5e6da5083d832296db798",
+      "size": 1417
+    },
+    "jax_experiments/analysis/train_regime_damping_headroom_entry.py": {
+      "sha256": "5b5e04dc5f041b8b254177261de5a15960f7c569e85ed3b9119c74ba14a15705",
+      "size": 349
+    },
+    "jax_experiments/analysis/train_regime_damping_headroom_entry_v2.py": {
+      "sha256": "45b4460bebb1ae347a43a4e1f21f24db1245100321891d04f1bce2be9b7bae9e",
+      "size": 904
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/common/logging.py": {
+      "sha256": "cabca30405ea73456de25ccfbbb29b20d11fb0c71ab63f06fbc24709d7630d3b",
+      "size": 2051
+    },
+    "jax_experiments/common/replay_buffer.py": {
+      "sha256": "b8f86ac4ed013797d681e5b070222004fd319fd63e06604cf33ffbe374cc97e2",
+      "size": 17329
+    },
+    "jax_experiments/configs/default.py": {
+      "sha256": "4ddbe406e95ce1be008b231296f1d9fda93b54f98bd65acb44264d30a33b72b7",
+      "size": 27848
+    },
+    "jax_experiments/deployments/regime_damping_headroom_v1/registration.json": {
+      "sha256": "943003ecdd3978449aa1d8ac1d772d29477dd524a20904a0a1ab468be265b2b0",
+      "size": 4615
+    },
+    "jax_experiments/deployments/regime_damping_headroom_v2/registration.json": {
+      "sha256": "f552870a93c36e067157eee876ee617ae982343ac722590ce8062538ae4ff16e",
+      "size": 7149
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/persistent_damping_mode_env.py": {
+      "sha256": "7e11bb63cd5c14f95cd458c7cbc0298a3e1a45b858123bb3d6e9a4bb50a84202",
+      "size": 6073
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/networks/ensemble_critic.py": {
+      "sha256": "57cf94dc38b9d54ff99cc64669101635622fe2ea5834ece596c939cbf2f290ee",
+      "size": 3638
+    },
+    "jax_experiments/networks/policy.py": {
+      "sha256": "33a7d5de27a4e8ca78aa6658cbcc5b543398b742f953028d1210153eee7b72e0",
+      "size": 2439
+    },
+    "jax_experiments/tests/test_regime_damping_headroom_v2.py": {
+      "sha256": "fc188268d83deaa1bcf3ebd7a7ae290aadeee22b86e42e0e96b01a39a16d08df",
+      "size": 1285
+    },
+    "jax_experiments/tests/test_regime_damping_headroom_v3.py": {
+      "sha256": "7bf3b0c297bcf95fd3189bfde987dd1d0e2495d66a2808225935de6cc08b8bdc",
+      "size": 1350
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_damping_headroom_protocol_2026-08-09.md": {
+      "sha256": "65a72369385c55250d4f647ed357823033204f71ae8b5e83213566bf738f2182",
+      "size": 2005
+    },
+    "reports/regime_damping_headroom_v2_amendment_2026-08-09.md": {
+      "sha256": "a3b91cdee725165c51c58ac00b638248fc00b191d2640ede4b19862ebf0ab180",
+      "size": 1077
+    },
+    "reports/regime_damping_headroom_v3_amendment_2026-08-26.md": {
+      "sha256": "082de2ead36ee96895ab0a3536c1348cb8586e8528f2dd866f12224a05483fc1",
+      "size": 862
+    },
+    "scripts/submit_regime_damping_headroom.py": {
+      "sha256": "fe5263fe40de844a13858268073a9e7efd699f4f91e77e36f31a307979ed7d89",
+      "size": 12214
+    },
+    "scripts/submit_regime_damping_headroom_v2.py": {
+      "sha256": "b3e72cea2e34c5f054272c88b00bfa43d1d1d3fefd34fad885b7b17d1ee9c3be",
+      "size": 1867
+    },
+    "scripts/submit_regime_damping_headroom_v3.py": {
+      "sha256": "ce6fed7f3371fdb1542c7b9441f11fefdb3c34d62f5128589b22b4104b6c22f7",
+      "size": 8573
+    }
+  },
+  "status": "frozen"
+}

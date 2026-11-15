@@ -1,0 +1,130 @@
+{
+  "created_before_audit": true,
+  "data_policy": {
+    "checkpoint_only": true,
+    "development_not_confirmation": true,
+    "new_training": false,
+    "result_payload": "json_and_markdown_only"
+  },
+  "decision_rule": {
+    "minimum_candidate_gain": 0.1,
+    "minimum_candidate_headroom_recovery": 0.7,
+    "minimum_delay_4_headroom_retention": 0.7,
+    "minimum_safe_oracle_gain": 0.1,
+    "require_zero_termination": true,
+    "required_event_wins": 3,
+    "required_seed_passes": 4,
+    "selection_order": [
+      "seed_pass_count",
+      "mean_return",
+      "lower_fallback_fraction",
+      "fewer_confirmation_steps"
+    ]
+  },
+  "identity": {
+    "arms": [
+      "robust_sac",
+      "true_mode_safe_utility",
+      "delayed_oracle_4_safe_utility",
+      "posterior_map_safe_utility",
+      "conflict_fallback_confirm1_safe_utility",
+      "conflict_fallback_confirm2_safe_utility",
+      "conflict_fallback_confirm3_safe_utility"
+    ],
+    "dwell_steps": 250,
+    "event_seeds": [
+      169201,
+      169217,
+      169233
+    ],
+    "max_episode_steps": 1000,
+    "parent_protocol_version": "v13-frozen-estimator-transfer",
+    "protocol_version": "v14-evidence-conflict-fallback-router-development",
+    "switching_episodes": 5,
+    "switching_schedules": {
+      "169201": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "169217": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "169233": [
+        3,
+        0,
+        2,
+        1
+      ]
+    },
+    "training_seeds": [
+      71003,
+      71021,
+      71039,
+      71057,
+      71079
+    ]
+  },
+  "router": {
+    "candidate_forbidden_inputs": [
+      "mode_id",
+      "switch_clock",
+      "dwell_boundary",
+      "action_gain"
+    ],
+    "candidate_online_inputs": [
+      "observation",
+      "commanded_action",
+      "next_observation",
+      "frozen estimator posterior",
+      "frozen estimator evidence"
+    ],
+    "confirmation_steps": [
+      1,
+      2,
+      3
+    ],
+    "conflict_log_likelihood_margin": 3.0,
+    "exit_requires_evidence_posterior_agreement": true,
+    "fallback_controller": "matched robust SAC",
+    "minimum_fallback_actions_after_conflict": 1,
+    "posterior_exit_confidence": 0.8,
+    "trigger": "best alternative one-step evidence exceeds active-mode log likelihood by at least 3.0"
+  },
+  "schema": "bapr.evidence-conflict-fallback-registration.v14",
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_conflict_fallback_router_v14.py": {
+      "sha256": "a2a778c6d8f7eef9bc2bc1201625adc4f013fe7130ed4b3d1e5f6dc94ea5346c",
+      "size": 11005
+    },
+    "jax_experiments/analysis/regime_polarity_conflict_fallback_router_v14.py": {
+      "sha256": "14d737e5a7e0c6d210b525260f7f04c225c8ac32ea017e1ff066bb4f15e2badc",
+      "size": 9826
+    },
+    "jax_experiments/analysis/run_regime_polarity_conflict_fallback_router_audit_v14.py": {
+      "sha256": "e080f87e3d8ef27db8b842d80c583a09c237d3c3951262424d3752c1b09cfcfc",
+      "size": 20498
+    },
+    "jax_experiments/deployments/regime_polarity_frozen_estimator_transfer_v13/registration.json": {
+      "sha256": "d379cd8d92c86e287c3a8410c3b5f22f3857dd2c72352e7a93718fd3f585f401",
+      "size": 13430
+    },
+    "jax_experiments/results_regime_polarity_frozen_estimator_transfer_analysis_v13/analysis.json": {
+      "sha256": "58017642200da7733ce6a00ee45d293424b27a5d1e162cbe7dd434c719fec44a",
+      "size": 13877
+    },
+    "jax_experiments/results_regime_polarity_frozen_estimator_transfer_analysis_v13/analysis.md": {
+      "sha256": "9d74f51e6c1f55b4ccb870a8ac2439c8fd9452f3f946f4925b8418f6c15e9e50",
+      "size": 1042
+    },
+    "reports/regime_polarity_conflict_fallback_router_v14_preregistration_2026-09-01.md": {
+      "sha256": "92799c18e4a3e352ac0e6526d03471843d05aa71c3423fcd809832ab0b06c480",
+      "size": 1588
+    }
+  },
+  "status": "registered"
+}

@@ -1,0 +1,538 @@
+{
+  "budget": {
+    "bapr_role": "frozen_teacher_estimator_deployment_student_replication",
+    "full_construction_budget_report": "reports/bapr_deployment_compression_budget_2026-08-09.md",
+    "single_controller_max_iters": 1400,
+    "single_controller_total_steps": 5600000,
+    "single_controller_update_count": 350000
+  },
+  "created_before_confirmation_training": true,
+  "identity": {
+    "env": "HalfCheetah-v2",
+    "event_seeds": [
+      152021,
+      152127,
+      152237,
+      152349,
+      152457
+    ],
+    "family": "actuator_polarity",
+    "methods": [
+      "bapr",
+      "sac",
+      "escp_recurrent",
+      "resac_b0"
+    ],
+    "old_seed_results_excluded": true,
+    "protocol_version": "v1-fresh-ten-seed-deployment-confirmation",
+    "student_architecture": "mode_heads",
+    "training_seeds": [
+      52021,
+      52127,
+      52237,
+      52349,
+      52457,
+      52567,
+      52679,
+      52783,
+      52889,
+      52999
+    ]
+  },
+  "release_gate": {
+    "analysis_path": "jax_experiments/results_regime_polarity_final_mechanism_analysis_v2/analysis.json",
+    "pass_marker": "jax_experiments/results_regime_polarity_final_mechanism_analysis_v2/MECHANISM_PASS",
+    "protocol_version": "v2-final-stack-mechanism-audit",
+    "registration": {
+      "sha256": "3df1d27a40603720238080831c4c1ac5418de84b1b35091d86ef91fa478fc88d",
+      "size": 9897
+    },
+    "required_field": "mechanism_pass=true"
+  },
+  "schema": "bapr.regime-polarity-deployment-confirmation-registration.v1",
+  "source_records": {
+    "jax_experiments/algos/escp.py": {
+      "sha256": "3fd49e3fe1680b01db474698133bd378f97c1d64e6297001b77c64985c0523c7",
+      "size": 38868
+    },
+    "jax_experiments/algos/resac.py": {
+      "sha256": "bc7ca0cc587ce2193043b237888fba610db96838e26d505dded93aa5c267fcea",
+      "size": 16247
+    },
+    "jax_experiments/algos/sac_base.py": {
+      "sha256": "4bbdd0874454ca7a09b3b28fd798aa2f5f8256a4fd005b889364385bbd7b354e",
+      "size": 7835
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_corrected_baselines_v2.py": {
+      "sha256": "04041a842c3ff08fcb76030d6f25d15ac78bf8d171e347f1875ae6136686adce",
+      "size": 11075
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_deployment_confirmation_v1.py": {
+      "sha256": "24dc90f4b9f50ab998e65ba89378a020c13397808ac4d3312f23cb7d0ef78a34",
+      "size": 11569
+    },
+    "jax_experiments/analysis/regime_polarity_corrected_baselines_v2.py": {
+      "sha256": "039500da143a5e73cdf87d80679c3cfb3817df9cab83cd359c64935e5e7c0d08",
+      "size": 11896
+    },
+    "jax_experiments/analysis/regime_polarity_deployment_confirmation_v1.py": {
+      "sha256": "6c72ab364d4e6d619082243f4865d148041a9e71a4e28c6253ec6a053258e575",
+      "size": 19943
+    },
+    "jax_experiments/analysis/regime_polarity_expected_action_system_id_model.py": {
+      "sha256": "26f5789e23d826393562c15fae3b64a397c37d3635ee24576cb445775b8cb2d9",
+      "size": 3623
+    },
+    "jax_experiments/analysis/regime_polarity_policy_distillation_control_model.py": {
+      "sha256": "42a4e1a4e1d270118787f3bc94664138862b504ac73d482dff20cc8afc8b9510",
+      "size": 4706
+    },
+    "jax_experiments/analysis/run_regime_polarity_corrected_audit_v2.py": {
+      "sha256": "e5ad1865be99b787e60e8590812eb087565d118eb3c92cdf546d9ce65e8c03c4",
+      "size": 12065
+    },
+    "jax_experiments/analysis/run_regime_polarity_corrected_baseline_v2.py": {
+      "sha256": "82d01996d7b36315caf0cbbc99fde02ac9011a00ff147d091f1808e6ba1cb9eb",
+      "size": 11798
+    },
+    "jax_experiments/analysis/run_regime_polarity_deployment_confirmation_audit_v1.py": {
+      "sha256": "d4b235004ed36c1d38099b06c7b784328c5f7ae67d0cb9082e16345d34ea4083",
+      "size": 1952
+    },
+    "jax_experiments/analysis/run_regime_polarity_deployment_confirmation_corrected_v1.py": {
+      "sha256": "8a9113dbf199734af363a609880d3159d093aa40fb5652a061a3afd17fe1357a",
+      "size": 975
+    },
+    "jax_experiments/analysis/run_regime_polarity_deployment_confirmation_sac_v1.py": {
+      "sha256": "78f6708cd774cc7ca516138dbe98f96581fbe4de7a8b9a46726005ca223c9991",
+      "size": 857
+    },
+    "jax_experiments/analysis/run_regime_polarity_fallback_final_audit_v1.py": {
+      "sha256": "747e5053ebf97e0f072613db6142212df55072731a69c5ff95664d32cde32b0d",
+      "size": 15388
+    },
+    "jax_experiments/analysis/run_regime_polarity_fallback_final_baseline_v1.py": {
+      "sha256": "edcf7cbf262d2122202e6725aa79845d0844ca4453d09d56e87cb2654de91a4e",
+      "size": 8435
+    },
+    "jax_experiments/analysis/train_regime_polarity_deployment_confirmation_student_v1.py": {
+      "sha256": "d039905b6ff50f657bbed530778b4686da8950a03018c24db0c178a1d282e3b9",
+      "size": 550
+    },
+    "jax_experiments/analysis/train_regime_polarity_fallback_final_student_v1.py": {
+      "sha256": "a903e8d16559358a29bd6d29d98ea99c33230ec9420d39f495e141849e8ff559",
+      "size": 702
+    },
+    "jax_experiments/analysis/train_regime_polarity_policy_distillation_control_v2.py": {
+      "sha256": "c0706d91950328c764abcc4790b3ddafff14a7a3f19a806b67d9142e2bdf4243",
+      "size": 31447
+    },
+    "jax_experiments/common/causal_fallback.py": {
+      "sha256": "1904e17eeda3719b4ef11d8e398bfce5694276b3f327a700ef94c3e0ac57e9be",
+      "size": 9508
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/common/replay_buffer.py": {
+      "sha256": "b8f86ac4ed013797d681e5b070222004fd319fd63e06604cf33ffbe374cc97e2",
+      "size": 17329
+    },
+    "jax_experiments/configs/default.py": {
+      "sha256": "4ddbe406e95ce1be008b231296f1d9fda93b54f98bd65acb44264d30a33b72b7",
+      "size": 27848
+    },
+    "jax_experiments/deployments/regime_polarity_final_mechanism_audit_v2/registration.json": {
+      "sha256": "3df1d27a40603720238080831c4c1ac5418de84b1b35091d86ef91fa478fc88d",
+      "size": 9897
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_101/bundle_manifest.json": {
+      "sha256": "183c142144e96bb39f2f964b89a5efc9bb3653e0a63a4f760d8e8bb8b9b7041a",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_101/checkpoints/params.pkl": {
+      "sha256": "ed4fffd320150be0db9d47ca8c32d19bac653c0bd5a9fac5471d29286aff03bb",
+      "size": 23140156
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_101/checkpoints/train_state.pkl": {
+      "sha256": "1d5b29a3b66a93261506c4fd13415969b14f4e7c89ada59ea7a59e63a2116caa",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_101/logs/protocol_signature.json": {
+      "sha256": "800c47ad84f73a5821468e543e19fc953a974ecfbb6c764d39386f44b571f76f",
+      "size": 15118
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_211/bundle_manifest.json": {
+      "sha256": "494f4b974e9e1f614efad78e6d4435da236d651646df0a26a9c549eaf20217d9",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_211/checkpoints/params.pkl": {
+      "sha256": "ed7770a5df3f9c087dc8860b387587e076a359263a2efba58e1aabab1b9b9b82",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_211/checkpoints/train_state.pkl": {
+      "sha256": "5989adb2258ed7ec1e0f7629285358567a061ba08bd97899d0f9ddc68e8bb9ae",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_211/logs/protocol_signature.json": {
+      "sha256": "0b35d5b7497663d752203b1f4850b7bc6f9df7c90df99db9e3bf68efefbb7d76",
+      "size": 15075
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_307/bundle_manifest.json": {
+      "sha256": "84067667e32e771791c01e7be1fbfa7d8497c163cf7af98fb5c8e0cace4c9288",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_307/checkpoints/params.pkl": {
+      "sha256": "62cee953534f6b3bbb6be11575d894ae63bb32ff9129b69a62f9a6c0a3776c66",
+      "size": 23140156
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_307/checkpoints/train_state.pkl": {
+      "sha256": "68e68092e55db94d2c122a90a9baa98a87010b3da1ba53d3be0f43bc42fd0004",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_307/logs/protocol_signature.json": {
+      "sha256": "4c093a171ef7e7c66e3bc57c0f9e9109f9fe62ad4025041134f59bc611ca84f8",
+      "size": 15118
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_419/bundle_manifest.json": {
+      "sha256": "cbd821c818bc640fa7e6dcc3c2d5456228421bd9259f9780e46f57c06b037354",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_419/checkpoints/params.pkl": {
+      "sha256": "c007124134fe721a1347ca0c71c3da88d5bece1b0e6e6643ee41c180172cc1cd",
+      "size": 23140156
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_419/checkpoints/train_state.pkl": {
+      "sha256": "7127757c9c42d77829f39b29486f87ffee5643725bc1b76331888bb7b9ff702b",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_419/logs/protocol_signature.json": {
+      "sha256": "08aca18138c7c4e27872c8a4e1d34c055e0c6c5202f4d776769d27ebc76ee5af",
+      "size": 15118
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_523/bundle_manifest.json": {
+      "sha256": "2144038066b84828c3693d4d72ea896168db519719301611abbce235725988fa",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_523/checkpoints/params.pkl": {
+      "sha256": "fdbc8075ef52e30ad7e72b5f4818757d6a0a9716925775d590aeb2b5a61561bf",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_523/checkpoints/train_state.pkl": {
+      "sha256": "a0f859e35dcb501abf7b77b029b93cac46965a5d64acf3af7044290043e12c2a",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/oracle/seed_523/logs/protocol_signature.json": {
+      "sha256": "98eead63355ecef6b34e5386d85ef68a5bf0db179932a2d5472704a09c060fbb",
+      "size": 15075
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_101/bundle_manifest.json": {
+      "sha256": "2cf06836206692f9ac7709c34bd4740b7ec996cc0b22b7ea7986150e1d32065a",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_101/checkpoints/params.pkl": {
+      "sha256": "4af282faddc3c235f23d2b25b8ac0cce7961021eb1f82338b2101824e2bd069f",
+      "size": 23140992
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_101/checkpoints/train_state.pkl": {
+      "sha256": "42a245b7bc321cb210999c7131fba2391d812266f84b5c3c81d431651643628b",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_101/logs/protocol_signature.json": {
+      "sha256": "a63865de7d16b033d9b524d0ee11ff2e43640ec3d9720f1cd879357986d77899",
+      "size": 15066
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_211/bundle_manifest.json": {
+      "sha256": "6c1d9a781b100e5b3f798286868358e3d78934fe1371369cbb2c9ca722e5b6ba",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_211/checkpoints/params.pkl": {
+      "sha256": "f4fdcfa43f0ee7c34147e7ff2b7a42804fcd6529a383f89e3141829f70feb47e",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_211/checkpoints/train_state.pkl": {
+      "sha256": "5cd68c51a45a3f9515fd1945b5b59424172b5a593fd993cacc564ab0a523c2cf",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_211/logs/protocol_signature.json": {
+      "sha256": "12aabaec175f5cbfe8df330bdb973207360092f4160a0067ddcae3fd6941687d",
+      "size": 15075
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_307/bundle_manifest.json": {
+      "sha256": "4805985ac6b349b2ab8d15a080898ba40b126df6c054e7307f062b524f40ed60",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_307/checkpoints/params.pkl": {
+      "sha256": "7cc909e2394007efecbce4279c8b7537ef6f9dc684d8fe18fc67b4746e214437",
+      "size": 23140156
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_307/checkpoints/train_state.pkl": {
+      "sha256": "279d2abd0ce5a31ad8da11c2e0a03aec45ebf0645c136ca616a161ceafe7c72c",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_307/logs/protocol_signature.json": {
+      "sha256": "ce547d4359676d92078f879f4766d81ce2daf34502df2ebd34a00ba270b516ed",
+      "size": 15118
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_419/bundle_manifest.json": {
+      "sha256": "804ba98df3b63b26a102ce1d2b084661f1b4293eb6b1520eb30d399d7fa2a773",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_419/checkpoints/params.pkl": {
+      "sha256": "f5f1f05e32c15448884f62e4d724dc4787abc9eedbf9f54a5f32426c894932c4",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_419/checkpoints/train_state.pkl": {
+      "sha256": "6ff418ef766e1d948f792c5965b02104fe17a0596ed8078191a7912cfc64a95e",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_419/logs/protocol_signature.json": {
+      "sha256": "38b1b4eab661d119d8a601b9e0ae922d588768446d51ba182fdb30656d3173ab",
+      "size": 15075
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_523/bundle_manifest.json": {
+      "sha256": "9b3fc5784d61c44ba8164c443b06368a4f02669eae8628e8fbb5b8566d9ae360",
+      "size": 951
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_523/checkpoints/params.pkl": {
+      "sha256": "ccffac38c150e7962b6093cfb5e8b8cffa0f26e6892a14f28ba969db70a394b1",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_523/checkpoints/train_state.pkl": {
+      "sha256": "2222c9524aca9befa149d0f7c716ef008b25b78a5e83f9a5767a7cc4c0e30b95",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_confirmation_v1/HalfCheetah/robust/seed_523/logs/protocol_signature.json": {
+      "sha256": "40916e13a9ec71cc54fecdd33c23abdac4a0391dd2eba4405af3288fc3b609dc",
+      "size": 15075
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_1031/bundle_manifest.json": {
+      "sha256": "fe024cc8fec375de64acb607b1ad7624a4fdb56e8d39795018d4bc7637289e79",
+      "size": 971
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_1031/checkpoints/params.pkl": {
+      "sha256": "eaf9101e4298ab2b5b84e57d98194c9139ce97d029b1d496e6aac12e76300532",
+      "size": 23140156
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_1031/checkpoints/train_state.pkl": {
+      "sha256": "ab36a0bb62f8bfe5ac5ba4395bb735269452939467a0d3edc564d4d95eac2b02",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_1031/logs/protocol_signature.json": {
+      "sha256": "e8bb2134d3434cb89883dfd74ff6ef0d7d92d7089750928a27454e00799e06af",
+      "size": 15134
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_607/bundle_manifest.json": {
+      "sha256": "6019865c31f21f41c1b5fdb9bd1a52c54bb7174ad892d189042b28921ea16354",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_607/checkpoints/params.pkl": {
+      "sha256": "ed443bca11af1661d3c104e40699960f1ab85659a359bf0d39ace2221d9c25e1",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_607/checkpoints/train_state.pkl": {
+      "sha256": "cb4768615315073906ad326f2b9d94c869381fc82b1930bd241059cda8e8c948",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_607/logs/protocol_signature.json": {
+      "sha256": "4ec05e87520b93acaaf8b46fd08af7b256861957241789777ac62bb24523459c",
+      "size": 15087
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_719/bundle_manifest.json": {
+      "sha256": "2655e408a770d896bcc01bfe74084560dda61c15fd5971401b16e103208de880",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_719/checkpoints/params.pkl": {
+      "sha256": "db20c8507fa663858917bc3093daddb6c5187868ea8dbe022f25f6be760fd96b",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_719/checkpoints/train_state.pkl": {
+      "sha256": "cb3f68f0bb09dd6efbb9672a6d8cbd80ef24cf750d420e7eb5c47c4a0ed2e39f",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_719/logs/protocol_signature.json": {
+      "sha256": "0f78929fc3e57f74ee0a6809cc7cbdda895c33dc0430770636032bad362d468c",
+      "size": 15087
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_823/bundle_manifest.json": {
+      "sha256": "1530bbf4dfc71926855bc7e1177cc5b783084abe8c4d19e4ed597cc932082c8c",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_823/checkpoints/params.pkl": {
+      "sha256": "da42692d7f3112e96eb804a1975373113540c86503460b571db34d4db157cad4",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_823/checkpoints/train_state.pkl": {
+      "sha256": "9ec53be2c560b7b57898de568d055ad7feb3c48b0bb52906cba73aaeed1e6cd7",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_823/logs/protocol_signature.json": {
+      "sha256": "3017e37a9239e5a055a37e082da1b141fcee6e9191ae67c9e7e4ec354d288ef8",
+      "size": 15087
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_929/bundle_manifest.json": {
+      "sha256": "690ededb4075778b46d2a2804ce48f6df411dd51dc2ec5f6c00ebf35d42e2387",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_929/checkpoints/params.pkl": {
+      "sha256": "e856655da9055b4896e8d561ec92f3c53ac1dd4e8a3362728f0fe17f207b2e45",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_929/checkpoints/train_state.pkl": {
+      "sha256": "8d5c04e8136a3d0af2eefabe2a00f7ec4a24ecc6754023e503383b77fd2ea7a2",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/oracle/seed_929/logs/protocol_signature.json": {
+      "sha256": "2858f081a51577f65dc4b2ebf52943d75941dd5a6b31dacee6aaa0e54cc48398",
+      "size": 15087
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_1031/bundle_manifest.json": {
+      "sha256": "505a5ecde2351a0c430265e248a32f074a9dfba19685fd582a8999f9a6fe8fa2",
+      "size": 971
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_1031/checkpoints/params.pkl": {
+      "sha256": "e6f080e2e3276b0afe447792417557b76019f47f6f3ec42abfad2e5ba40546b0",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_1031/checkpoints/train_state.pkl": {
+      "sha256": "914c6f3d11ceff9a3927c4b79e3fe960a0de36eb51b0bba95014d6aff9b440d9",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_1031/logs/protocol_signature.json": {
+      "sha256": "184b94a7ecd22afc98a3263db42400d2d80ce2b100d2c1a02fdfa6d2546e5928",
+      "size": 15091
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_607/bundle_manifest.json": {
+      "sha256": "916ad883081ecf9b9ebf55a1ab98959fe15cccb988d2b25005c3b330d2c945f2",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_607/checkpoints/params.pkl": {
+      "sha256": "663648dd191afc2d1112ba9973220e5a16f8e3a60d32d291bba8c2d910d47233",
+      "size": 23140992
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_607/checkpoints/train_state.pkl": {
+      "sha256": "0772089dd86a58a4002c8d15f6a4cef6e7499a95482c7d3ff7a8116d0c539582",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_607/logs/protocol_signature.json": {
+      "sha256": "ec55cace678c04c60495e9707396dc94ff8f5275228a5372dd04d11ac9c09a8f",
+      "size": 15078
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/bundle_manifest.json": {
+      "sha256": "6ff2a58d903db1d900a91405f57a4884ce55c39dae249d765b186c14aa5fc4a8",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/checkpoints/params.pkl": {
+      "sha256": "5b0d783989eb9cf19e617c87692595a8bc7ec06ac8ee1070cb6015e858bf9ee4",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/checkpoints/train_state.pkl": {
+      "sha256": "4318607407285db6047d33f37dc7116e15e5ad847fb15ebdc8d37919df4077f1",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/logs/protocol_signature.json": {
+      "sha256": "e7c06aa6f061b99e6c106833a18bf7be2071d8aa08d287db0ab14328e324d895",
+      "size": 15087
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_823/bundle_manifest.json": {
+      "sha256": "502838bdb240933109525c9174d4e6496e00cfc578c8ae88321fe2cfa3600691",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_823/checkpoints/params.pkl": {
+      "sha256": "ee148a8af1d8d665f05d0c5f4a8fb3a89fc9b94832f61b81b080a8db3d5fab75",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_823/checkpoints/train_state.pkl": {
+      "sha256": "9f5464d12464772d8e517f0f03f18026cf6503ff8c6b298e451f69f753f500e4",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_823/logs/protocol_signature.json": {
+      "sha256": "574829529bb5ce6c9fc39c79fcb8667af795134956c1cf7ed88efe98b1cedef3",
+      "size": 15087
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_929/bundle_manifest.json": {
+      "sha256": "e131b544431569aa4586a3626713c8b17fd711f284d09c894e3620e966583157",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_929/checkpoints/params.pkl": {
+      "sha256": "b55ae1f2780e48724b5eccd98d60af37b08602553fe6a41d040955f40be2dcc6",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_929/checkpoints/train_state.pkl": {
+      "sha256": "61a3d41ab7ab79b060045ddf9970865eb3c9f9fe2a69b5197825b5cff9a4d160",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_929/logs/protocol_signature.json": {
+      "sha256": "6e9efd1547c8f33bc48bbaf2c45d6d3dc21a3b9ba519185cc0e99eede386bb7b",
+      "size": 15087
+    },
+    "jax_experiments/networks/escp_recurrent.py": {
+      "sha256": "ebcc132782fd59e074f8534fac307a3be4308b3f284d6e7a56b4b43c9a7603a5",
+      "size": 6548
+    },
+    "jax_experiments/results_regime_polarity_expected_action_system_id_model_v4/inverse_params.npz": {
+      "sha256": "c1ff9021a3d3684116464c421c852eb16cd7ab286b2fd53bcd764d9a50393af1",
+      "size": 2712127
+    },
+    "jax_experiments/results_regime_polarity_expected_action_system_id_model_v4/model_manifest.json": {
+      "sha256": "fc4b28662ac1f38081aab02723ebcbea2fa47fbe37eea27bb4e1a564b8d571d0",
+      "size": 56089
+    },
+    "jax_experiments/results_regime_polarity_policy_distillation_transient_causal_ceiling_analysis_v1/analysis.json": {
+      "sha256": "100a74e5a94873400780db83866697b1de2bea62cc3e93bfc9ff5cfa738d7b44",
+      "size": 17211
+    },
+    "jax_experiments/results_regime_polarity_policy_distillation_transient_fallback_cross_student_analysis_v1/analysis.json": {
+      "sha256": "346390d2019a3f33f923df87ce7a11d864a04eee2ba53992e6e56ad44b716620",
+      "size": 11306
+    },
+    "jax_experiments/results_regime_polarity_policy_distillation_transient_fallback_selection_v1/selection_manifest.json": {
+      "sha256": "02e3e965d19eda0df0eb62cb379518cfc2107593b94278e65ceb6f429f621c73",
+      "size": 2746
+    },
+    "jax_experiments/tests/test_regime_polarity_deployment_confirmation_v1.py": {
+      "sha256": "c61a0bce6c7b98b6ab6a342e1b7def7f865c72e049eb850c02d526b83610a468",
+      "size": 2133
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_polarity_deployment_confirmation_v1_preregistration_2026-08-09.md": {
+      "sha256": "e52cd9e5cd0bdfde4f42626941a61d12669d74df79e9686ad10d145d4e1d346d",
+      "size": 2558
+    },
+    "scripts/submit_regime_polarity_corrected_baselines_v2.py": {
+      "sha256": "d48784352cfbad822c03a7c41df9455ac4019345a06395e0d075066bdd79c785",
+      "size": 11314
+    },
+    "scripts/submit_regime_polarity_deployment_confirmation_v1.py": {
+      "sha256": "3aecf743dd8f43727541864a4029d8465d6900037cc93d05926ccdfc7a29333b",
+      "size": 17265
+    }
+  },
+  "statistics": {
+    "family": [
+      "bapr>sac",
+      "bapr>escp_recurrent",
+      "bapr>resac_b0"
+    ],
+    "family_alpha": 0.05,
+    "maximum_termination_gap": 0.0,
+    "minimum_seed_wins": 8,
+    "minimum_stationary_retention": 0.95,
+    "multiplicity": "Holm one-sided paired tests",
+    "simultaneous_interval": "Bonferroni one-sided lower bound",
+    "strongest_seedwise_envelope": "diagnostic_only"
+  },
+  "status": "registered"
+}

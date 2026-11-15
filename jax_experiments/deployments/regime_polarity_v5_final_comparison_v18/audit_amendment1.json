@@ -1,0 +1,23 @@
+{
+  "correction": "Expose the already-preregistered v5 system-ID manifest and parameter paths as process-local loader aliases before invoking the frozen v18 audit.",
+  "created_after_training_before_successful_audit_retry": true,
+  "failure": {
+    "exception": "AttributeError",
+    "missing_attributes": [
+      "MODEL_MANIFEST",
+      "MODEL_PATH"
+    ],
+    "module": "jax_experiments.analysis.regime_polarity_specialist_expected_action_model_v5"
+  },
+  "parent_registration": {
+    "sha256": "9a44ea37b44cc8088956ecc2fa16364edd9084347492bdfe1bb8de9b04832240",
+    "size": 10057
+  },
+  "schema": "bapr.regime-polarity-v5-final-audit-amendment.v18.1",
+  "scientific_protocol_changes": [],
+  "source": {
+    "sha256": "a02a62fdf541d15f5243c67403c0a8b7d0eae74a363b41979b00cb2abbd1b1f6",
+    "size": 3121
+  },
+  "status": "registered"
+}

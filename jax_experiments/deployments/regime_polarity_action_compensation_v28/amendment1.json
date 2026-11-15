@@ -1,0 +1,38 @@
+{
+  "correction": "Bind the frozen V28 audit's estimator symbol to the existing v5 model-construction module before running the unchanged audit.",
+  "created_after_failed_execution_before_successful_policy_audit": true,
+  "discarded_outputs": "All five failed runs exited before writing an audit result or manifest.",
+  "failed_task_ids": [
+    "t93039",
+    "t93040",
+    "t93041",
+    "t93042",
+    "t93043"
+  ],
+  "failure": {
+    "exception": "AttributeError",
+    "incorrect_module": "jax_experiments.analysis.regime_polarity_specialist_expected_action_system_id_v5",
+    "missing_attribute": "make_estimator"
+  },
+  "parent_registration": {
+    "sha256": "3b7d0463427ddfb2550ab34c259229424054f51140b3d6dced8cc7c4de63f3a3",
+    "size": 6554
+  },
+  "schema": "bapr.regime-polarity-action-compensation-amendment.v28.1",
+  "scientific_protocol_changes": [],
+  "source_records": {
+    "amendment_runner": {
+      "sha256": "83bbff85d4da8e4ab813c791f24da318547a34ae4f378050b676b9a2ffffedba",
+      "size": 4215
+    },
+    "estimator_implementation": {
+      "sha256": "b25114a539109a38022571b001bbb2f1ca97b0b1426796894c70ae01688ea518",
+      "size": 4039
+    },
+    "resubmission_script": {
+      "sha256": "0376e5ddd302e5d272dbf53fefef35124a4941fd9f08222060b00d96c5a70075",
+      "size": 3017
+    }
+  },
+  "status": "registered"
+}

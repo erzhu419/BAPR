@@ -1,0 +1,280 @@
+{
+  "created_before_audit": true,
+  "data_policy": {
+    "checkpoint_only": true,
+    "controllers": "frozen v12 policy-only bundles",
+    "estimator": "frozen v5 expected-action estimator",
+    "new_training": false,
+    "result_payload": "json_and_markdown_only"
+  },
+  "decision_rule": {
+    "estimator_retraining_requires_causal_margin": true,
+    "minimum_delay_4_headroom_retention": 0.7,
+    "minimum_mode_accuracy": 0.95,
+    "minimum_posterior_gain": 0.1,
+    "minimum_posterior_headroom_recovery": 0.7,
+    "minimum_safe_oracle_gain": 0.1,
+    "require_zero_termination": true,
+    "required_event_wins": 3,
+    "required_seed_passes": 4
+  },
+  "identity": {
+    "arms": [
+      "robust_sac",
+      "true_mode_safe_utility",
+      "delayed_oracle_4_safe_utility",
+      "posterior_map_safe_utility"
+    ],
+    "delay_steps": 4,
+    "dwell_steps": 250,
+    "estimator_protocol_version": "v5-specialist-trajectory-expected-action-system-id",
+    "event_seeds": [
+      168201,
+      168217,
+      168233
+    ],
+    "max_episode_steps": 1000,
+    "parent_protocol_version": "v12-actor-only-warmstart-confirmation",
+    "protocol_version": "v13-frozen-estimator-transfer",
+    "switching_episodes": 5,
+    "switching_schedules": {
+      "168201": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "168217": [
+        3,
+        1,
+        2,
+        0
+      ],
+      "168233": [
+        2,
+        3,
+        0,
+        1
+      ]
+    },
+    "training_seeds": [
+      71003,
+      71021,
+      71039,
+      71057,
+      71079
+    ]
+  },
+  "schema": "bapr.frozen-estimator-transfer-registration.v13",
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_frozen_estimator_transfer_v13.py": {
+      "sha256": "3708caa712ca2674b16ee6f86903cb0649efe90c76e43fe7e7dd3595c8daa882",
+      "size": 10392
+    },
+    "jax_experiments/analysis/regime_polarity_frozen_estimator_transfer_v13.py": {
+      "sha256": "b86331b01c19083db2dd9556865438bc9684f8d4dc503306be734a7db95e477c",
+      "size": 9842
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_expected_action_model_v5.py": {
+      "sha256": "b25114a539109a38022571b001bbb2f1ca97b0b1426796894c70ae01688ea518",
+      "size": 4039
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_expected_action_system_id_v5.py": {
+      "sha256": "b8a598feaca8559702bb452c57d78824d25395ebc0a8b649d9ff231a7b11b9d4",
+      "size": 3946
+    },
+    "jax_experiments/analysis/run_regime_polarity_frozen_estimator_transfer_audit_v13.py": {
+      "sha256": "8fa6bc35aa6a9c1e3e3b0d15d54c6238e6b10c685b87bd1554c0516b3579e9c9",
+      "size": 16279
+    },
+    "jax_experiments/analysis/run_regime_polarity_inverse_system_id_audit.py": {
+      "sha256": "828906529e45f11596cf215a45956d487d4577ad6e0f60a1d9daa2993e175a3a",
+      "size": 11838
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_expected_action_confirmation_audit_v6.py": {
+      "sha256": "a4287dbe7e0b279de755fb74974be8eede7492051b20ca00c9115b2b8d42d1bb",
+      "size": 11324
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_safe_utility_audit_v8.py": {
+      "sha256": "c88b602f9cdac5acb9f7f1a15b5c4f7fc9daddea3d0a56717ada40e8a90d5976",
+      "size": 15605
+    },
+    "jax_experiments/deployments/regime_polarity_robust_warmstart_confirmation_v12/audit_fix1_registration.json": {
+      "sha256": "8810b3f98390c170001736ac0f8cadbbfe47913872084d8775e174637b738670",
+      "size": 583
+    },
+    "jax_experiments/deployments/regime_polarity_robust_warmstart_confirmation_v12/registration.json": {
+      "sha256": "5e19ba418b5344df9f4a94a630243e07404bc22342b13077108d426110022025",
+      "size": 4465
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71003/bundle_manifest.json": {
+      "sha256": "cc716854f4e8e9d1abfa1dfbc789f849f8dbd644543c6f97a42a0f22ef9eb833",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71021/bundle_manifest.json": {
+      "sha256": "ff17a320226a514a1f0d146008d7773eca1395986cfe98ea48c98634e759f89f",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71039/bundle_manifest.json": {
+      "sha256": "61d20a041a2b683e5bea7b0b32a9148ec1b95a9c753cffed6f3a0b03805fc941",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71057/bundle_manifest.json": {
+      "sha256": "b541ed07c6586bbcd6dcb0d6e2330985b66a0132052320956dcfce9288cd4907",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_source_v12/seed_71079/bundle_manifest.json": {
+      "sha256": "248fb2603b86a3320f63c21fc4f78a8f7227de2b6bf3453cf9eebab501a2a7dd",
+      "size": 959
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_0/bundle_manifest.json": {
+      "sha256": "15613fd10aa12cf2374e6319b05b4fbf0a0a1a3b95766261ed243c802bb94d99",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_1/bundle_manifest.json": {
+      "sha256": "030a595e3e582de0b375dc92511d7aaf903eb40203a649837f34977628481534",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_2/bundle_manifest.json": {
+      "sha256": "68eb65722cfff1bbd5fd47d14c6f7532286efadc21ba7388c70a606064c3274b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71003/mode_3/bundle_manifest.json": {
+      "sha256": "88837fa94bb6d6a10e104f5b42b065bda1f5044a486ed22e8807f0964db45e1b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_0/bundle_manifest.json": {
+      "sha256": "187d62bdef8a209c9f3222ff939588e6c717748873212e1f2c3d8e0f69a71d10",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_1/bundle_manifest.json": {
+      "sha256": "69ee25f00ac8c2c7c258eb474918ae9706a5a4e624079be078286c9e53c51ced",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_2/bundle_manifest.json": {
+      "sha256": "5a74d5b55efd96bdc372c069d5ba7227f045ad555c6ef4cc3594f4e94f97c889",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71021/mode_3/bundle_manifest.json": {
+      "sha256": "79ef66b33428fc9ea17ee79ef89e85e4b04d33ceaf6e3de935050aad3c2f921b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_0/bundle_manifest.json": {
+      "sha256": "1e26dd51a0238dfc1d2b46d24934f757c52506b8511db653abcf6c444ecdddf7",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_1/bundle_manifest.json": {
+      "sha256": "b8d0f5903da8b1efc224a0e953b97af2304431630403387e06f9361256b4553e",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_2/bundle_manifest.json": {
+      "sha256": "103705dcd807aa5f24aa9faa3f6323fe5a33742bcb5bfdf7e6961a636063f5a4",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71039/mode_3/bundle_manifest.json": {
+      "sha256": "7534c669478a7f93cacd58c666d0e95f35a218d9dbad3a1da9f127a2dc73f0fc",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_0/bundle_manifest.json": {
+      "sha256": "7b3bc3c9ae2dca04aa7a92ac0310b7be2c09406b7460661d623e1f0fa357aaf0",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_1/bundle_manifest.json": {
+      "sha256": "88a0a115e4e6a9d94ad2c998c7542787ebbfd418d1a93f43637e798ba3320a6b",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_2/bundle_manifest.json": {
+      "sha256": "39511cfc4de7dc860d1efe9ce9727139a45062be25746d462b23851f3baa2f98",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71057/mode_3/bundle_manifest.json": {
+      "sha256": "131719d1448349283ead4b42a47a74958231b330c14906b45496a86bd28f0c6c",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_0/bundle_manifest.json": {
+      "sha256": "47f2f61ec526a7ae2006dafd32225bb13a7fe4b67beb43547f567ab0b1d713ea",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_1/bundle_manifest.json": {
+      "sha256": "b59ebc32021edc26f05423cfbf96d1535edb1e087e4f9e5eb824cf72f6cb9071",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_2/bundle_manifest.json": {
+      "sha256": "63f8507019522d276966fcbe611f7de25241a46174855a4db95b910925f5ee93",
+      "size": 1363
+    },
+    "jax_experiments/eval_bundles_regime_polarity_robust_warmstart_confirmation_v12/actor_only/seed_71079/mode_3/bundle_manifest.json": {
+      "sha256": "478077dccd5dcc65be9487e4fe6dee8474a7b341822aaa265a010ea75741b501",
+      "size": 1363
+    },
+    "jax_experiments/networks/executed_action_inverse.py": {
+      "sha256": "7af26a7c49ae1fedc4be0f49b0a5a9a856e43390e3ae8f55cada0e0486ed57d5",
+      "size": 5820
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_analysis_v12/analysis.json": {
+      "sha256": "1864bac6b87089760b7a867eebe2971094a782d4757a768b69fd2ce9fdb4d479",
+      "size": 15868
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_analysis_v12/analysis.md": {
+      "sha256": "fc9c2fdf4c729f70d89e27ffcd8044a8a28e0fb524adb630b9df063c462f93aa",
+      "size": 1006
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71003/audit.json": {
+      "sha256": "b8bcdbb7351a5c11d01f8b7ecd585f0a9c06d033d4609758b2bf750eca8789ef",
+      "size": 39020
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71003/audit_manifest.json": {
+      "sha256": "8093e32a9bc8d25ca65508c476e644a22f97f13e392c87aad7c9a51e957fce31",
+      "size": 1651
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71021/audit.json": {
+      "sha256": "c5bc7104ad00a9e009e1236fa4de8b77e88fc9148f9a96ca564a6afa27e2dd4c",
+      "size": 39022
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71021/audit_manifest.json": {
+      "sha256": "1e25cf6abf7b5622ceda09794dab9f01d9a9fa627eabc84f854c3a252c183231",
+      "size": 1651
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71039/audit.json": {
+      "sha256": "dea9a8ece2d7539a52c115c11a4ed5e5f69173d04ed3217b5d65adbba74eaf7e",
+      "size": 39047
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71039/audit_manifest.json": {
+      "sha256": "0a81714179148abc85b9a98925cf910d626761a52e2e99fca0fd2a1bc8cd1706",
+      "size": 1651
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71057/audit.json": {
+      "sha256": "2b24de5d0ef1d21635fa5068081edde3e673e55fa55f4d3c4904999706634e2c",
+      "size": 39023
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71057/audit_manifest.json": {
+      "sha256": "fb5db39680ec5e072a0f317c475e58df6d12ca2de3b1b8bc058608399845ee01",
+      "size": 1651
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71079/audit.json": {
+      "sha256": "b13b345889685d2c38fc49207a18e31270f96832a6096ecc8375398cd968959e",
+      "size": 39057
+    },
+    "jax_experiments/results_regime_polarity_robust_warmstart_confirmation_audit_v12/seed_71079/audit_manifest.json": {
+      "sha256": "9f9ee3c4715013862b120d087a6ca29fae23a6baeddb41dd5b475278393c97ca",
+      "size": 1651
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "reports/regime_polarity_frozen_estimator_transfer_v13_preregistration_2026-09-01.md": {
+      "sha256": "ffb7fd1256b1058a6933f5640e8c70648710c9d62d252c4890e02131e0c71b1a",
+      "size": 1474
+    },
+    "reports/regime_polarity_specialist_expected_action_v5_2026-08-29.md": {
+      "sha256": "7aab8ef2b4778e6828773d8ca0b45e4e2ac29c80fa9096dd5b7b6e0d06cde238",
+      "size": 1354
+    }
+  },
+  "status": "registered"
+}

@@ -1,0 +1,2870 @@
+\clearpage
+\appendix
+
+\section{Actuator-regime benchmark}
+\label{app:benchmark}
+
+The prospective confirmation benchmark keeps HalfCheetah morphology, gravity, reward, observation space, and episode horizon fixed. Only the actuator-coordinate transform changes. Before each physics step, the environment applies
+\begin{equation}
+    u_t=\clip(\gain_{z_t}a_t+\varepsilon_t,-1,1),
+    \qquad \varepsilon_t\sim\mathcal{N}(0,0.02^2 I).
+\end{equation}
+For six action dimensions, the four fixed transforms are:
+\begin{center}
+\begin{tabular}{clc}
+\toprule
+Mode & Affected channels & $\operatorname{diag}(\gain_z)$ \\
+\midrule
+0 & lower half & $(-1,-1,-1,+1,+1,+1)$ \\
+1 & upper half & $(+1,+1,+1,-1,-1,-1)$ \\
+2 & even indices & $(-1,+1,-1,+1,-1,+1)$ \\
+3 & odd indices & $(+1,-1,+1,-1,+1,-1)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The environment holds the active mode fixed for 250 steps. A switching episode contains four blocks and lasts 1,000 steps. The simulator state is preserved at a switch; the robot is not reset. Each mode therefore defines a persistent stochastic transition distribution rather than a per-step resampling of robot morphology.
+
+\section{Proofs for the action-compensation mechanism}
+\label{app:proofs}
+
+The mechanism proofs use abstract common transition and reward maps, with a finite family of actuator transforms.
+Their state space, noise law, and switching schedule are not specific to HalfCheetah.
+Return comparisons retain the stated integrability and action-value sensitivity conditions.
+Appendix~\ref{app:environment_certificates} separately studies sufficient conditions for one spring simulator.
+
+\subsection{Feasible compensation for an invertible transform}
+
+For Proposition~\ref{prop:feasible_compensation}, set $w=\gain_z^{-1}\gain_r q$. Since $\gain_z$ is invertible,
+\begin{align}
+ \gain_z\clip(w,-1,1)=\gain_r q
+ &\iff \clip(w,-1,1)=\gain_z^{-1}\gain_r q=w\\
+ &\iff w\in[-1,1]^d.
+\end{align}
+This is a condition on the command needed at the particular canonical action $q$, not merely on the determinant of $\gain_z$. If it holds at every state reached by the reference and compensated controllers, the two have equal pre-noise signals at equal states. Coupling their initial simulator state, actuator noise, and any other exogenous randomness then makes the executed actions, rewards, and next states equal by induction. For example, with one actuator, $\gain_z=0.45$, $\gain_r=1$, and $q=1$, the required command is $1/0.45>1$. Clipping it to 1 yields a pre-noise signal of $0.45$, not the reference signal 1. In the tested polarity family, $\gain_z^{-1}\gain_r$ is itself a sign matrix and maps the entire command box onto itself, so feasibility is automatic.
+
+\subsection{Benchmark assumptions and pathwise equivalence}
+
+The unconditional pathwise claim is deliberately limited to the structure implemented by the actuator-polarity benchmark. All modes use common transition and reward maps and differ only in the action transform $\gain_z$. Each $\gain_z$ is a diagonal sign matrix, so $\gain_z^{-1}=\gain_z$ and $\gain_z^2=I$. The canonical deployment policy is deterministic, and its output lies in $[-1,1]^d$. For a pathwise comparison, the reference and switched rollouts use the same initial simulator state and the same realization of actuator noise. Any additional simulator or reset randomness can be included in this common exogenous-noise sequence. These assumptions hold for the prospective HalfCheetah evaluator: the transformed, noisy action is passed to both the physics step and the control-cost term in the reward.
+
+Fix an arbitrary horizon $H$ and mode sequence $(z_t)_{t=0}^{H-1}$. Write the fixed-reference rollout as
+\begin{align}
+    a_t^{\mathrm{ref}} &= \pi_r(s_t^{\mathrm{ref}}), \\
+    u_t^{\mathrm{ref}} &= \clip\!\left(
+        \gain_r a_t^{\mathrm{ref}}+\varepsilon_t,-1,1\right),
+\end{align}
+and the switched, true-mode-compensated rollout as
+\begin{align}
+    a_t^{\mathrm{comp}} &=
+        \gain_{z_t}\gain_r\pi_r(s_t^{\mathrm{comp}}), \\
+    u_t^{\mathrm{comp}} &= \clip\!\left(
+        \gain_{z_t}a_t^{\mathrm{comp}}+\varepsilon_t,-1,1\right).
+\end{align}
+
+\begin{proof}[Detailed proof of Proposition~\ref{prop:equivalence}]
+At $t=0$, the states are equal by construction. Suppose
+$s_t^{\mathrm{comp}}=s_t^{\mathrm{ref}}$. Deterministic deployment then gives the same canonical output in both rollouts. A sign matrix maps $[-1,1]^d$ onto itself, so the compensated command is admissible without changing its value through command clipping. Using $\gain_{z_t}^2=I$,
+\begin{align}
+u_t^{\mathrm{comp}}
+&=\clip\!\left(
+\gain_{z_t}\gain_{z_t}\gain_r
+\pi_r(s_t^{\mathrm{comp}})+\varepsilon_t,-1,1\right)\\
+&=\clip\!\left(
+\gain_r\pi_r(s_t^{\mathrm{ref}})+\varepsilon_t,-1,1\right)
+=u_t^{\mathrm{ref}}.
+\end{align}
+Because the transition and reward maps are common across modes, equal current states, executed actions, and coupled exogenous noise imply equal rewards and equal next states. This closes the induction for every $t<H$, irrespective of when or how often $z_t$ changes. The finite-horizon returns are therefore equal for every coupled sample path. Sampling the coupled noise sequence from its common law gives equality of the return distributions and hence of their expectations.
+\end{proof}
+
+The result is an exact structural equivalence, not a performance theorem for the learned mode estimator. In particular, mode-classification accuracy alone does not imply a return-gap bound: errors can occur at dynamically sensitive states and compound through later states. The causal estimator's recovery must therefore remain an empirical quantity.
+
+\subsection{Information ordering and causal execution}
+
+Before selecting action $a_t$, deployment has observed
+$\mathcal{H}_t=\sigma\!\left(s_0,(a_\tau,r_\tau,s_{\tau+1})_{\tau=0}^{t-1}\right)$.
+The mode belief $b_t$ contains emissions only through transition $t-1$. The state $s_{t+1}$ first appears after $a_t$ has been executed and may affect $b_{t+1}$ and $a_{t+1}$, but not $a_t$.
+
+\begin{proof}[Detailed proof of Proposition~\ref{prop:causality}]
+The initialization $b_0=1/M$ is deterministic and therefore $\mathcal{H}_0$-measurable. Assume $b_t$ is $\mathcal{H}_t$-measurable. Finite-mode $\arg\max$ with fixed tie-breaking is Borel measurable, and the assumed measurable frozen policy and known transform make $a_t$ a measurable function of $(s_t,b_t)$. Thus $a_t$ is $\mathcal{H}_t$-measurable. Once the transition is complete, $(a_t,r_t,s_{t+1})$ belongs to $\mathcal{H}_{t+1}$. The frozen inverse model computes its predictions from $(s_t,s_{t+1})$, the emission score additionally uses the already selected $a_t$, and Eq.~\eqref{eq:posterior} measurably maps these quantities and $b_t$ to $b_{t+1}$. Hence $b_{t+1}$ is $\mathcal{H}_{t+1}$-measurable, completing the induction.
+\end{proof}
+
+This proposition establishes absence of deployment-time look-ahead or true-mode leakage. It does not remove the separately reported supervision used to pretrain the inverse model, nor does it claim that the tempered belief is a calibrated probability.
+
+\subsection{Information available from a persistent mode}
+
+Proposition~\ref{prop:identifiability} concerns information under a fixed causal behavior policy $\mu$, not the accuracy of BAPR's approximate inverse model. Both mode hypotheses start from the same pre-dwell history and physical-state distribution. The policy kernel $\mu_t(\mathrm da\mid h)$ is the same function of observed history under either hypothesis. Let $\mathsf P_{z,t}^{\mu}$ denote the law of the complete prefix before action $t$, including the common initial observation. Its extension consists of sampling an action from $\mu_t$ and a completed transition $Y_t=(r_t,s_{t+1})$ from $P_z$. Thus
+\begin{equation}
+ \mathsf P_{z,t+1}^{\mu}(\mathrm dh,\mathrm da,\mathrm dy)
+ =\mathsf P_{z,t}^{\mu}(\mathrm dh)\,
+ \mu_t(\mathrm da\mid h)\,P_z(\mathrm dy\mid h,a).
+\end{equation}
+These are probability kernels, not necessarily densities with respect to Lebesgue measure. This formulation includes deterministic policies and the boundary point masses created by actuator clipping.
+
+Absolute continuity gives the following Radon--Nikodym identity, almost surely under the mode-$z$ law:
+\begin{equation}
+ \frac{\mathrm d\mathsf P_{z,t+1}^{\mu}}
+      {\mathrm d\mathsf P_{z',t+1}^{\mu}}(h,a,y)
+ =\frac{\mathrm d\mathsf P_{z,t}^{\mu}}
+       {\mathrm d\mathsf P_{z',t}^{\mu}}(h)
+   \frac{\mathrm dP_z(\cdot\mid h,a)}
+        {\mathrm dP_{z'}(\cdot\mid h,a)}(y).
+\end{equation}
+The shared policy contributes no likelihood-ratio factor, regardless of whether it is stochastic or deterministic. For integrable log likelihood ratios, taking logarithms, integrating, and conditioning on $(h,a)$ yields
+\begin{align}
+ D_{\mathrm{KL}}(\mathsf P_{z,t+1}^{\mu}\|\mathsf P_{z',t+1}^{\mu})
+ &=D_{\mathrm{KL}}(\mathsf P_{z,t}^{\mu}\|\mathsf P_{z',t}^{\mu})\nonumber\\
+ &\quad+\mathbb E_{z,\mu}\!\left[
+ D_{\mathrm{KL}}\!\left(P_z(\cdot\mid\mathcal H_t,a_t)\|
+ P_{z'}(\cdot\mid\mathcal H_t,a_t)\right)\right].
+\end{align}
+The extended-valued argument instead uses the nonnegative function $f(q)=q\log q+1-q$, with $0\log0=0$. Under absolute continuity, $D_{\mathrm{KL}}(P\|Q)=\int f(\mathrm dP/\mathrm dQ)\,\mathrm dQ$, including infinite divergence. Write $r$ for the prefix likelihood ratio and $s$ for the conditional ratio. For fixed finite $r\ge0$, let $c=|r\log r|$. The pointwise identity
+\begin{equation}
+ f(rs)+cs+r=rf(s)+(r\log r+c)s+1
+\end{equation}
+has only nonnegative terms on both sides. Integrating over the reference conditional law, using $\int s=1$, and cancelling the finite offset $c+r$ gives
+\begin{equation}
+ \int f(rs)=f(r)+r\int f(s).
+\end{equation}
+This equality remains valid when either KL integral is infinite. Integrating over prefixes recovers the same recursion without subtracting infinite quantities. The initial divergence is zero because the initial law is common. Induction through $T$ completed transitions proves Eq.~\eqref{eq:mode_information} in $[0,+\infty]$.
+
+If $\gain_z a_t=\gain_{z'}a_t$ at every history reachable under either hypothesis, the two modes produce the same distribution of $u_t=\clip(\gain a_t+\varepsilon_t,-1,1)$ under the common actuator-noise law. The common physics, observation, and reward maps therefore give $P_z(\cdot\mid\mathcal H_t,a_t)=P_{z'}(\cdot\mid\mathcal H_t,a_t)$. Every conditional KL term is zero; inductively the complete observed trajectory laws are identical. For a binary equal-prior hypothesis test, any decision rule $\phi$ based on that trajectory satisfies
+\begin{equation}
+ \Pr(\phi\text{ is correct})
+ =\tfrac12\mathsf P_z^{\mu}(\phi=z)
+ +\tfrac12\mathsf P_{z'}^{\mu}(\phi=z')\leq\tfrac12.
+\end{equation}
+In particular, an actuator channel on which the two sign matrices differ supplies no information while its commanded action remains zero. Nonzero action on such a channel is necessary but may still be insufficient if the resulting transitions are observationally indistinguishable. Neither positive KL nor the known transform family establishes a finite-sample recovery rate for the trained inverse model or the tempered filter.
+
+\subsection{Action-weighted mode-error identity}
+
+Let $q_t=\pi_r(s_t)$. Under polarity compensation with estimated mode $\hat z_t$, the command is $a_t=\gain_{\hat z_t}\gain_r q_t$. The nominal signal produced in true mode $z_t$ is therefore
+\begin{equation}
+ v_t^{\mathrm{causal}}=\gain_{z_t}\gain_{\hat z_t}\gain_r q_t,
+\end{equation}
+whereas reference execution produces $v_t^{\mathrm{ref}}=\gain_r q_t$. Their difference is Eq.~\eqref{eq:weighted_mode_error}. On channel $j$, the multiplier $g_{z_t,j}g_{\hat z_t,j}-1$ is zero when the two modes agree and is $-2$ when their signs differ. Because $g_{r,j}^2=1$, squaring and summing gives
+\begin{equation}
+ \|e_t\|_2^2
+ =4\sum_{j:g_{z_t,j}\ne g_{\hat z_t,j}}q_{t,j}^2.
+\end{equation}
+For common noise $\varepsilon_t$, componentwise clipping is non-expansive, so
+\begin{equation}
+ \left\|\clip(v_t^{\mathrm{causal}}+\varepsilon_t)
+ -\clip(v_t^{\mathrm{ref}}+\varepsilon_t)\right\|_2
+ \le \|e_t\|_2.
+\end{equation}
+This is a same-state action bound, not a long-horizon return bound. Contact dynamics can propagate the resulting state difference nonlinearly.
+
+\subsection{Belief calibration and conditional compensation risk}
+\label{app:belief_risk}
+
+Fix a pre-action information set and the canonical action $q=\pi_r(s)$.
+Let $p(z)$ be the true conditional mode distribution and $b(z)$ the implemented filter's normalized belief.
+Both are nonnegative and sum to one, but they need not coincide.
+The selected mode $\hat z$ is fixed at this decision; BAPR selects a maximum-belief mode with fixed tie-breaking.
+Define
+\begin{align}
+ E(q)&=\sum_j q_j^2, &
+ D_q(z,\hat z)&=\sum_{j:g_{z,j}\ne g_{\hat z,j}}q_j^2,\\
+ \mathcal R_b(q,\hat z)&=\sum_z b(z)D_q(z,\hat z), &
+ \epsilon(p,b)&=\tfrac12\sum_z|p(z)-b(z)|.
+\end{align}
+Here $\epsilon$ is total variation between the true conditional distribution and the filter belief.
+The action-weighted cost satisfies $0\le D_q\le E(q)$ and $D_q(\hat z,\hat z)=0$.
+
+\begin{proposition}[Calibration-aware compensation risk]
+\label{prop:belief_risk}
+For any finite polarity family and any selected mode $\hat z$,
+\begin{align}
+ \mathbb E_p\|e\|_2^2&=4\mathcal R_p(q,\hat z),\label{eq:belief_squared_error}\\
+ |\mathcal R_p(q,\hat z)-\mathcal R_b(q,\hat z)|
+ &\le E(q)\epsilon(p,b),\label{eq:belief_calibration}\\
+ \mathcal R_p(q,\hat z)&\le E(q)\bigl[1-b(\hat z)+\epsilon(p,b)\bigr].
+ \label{eq:belief_confidence}
+\end{align}
+The conditional mean squared difference of executed actions, with common noise and clipping, is at most $4\mathcal R_p$.
+If $Q_z$ satisfies the same-state sensitivity bound with a common coefficient $L\ge0$ for every mode in this comparison, then
+\begin{equation}
+ \left|\sum_z p(z)\bigl[Q_z(\gain_z\gain_{\hat z}\gain_rq)
+               -Q_z(\gain_rq)\bigr]\right|
+ \le 2L\sqrt{\mathcal R_b(q,\hat z)+E(q)\epsilon(p,b)}.
+ \label{eq:belief_value_bound}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Average Proposition~\ref{prop:mode_error} over the finite mode law to obtain Eq.~\eqref{eq:belief_squared_error}.
+Clipping is non-expansive for every common noise realization, giving the executed-action bound.
+For the calibration term, normalization gives $\sum_z[p(z)-b(z)]=0$.
+Centering the cost therefore yields
+\begin{align}
+ \mathcal R_p-\mathcal R_b
+ &=\sum_z[p(z)-b(z)]\bigl[D_q(z,\hat z)-E(q)/2\bigr],\\
+ |\mathcal R_p-\mathcal R_b|
+ &\le\tfrac12E(q)\sum_z|p(z)-b(z)|=E(q)\epsilon(p,b).
+\end{align}
+Since the selected mode has zero cost, $\mathcal R_b\le E(q)[1-b(\hat z)]$, proving Eq.~\eqref{eq:belief_confidence}.
+Finally, the sensitivity assumption and weighted Cauchy--Schwarz give
+\begin{equation}
+ \left|\sum_z p(z)\bigl[Q_z(\gain_z\gain_{\hat z}\gain_rq)-Q_z(\gain_rq)\bigr]\right|
+ \le 2L\sum_z p(z)\sqrt{D_q(z,\hat z)}
+ \le 2L\sqrt{\mathcal R_p}.
+\end{equation}
+Equation~\eqref{eq:belief_calibration} supplies the final bound.
+\end{proof}
+
+\paragraph{Interpretation and limits.}
+The result separates lack of excitation, mode uncertainty, and belief miscalibration without imposing simulator smoothness.
+It applies to continuous transition histories because only the mode sum is finite.
+For action-value comparisons, the conditioning must include the complete simulator state or supply a sensitivity bound uniform over compatible hidden states.
+For a fixed known schedule, the true conditional law may be a point mass; the same inequalities still hold.
+The tempered update in Eq.~\eqref{eq:posterior} does not establish $p=b$, and high reported confidence alone does not control the compensation risk.
+The aggregate mode accuracy and Brier score do not supply a uniform bound on $\epsilon(p,b)$.
+The proposition is a conditional mechanism statement, not a numerical certificate for the experimental return gains.
+
+\subsection{Finite-horizon return identity and conditional bound}
+
+We prove Theorem~\ref{thm:return_gap} for a fixed mode schedule $z_{0:H-1}$; an exogenous random schedule follows by conditioning on its realization and averaging. Let $x_t$ denote the complete simulator state, including any variables needed to make the physical transition Markov, and let $s_t$ be the policy's observation. The transition law includes the evaluator's reset convention: on health termination the simulator is reset and reward accumulation continues to step $H$, while the mode clock and causal belief persist. The HalfCheetah confirmation has no health terminations. All expectations below include actuator noise and any reset or other transition randomness, with the integrability assumptions of the theorem. The true-mode oracle uses nominal signal $v_t^O(x)=\gain_r\pi_r(s(x))$ for every $t$; the mode sequence is implicit in the time index of its value functions. Define $V_H^O(x)=0$ and
+\begin{align}
+ Q_t^O(x,v)&=\mathbb E\!\left[r_t+V_{t+1}^O(x_{t+1})
+ \mid x_t=x,\text{ nominal signal }v\right],\\
+ V_t^O(x)&=Q_t^O(x,v_t^O(x)).
+\end{align}
+The current noise is applied through $u_t=\clip(v+\varepsilon_t,-1,1)$ before both the physics step and reward are computed. In particular, $Q_t^O$ is defined for a counterfactual signal at the \emph{same} simulator state; it does not compare states from separate rollouts. The causal controller is history dependent through $b_t$. One can lift the state to $(x_t,b_t)$, including any further history needed by the update. The physical transition and reward depend on this memory only through the selected action, and the oracle ignores it. Backward induction therefore makes the lifted oracle value equal to $V_t^O(x_t)$; the performance-difference argument does not require $C$ to be memoryless in the physical state alone.
+
+Under the causal controller, conditional expectation at $x_t$ and its chosen nominal signal $v_t^C$ yields
+\begin{equation}
+ \mathbb E_C\!\left[Q_t^O(x_t,v_t^C)-V_t^O(x_t)\right]
+ =\mathbb E_C\!\left[r_t+V_{t+1}^O(x_{t+1})-V_t^O(x_t)\right].
+\end{equation}
+Summing over $t$ telescopes the value terms. The remaining initial value is $\mathbb E[V_0^O(x_0)]=J_O$ because both controllers start from the same initial-state distribution. This proves Eq.~\eqref{eq:causal_return_identity} without any regularity assumption on the physics or the value function.
+
+For the second statement, assume explicitly that at each state reached by the causal controller the oracle action value satisfies
+\begin{equation}
+ |Q_t^O(x_t,v_t^C)-Q_t^O(x_t,v_t^O)|
+ \leq L_t(x_t)\|v_t^C-v_t^O\|_2.
+\end{equation}
+The polarity compensation map and Eq.~\eqref{eq:weighted_mode_error} give
+\begin{equation}
+ \|v_t^C-v_t^O\|_2
+ =2\left(\sum_{j:g_{z_t,j}\ne g_{\hat z_t,j}}
+ \pi_r(s_t)_j^2\right)^{1/2}.
+\end{equation}
+Apply the triangle inequality to Eq.~\eqref{eq:causal_return_identity} and substitute this exact norm to obtain Eq.~\eqref{eq:causal_return_bound}. No sign is imposed on $J_O-J_C$: an incorrect route may accidentally increase return. Proposition~\ref{prop:gaussian_sensitivity} supplies sensitivity from a bounded continuation term without assuming smooth contact dynamics. The reported oracle-minus-causal gap is measured from paired evaluations, not calculated from a numerical sensitivity certificate.
+
+\subsection{Closed-loop accumulation of calibrated belief risk}
+\label{app:closed_loop_belief}
+
+Write the augmented pre-action state as $\xi_t=(y_t,z_t)$.
+The variable $y_t$ contains the physical state and controller history needed for the transition and value functions.
+The canonical action, selected mode, and filter belief use only the observed pre-action information established in Proposition~\ref{prop:causality}.
+Thus $q(y)=\pi_r(s(y))$, $\hat z_t(y)$, and $b_t(z\mid y)$ do not take the current true-mode label as an input.
+The oracle ignores the belief memory, as in the projection argument above.
+The state may also contain a clock needed to represent persistent switches or the evaluation reset convention.
+
+Let $\rho_t^C$ be the actual causal controller's state distribution.
+Write its conditional-mode factorization as
+\begin{equation}
+ \rho_t^C(\mathrm dy,\mathrm dz)=\nu_t(\mathrm dy)K_t(y,\mathrm dz),
+ \qquad p_t(z\mid y)=K_t(y,\{z\}).
+ \label{eq:closed_loop_mode_law}
+\end{equation}
+Here $K_t$ is the true conditional probability kernel, distinct from the implemented belief $b_t$.
+With fresh exogenous noise $e_t$ drawn independently from a common probability law $\mu$, define the complete causal update $\Psi_t^C$.
+It includes noisy, clipped execution, the physical transition, and controller-history update.
+The occupancy sequence must satisfy the pushforward identity
+\begin{equation}
+ \rho_{t+1}^C=(\Psi_t^C)_\#(\rho_t^C\otimes\mu).
+ \label{eq:closed_loop_occupancy_flow}
+\end{equation}
+The notation $\#$ denotes the distribution induced by the update map.
+
+\begin{theorem}[Closed-loop calibrated-belief return bound]
+\label{thm:closed_loop_belief}
+Fix a finite horizon $H$, normalized filter beliefs, a common initial augmented-state law, and measurable update maps satisfying Eq.~\eqref{eq:closed_loop_occupancy_flow}.
+Retain the Bellman-integrability conditions for the causal and oracle controllers.
+Assume $V_t^C-V_t^O$ is integrable under $\rho_t^C$ for $t\le H$, and both initial values are integrable under $\rho_0^C$.
+Suppose the oracle action-value sensitivity at $(y,z)$ is bounded by a nonnegative coefficient $L_t(y)$ for every candidate mode $z$.
+Using the action-weighted risk from Proposition~\ref{prop:belief_risk}, define
+\begin{equation}
+ \beta_t(y)=2L_t(y)\sqrt{
+   \mathcal R_{b_t}(q(y),\hat z_t(y))
+   +E(q(y))\epsilon\bigl(p_t(\cdot\mid y),b_t(\cdot\mid y)\bigr)}.
+ \label{eq:closed_loop_budget}
+\end{equation}
+If $\beta_t$ is integrable under $\nu_t$ for every $t<H$, then
+\begin{equation}
+ |J_C-J_O|\le\sum_{t=0}^{H-1}\int\beta_t(y)\,\nu_t(\mathrm dy).
+ \label{eq:closed_loop_return_bound}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Put $D_t=V_t^C-V_t^O$, with $D_H=0$, and define the same-state oracle gap
+\begin{equation}
+ A_t(\xi)=Q_t^O(\xi,v_t^C(\xi))-Q_t^O(\xi,v_t^O(\xi)).
+\end{equation}
+Subtracting the two Bellman recursions gives
+\begin{equation}
+ D_t(\xi)=A_t(\xi)+\int D_{t+1}(\Psi_t^C(\xi,e))\,\mu(\mathrm de).
+\end{equation}
+The occupancy transport and integrability assumptions permit Fubini and give
+\begin{equation}
+ \int A_t\,\mathrm d\rho_t^C
+ =\int D_t\,\mathrm d\rho_t^C-\int D_{t+1}\,\mathrm d\rho_{t+1}^C.
+\end{equation}
+Summing telescopes to $J_C-J_O=\sum_{t<H}\int A_t\,\mathrm d\rho_t^C$.
+Thus the performance-difference identity follows from the actual forward distribution, rather than being an additional assumption.
+The finite conditional kernel gives
+\begin{equation}
+ \int A_t\,\mathrm d\rho_t^C
+ =\int\sum_z p_t(z\mid y)A_t(y,z)\,\nu_t(\mathrm dy).
+\end{equation}
+Proposition~\ref{prop:belief_risk} bounds the absolute conditional sum by $\beta_t(y)$.
+Apply the integral and finite-sum triangle inequalities to obtain Eq.~\eqref{eq:closed_loop_return_bound}.
+\end{proof}
+
+\paragraph{Scope and limits.}
+All budgets are averaged along the causal controller's occupancy, including switch transients, not along separate oracle or estimator-training trajectories.
+Only the mode space is finite; physical state, history, and noise may be continuous.
+The sensitivity coefficient is uniform across candidate modes at the same conditioning state, and the formal API retains Bellman integrability at all states and counterfactual signals.
+The true conditional kernel must describe that occupancy sequence; no identification with the tempered filter is made.
+The theorem does not prove small calibration error, a finite switch-detection delay, or a numerical advantage over a learned baseline.
+
+\subsection{Evidence errors and recovery of the tempered sticky filter}
+\label{app:filter_stability}
+
+This analysis uses the deployed forgetting update, rather than substituting an exact Bayesian filter.
+Both compared filters receive the same completed transitions and commands on the actual causal trajectory.
+Let $\ell_t^\star$ be reference scores and $\ell_t$ the approximate scores on that sequence.
+The reference scores need not be transition-density log likelihoods.
+Write $b_t^\star$ and $b_t$ for the corresponding normalized filter states.
+
+For $M\ge2$, put $k=h/(M-1)$ and $a=1-h-k$.
+Assume $a\ge0$, $k>0$, and $0\le\delta<1$.
+The prior is $\bar b(z)=a b(z)+k$, with $a+Mk=1$.
+For positive normalized masses define the pairwise log-odds discrepancy
+\begin{equation}
+ D(p,b)=\max_{z,w}\left|
+ \log\frac{p(z)}{p(w)}-\log\frac{b(z)}{b(w)}\right|.
+ \label{eq:filter_odds_discrepancy}
+\end{equation}
+The uniform initialization and each real-arithmetic softmax update produce positive masses.
+
+\begin{theorem}[Tempered-filter score stability]
+\label{thm:filter_stability}
+Suppose $c\ge0$ and $|\ell_t^\star(z)-\ell_t(z)|\le\eta$ for every candidate mode on each completed transition, with $\eta\ge0$.
+Let $D_t=D(b_t^\star,b_t)$. Then
+\begin{align}
+ D_{t+1}&\le\delta D_t+2c\eta,\\
+ D_t&\le\delta^tD_0+2c\eta\sum_{i=0}^{t-1}\delta^i.
+ \label{eq:filter_error_envelope}
+\end{align}
+If both filters start from the same mass, $D_t\le2c\eta/(1-\delta)$.
+For any true conditional mode mass $p_t$ at the same pre-action information set,
+\begin{equation}
+ \operatorname{TV}(p_t,b_t)
+ \le\operatorname{TV}(p_t,b_t^\star)+e^{D_t}-1.
+ \label{eq:filter_reference_calibration}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Pairwise log-odds discrepancy at most $D$ is equivalent to
+$p(z)b(w)\le e^D b(z)p(w)$ for every ordered pair.
+For a common nonnegative matrix $A$, multiply this inequality by $A_{zi}A_{wj}$ and sum over $i,j$.
+It gives
+\begin{equation}
+ (Ap)(z)(Ab)(w)\le e^D(Ab)(z)(Ap)(w).
+\end{equation}
+The sticky prior has $A_{zi}=a\mathbf1\{z=i\}+k$, because the incoming masses sum to one.
+Consequently $D(\bar p,\bar b)\le D(p,b)$.
+Normalization cancels from the next pairwise log odds:
+\begin{equation}
+ \log\frac{b_{t+1}(z)}{b_{t+1}(w)}
+ =\delta\log\frac{\bar b_t(z)}{\bar b_t(w)}
+   +c\bigl(\ell_t(z)-\ell_t(w)\bigr).
+ \label{eq:filter_exact_odds}
+\end{equation}
+The difference between two evidence contrasts is at most $2\eta$.
+Taking absolute values gives the one-step inequality, and induction gives Eq.~\eqref{eq:filter_error_envelope}.
+
+Summing the multiplicative pair bound over one index gives
+$p(z)\le e^D b(z)$ and $b(z)\le e^D p(z)$.
+Hence $|p(z)-b(z)|\le(e^D-1)(p(z)+b(z))$.
+Summing and dividing by two gives $\operatorname{TV}(p,b)\le e^D-1$.
+The TV triangle inequality with the reference filter proves Eq.~\eqref{eq:filter_reference_calibration}.
+\end{proof}
+
+This result connects emission approximation to the existing action-risk bound.
+Writing $E_t=\sum_jq_{t,j}^2$, Proposition~\ref{prop:belief_risk} gives
+\begin{equation}
+ \mathcal R_{p_t}(q_t,\hat z_t)
+ \le\mathcal R_{b_t}(q_t,\hat z_t)
+ +E_t\left[\operatorname{TV}(p_t,b_t^\star)+e^{D_t}-1\right].
+ \label{eq:filter_to_action_risk}
+\end{equation}
+The same upper bound can replace the calibration term in Theorem~\ref{thm:closed_loop_belief} whenever its resulting budget is integrable.
+
+\begin{proposition}[Conditional finite-dwell mode recovery]
+\label{prop:filter_recovery}
+Let a true mode $z_\star$ persist throughout $N\ge1$ completed transitions.
+Suppose $c>0$, $\ell_t^\star(z_\star)-\ell_t^\star(w)\ge\gamma$ for every competing mode $w$ on those transitions.
+Suppose the score errors are at most $\eta$, and $m=\gamma-2\eta>0$.
+For an arbitrary normalized incoming belief, set
+\begin{equation}
+ B=\log\frac{a+k}{k},\qquad s=cm,\qquad
+ F_N=-\delta^NB+s\sum_{i=0}^{N-1}\delta^i.
+ \label{eq:filter_recovery_certificate}
+\end{equation}
+If $F_N>0$, the belief after transition $N$ has $z_\star$ as its unique maximum.
+The next action selects compensation for $z_\star$, which is correct if that mode remains active.
+\end{proposition}
+
+\begin{proof}
+The score contrast satisfies $\ell_t(z_\star)-\ell_t(w)\ge\gamma-2\eta=m$.
+The initial sticky prior lies in $[k,a+k]$, so its true-versus-competitor log odds are at least $-B$.
+Equation~\eqref{eq:filter_exact_odds} gives first-update log odds at least $-\delta B+s$.
+
+For any subsequent positive belief, common mixing moves each pair's odds towards one.
+Writing $L_t=\log[b_t(z_\star)/b_t(w)]$, this implies
+\begin{equation}
+ \log\frac{a b_t(z_\star)+k}{a b_t(w)+k}
+ \ge\min(L_t,0),\qquad
+ L_{t+1}\ge\delta\min(L_t,0)+s.
+\end{equation}
+For a negative $L_t$, the first inequality follows by cross-multiplication; for a nonnegative $L_t$, both prior odds remain at least one.
+Induction gives $L_N\ge\min(s,F_N)$, using $F_{t+1}=\delta F_t+s$.
+Since $s>0$ and $F_N>0$, every competing mode has strictly smaller belief mass.
+The information ordering in Proposition~\ref{prop:causality} places this recovery at the next action, not at the first action after a hidden switch.
+\end{proof}
+
+\paragraph{Frozen parameters and numerical correspondence.}
+For $M=4$ and $h=0.002$, $a=374/375$, $k=1/1500$, and $(a+k)/k=1497$.
+The prior lies in $[1/1500,499/500]$, so the implementation's prior clamp to $[10^{-12},1]$ is inactive in real arithmetic.
+Subtracting the largest evidence or logit is a common softmax shift and leaves the normalized update unchanged.
+With $c=1$ and $\delta=0.98$, the uniform discrepancy bound is $100\eta$.
+This is a conservative error budget, not the measured three-step identification delay.
+
+\paragraph{Scope and limits.}
+The reference-filter bias $\operatorname{TV}(p_t,b_t^\star)$ remains separate from emission approximation.
+The deployed inverse score is not established as a forward transition likelihood, and forgetting can introduce additional bias.
+The recovery proposition requires a separating score contrast throughout a finite dwell.
+Appendix~\ref{app:recovery_probability} gives a probability bound from explicit causal-rollout error moments and excitation probabilities.
+Both filters are evaluated on the same observed trajectory, rather than on two independently controlled counterfactual rollouts.
+The correspondence above concerns real arithmetic, not a floating-point underflow or Python/JAX execution proof.
+
+\subsection{Inverse-prediction errors and actuator excitation}
+\label{app:inverse_evidence}
+
+This section supplies the score-accuracy and separation conditions used above from explicit inverse-prediction errors and commanded actuator signals.
+It analyzes the deployed score in Eq.~\eqref{eq:emission}, including its factor $1/d$ and log-mixture aggregation.
+Write $\nu_i=\sigma_i^2>0$ for the shared, fixed residual variance on coordinate $i$.
+For a candidate nominal signal $u$ and a head prediction $p$, put
+\begin{equation}
+ H(u,p;\nu)=-\frac{1}{2d}\sum_{i=1}^d
+ \left[\frac{(u_i-p_i)^2}{\nu_i}+\log(2\pi\nu_i)\right].
+ \label{eq:inverse_head_score}
+\end{equation}
+The ensemble score is $\ell(u)=\log\sum_j\exp H(u,p^{(j)};\nu)-\log K$.
+The candidates are clipped to $[-1,1]^d$, and the heads use a final hyperbolic tangent.
+The variance clamp gives $10^{-6}\le\nu_i\le1$ in real arithmetic.
+
+\begin{proposition}[Inverse-prediction error to ensemble-score error]
+\label{prop:inverse_score_error}
+Let $d\ge1$ and $K\ge1$. Suppose $u,p^{(j)},p^{\star(j)}\in[-1,1]^d$ and
+$|p_i^{(j)}-p_i^{\star(j)}|\le e_i$ for every head and coordinate, with $e_i\ge0$.
+Use the same candidate and residual variance for both ensembles. Then
+\begin{equation}
+ |\ell(u)-\ell^\star(u)|\le
+ \eta(e,\nu):=\frac{2}{d}\sum_{i=1}^d\frac{e_i}{\nu_i}.
+ \label{eq:inverse_score_budget}
+\end{equation}
+If $e_i\le e$ and $\nu_i\ge\nu_{\min}>0$, then $\eta(e,\nu)\le2e/\nu_{\min}$.
+\end{proposition}
+
+\begin{proof}
+For one coordinate, factor the squared-residual difference as
+\begin{equation}
+ (u_i-p_i)^2-(u_i-p_i^\star)^2
+ =(p_i^\star-p_i)(2u_i-p_i-p_i^\star).
+\end{equation}
+The second factor has magnitude at most four, giving an absolute difference at most $4e_i$.
+The common logarithmic variance terms cancel, so each head-score difference is bounded by Eq.~\eqref{eq:inverse_score_budget}.
+For finite vectors $x,y$ with $|x_j-y_j|\le\eta$,
+\begin{equation}
+ e^{-\eta}\sum_j e^{y_j}\le\sum_j e^{x_j}\le e^{\eta}\sum_j e^{y_j}.
+\end{equation}
+Taking logarithms and cancelling $\log K$ proves the ensemble bound.
+The uniform variance corollary follows by bounding each $e_i/\nu_i$ and summing $d$ terms.
+\end{proof}
+
+On a common completed-transition sequence, apply this proposition at each time and candidate mode.
+If $\eta(e_t,\nu_t)\le\eta$ throughout the sequence, Theorem~\ref{thm:filter_stability} applies with that explicit score-error budget.
+Thus the formal connection begins at inverse-prediction errors, rather than assuming emission-score accuracy as an independent unexplained premise.
+
+\begin{proposition}[Prediction accuracy and actuator excitation give score separation]
+\label{prop:inverse_excitation}
+Let $u_\star$ be the true nominal signal on a completed transition and $u_w$ a competing candidate.
+Suppose every head satisfies $|p_i^{(j)}-u_{\star,i}|\le e_i$ and uses the same positive variance vector $\nu$.
+Define $\Delta_i=u_{w,i}-u_{\star,i}$. Then
+\begin{equation}
+ \ell(u_\star)-\ell(u_w)\ge
+ \Gamma(u_\star,u_w;e,\nu):=
+ \frac{1}{2d}\sum_{i=1}^d
+ \frac{\Delta_i^2-2e_i|\Delta_i|}{\nu_i}.
+ \label{eq:inverse_excitation_margin}
+\end{equation}
+For polarity gains $g_{z,i},g_{w,i}\in\{-1,1\}$ and a bounded command $a$,
+\begin{equation}
+ \Gamma=\frac{2}{d}\sum_{i:g_{z,i}\ne g_{w,i}}
+ \frac{a_i^2-e_i|a_i|}{\nu_i}.
+ \label{eq:polarity_excitation_margin}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+For a single head write $r_i=p_i-u_{\star,i}$.
+The common normalizers cancel from the true-versus-competing contrast, leaving
+\begin{equation}
+ H(u_\star,p;\nu)-H(u_w,p;\nu)
+ =\frac{1}{2d}\sum_i\frac{\Delta_i^2-2\Delta_i r_i}{\nu_i}.
+\end{equation}
+Since $|r_i|\le e_i$, $\Delta_i r_i\le|\Delta_i|e_i$ proves the headwise lower bound.
+Every head has the same lower bound $\Gamma$, so summing their exponentials preserves the factor $e^\Gamma$.
+Taking logarithms gives Eq.~\eqref{eq:inverse_excitation_margin}.
+
+For bounded polarity commands, the nominal candidate clip is inactive.
+When gains agree, $\Delta_i=0$; when they differ, $\Delta_i^2=4a_i^2$ and $|\Delta_i|=2|a_i|$.
+Substitution proves Eq.~\eqref{eq:polarity_excitation_margin}.
+If every differing channel has $a_i=0$, both candidate signals and their ensemble scores are exactly equal.
+\end{proof}
+
+\paragraph{Connection to causal switch recovery.}
+Suppose the true mode persists for $N$ completed transitions.
+If every head's errors obey the stated bounds and $\Gamma(u_\star,u_w;e_t,\nu_t)\ge m>0$ for every competing mode on each transition,
+the actual score contrast is at least $m$.
+The certificate in Eq.~\eqref{eq:filter_recovery_certificate}, with $s=cm$, then establishes strict MAP dominance of that mode after $N$ observations when $F_N>0$.
+This updated belief is available for the next action.
+This direct route requires no interpretation of the inverse score as a forward transition density or calibrated Bayesian posterior.
+
+\paragraph{Scope and limits.}
+The prediction-error bounds must hold for all heads on the causal trajectory used by the controller.
+Training-set or validation-set average MSE does not establish these uniform bounds, especially across switches or changed state occupancies.
+Gaussian actuator noise can make nominal inverse prediction ambiguous, and does not imply that the errors remain within a specified tube.
+Positive separation also depends on the actual commanded excitation; invertible, distinct transforms alone do not provide it.
+The variance vector is held fixed in each comparison, so no variance-calibration or forward-likelihood certificate is inferred.
+The following extension bounds the failure probability from moments and excitation under the causal rollout law.
+
+\subsection{Recovery probability under the causal rollout law}
+\label{app:recovery_probability}
+
+Fix a window of $N\ge1$ completed transitions during which the true mode is $z_\star$.
+Let $\mathbb P$ be their actual causal rollout law, including the incoming belief, commands, states, and inverse predictions.
+For each time, head, and actuator coordinate define
+\begin{equation}
+ E_{tji}=p_{t,i}^{(j)}-u_{t,i}(z_\star),\qquad
+ \mathbb E_{\mathbb P}[E_{tji}^2]\le M_{tji},\qquad e_{ti}>0.
+ \label{eq:causal_inverse_moment}
+\end{equation}
+The tolerances $e_{ti}$ and positive residual variances $\nu_{ti}$ are deterministic.
+Their values can vary across time and coordinates, but are shared across heads and candidate modes.
+The means and candidates are measurable functions of the completed trajectory.
+The incoming belief is measurable and normalized; it may be stale or assign zero mass to the true mode.
+
+For $m>0$, define the excitation event
+\begin{equation}
+ \mathcal X_N=\left\{
+ \Gamma(u_t(z_\star),u_t(w);e_t,\nu_t)\ge m
+ \text{ for every }t<N\text{ and }w\ne z_\star
+ \right\}.
+ \label{eq:causal_excitation_event}
+\end{equation}
+This event depends on the actual commands produced by the causal controller, not a separately excited training policy.
+
+\begin{theorem}[Finite-window recovery from causal error moments]
+\label{thm:recovery_probability}
+Use the sticky filter with $a\ge0$, $k>0$, $\delta\ge0$, and $c>0$.
+Suppose Eq.~\eqref{eq:causal_inverse_moment} holds, all squared errors are integrable, and
+$\mathbb P(\mathcal X_N^c)\le\alpha_{\mathrm{exc}}$.
+If the certificate $F_N$ in Eq.~\eqref{eq:filter_recovery_certificate}, with $s=cm$, is positive, then
+\begin{align}
+ \mathbb P\!\left(\exists w\ne z_\star:\ b_N(w)\ge b_N(z_\star)\right)
+ &\le \beta_N,\qquad
+ \beta_N:=\alpha_{\mathrm{exc}}+
+ \sum_{t=0}^{N-1}\sum_{j=1}^{K}\sum_{i=1}^{d}\frac{M_{tji}}{e_{ti}^2},
+ \label{eq:causal_recovery_failure}\\
+ \mathbb P\!\left(b_N(z_\star)>b_N(w)\text{ for all }w\ne z_\star\right)
+ &\ge 1-\beta_N.
+ \label{eq:causal_recovery_success}
+\end{align}
+No independence across times, heads, or coordinates is required.
+\end{theorem}
+
+\begin{proof}
+Markov's inequality applied to $E_{tji}^2$ gives
+$\mathbb P(|E_{tji}|>e_{ti})\le M_{tji}/e_{ti}^2$.
+The finite union bound therefore controls failure of the simultaneous error tube by the triple sum in Eq.~\eqref{eq:causal_recovery_failure}.
+On that tube and $\mathcal X_N$, Proposition~\ref{prop:inverse_excitation} gives every actual score contrast at least $m$.
+Proposition~\ref{prop:filter_recovery} then gives strict true-mode dominance, regardless of the stale incoming belief.
+Its failure event lies inside the union of excitation failure and error-tube failure, proving Eq.~\eqref{eq:causal_recovery_failure}.
+Measurable predictions and candidates yield measurable log-mixture evidence, recursively measurable beliefs, and a measurable strict-dominance event.
+Taking the complement gives Eq.~\eqref{eq:causal_recovery_success}.
+\end{proof}
+
+For measurable predictions and candidates in $[-1,1]$, $E_{tji}^2\le4$, so their squared errors are automatically integrable under a probability law.
+Alternatively, history-conditional bounds $\mathbb E[E_{tji}^2\mid\mathcal H_t]\le M_{tji}$ almost surely imply Eq.~\eqref{eq:causal_inverse_moment} by the tower identity.
+These statements accommodate the correlations induced by closed-loop state visitation and shared ensemble inputs.
+
+\paragraph{Scope and limits.}
+The moments and excitation probability concern the actual rollout law for the specified fixed-mode window.
+Training or validation MSE does not supply them, and Gaussian actuator noise alone does not supply sufficiently small error tails or positive excitation.
+The bounded-output certificate $M_{tji}=4$ establishes finiteness, not a useful recovery rate; the probability bound may be vacuous when $\beta_N\ge1$.
+The theorem guarantees neither posterior calibration nor empirical return improvement, and does not construct a conditional law at an arbitrary random switch time.
+Strict dominance identifies the window's mode; correct compensation at the next action additionally requires that mode to remain active.
+
+\subsection{From recovery probability to closed-loop return loss}
+\label{app:recovery_return}
+
+This section connects recovery probability to control loss without interpreting the tempered belief as the true posterior.
+Let $\xi_t=(y_t,z_t)\sim\rho_t^C$ be the actual augmented pre-action state from Appendix~\ref{app:closed_loop_belief}.
+Write $\hat z_t=\hat z_t(y_t)$ for a measurable MAP selector, so $b_t(w\mid y_t)\le b_t(\hat z_t\mid y_t)$ for every $w$.
+Define its actual mode-error probability by
+\begin{equation}
+ p_t^{\mathrm{err}}=\mathbb P_C(\hat z_t\ne z_t).
+ \label{eq:actual_mode_error_probability}
+\end{equation}
+Both this probability and the bounds below refer to causal-controller states, not separately sampled oracle or estimator-training states.
+
+Let $Z_t^{\mathrm{win}}$ denote the true mode of an observed recovery window.
+It is an analysis variable, not an input to the controller.
+For that window define strict-dominance failure and mode-change events
+\begin{align}
+ \mathcal D_t&=\left\{\exists w\ne Z_t^{\mathrm{win}}:
+ b_t(w\mid y_t)\ge b_t(Z_t^{\mathrm{win}}\mid y_t)\right\},\\
+ \mathcal S_t&=\{z_t\ne Z_t^{\mathrm{win}}\}.
+ \label{eq:post_window_mode_change}
+\end{align}
+The second event charges a change after the observed window; it is not an estimator error.
+
+\begin{proposition}[Recovery-to-action error bound]
+\label{prop:recovery_action_error}
+For any maximizing selector, $\{\hat z_t\ne z_t\}\subseteq\mathcal D_t\cup\mathcal S_t$.
+Consequently, if $\mathbb P_C(\mathcal D_t)\le\beta_t^{\mathrm{rec}}$ and $\mathbb P_C(\mathcal S_t)\le\chi_t$, then
+\begin{equation}
+ p_t^{\mathrm{err}}\le\beta_t^{\mathrm{rec}}+\chi_t.
+ \label{eq:recovery_current_mode_error}
+\end{equation}
+For polarity gains and a measurable reference action $q_t=\pi_r(s_t)\in[-1,1]^d$,
+let $v_t^C=\gain_{z_t}\gain_{\hat z_t}\gain_rq_t$ and $v_t^O=\gain_rq_t$.
+Using common actuator noise in the two same-state executions gives
+\begin{equation}
+ \mathbb E_C\|u_t^C-u_t^O\|_2^2
+ \le4d\,p_t^{\mathrm{err}},\qquad
+ \mathbb E_C\|v_t^C-v_t^O\|_2^2
+ \le4d\,p_t^{\mathrm{err}}.
+ \label{eq:recovery_action_mse}
+\end{equation}
+Here $u_t^C=\clip(v_t^C+\varepsilon_t)$ and $u_t^O=\clip(v_t^O+\varepsilon_t)$ are compared at the same causal state.
+\end{proposition}
+
+\begin{proof}
+Outside $\mathcal D_t$, strict dominance forces any maximizing selector to return $Z_t^{\mathrm{win}}$.
+Outside $\mathcal S_t$, that mode is still $z_t$, proving the event inclusion and its union bound.
+Correct mode selection gives $v_t^C=v_t^O$ by polarity compensation.
+Otherwise, Eq.~\eqref{eq:weighted_mode_error} bounds squared nominal error by $4\|q_t\|_2^2\le4d$.
+Common noise and non-expansive clipping preserve this upper bound and the zero-error case.
+The squared errors are measurable and bounded, hence integrable; integrating their error-event indicators proves Eq.~\eqref{eq:recovery_action_mse}.
+\end{proof}
+
+\begin{theorem}[Closed-loop return loss from mode-error probability]
+\label{thm:recovery_return}
+Retain the common initial law, measurable occupancy flow, Bellman integrability, and visited-state value-difference integrability of Theorem~\ref{thm:closed_loop_belief}.
+Let the reference action lie in $[-1,1]^d$, and suppose deterministic nonnegative coefficients $\overline L_t$ satisfy
+\begin{equation}
+ |Q_t^O(\xi,v_t^C)-Q_t^O(\xi,v_t^O)|
+ \le\overline L_t\|v_t^C-v_t^O\|_2
+ \label{eq:uniform_causal_sensitivity}
+\end{equation}
+for $\rho_t^C$-almost every augmented state.
+If $p_t^{\mathrm{err}}\le\gamma_t$ for each $t<H$, then
+\begin{equation}
+ |J_C-J_O|\le2\sqrt d\sum_{t=0}^{H-1}\overline L_t\gamma_t.
+ \label{eq:recovery_return_loss}
+\end{equation}
+The proof uses the joint occupancy law directly, without a conditional-mode factorization or posterior-calibration premise.
+\end{theorem}
+
+\begin{proof}
+The actual occupancy flow gives the performance-difference identity
+$J_C-J_O=\sum_{t<H}\int A_t\,\mathrm d\rho_t^C$, with $A_t$ as defined above.
+If $\hat z_t=z_t$, the nominal signals agree and $A_t=0$.
+Otherwise, $\|v_t^C-v_t^O\|_2\le2\sqrt d$, so
+$|A_t|\le2\overline L_t\sqrt d\,\mathbf1_{\{\hat z_t\ne z_t\}}$.
+Integrating and applying the finite-sum triangle inequality gives Eq.~\eqref{eq:recovery_return_loss}.
+Thus the coefficient multiplies error probability directly, rather than its square root.
+\end{proof}
+
+For a window certified by Theorem~\ref{thm:recovery_probability} under the same causal law, Eq.~\eqref{eq:recovery_current_mode_error} supplies $\gamma_t=\beta_t^{\mathrm{rec}}+\chi_t$.
+On uncertified decisions, including actions before enough post-switch observations, the universal bound $\gamma_t=1$ remains available.
+No single recovery certificate implies correctness on all subsequent decisions without their corresponding error bounds.
+
+\paragraph{Scope and limits.}
+The uniform sensitivity coefficients are additional conditions, not numerical certificates supplied by the experiments or by Gaussian noise alone.
+They are stronger than the state-dependent coefficients in Theorem~\ref{thm:closed_loop_belief}.
+Recovery and mode-change probabilities must concern the same causal law at the decision being bounded.
+Appendix~\ref{app:random_recovery_windows} establishes this connection by conditioning and averaging under the actual causal path law.
+The comparison is with the true-mode oracle using the same frozen reference actor; it does not establish superiority over SAC, ESCP, or RE-SAC.
+
+\subsection{Random recovery windows and actual decision occupancies}
+\label{app:random_recovery_windows}
+
+Let $\mathbb P_C$ be the joint path law of the deployed causal controller.
+At decision $t\ge1$, transitions $0,\ldots,t-1$ have been completed.
+Define the start of their last constant-mode suffix by
+\begin{equation}
+ S_t=\max\bigl(\{0\}\cup
+ \{j\in\{1,\ldots,t-1\}:z_j\ne z_{j-1}\}\bigr),\qquad
+ \Lambda_t=(S_t,z_{t-1}).
+ \label{eq:observed_dwell_label}
+\end{equation}
+Thus $z_j=z_{t-1}$ for $S_t\le j<t$.
+The label is an analysis variable; the controller still acts using only its pre-action state and belief.
+It contains no unobserved current mode $z_t$.
+For a label $\lambda=(s,z)$, set $N_\lambda=t-s$ and
+$C_\lambda=\{\Lambda_t=\lambda\}$.
+The cells form a finite measurable partition, even when physical states and noise are continuous.
+
+On every cell with $w_\lambda=\mathbb P_C(C_\lambda)>0$, use the actual conditional law
+\begin{equation}
+ \mathbb P_\lambda(A)=
+ \frac{\mathbb P_C(A\cap C_\lambda)}{w_\lambda}.
+ \label{eq:actual_window_conditional_law}
+\end{equation}
+This conditioning retains dependencies among commands, prediction errors, window length, and incoming belief.
+In particular, an unconditional moment bound need not hold under $\mathbb P_\lambda$.
+
+\begin{theorem}[Random-window recovery on the decision law]
+\label{thm:random_window_recovery}
+For each positive-mass cell, let $\beta_\lambda$ bound strict-dominance failure under $\mathbb P_\lambda$ at decision $t$.
+Such a bound follows from Theorem~\ref{thm:recovery_probability} when its moment, excitation, and margin conditions hold under this conditional law.
+Use the actual incoming belief $b_s$, shifted evidence $\ell_{s+j}$, and window length $N_\lambda$.
+On certified cells, the resulting bound is
+\begin{equation}
+ \beta_\lambda=\alpha_\lambda+
+ \sum_{j=0}^{N_\lambda-1}\sum_{h=1}^{K}\sum_{i=1}^{d}
+ \frac{M_{\lambda,jhi}}{e_{\lambda,ji}^{\,2}}.
+ \label{eq:conditional_window_budget}
+\end{equation}
+On all other positive-mass cells, $\beta_\lambda=1$ is valid.
+Zero-mass cells contribute zero and require no conditional recovery certificate.
+Then, with $\chi_t=\mathbb P_C(z_t\ne z_{t-1})$,
+\begin{equation}
+ p_t^{\mathrm{err}}\le
+ \sum_{\lambda}w_\lambda\beta_\lambda+\chi_t.
+ \label{eq:random_window_mode_error}
+\end{equation}
+These are probabilities under the same path law whose decision-state pushforward is $\rho_t^C$.
+\end{theorem}
+
+\begin{proof}
+Write $\mathcal T^N(b,\ell)$ for $N$ iterations of the frozen tempered filter from belief $b$.
+Its recursion gives the exact restart identity
+\begin{equation}
+ \mathcal T^{s+N}(b_0,\ell)=
+ \mathcal T^N\!\left(b_s,(\ell_{s+j})_{j\ge0}\right),
+ \qquad b_s=\mathcal T^s(b_0,\ell),
+ \label{eq:filter_window_restart}
+\end{equation}
+proved by induction on $N$.
+The incoming belief remains normalized, and its dependence on preceding transitions is retained by conditioning.
+Consequently, conditional window recovery concerns the actual belief $b_t$, not a filter reset to a fresh prior.
+On $C_\lambda$, its recovered target $z$ equals $z_{t-1}$.
+The finite partition gives
+$\mathbb P_C(\mathcal D_t)=\sum_\lambda w_\lambda\mathbb P_\lambda(\mathcal D_t)
+\le\sum_\lambda w_\lambda\beta_\lambda$.
+Proposition~\ref{prop:recovery_action_error} adds the possible unobserved change from $z_{t-1}$ to $z_t$.
+Finally, pushing $\mathbb P_C$ through the actual augmented decision state preserves the mode-error event probability.
+\end{proof}
+
+Theorem~\ref{thm:recovery_return} therefore accepts
+$\gamma_t=\min\{1,\sum_\lambda w_\lambda\beta_\lambda+\chi_t\}$ for $t\ge1$ and $\gamma_0=1$.
+This supplies the random-window connection without independence between a window label and its prediction errors.
+The conditional moments, excitation bounds, and return-sensitivity coefficients remain population conditions, not certificates derived from aggregate validation scores.
+
+\subsection{Cumulative excitation and discounted inverse-error budgets}
+\label{app:cumulative_recovery}
+
+The simultaneous error tube in Theorem~\ref{thm:recovery_probability} is one sufficient recovery condition, not a requirement of the deployed filter.
+An alternative retains the sticky mixer's nonlinear truncation while accumulating prediction error through a discounted budget.
+Use the fixed-mode causal window and second moments $M_{tji}$ from Appendix~\ref{app:recovery_probability}.
+For each competing mode $w$, define its error-free separation
+\begin{equation}
+ g_t(w)=\Gamma(u_t(z_\star),u_t(w);0,\nu_t)
+ =\frac{1}{2d}\sum_{i=1}^{d}
+ \frac{(u_{t,i}(w)-u_{t,i}(z_\star))^2}{\nu_{ti}}.
+ \label{eq:cumulative_ideal_separation}
+\end{equation}
+Let $B=\log(a+k)-\log k$ and define a sufficient margin envelope by
+\begin{equation}
+ R_0(w)=-B,\qquad
+ R_{t+1}(w)=\delta\min\{R_t(w),0\}+c\,g_t(w).
+ \label{eq:cumulative_margin_recursion}
+\end{equation}
+The truncation follows the sticky prior bound; a plain sum of score contrasts does not supply the same certificate.
+
+Write $E_{tji}=p_{t,i}^{(j)}-u_{t,i}(z_\star)$ and set
+\begin{align}
+ \eta_t&=\frac{2}{d}\sum_{i=1}^{d}
+ \frac{\sum_{j=1}^{K}|E_{tji}|}{\nu_{ti}},\qquad
+ A_t=\frac{2}{d}\sum_{i=1}^{d}
+ \frac{\sum_{j=1}^{K}\sqrt{M_{tji}}}{\nu_{ti}},\\
+ D_N&=c\sum_{t=0}^{N-1}\delta^{N-1-t}\eta_t,\qquad
+ U_N=c\sum_{t=0}^{N-1}\delta^{N-1-t}A_t.
+ \label{eq:discounted_inverse_error_budget}
+\end{align}
+Boxed candidates and inverse outputs imply error integrability; the same-law second moments give $\mathbb E|E_{tji}|\le\sqrt{M_{tji}}$.
+Thus $\mathbb E D_N\le U_N$, without independence across times or ensemble heads.
+
+\begin{theorem}[Recovery from cumulative separation]
+\label{thm:cumulative_recovery}
+Use $a\ge0$, $k>0$, $\delta\ge0$, $c\ge0$, normalized incoming beliefs, and measurable boxed candidates and predictions.
+For $\theta>0$, suppose
+\begin{equation}
+ \mathbb P\!\left(\exists w\ne z_\star:\ R_N(w)\le\theta\right)\le\alpha_{\mathrm{cum}}.
+ \label{eq:cumulative_excitation_probability}
+\end{equation}
+Then the actual tempered inverse-ensemble filter satisfies
+\begin{equation}
+ \mathbb P\!\left(\exists w\ne z_\star:\ b_N(w)\ge b_N(z_\star)\right)
+ \le\alpha_{\mathrm{cum}}+\frac{U_N}{\theta}.
+ \label{eq:cumulative_recovery_probability}
+\end{equation}
+This sufficient condition allows intermediate steps whose separation is too small for a uniform positive per-step margin.
+\end{theorem}
+
+\begin{proof}
+For boxed candidates, each coordinate difference has absolute value at most two.
+Using $\sum_j|E_{tji}|$ as a coordinate error bound in Proposition~\ref{prop:inverse_excitation} therefore gives
+$g_t(w)-[\ell_t(z_\star)-\ell_t(w)]\le\eta_t$.
+The function $x\mapsto\min\{x,0\}$ is monotone and one-Lipschitz.
+Induction shows that the margin recursion with actual score contrasts is at least $R_N(w)-D_N$.
+The sticky floor bounds the first update even when the incoming belief assigns zero mass to $z_\star$.
+Subsequent updates bound actual log odds below by this actual-contrast recursion.
+On the cumulative excitation event and $D_N<\theta$, every true-mode log-odds contrast is strictly positive.
+Failure therefore lies in the union of cumulative excitation failure and $\{D_N\ge\theta\}$.
+Markov's inequality and $\mathbb E D_N\le U_N$ prove Eq.~\eqref{eq:cumulative_recovery_probability}.
+\end{proof}
+
+The cumulative bound may replace $\beta_\lambda$ on positive-mass conditional windows in Theorem~\ref{thm:random_window_recovery}.
+The existing restart identity then connects it to the full filter and the same closed-loop return budget.
+
+\paragraph{Scope and limits.}
+The population moments and cumulative excitation probability remain conditions under the actual causal law, rather than consequences of training loss or Gaussian noise.
+This alternative is not uniformly tighter than the simultaneous-tube bound and may remain vacuous.
+The sufficient envelope can also become nonpositive after an unexcited final step, even if the actual belief remains correct.
+For example, $\delta=1/2$, $c=B=1$, and separations $(0,2)$ give $R_2=7/4$; appending zero separation gives $R_3=0$.
+Appendix~\ref{app:quiet_retention} supplies a positive-odds retention bound for that final transition and subsequent quiet steps.
+
+\subsection{Positive-margin retention through quiet transitions}
+\label{app:quiet_retention}
+
+Recovery and retention are different properties of the same frozen filter.
+Once a mode has a positive log-odds margin, common sticky mixing retains part of that margin instead of replacing it by zero.
+Let $M=|\mathcal Z|$ be the number of modes, and define, for $m\ge0$,
+\begin{equation}
+ \varphi_M(m)=\log(a+Mk)-\log(ae^{-m}+Mk).
+ \label{eq:sticky_positive_retention}
+\end{equation}
+For $a,k>0$, this function satisfies $\varphi_M(0)=0$ and
+$0<\varphi_M(m)\le m$ whenever $m>0$.
+
+\begin{theorem}[Positive-margin retention]
+\label{thm:quiet_retention}
+Use $a,k,\delta>0$ and $c\ge0$.
+At the beginning of an observed window, let $b_s$ be a normalized positive belief.
+Suppose a mode $z$ has margin $m_0>0$ against every competitor:
+\begin{equation}
+ \log\frac{b_s(z)}{b_s(w)}\ge m_0
+ \quad\text{for all }w\ne z.
+ \label{eq:retention_initial_margin}
+\end{equation}
+Let nonnegative numbers $\eta_j$ bound adverse score contrasts over the following $N$ completed transitions,
+\begin{equation}
+ \ell_{s+j}(z)-\ell_{s+j}(w)\ge-\eta_j,
+ \qquad 0\le j<N,\quad w\ne z,
+ \label{eq:retention_score_budget}
+\end{equation}
+and define
+\begin{equation}
+ m_{j+1}=\delta\varphi_M(m_j)-c\eta_j.
+ \label{eq:positive_margin_recursion}
+\end{equation}
+If $m_j\ge0$ for $j<N$, then the actual continued filter satisfies
+\begin{equation}
+ \log\frac{b_{s+N}(z)}{b_{s+N}(w)}\ge m_N
+ \quad\text{for every }w\ne z.
+ \label{eq:retained_actual_margin}
+\end{equation}
+Thus $m_N>0$ forces every maximizing mode selector to choose $z$.
+In particular, exactly flat evidence, $\ell_{s+j}(z)=\ell_{s+j}(w)$, retains that strict MAP mode on every finite quiet prefix.
+Its sufficient margin obeys $0<m_N\le\delta^N m_0$ when all $\eta_j=0$.
+\end{theorem}
+
+\begin{proof}
+Suppose a normalized positive belief $b$ has global margin at least $m\ge0$ for $z$.
+Then $b(w)\le e^{-m}b(z)$ for all competitors, so $z$ maximizes $b$ and $Mb(z)\ge1$.
+Write $e=e^{-m}$, $x=b(z)$ and $y=b(w)$.
+The identity
+\begin{align}
+ &(ae+Mk)(ax+k)-(a+Mk)(ay+k)\nonumber\\
+ &\qquad=a(a+Mk)(ex-y)+ak(1-e)(Mx-1)\ge0
+ \label{eq:retention_prior_cross_product}
+\end{align}
+therefore bounds the mixed prior log odds below by $\varphi_M(m)$.
+The exact tempered update gives
+\begin{equation}
+ \log\frac{b_{t+1}(z)}{b_{t+1}(w)}
+ =\delta\log\frac{ab_t(z)+k}{ab_t(w)+k}
+   +c[\ell_t(z)-\ell_t(w)].
+\end{equation}
+Induction proves Eq.~\eqref{eq:retained_actual_margin}, using each nonnegative intermediate margin in the prior bound.
+The restart identity in Eq.~\eqref{eq:filter_window_restart} retains the actual incoming belief $b_s$.
+For flat evidence, $\varphi_M(m)>0$ preserves positivity at every finite step.
+Moreover, $\varphi_M(m)\le m$ yields $m_N\le\delta^N m_0$ by induction.
+\end{proof}
+
+For the frozen four-mode parameters $a=374/375$, $k=1/1500$, $\delta=0.98$ and $c=1$, the retention function becomes
+\begin{equation}
+ \varphi_4(m)=-\log\left(\frac{374e^{-m}+1}{375}\right).
+ \label{eq:frozen_positive_retention}
+\end{equation}
+The one-step certificate stays positive when
+$\eta_j<0.98\varphi_4(m_j)$.
+The recursion quantifies the available evidence-error budget without changing the deployed update.
+
+For the implemented inverse ensemble, equal candidate executed actions give exactly equal scores, for any head predictions and shared residual variances.
+Consequently, candidate equality on a quiet prefix satisfies the flat-evidence case even when the completed transitions or inverse predictions are noisy.
+
+\paragraph{Scope and limits.}
+Retention implies correctness only while the retained mode remains the active hidden mode.
+The same update can retain a stale mode after an unobserved switch; quiet transitions supply no new identification evidence.
+Small excitation is not candidate equality and does not imply flat scores, so it requires the adverse-contrast budget in Eq.~\eqref{eq:retention_score_budget}.
+Finite-prefix positivity is a real-arithmetic statement, not a uniform confidence floor or a floating-point tie guarantee.
+
+\subsection{Gaussian smoothing of the continuation value}
+\label{app:gaussian_sensitivity}
+
+Write $p_v$ for the density of $\mathcal N(v,\sigma^2I)$ before actuator clipping.
+Completing the square coordinatewise and integrating gives its affinity with $p_w$:
+\begin{equation}
+ A(v,w):=\int\sqrt{p_v(y)p_w(y)}\,\mathrm dy
+ =\exp\!\left(-\frac{\|v-w\|_2^2}{8\sigma^2}\right).
+\end{equation}
+Let $b=\|v-w\|_2/\sigma>0$. The elementary inequality
+$|\alpha\beta|\le\alpha^2/\eta+\eta\beta^2/4$, applied to the difference and sum of the square-root densities with $\eta=b/2$, yields
+\begin{align}
+ \int|p_v-p_w|
+ &\le \frac{2-2A(v,w)}{b/2}
+       +\frac{(b/2)(2+2A(v,w))}{4}\nonumber\\
+ &\le b.
+\end{align}
+The last step uses $1-A(v,w)\le b^2/8$ and $A(v,w)\le1$; the case $v=w$ is immediate.
+For any measurable $f$ bounded in absolute value by $B$,
+\begin{equation}
+ \left|\int f(y)p_v(y)\,\mathrm dy-\int f(y)p_w(y)\,\mathrm dy\right|
+ \le B\int|p_v-p_w|
+ \le \frac{B}{\sigma}\|v-w\|_2.
+\end{equation}
+Taking $f(y)=F_t(x,\clip(y))$ proves Proposition~\ref{prop:gaussian_sensitivity}.
+Clipping remains inside the integrand; the argument does not assign a Lebesgue density to the clipped action law.
+The same argument covers discontinuities of the reward, contact response, or continuation value.
+
+\section{Environment-specific source certificates}
+\label{app:environment_certificates}
+
+This section studies the reward and spring-solver formulas used by the HalfCheetah benchmark.
+It develops sufficient integrability and growth conditions for that simulator, separately from the general mechanism proofs in Appendix~\ref{app:proofs}.
+The core return theorem remains conditional on its stated integrability and sensitivity assumptions.
+The source certificates below are not required for the pathwise compensation or causal-deployment results.
+Their incomplete global invariant and execution-provenance limits are collected under Formalization limits in Appendix~\ref{app:formalization_scope}.
+
+\subsection{HalfCheetah reward specialization}
+
+The implemented HalfCheetah spring environment uses six executed-action coordinates, forward-reward weight one, control-cost weight $0.1$, and time increment $\Delta t=0.05$. It does not terminate on health conditions. Let $p_t$ be the torso's forward position and $u_t\in[-1,1]^6$ the action after noise and clipping. On an uninterrupted $H$-step rollout, its reward therefore satisfies
+\begin{align}
+ r_t&=20(p_{t+1}-p_t)-0.1\|u_t\|_2^2,\\
+ R_H:=\sum_{t=0}^{H-1}r_t
+ &=20(p_H-p_0)-0.1 E_H,\qquad
+ E_H:=\sum_{t=0}^{H-1}\|u_t\|_2^2.
+\end{align}
+The velocity terms telescope regardless of mode switches or the controller's dependence on history. Clipping gives $0\le E_H\le6H$, hence
+\begin{equation}
+ 20(p_H-p_0)-0.6H\le R_H\le20(p_H-p_0).
+\end{equation}
+For measurable executed-action paths, $E_H$ is integrable under any probability law. Consequently,
+\begin{equation}
+ \mathbb E|R_H|<\infty\quad\Longleftrightarrow\quad
+ \mathbb E|p_H-p_0|<\infty.
+\end{equation}
+This identifies the displacement moment needed for each uninterrupted rollout, instead of requiring a uniform reward bound over unrestricted simulator states.
+
+The spring solver's strict approach test also matters for sensitivity arguments. At fixed positive penetration, its normal impulse is positive immediately below zero approach velocity and is suppressed at zero. A normalized instance is $I(v)=\mathbf1_{\{v<0\}}(1-v)$, which has no finite global Lipschitz constant. This branch-level fact does not establish nonsmoothness of the noise-averaged action value; averaging may smooth the response. It prevents inferring the required action-value sensitivity merely from action clipping or from assuming the raw contact solver is globally Lipschitz.
+
+\subsection{Finite-horizon reachability and local source bounds}
+
+Finite-horizon bounds can be obtained from a one-step growth envelope rather than a global reward bound.
+Let $S(x)\ge|p(x)|$ be a nonnegative simulator-state size on an invariant set of valid states.
+Suppose finite constants $C\ge0$ and $k\in\mathbb N$ satisfy
+\begin{equation}
+ \Phi(x,u)\text{ is valid},\qquad
+ S(\Phi(x,u))\le C(1+S(x))^k
+ \quad\text{for every valid }x\text{ and }u\in[-1,1]^6.
+ \label{eq:spring_growth_obligation}
+\end{equation}
+From an initial bound $S(x_0)\le\mathcal R_0$, define $\mathcal R_{n+1}=C(1+\mathcal R_n)^k$.
+Induction gives $S(x_n)\le\mathcal R_n$ for every clipped action sequence, including history-dependent controllers and counterfactual first actions.
+Each $\mathcal R_n$ is finite at a finite horizon; no contraction or asymptotic stability is needed.
+The HalfCheetah reward identity then gives
+\begin{equation}
+ |R_H|\le20(\mathcal R_H+\mathcal R_0)+0.6H.
+\end{equation}
+Measurable returns are consequently integrable under any initial/noise law supported by this envelope.
+Repeating the argument from a fixed state and remaining horizon also supplies a uniform bound on $F_t(x,\cdot)$.
+
+Rotation normalization and full-matrix contact denominators are formalized separately.
+For a unit quaternion $q$ and a pure-imaginary angular increment $\omega$, the spring rotation update satisfies
+\begin{equation}
+ \|q+h\omega q\|^2=1+h^2\|\omega\|^2\ge1.
+\end{equation}
+Thus normalization does not introduce a small denominator in real arithmetic.
+For full-matrix inverse inertia, positive inverse-mass contribution $m$ and nonnegative inertia weights $\lambda_j$ give
+$D=m+\sum_j\lambda_j c_j^2\ge m>0$.
+This follows from the rotated-inertia representation $I^{-1}v=\sum_j\lambda_j(a_j^\top v)a_j$ and the scalar triple-product identity, with $c_j=a_j^\top(r\times n)$.
+With approach velocity $v$, signed contact distance $p$, elasticity $e$, and stabilization coefficient $\kappa$, the masked normal impulse obeys
+\begin{equation}
+ |I|\le \frac{(1+|e|)|v|+|\kappa||p|}{m},
+\end{equation}
+including either side of the discontinuous approach switch.
+The inspected HalfCheetah configuration has positive link masses and principal inertias, no fluid forces, and only ground--capsule contact pairs.
+The real-arithmetic component model gives coordinatewise bounds for rotations, ground--capsule contact points, revolute joint forces and torques, and planar-root constraints.
+It also bounds inertia application, wrench shifts, point velocities, finite sums, and semi-implicit position and velocity updates.
+For the six clipped motors, each generalized torque is bounded in absolute value by 120.
+With positive effective contact denominators, friction is capped by the normal impulse times the friction coefficient.
+Averaging active contacts preserves their common coordinate bound.
+The normalized rotation update preserves unit quaternions exactly in real arithmetic.
+
+The installed contact routine uses scalar inertia entries rather than the preceding full-matrix formula.
+Its effective denominator for lever $r$ and direction $d$ is
+\begin{equation}
+ D_{\mathrm{scalar}}=m+s_i\|r\times d\|_2^2,
+\end{equation}
+where $s_i$ is flattened root-inertia entry $i$, for body indices $i=0,\ldots,6$.
+The actual masks, near-zero norm branch, friction threshold, contact averaging, and final matrix conversion to angular velocity are formalized.
+Assume normal denominators are at least $m_*>0$ and tangential denominators are positive.
+Let $C,P,V,W$ bound contact-point, center-of-mass position, linear velocity, and angular velocity coordinates.
+Let $D_*,e_*,\kappa_*,\mu_*$ bound absolute contact distance, elasticity, stabilization, and nonnegative friction.
+Finally, let $M_*,I_*,A_*$ bound inverse masses, absolute inertia weights, and rotated-axis coordinates.
+Writing
+\begin{equation}
+ J_* = \frac{(1+\mu_*)[(1+e_*)3(V+2W(C+P))+\kappa_*D_*]}{m_*},
+\end{equation}
+the complete contact increment satisfies
+\begin{equation}
+ \|\Delta v_i\|_\infty\le M_*J_*,\qquad
+ \|\Delta\omega_i\|_\infty\le18I_*A_*^2(C+P)J_*.
+\end{equation}
+
+Composition lemmas then reconstruct world coordinates from the center-of-mass frame, followed by parent anchors, child anchors, relative joint frames, and relative motion.
+All reconstructed rotations retain unit norm, and their positions and velocities receive explicit coordinatewise envelopes.
+The force assembly uses HalfCheetah's parent indices $(-1,0,1,2,0,4,5)$, with at most two child reactions per link.
+If local force and torque coordinates are bounded by $F$ and $T$, anchor positions by $A$, and center-of-mass positions by $P$, then
+\begin{equation}
+ \|f_i^{\mathrm{net}}\|_\infty\le42F,\qquad
+ \|\tau_i^{\mathrm{net}}\|_\infty\le42T+84(A+P)F.
+\end{equation}
+The explicit root and revolute formulas supply $F$ and $T$ from joint-state and parameter bounds.
+Rotated-inertia and inverse-mass bounds then give acceleration envelopes, without assuming a separate bound on the assembled joint force.
+The composed integration theorem propagates acceleration and contact-velocity envelopes through position, velocity, rotation, and all reconstructed frame/motion caches.
+
+Reduced-coordinate reconstruction gives nine positions and nine velocities, including the root-specific angular inverse rotation.
+If joint positions, linear velocities, and angular velocities have coordinate bounds $P_j,V_j,W_j$, and joint rotations are unit quaternions, then
+\begin{equation}
+ \|q\|_\infty\le P_j+\pi,\qquad
+ \|\dot q\|_\infty\le V_j+588W_j.
+\end{equation}
+The actual HalfCheetah observation concatenates $q_{1:}$ with all nine velocities, producing 17 coordinates without velocity clipping.
+Its coordinates are bounded by $P_j+\pi+V_j+588W_j$.
+
+\subsection{Geometric margins for scalar contact}
+\label{app:scalar_margins}
+
+The scalar gather's normal denominator admits a geometric lower bound even when its entry is negative.
+Let $n=(0,0,1)$, and let a COM-centred capsule endpoint have signed offset $h$, radius $\rho$, and unit axis $v$.
+For COM position $p$, the ground contact construction gives
+\begin{equation}
+ c=(p_x+hv_x,\ p_y+hv_y,\ (p_z+hv_z-\rho)/2).
+\end{equation}
+Thus, the normal lever satisfies
+\begin{equation}
+ \|(c-p)\times n\|_2^2=h^2(v_x^2+v_y^2)\le h^2,
+\end{equation}
+independently of COM height and penetration depth.
+
+\begin{proposition}[Scalar-contact geometric margins]
+\label{prop:scalar_margins}
+Assume unit COM, capsule, and root-inertia rotations, with root spring-scaled inverse principal inertia weights in $[0,9/4]$.
+Let every inverse mass be at least $1/4$.
+For bodies $i\in\{1,2,3,5,6\}$, require inverse mass at least $7/10$, COM-centred capsules, and $|h|\le1/5$.
+Then every ground contact has $D_n\ge1/4$, irrespective of position and velocity.
+For penetrating contacts, additionally require $0\le\rho\le1/20$ and $p_z\ge-1/2$ on those bodies.
+Then the tangential denominator for the implemented friction direction also satisfies $D_t\ge1/4$.
+\end{proposition}
+
+\begin{proof}
+The source rotation polynomial preserves dot products for unit quaternions, so its matrix rows have squared norm one.
+Cauchy--Schwarz bounds every rotated root-inertia entry by $9/4$ in absolute value.
+Gather indices 0 and 4 are diagonal entries, hence nonnegative; their denominators are at least the body's inverse mass.
+For the other bodies, the normal denominator is at least
+\begin{equation}
+ \frac{7}{10}-\frac94\left(\frac15\right)^2=\frac{61}{100}>\frac14.
+\end{equation}
+The normal-impulse magnitude is therefore bounded by four times its absolute numerator, without a separate denominator-margin premise.
+For penetrating contacts with the stated height and radius bounds, the vertical lever lies in $[-7/20,7/20]$.
+Consequently, $\|c-p\|_2^2\le1/25+49/400=13/80$.
+The friction direction has squared norm at most one, including the near-zero norm branch.
+The tangential denominator on the non-diagonal bodies is therefore at least
+\begin{equation}
+ \frac{7}{10}-\frac94\frac{13}{80}=\frac{107}{320}>\frac14.
+\end{equation}
+\end{proof}
+
+The current local source parameters satisfy these geometric inequalities, with floating-point rotation checks at tolerance $2\times10^{-6}$.
+A focused test checks 120 normal-contact cases, including deep penetrations, and 80 tangential cases satisfying the height condition.
+Their minimum denominators are 0.282963 and 0.277251, respectively; the maximum normal lever-formula error is $1.46\times10^{-8}$.
+
+\subsection{Scalar-step growth and vertical viability}
+\label{app:scalar_step}
+
+The original scalar-contact step shares the matrix model's frame reconstruction, joint forces, acceleration ordering, damping, and integration.
+Only the contact resolver differs: its effective inertia uses the flattened root-array gather.
+Let $\delta>0$ be the physics timestep and $d=\exp(\mathrm{vel\_damping}\,\delta)$ its linear damping multiplier.
+For body $i$, write $\widetilde v_{i,z}$ for vertical velocity after acceleration and $\Delta v_{i,z}$ for the collision increment.
+
+\begin{proposition}[Scalar-step bound and vertical viability]
+\label{prop:scalar_step}
+For ground contacts with nonnegative inverse masses, the real-arithmetic scalar resolver satisfies $\Delta v_{i,z}\ge0$.
+At a fixed state, $\widetilde v_{i,z}$ is independent of the current motor command.
+Consequently, the pre-contact condition
+\begin{equation}
+ p_{i,z}+\delta d\,\widetilde v_{i,z}\ge-\frac12
+ \label{eq:scalar_vertical_viability}
+\end{equation}
+is sufficient for $p'_{i,z}\ge-1/2$ for every current command.
+The exact post-contact criterion is
+\begin{equation}
+ p'_{i,z}\ge-\frac12
+ \quad\Longleftrightarrow\quad
+ v'_{i,z}\ge\frac{-1/2-p_{i,z}}{\delta}.
+\end{equation}
+Under Proposition~\ref{prop:scalar_margins} and the fixed-parameter bounds of Proposition~\ref{prop:matrix_growth} with $m=1/4$, the scalar step has radius $\Gamma_{K,1/4}(R)$ when non-diagonal capsule-contact bodies have height at least $-1/2$.
+If these heights hold before every physics substep of a finite rollout, its wrapper return satisfies
+\begin{equation}
+ |\mathcal R_T|\le
+ 20\bigl(R_{FT}+R_0+28K\bigr)+0.6T,
+ \qquad R_{k+1}=\Gamma_{K,1/4}(R_k),
+\end{equation}
+where $F$ is the number of physics substeps per action.
+\end{proposition}
+
+\begin{proof}
+The contact tangent and friction direction have zero vertical component.
+The normal impulse is nonnegative, and contact averaging and inverse-mass conversion preserve this sign.
+Motor commands enter only the angular component of the local joint wrench.
+Rotation, wrench shifting, and parent--child assembly do not mix angular torque into translational force.
+Thus, the pre-contact vertical velocity is independent of the current command.
+Integration gives $p'_{i,z}=p_{i,z}+\delta(d\widetilde v_{i,z}+\Delta v_{i,z})$, proving both vertical criteria.
+For the growth bound, an active normal impulse implies penetration, so Proposition~\ref{prop:scalar_margins} supplies both required denominator margins.
+Inactive contacts contribute zero impulse and require no tangential positivity premise.
+The shared geometry and joint-force bounds then control the complete scalar collision increment and integrated state.
+Finite induction and the telescoping reward identity give the stated return bound.
+\end{proof}
+
+A source test compares 12 physics updates and 84 body states with the vertical balance equation.
+Its maximum position error is $2.73\times10^{-8}$, and the minimum vertical collision increment is zero.
+Opposite motor commands produce identical instantaneous translational joint forces in all 12 cases.
+The pre-contact sufficient condition holds in 82 of the 84 body cases.
+
+\subsection{Reset initialization and the first physics substep}
+\label{app:reset_step}
+
+The experiment's wrapper initializes all nine positions and velocities with independent uniform noise in $[-0.1,0.1]$ around zero.
+The seven-link geometry has zero joint offsets and identity link-offset rotations.
+Its root height offset is $0.7$, and the two hip offsets are horizontal with lengths $0.5$.
+Each remaining link offset has length at most $1/3$, and every COM offset has length at most $1/5$.
+These decimal geometry parameters are interpreted in real arithmetic.
+
+\begin{proposition}[Reset radius and first-substep safety]
+\label{prop:reset_step}
+Every allowed reset has unit COM rotations, COM coordinate radius at most $3$, linear velocity coordinate radius at most $1$, and angular velocity coordinate radius at most $2/5$.
+Every initial COM height is at least $-1/3$.
+Assume inverse masses lie in $[0,4]$, gravity coordinates have magnitude at most $10$, and joint linear damping coefficients have magnitude at most $10$.
+For $\delta=1/320$ and linear integration multiplier $d=1$, the first scalar-contact physics substep satisfies $p'_{i,z}\ge-1/2$ for every body and motor command.
+\end{proposition}
+
+\begin{proof}
+The root height is at least $3/5$.
+The initial root pitch has magnitude at most $1/10$, so each horizontal hip contributes vertical magnitude at most $1/20$.
+At most two further link offsets precede a COM offset.
+Thus, each initial COM height is at least $3/5-1/20-2/3-1/5=-19/60\ge-1/3$.
+The corresponding coordinate triangle bounds give COM radius at most $3$.
+Angular speeds accumulate along each three-joint chain to at most $2/5$.
+Forward kinematics and the COM lever shift give linear velocity coordinate radius at most $7/10+2(2/5)(1/5)\le1$.
+
+Initial child origins coincide with their parent anchors, so all leaf joint position errors vanish exactly.
+The source's parent-motion shift gives relative world linear velocity $2\omega_p\mathbin{\times}\ell$, not zero.
+Parent angular coordinates have magnitude at most $3/10$, and lever coordinates at most $1/2$.
+The rotation bound therefore gives joint-cache velocity radius $14[2(2)(3/10)(1/2)]=42/5$.
+Initial root translational force is zero, and each leaf's translational force radius is at most $10(42/5)=84$.
+Wrench rotation and the two-child assembly give linear acceleration radius at most $10+4(42)(84)\le14200$.
+Consequently,
+\begin{equation}
+ p_{i,z}+\delta\widetilde v_{i,z}
+ \ge-\frac13-\frac1{320}\left(1+\frac{14200}{320}\right)>-\frac12.
+\end{equation}
+Proposition~\ref{prop:scalar_step} completes the first-substep height bound.
+\end{proof}
+
+A focused source test compares 12 wrapper resets and four boundary states with the translated initialization formulas.
+Their maximum discrepancy is $1.35\times10^{-7}$.
+All 48 first-substep updates satisfy the height floor; their minimum post-step COM height is $0.04306$.
+
+\subsection{Multi-contact recovery and finite-horizon certification}
+\label{app:contact_barrier}
+
+The current source returns two endpoint candidates per ground--capsule pair.
+Candidates occur on bodies $\{0,1,3,4,6\}$, whereas bodies $2$ and $5$ have no candidates.
+The sufficient tangential height region therefore applies to bodies $\{1,3,6\}$ rather than every non-diagonal body.
+
+For contact $j$ on body $i$, let $d_j$ be signed distance and $\kappa_j$ the stabilization coefficient.
+Its normal point velocity after acceleration is
+\begin{equation}
+ w_j=\widetilde v_{i,z}+
+       \bigl[\widetilde\omega_i\mathbin{\times}(c_j-p_i)\bigr]_z.
+\end{equation}
+Unlike COM vertical velocity, this quantity retains the command-dependent angular update.
+Write $\eta_i$ for inverse mass and define the approaching set
+$\mathcal A_i=\{j:b_j=i,\ d_j<0,\ w_j<0\}$.
+The source averaging constant is $\epsilon=10^{-8}$, and the geometric normal-denominator upper bound is $\eta_i+9/100$.
+Define
+\begin{equation}
+ B_i(x,a)=\frac{\eta_i}{|\mathcal A_i|+\epsilon}
+          \frac{\sum_{j\in\mathcal A_i}(-w_j-\kappa_jd_j)}{\eta_i+9/100},
+ \label{eq:scalar_recovery_lower}
+\end{equation}
+with the empty sum equal to zero.
+
+\begin{proposition}[Multi-contact recovery certificate]
+\label{prop:contact_barrier}
+Under Proposition~\ref{prop:scalar_margins}, unit COM rotations, and nonnegative contact elasticity and stabilization, each non-diagonal contact body satisfies $\Delta v_{i,z}\ge B_i(x,a)\ge0$.
+For $\delta\ge0$, the condition
+\begin{equation}
+ p_{i,z}+\delta d\,\widetilde v_{i,z}+\delta B_i(x,a)\ge-\frac12
+ \label{eq:scalar_contact_barrier}
+\end{equation}
+implies $p'_{i,z}\ge-1/2$.
+Start from the bounded unit-rotation state and safe contact heights of Proposition~\ref{prop:scalar_step}.
+If Eq.~\eqref{eq:scalar_contact_barrier} holds before every physics substep, the finite-horizon radius and return bounds of that proposition follow.
+\end{proposition}
+
+\begin{proof}
+The normal denominator is at least $1/4$ and at most $\eta_i+(9/4)(1/5)^2=\eta_i+9/100$.
+For $d_j<0$ and $w_j<0$, the raw numerator satisfies
+$-(1+e_j)w_j-\kappa_jd_j\ge-w_j-\kappa_jd_j>0$.
+Thus, the source active set equals $\mathcal A_i$, and each active normal impulse is at least $(-w_j-\kappa_jd_j)/(\eta_i+9/100)$.
+Summation and the actual active-count average give Eq.~\eqref{eq:scalar_recovery_lower}.
+Horizontal friction does not alter this vertical bound.
+The integration identity then proves the next-step height condition, including cases with a negative pre-contact margin.
+Finite induction applies the derived scalar radius at each safe state and uses the recovery condition to establish the next safe state.
+The telescoping reward identity yields the return bound, charging control energy once per environment action.
+\end{proof}
+
+A source check follows four normal resets for 256 physics substeps.
+It verifies the contact layout, active masks, averaging identity, and recovery inequality for 116 approaching and 11 separating non-diagonal contacts.
+The maximum vertical balance error is $2.98\times10^{-8}$.
+
+\subsection{Persistent planar structure}
+\label{app:planar_structure}
+
+The actual HalfCheetah geometry provides a structural invariant that reduces the remaining height obligation.
+Assume COM, link, joint, and capsule offsets lie in the $x/z$ plane, with link, joint, and capsule rotations about $y$.
+Gravity also lies in that plane.
+Each fixed inertia principal axis lies either in the $x/z$ plane or along $y$.
+This axis condition permits the root's mixed inertia rotation; it does not require that rotation itself to be about $y$.
+
+\begin{proposition}[Persistent planar structure]
+\label{prop:planar_structure}
+Under these fixed-parameter conditions, the wrapper reset has planar positions and linear velocities, pitch rotations, and $y$-axis angular velocities.
+Every scalar-contact physics step preserves this structure, for arbitrary commands and without a height or contact-denominator premise.
+Consequently, the root-inertia entries gathered by bodies $1,3,5$ are zero at every finite step.
+Retain Proposition~\ref{prop:scalar_step}'s parameter and initial-radius conditions.
+For the actual contact layout $\{0,1,3,4,6\}$, its radius and return bounds require the height and recovery conditions only on body $6$.
+In particular, Eq.~\eqref{eq:scalar_contact_barrier} for that body suffices for the corresponding finite-horizon induction.
+\end{proposition}
+
+\begin{proof}
+Pitch quaternion multiplication, conjugation, and normalized integration preserve pitch rotations.
+Such rotations preserve planar vectors and axial angular vectors.
+A cross product of two planar vectors is axial; an axial vector crossed with a planar vector is planar.
+These identities preserve COM/world transformations, joint caches, local joint forces, and the seven-link wrench assembly.
+The principal-axis condition makes inertia application preserve both vector subspaces.
+Ground-contact points, point velocities, and normal/friction impulses remain planar, so their torques remain axial.
+Contact masks, active-count averaging, and damping only scale or sum these components.
+The bounded-uniform reset formulas establish the initial structure; induction establishes it at every finite step.
+The resulting root inertia has zero $xy$, $yx$, and $yz$ entries, which are exactly the flattened entries gathered by bodies $1,3,5$.
+Bodies $0,4$ gather nonnegative diagonal entries, and bodies $2,5$ have no contact candidates.
+Hence only body $6$ needs the geometric tangential margin.
+Combining its recovery condition with the planar step gives the radius induction and telescoping return bound.
+\end{proof}
+
+The extended 256-substep source check has maximum planar residual $3.49\times10^{-7}$.
+The maximum absolute value of the three theoretically zero gathered entries is $2.56\times10^{-7}$ in the floating-point source.
+
+\subsection{Paired foot endpoints and a COM-speed certificate}
+\label{app:paired_foot}
+
+Body $6$ has exactly two ground--capsule endpoint candidates, with the same local rotation and opposite axial offsets about its COM.
+Write $z=p_{6,z}$ and $v=\widetilde v_{6,z}$, and retain the common stabilization coefficient $\kappa$.
+The normal point velocities satisfy
+\begin{equation}
+ w_++w_-=2v,
+ \label{eq:foot_pair_velocity}
+\end{equation}
+because the opposite horizontal lever arms cancel their angular contributions.
+
+\begin{proposition}[Paired-endpoint speed certificate]
+\label{prop:paired_foot}
+Under Proposition~\ref{prop:scalar_margins}'s fixed-parameter conditions and unit COM rotations, suppose the capsule radii and $\kappa$ are nonnegative.
+If $z<-1/5$ and $v<0$, then
+\begin{equation}
+ B_6(x,a)\ge\frac{87}{100}
+       \left[-v+\kappa\left(-z-\frac15\right)\right].
+ \label{eq:foot_pair_recovery}
+\end{equation}
+For $\delta=1/320$, $d=1$, and $\kappa\ge32$, the conditions $z\ge-1/2$ and $v\ge-64$ imply Eq.~\eqref{eq:scalar_contact_barrier} for body $6$, for every angular velocity.
+With nonnegative elasticity, the next height therefore satisfies $p'_{6,z}\ge-1/2$.
+Under Proposition~\ref{prop:planar_structure}'s remaining conditions, a bounded planar initial state with $p_{6,z}\ge-1/2$ and the speed condition $\widetilde v_{6,z}\ge-64$ before every substep gives the scalar-model radius and finite-horizon return bounds.
+The reset assumptions of Proposition~\ref{prop:reset_step} imply the first pre-contact velocity bound $\widetilde v_{i,z}\ge-363/8=-45.375$ for every body.
+\end{proposition}
+
+\begin{proof}
+Each endpoint distance is at most $z+1/5$; hence both endpoints penetrate when $z<-1/5$.
+By Eq.~\eqref{eq:foot_pair_velocity}, at least one endpoint approaches when $v<0$.
+If both approach, their average normal velocity is $v$.
+If only one approaches, the other has nonnegative normal velocity, so the approaching velocity is at most $2v\le v$.
+Thus, for $c=|\mathcal A_6|\ge1$, the active average is at most $v$ and each penetration contribution is at least $\kappa(-z-1/5)$.
+The inverse-mass condition $\eta_6\ge7/10$ gives
+\begin{equation}
+ \frac{\eta_6}{\eta_6+9/100}\ge\frac78,
+ \qquad \frac{c}{c+10^{-8}}\ge\frac{1000}{1001},
+ \qquad \frac78\frac{1000}{1001}>\frac{87}{100}.
+\end{equation}
+Substitution into Eq.~\eqref{eq:scalar_recovery_lower} proves Eq.~\eqref{eq:foot_pair_recovery}, retaining the source averaging epsilon.
+
+If $v\ge0$, nonnegative recovery already proves the barrier.
+If $v<0$ and $z\ge-1/5$, then $z+v/320\ge-2/5$.
+In the remaining case, Eq.~\eqref{eq:foot_pair_recovery} and $\kappa\ge32$ give
+\begin{align}
+ z+\frac{v+B_6(x,a)}{320}
+ &\ge\frac{913}{1000}z+\frac{13}{32000}v-\frac{87}{5000}\\
+ &\ge-\frac{4999}{10000}>-\frac12.
+\end{align}
+Proposition~\ref{prop:contact_barrier} yields the next height.
+Induction uses the planar invariant and the speed condition to derive all later safe heights, the radius, and the return bound.
+Finally, the reset's velocity and acceleration bounds give $v\ge-1-14200/320=-363/8$.
+\end{proof}
+
+An additional 108 constructed source-formula cases cover 36 deep/downward configurations, zero, one, or two active contacts, both signs of the gathered root entry, and angular velocities $-2000$, $0$, and $2000$.
+The maximum pair-velocity sum error is $5.96\times10^{-5}$; all recovery and height inequalities hold in these cases.
+These checks test the paired-contact formulas rather than reachability from the experimental reset.
+
+\subsection{Exact leaf-joint dynamics and signed speed slack}
+\label{app:foot_joint}
+
+The front foot is a leaf, so no child-joint reaction contributes to its translational force.
+Let $A_6$ and $A^c_6$ denote its parent and child anchor positions, and let $P_5$ be the parent's world-frame origin.
+Write $E=[A^c_6-A_6]_z$, with joint stiffness $k_J$ and linear damping $d_J$.
+For COM offsets $o_i$, rotations $R_i$, and current angular velocities $\omega_i$, define the vertical angular lever contribution
+\begin{equation}
+ C=\left[\omega_6\mathbin{\times}(-R_6o_6)
+       -\omega_5\mathbin{\times}(-R_5o_5)
+       -\omega_5\mathbin{\times}(P_5-A_6)\right]_z.
+\end{equation}
+Thus, the source's world-relative vertical velocity is $v_{6,z}-v_{5,z}+C$.
+Set
+\begin{equation}
+ \lambda=\delta\eta_6d_J,
+ \qquad D=\delta\eta_6k_J E+\lambda C-\delta g_z.
+\end{equation}
+
+\begin{proposition}[Exact joint-speed certificate]
+\label{prop:foot_joint}
+Unit parent-anchor rotation gives the exact pre-contact identity
+\begin{equation}
+ \widetilde v_{6,z}=(1-\lambda)v_{6,z}+\lambda v_{5,z}-D.
+ \label{eq:foot_joint_velocity}
+\end{equation}
+For $\delta=1/320$, $\eta_6\in[0,4]$, and $d_J\in[0,10]$, the damping weight satisfies $\lambda\in[0,1/8]$.
+The speed condition $\widetilde v_{6,z}\ge-64$ is equivalent to the state-only condition
+\begin{equation}
+ D\le(1-\lambda)(v_{6,z}+64)+\lambda(v_{5,z}+64).
+ \label{eq:foot_joint_slack}
+\end{equation}
+Reset satisfies Eq.~\eqref{eq:foot_joint_slack} under Proposition~\ref{prop:reset_step}'s assumptions.
+If this condition holds before every substep, Proposition~\ref{prop:paired_foot}'s remaining assumptions yield its finite-horizon height, radius, and return bounds.
+Under the same contact assumptions, let $z<-1/5$, $\widetilde v_{6,z}\in[-64,0)$, and $d=1$.
+Nonnegative elasticity and stabilization then give
+\begin{equation}
+ v'_{6,z}\ge\frac{13}{100}\widetilde v_{6,z}
+       +\frac{87}{100}\kappa\left(-z-\frac15\right)\ge-\frac{208}{25}=-8.32.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Wrench shifts preserve translational force, and the foot has no incoming child wrench.
+The revolute joint force is $-k_J$ times local anchor error minus $d_J$ times local relative velocity.
+Unit quaternion rotation cancels the inverse frame rotation, recovering the corresponding world quantities exactly.
+COM-to-world motion shifts give $C$, and the acceleration-before-contact update gives Eq.~\eqref{eq:foot_joint_velocity}.
+The parameter bounds imply $0\le\lambda\le(4)(10)/320=1/8$; rearrangement gives Eq.~\eqref{eq:foot_joint_slack}.
+The reset speed bound proves its initial validity, and finite induction applies the paired-endpoint height certificate at each later state.
+Finally, adding Eq.~\eqref{eq:foot_pair_recovery} to pre-contact velocity yields the post-contact bound.
+\end{proof}
+
+A source regression uses four bounded-uniform resets and 1,000 actions per rollout, each held for 16 physics substeps.
+Commands are zero, all $+1$, all $-1$, or independent uniform draws in $[-1,1]^6$.
+Across 64,000 substeps, minimum pre-contact foot velocity is $-8.09563$ and minimum signed speed slack is $55.90437$.
+The maximum pre-contact velocity formula discrepancy is $4.29\times10^{-6}$.
+Positive anchor error reaches $0.04342$, so a uniform $1$ cm error invariant does not hold for these supported commands.
+
+\subsection{Forced foot--parent recurrence and common motion}
+\label{app:foot_recurrence}
+
+Separate relative joint motion from motion shared by the foot and its parent.
+Let $w=v_{6,z}-v_{5,z}$, $\mu=\eta_5+\eta_6$, and let $F_{5,z}$ denote the world-frame vertical force exerted by joint $5$ on body $5$.
+The foot-joint force is $F_{6,z}=-k_J E-d_J(w+C)$.
+Body $5$ receives $F_{5,z}-F_{6,z}$, whereas body $6$ receives $F_{6,z}$.
+Write $c_6$ for the vertical collision increment on body $6$; body $5$ has no contact candidates.
+Define
+\begin{align}
+ \gamma&=\delta\mu d_J, & \chi&=\delta^2\mu k_J,\nonumber\\
+ U&=c_6-\delta(\mu d_J C+\eta_5F_{5,z}), &
+ P&=\eta_5v_{6,z}+\eta_6v_{5,z}.
+\end{align}
+The scaled momentum $P$ satisfies $\mu v_{6,z}=P+\eta_6w$.
+For the vertical geometric anchor offset, set
+\begin{equation}
+ h_{\rm geom}=E-(p_{6,z}-p_{5,z}),
+ \qquad \rho=h'_{\rm geom}-h_{\rm geom}.
+\end{equation}
+Primes denote successive physics substeps, not environment actions.
+
+\begin{proposition}[Source-derived forced recurrence]
+\label{prop:foot_recurrence}
+Assume unit parent-anchor rotations, the actual contact layout, and linear integration multiplier $d=1$.
+The scalar source model obeys
+\begin{align}
+ w'&=(1-\gamma)w-\delta\mu k_J E+U,\label{eq:foot_relative_recurrence}\\
+ E'&=E+\delta w'+\rho,\label{eq:foot_anchor_recurrence}\\
+ P'&=P+\delta\mu g_z+\delta\eta_5\eta_6F_{5,z}+\eta_5c_6.
+ \label{eq:foot_momentum_recurrence}
+\end{align}
+For fixed parameters, eliminating relative speed gives
+\begin{equation}
+ E''-(2-\gamma-\chi)E'+(1-\gamma)E
+   =\delta U'+\rho'-(1-\gamma)\rho.
+ \label{eq:foot_second_order}
+\end{equation}
+If joint $6$ has zero translation and identity rotation, $\|o_5\|,\|o_6\|\le1/5$, and its fixed link translation has norm at most $1/3$, unit initial COM rotations imply $|\rho_t|\le22/15$ at every substep.
+This geometric bound requires no subsequent height or speed premise.
+For $\delta=1/320$, $0<\mu\le8$, $0<k_J\le20000$, and $0<d_J\le10$, every root of
+\begin{equation}
+ \zeta^2-(2-\gamma-\chi)\zeta+(1-\gamma)=0
+ \label{eq:foot_homogeneous_roots}
+\end{equation}
+has modulus strictly less than one.
+\end{proposition}
+
+\begin{proof}
+The parent receives the opposite foot-joint reaction, and its collision increment is zero under the actual contact layout.
+Subtracting the two velocity updates proves Eq.~\eqref{eq:foot_relative_recurrence}; weighting them by $\eta_5$ and $\eta_6$ cancels the internal joint force and gives Eq.~\eqref{eq:foot_momentum_recurrence}.
+Semi-implicit position integration gives Eq.~\eqref{eq:foot_anchor_recurrence}.
+Substituting the next relative-speed update and eliminating $\delta w'$ proves Eq.~\eqref{eq:foot_second_order}.
+
+Normalized integration preserves unit rotations without a height premise.
+Writing $\ell_6$ for the link translation, anchor reconstruction gives
+\begin{equation}
+ h_{\rm geom}=\left[R_6(-o_6)-R_5(-o_5)-R_5\ell_6\right]_z.
+\end{equation}
+Unit rotations imply $|h_{\rm geom}|\le1/5+1/5+1/3=11/15$.
+Applying this at two consecutive states proves $|\rho_t|\le22/15$ for every substep.
+
+The parameter ranges give $0<\gamma\le1/4$, $0<\chi\le25/16$, and $\chi+2\gamma\le33/16<4$.
+For $T=2-\gamma-\chi$ and $D=1-\gamma$, these imply $-1<D<1$ and $-(1+D)<T<1+D$.
+For a nonreal root, the imaginary and real equations yield $|\zeta|^2=D<1$.
+For a real root, the same inequalities exclude $\zeta\ge1$ and $\zeta\le-1$.
+Thus both homogeneous roots lie strictly inside the unit disk.
+\end{proof}
+
+The extended 64,000-substep source regression checks the parent force, both first-order recurrences, and Eq.~\eqref{eq:foot_second_order}.
+Its maximum relative-speed discrepancy is $1.05\times10^{-5}$ and maximum second-order discrepancy is $1.89\times10^{-7}$.
+For the checked source parameters, $\gamma=0.0615453$, $\chi=0.384658$, and the largest homogeneous root modulus is $0.968739$.
+The largest observed $|\rho|$ is $0.00959611$; the proved $22/15$ bound applies beyond these finite observations.
+
+\subsection{Whole-tree momentum and relative edge-speed budget}
+\label{app:global_momentum}
+
+The upstream joint force in Eq.~\eqref{eq:foot_momentum_recurrence} cancels when momentum is summed over the complete seven-link tree.
+Let $m_i=\eta_i^{-1}>0$, $M=\sum_i m_i$, and $J_t=\sum_i m_i v_{i,z,t}$.
+For each substep, let $\Gamma_t=\sum_i m_i c_{i,t}$ denote total vertical contact support.
+Ground friction is horizontal, while normal impulses and active-contact averaging give $\Gamma_t\ge0$.
+
+Use the six edges in order $(0,1),(1,2),(2,3),(0,4),(4,5),(5,6)$.
+Let $e_j=v_{{\rm child}(j),z}-v_{{\rm parent}(j),z}$ and $B(v)=\sum_{j=1}^6|e_j|$.
+The coefficients recovering foot velocity from total momentum are
+\begin{align}
+ \beta={}&\bigl(-(m_1+m_2+m_3),-(m_2+m_3),-m_3,\nonumber\\
+ &\hspace{12mm}M-(m_4+m_5+m_6),M-(m_5+m_6),M-m_6\bigr).
+\end{align}
+
+\begin{proposition}[Contact-supported whole-tree certificate]
+\label{prop:global_momentum}
+Assume positive inverse masses, identity root link/joint-offset rotations, fixed parameters, and linear integration multiplier $d=1$.
+The original scalar-contact model obeys
+\begin{align}
+ J_{t+1}&=J_t+\delta M g_z+\Gamma_t,\nonumber\\
+ J_t&=J_0+t\delta M g_z+\sum_{k=0}^{t-1}\Gamma_k.
+ \label{eq:global_momentum}
+\end{align}
+These identities require neither a height floor nor an upper joint-force bound.
+For any seven-body velocity field, including pre-contact velocities,
+\begin{equation}
+ M v_{6,z}=J+\sum_{j=1}^6\beta_j e_j,
+ \qquad \left|\sum_{j=1}^6\beta_j e_j\right|\le M B(v).
+ \label{eq:global_foot_decomposition}
+\end{equation}
+Consequently, $M V_0\le J_0$ implies
+\begin{equation}
+ \widetilde v_{6,z,t}\ge V_0+(t+1)\delta g_z+
+   \frac1M\sum_{k=0}^{t-1}\Gamma_k-B(\widetilde v_t).
+ \label{eq:global_foot_lower}
+\end{equation}
+Thus $B(\widetilde v_t)\le64+V_0+(t+1)\delta g_z+M^{-1}\sum_{k<t}\Gamma_k$ gives $\widetilde v_{6,z,t}\ge-64$.
+With Proposition~\ref{prop:foot_joint}'s unit parent-anchor condition, this implies Eq.~\eqref{eq:foot_joint_slack}.
+Proposition~\ref{prop:reset_step}'s velocity and COM-offset assumptions give $J_0\ge-M$, so $V_0=-1$ is valid.
+\end{proposition}
+
+\begin{proof}
+Every non-root joint's translational force has an opposite parent reaction.
+Summation over the actual parent map cancels these forces exactly.
+The root constraint has only a lateral translational component in its identity anchor frame.
+Therefore $\sum_i m_i\dot v_{i,z}=M g_z$ before contact, independently of joint-force magnitude.
+Adding contact increments proves the first identity in Eq.~\eqref{eq:global_momentum}; finite induction proves the second.
+
+Expanding the six edge differences gives Eq.~\eqref{eq:global_foot_decomposition}'s exact identity.
+Each $|\beta_j|\le M$ because its absolute value is a sum over a subset of the positive masses.
+The triangle inequality gives the stated budget bound.
+Pre-contact total momentum equals $J_t+\delta M g_z$.
+Substitution of Eq.~\eqref{eq:global_momentum} into the lower side of Eq.~\eqref{eq:global_foot_decomposition} proves Eq.~\eqref{eq:global_foot_lower}.
+Its last implication uses the exact joint-speed equivalence in Proposition~\ref{prop:foot_joint}.
+The reset's COM vertical velocities are each at least $-1$; their positive-mass weighted sum gives $J_0\ge-M$.
+\end{proof}
+
+The 256-substep source check from four normal resets also compares these whole-tree formulas against the installed update.
+Maximum total joint-force residual is $6.87\times10^{-5}$; maximum pre/post-contact momentum-update error is $6.80\times10^{-7}$.
+The foot-decomposition error is at most $3.55\times10^{-15}$ when evaluated in double precision.
+
+\subsection{Complete coupled edge dynamics}
+\label{app:coupled_edges}
+
+The six relative velocities in Eq.~\eqref{eq:global_foot_decomposition} interact through their shared bodies, including the root connecting both legs.
+Let $\mathsf B\in\mathbb R^{6\times7}$ be the signed incidence matrix in the edge order above, with child entry $+1$ and parent entry $-1$.
+Write $y=\mathsf Bp_z$, $r=\mathsf Bv_z$, and $A=\mathsf B\operatorname{diag}(\eta)\mathsf B^\top$.
+For edge $j$, let $H_j$ be world anchor displacement minus COM displacement, and $C_j$ be world joint-relative velocity minus COM-relative velocity.
+With uniform joint stiffness $k_J$ and linear damping $d_J$, the world vertical edge force is $F=-k_J(y+H)-d_J(r+C)$.
+Let $c$ contain the seven vertical collision increments and define
+\begin{equation}
+ U=-\delta A(k_JH+d_JC)+\mathsf Bc.
+ \label{eq:coupled_edge_input}
+\end{equation}
+
+\begin{proposition}[Forced six-edge update and homogeneous stability]
+\label{prop:coupled_edges}
+Assume fixed positive inverse masses, identity root link/joint rotations, zero joint-offset translations, unit COM and parent-anchor rotations, and linear integration multiplier $1$.
+For the complete scalar-contact update, gravity cancels from relative acceleration and
+\begin{align}
+ r_{t+1}&=(I-\delta d_JA)r_t-\delta k_JAy_t+U_t,\nonumber\\
+ y_{t+1}&=y_t+\delta r_{t+1},\nonumber\\
+ y_{t+2}&-(2I-\delta d_JA-\delta^2k_JA)y_{t+1}
+                 +(I-\delta d_JA)y_t=\delta U_{t+1}.
+ \label{eq:coupled_edge_recurrence}
+\end{align}
+Let $\deg(i)$ be the body's degree in the actual seven-body tree.
+If $\deg(i)\eta_i\le4$, then $A$ is symmetric positive definite with all six eigenvalues in $(0,8]$.
+For $\delta=1/320$, $0<k_J\le20000$, and $0<d_J\le10$, every homogeneous modal root lies strictly inside the unit disk.
+
+Suppose each COM offset has norm at most $1/5$ and each internal link-offset translation has norm at most $1/2$.
+Then $|H_j|\le9/10$ at every substep from unit initial rotations.
+On a planar state with pitch speeds bounded by $W\ge0$, $|C_j|\le(9/10)W$.
+The relative contact input satisfies
+\begin{equation}
+ \|\mathsf Bc\|_1\le8\Gamma,\qquad
+ \Gamma=\sum_i\eta_i^{-1}c_i\ge0.
+ \label{eq:coupled_edge_contact}
+\end{equation}
+This is the same contact support appearing in Eq.~\eqref{eq:global_momentum}.
+\end{proposition}
+
+\begin{proof}
+The joint-force assembly is $\mathsf B^\top F$, so edge acceleration is $AF$; the common gravity term disappears because $\mathsf B\mathbf1=0$.
+Substituting $F$ into the source's velocity and position updates gives Eq.~\eqref{eq:coupled_edge_recurrence}.
+For any edge vector $q$, $q^\top Aq=\sum_i\eta_i[(\mathsf B^\top q)_i]^2$.
+The tree incidence transpose is injective, giving positive definiteness.
+At each body, Cauchy's inequality bounds this squared sum by its degree times the sum of incident squared edge coordinates.
+Summing and using $\deg(i)\eta_i\le4$ gives $q^\top Aq\le8\|q\|_2^2$.
+The real symmetric spectral theorem supplies all six orthogonal eigenmodes.
+Each mode has polynomial $z^2-(2-\gamma-\chi)z+(1-\gamma)$, where $\gamma=\delta d_J\lambda$ and $\chi=\delta^2k_J\lambda$.
+The stated bounds give $0<\gamma\le1/4$, $0<\chi\le25/16$, and $\chi+2\gamma\le33/16<4$.
+The root argument of Proposition~\ref{prop:foot_recurrence} applies to each eigenvalue.
+
+Let $\ell_c,\ell_p$ be the rotated negative child/parent COM offsets, and $\ell_J$ the rotated link offset.
+The source formulas give $H_j=(\ell_c-\ell_p-\ell_J)_z$ and
+\begin{equation}
+ C_j=(\omega_c\times\ell_c-\omega_p\times\ell_p+\omega_p\times\ell_J)_z.
+\end{equation}
+Unit rotations preserve offset norms, giving $1/5+1/5+1/2=9/10$.
+On a planar state, only pitch angular velocity contributes to this vertical cross-product coordinate, giving the bound on $C_j$.
+Each nonnegative collision increment appears in at most two edge differences, so $\|\mathsf Bc\|_1\le2\sum_i c_i$.
+Since $\eta_i\le4$, $c_i\le4\eta_i^{-1}c_i$; summation proves Eq.~\eqref{eq:coupled_edge_contact}.
+\end{proof}
+
+A four-reset, 256-substep comparison checks the complete recurrence against the installed scalar pipeline under zero, positive, negative, and random bounded commands.
+The maximum second-order error is $9.32\times10^{-8}$; the angular-bias formula error is $9.54\times10^{-7}$.
+All three input bounds pass in these comparisons.
+The checked matrix has eigenvalues from $0.176535$ to $2.863872$ and maximum homogeneous root modulus $0.997238$.
+
+\subsection{Finite forced response about joint anchors}
+\label{app:forced_response}
+
+Using anchor error $E_t=y_t+H_t$ avoids repeatedly charging the fixed geometry offset as a stiffness input.
+Define $\rho_t=H_{t+1}-H_t$, $\Omega_t=\sum_i|\omega_{i,y,t}|$, and the scaled state $X_t=(E_t,\delta r_t)$.
+Here $\Omega_t$ is the actual pitch-speed sum at substep $t$, not an assumed uniform bound.
+Let
+\begin{align}
+ \mathsf T&=\begin{pmatrix}
+ I-\delta^2k_JA&I-\delta d_JA\\
+ -\delta^2k_JA&I-\delta d_JA
+ \end{pmatrix},\nonumber\\
+ \kappa_t&=-\delta^2d_JAC_t+\delta\mathsf Bc_t,
+ \qquad \xi_t=(\rho_t+\kappa_t,\kappa_t).
+ \label{eq:anchor_transient}
+\end{align}
+The matrix norm $\|Q\|_1$ below is the maximum absolute column sum.
+
+\begin{proposition}[Source-derived finite response]
+\label{prop:forced_response}
+Under Proposition~\ref{prop:coupled_edges}'s parameter conditions, assume planar motion and $\delta>0$.
+The normalized semi-implicit rotation update gives, for every edge,
+\begin{align}
+ |\rho_{j,t}|&\le\delta\left(\tfrac15|\omega_{{\rm child}(j),y,t+1}|+
+       \tfrac7{10}|\omega_{{\rm parent}(j),y,t+1}|\right),\nonumber\\
+ |C_{j,t}|&\le\tfrac15|\omega_{{\rm child}(j),y,t}|+
+       \tfrac7{10}|\omega_{{\rm parent}(j),y,t}|.
+ \label{eq:anchor_local_inputs}
+\end{align}
+The exact scalar-contact update satisfies
+\begin{align}
+ X_{t+1}&=\mathsf T X_t+\xi_t,\nonumber\\
+ X_t&=\mathsf T^tX_0+\sum_{s=0}^{t-1}\mathsf T^{t-1-s}\xi_s,\nonumber\\
+ \|\xi_t\|_1&\le\Xi_t:=\tfrac75\delta\Omega_{t+1}+
+       \tfrac{112}5\delta^2d_J\Omega_t+16\delta\Gamma_t.
+ \label{eq:anchor_forced_response}
+\end{align}
+In particular, the constant $k_JH_t$ term is absent from this input bound.
+Set $\mathsf P=(-\delta k_JA,\,\delta^{-1}(I-\delta d_JA))$.
+For the actual pre-contact relative velocity $\widetilde r_t$,
+\begin{align}
+ \widetilde r_t&=\mathsf P X_t-\delta d_JAC_t,\nonumber\\
+ \|\widetilde r_t\|_1&\le\|\mathsf P\mathsf T^t\|_1\|X_0\|_1+
+     \sum_{s=0}^{t-1}\|\mathsf P\mathsf T^{t-1-s}\|_1\Xi_s+
+       \tfrac{56}5\delta d_J\Omega_t.
+ \label{eq:anchor_pre_speed_bound}
+\end{align}
+All angular and contact terms refer to the actual source-model history.
+\end{proposition}
+
+\begin{proof}
+For a pitch rotation $q$ and angular velocity $w$, write $a=\delta w/2$ and $\ell=R(q)v$.
+Normalizing $q+(\delta/2)(0,0,w,0)q$ yields
+\begin{equation}
+ (1+a^2)(\ell'_z-\ell_z)=-2a\ell_x-2a^2\ell_z.
+\end{equation}
+Cauchy's inequality and norm preservation give $|\ell'_z-\ell_z|\le2|a|\|v\|_2$.
+The source uses the post-update angular velocity, explaining the $t+1$ indices in Eq.~\eqref{eq:anchor_local_inputs}.
+Applying the three offset bounds proves its first inequality; the angular-bias formula in Proposition~\ref{prop:coupled_edges} proves the second.
+The tree weights give $\|\rho_t\|_1\le(7/5)\delta\Omega_{t+1}$ and $\|C_t\|_1\le(7/5)\Omega_t$.
+Its absolute column sums also give $\|A\|_1\le8$.
+Substitution into the anchor-error and scaled-speed updates gives Eq.~\eqref{eq:anchor_transient} and the input bound.
+Finite induction gives the convolution in Eq.~\eqref{eq:anchor_forced_response}.
+Removing the current contact increment from the velocity update gives $\widetilde r_t=\mathsf P X_t-\delta d_JAC_t$.
+Applying column-sum bounds to each projected matrix power proves Eq.~\eqref{eq:anchor_pre_speed_bound}.
+\end{proof}
+
+The 256-substep source comparison also checks these rotation, state-response, and pre-contact observation identities.
+Maximum errors are $9.80\times10^{-8}$, $2.43\times10^{-7}$, and $5.41\times10^{-6}$, respectively.
+All local input and finite-response inequalities pass on the checked prefixes.
+
+\subsection{Signed foot response and one-sided contact support}
+\label{app:signed_response}
+
+Projecting onto foot velocity preserves cancellation between common momentum and relative contact motion.
+Let $m_i=\eta_i^{-1}$, $M=\sum_i m_i$, and $w=\beta/M$, with $\beta$ from Proposition~\ref{prop:global_momentum}.
+Write $\ell_l=w^\top\mathsf P\mathsf T^l=(\ell_l^E,\ell_l^r)$ and split the input into
+\begin{equation}
+ \xi_s^{\rm ang}=(\rho_s-\delta^2d_JAC_s,-\delta^2d_JAC_s),
+ \qquad \xi_s^{\rm contact}=(\delta\mathsf Bc_s,\delta\mathsf Bc_s).
+\end{equation}
+Define the free response, angular response, and contact kernel by
+\begin{align}
+ F_t&=J_0/M+(t+1)\delta g_z+\ell_tX_0,\nonumber\\
+ \mathcal A_t&=-\delta d_Jw^\top AC_t+
+     \sum_{s=0}^{t-1}\ell_{t-1-s}\xi_s^{\rm ang},\nonumber\\
+ K_{l,i}&=m_i/M+\delta[\mathsf B^\top(\ell_l^E+\ell_l^r)^\top]_i,
+ \qquad \nu_l=\min_i\eta_iK_{l,i}.
+ \label{eq:foot_response_channels}
+\end{align}
+The kernel includes both the common momentum and relative velocity generated by each contact.
+
+\begin{proposition}[Signed pre-contact foot response]
+\label{prop:signed_response}
+Under Proposition~\ref{prop:forced_response}'s conditions, the actual pre-contact foot velocity obeys
+\begin{align}
+ \widetilde v_{6,z,t}&=F_t+\mathcal A_t+
+    \sum_{s=0}^{t-1}\sum_i K_{t-1-s,i}c_{i,s},\nonumber\\
+ F_t+\mathcal A_t+\sum_{s=0}^{t-1}\nu_{t-1-s}\Gamma_s
+    &\le\widetilde v_{6,z,t}.
+ \label{eq:signed_foot_response}
+\end{align}
+Negative $K_{l,i}$ and $\nu_l$ are permitted.
+For $e_{j,s}=\tfrac15|\omega_{{\rm child}(j),y,s}|+\tfrac7{10}|\omega_{{\rm parent}(j),y,s}|$, set $D(q,e)=\sum_j|q_j|e_j$ and
+\begin{align}
+ \Lambda_t={}&\delta d_JD(w^\top A,e_t)\nonumber\\
+ &+\sum_{s=0}^{t-1}\left[
+   \delta D(\ell_{t-1-s}^E,e_{s+1})+
+   \delta^2d_JD((\ell_{t-1-s}^E+\ell_{t-1-s}^r)A,e_s)\right].
+ \label{eq:signed_angular_cost}
+\end{align}
+Then $|\mathcal A_t|\le\Lambda_t$, and
+\begin{equation}
+ F_t-\Lambda_t+\sum_{s=0}^{t-1}\nu_{t-1-s}\Gamma_s\le\widetilde v_{6,z,t}.
+ \label{eq:directional_foot_lower}
+\end{equation}
+Either lower bound certifies Eq.~\eqref{eq:foot_joint_slack} whenever it is at least $-64$.
+\end{proposition}
+
+\begin{proof}
+The momentum identity and edge decomposition give $\widetilde v_{6,z,t}=\widetilde J_t/M+w^\top\widetilde r_t$.
+Substituting the finite convolution and separating its two input channels yields the exact response.
+The incidence adjoint gives $q^\top\mathsf Bc=(\mathsf B^\top q)^\top c$, producing the contact kernel.
+Since $c_{i,s}\ge0$ and $\nu_l\le\eta_iK_{l,i}$, summation gives $\nu_l\Gamma_s\le\sum_iK_{l,i}c_{i,s}$.
+For the angular channel,
+\begin{equation}
+ \ell_l\xi_s^{\rm ang}=\ell_l^E\rho_s-
+   \delta^2d_J(\ell_l^E+\ell_l^r)AC_s.
+\end{equation}
+Applying Eq.~\eqref{eq:anchor_local_inputs} coordinatewise proves $|\mathcal A_t|\le\Lambda_t$.
+Finally, Proposition~\ref{prop:foot_joint} equates the $-64$ speed condition with the signed joint slack.
+\end{proof}
+
+The same four-reset, 256-substep source comparison gives maximum signed-response error $2.42\times10^{-5}$.
+All one-sided inequalities hold within the $5\times10^{-4}$ floating-point comparison tolerance.
+The absolute-angular bound reaches $-118.08$ with exact contact inputs and $-127.28$ with support alone.
+Both certify 202 of the 256 speed conditions; the support bound retaining actual $\mathcal A_t$ certifies all 256, with minimum $-15.29$.
+
+\subsection{Source-correct joint work and discrete energy balance}
+\label{app:joint_work}
+
+The installed joint cache and the physical anchor use different parent-velocity lever signs.
+For revolute edge $j$, let $\mathbf E_j$ be its child-minus-parent anchor position and $\mathbf U_j$ its physical anchor-velocity difference.
+With parent link offset $\ell_j$ and rotation $R_p$, define $\mathbf Q_j=\boldsymbol\omega_p\times R_p\ell_j$.
+The zero joint offsets give the world-frame cached velocity
+\begin{equation}
+ \mathbf v_j^{\rm cache}=\mathbf U_j+2\mathbf Q_j,
+ \qquad \mathbf F_j=-k_j\mathbf E_j-d_j(\mathbf U_j+2\mathbf Q_j).
+ \label{eq:joint_cache_work}
+\end{equation}
+Consequently,
+\begin{equation}
+ \mathbf F_j\cdot\mathbf U_j+k_j\mathbf E_j\cdot\mathbf U_j
+   =-d_j\|\mathbf U_j+\mathbf Q_j\|_2^2+d_j\|\mathbf Q_j\|_2^2.
+ \label{eq:joint_shift_work}
+\end{equation}
+For unit parent rotations and the source link lengths $\|\ell_j\|_2\le1/2$, the positive term is at most $d_j\omega_{p,y}^2/4$.
+On the planar invariant, cached pitch speed equals $w_j=\omega_{{\rm child}(j),y}-\omega_{{\rm parent}(j),y}$.
+The axis-alignment torque contributes no work, while motor, angular damping and joint limits contribute
+\begin{equation}
+ W_j^{\rm ang}=\tau_jw_j-d_j^{\rm ang}w_j^2
+   -k_j^{\rm lim}\operatorname{err}(\theta_j;\theta_j^{\min},\theta_j^{\max})w_j,
+\end{equation}
+where $\operatorname{err}$ is the source's sequential joint-limit error.
+Set $D_j=-d_j\|\mathbf U_j+\mathbf Q_j\|_2^2+d_j\|\mathbf Q_j\|_2^2+W_j^{\rm ang}$.
+Wrench shifting and cancellation over the actual seven-link parent tree give
+\begin{equation}
+ W_{\rm body}+\sum_jk_j\mathbf E_j\cdot\mathbf U_j=W_0+\sum_jD_j,
+ \label{eq:seven_joint_work}
+\end{equation}
+where $W_{\rm body}$ pairs all assembled body wrenches with COM motion, and $W_0$ is the root-joint contribution.
+
+Let $I_i$ be body $i$'s pitch inertia and $m_i$ its mass.
+Unit pitch rotations preserve $I_i$ because they preserve the pitch row of the rotated principal-inertia axes.
+Positive principal inverse inertias give a positive, state-independent inverse pitch inertia.
+Write $\mathbf A_i$ and $B_i$ for linear and pitch acceleration, and $\mathbf c_i$ and $\zeta_i$ for scalar-resolver collision increments.
+The source update has
+\begin{equation}
+ \widetilde{\mathbf v}_i=\mathbf v_i+\delta\mathbf A_i,\quad
+ \widetilde\omega_i=\omega_i+\delta B_i,\quad
+ \mathbf v_i^+=\widetilde{\mathbf v}_i+\mathbf c_i,\quad
+ \omega_i^+=\alpha\widetilde\omega_i+\zeta_i,
+\end{equation}
+with linear damping factor one and $\alpha=\exp(-0.01\delta)$.
+Define
+\begin{equation}
+ K=\tfrac12\sum_i[m_i\|\mathbf v_i\|_2^2+I_i\omega_i^2],
+ \qquad V=\tfrac12\sum_jk_j\|\mathbf E_j\|_2^2.
+\end{equation}
+For $\Delta\mathbf E_j=\mathbf E_j^+-\mathbf E_j$, retain the four corrections
+\begin{align}
+ C_{\rm Euler}&=\tfrac{\delta^2}{2}\sum_i[m_i\|\mathbf A_i\|_2^2+I_iB_i^2],\nonumber\\
+ C_{\rm damping}&=\tfrac{\alpha^2-1}{2}\sum_iI_i\widetilde\omega_i^2,\nonumber\\
+ C_{\rm contact}&=\sum_i\left[
+ m_i\widetilde{\mathbf v}_i\cdot\mathbf c_i+\tfrac{m_i}{2}\|\mathbf c_i\|_2^2+
+ I_i\alpha\widetilde\omega_i\zeta_i+\tfrac{I_i}{2}\zeta_i^2\right],\nonumber\\
+ C_{\rm elastic}&=\sum_j\left[
+ k_j\mathbf E_j\cdot(\Delta\mathbf E_j-\delta\mathbf U_j)+
+ \tfrac{k_j}{2}\|\Delta\mathbf E_j\|_2^2\right].
+ \label{eq:source_energy_corrections}
+\end{align}
+
+\begin{proposition}[Discrete source energy balance]
+\label{prop:source_energy}
+Under the planar invariant, unit frame rotations, zero joint offsets and positive masses and principal inertias, the scalar-contact source step satisfies
+\begin{equation}
+ \Delta(K+V)=\delta\left[W_0+\sum_jD_j+\sum_im_i\mathbf g\cdot\mathbf v_i\right]
+ +C_{\rm Euler}+C_{\rm damping}+C_{\rm contact}+C_{\rm elastic}.
+ \label{eq:source_mechanical_balance}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Wrench power is preserved when shifting from each anchor to its body COM.
+Reindexing parent contributions proves Eq.~\eqref{eq:seven_joint_work}.
+Expanding the squared pre-contact velocities gives acceleration work plus $C_{\rm Euler}$.
+Applying angular damping and then collision increments gives $C_{\rm damping}+C_{\rm contact}$.
+The constant pitch inertia converts angular acceleration work into torque work.
+Finally, expanding $\|\mathbf E_j^+\|_2^2-\|\mathbf E_j\|_2^2$ gives $\delta k_j\mathbf E_j\cdot\mathbf U_j$ and $C_{\rm elastic}$.
+Substitution of Eq.~\eqref{eq:seven_joint_work} proves the stated balance.
+\end{proof}
+
+The four-reset, 256-substep source comparison checks cached velocity, wrench work, angular work, pitch inertia and both energy increments.
+The maximum mechanical-balance error is $2.73\times10^{-5}$; the maximum angular-work error is $1.59\times10^{-3}$.
+The work comparisons use absolute tolerance $0.05$ and relative tolerance $3\times10^{-5}$; the anchor-increment identity uses absolute tolerance $2\times10^{-5}$.
+
+\subsection{Contact averaging and second-order anchor bounds}
+\label{app:energy_bounds}
+
+The actual active-contact average supplies an upper bound without requiring every collision to dissipate energy.
+For body $i$, write $\eta_i=1/m_i$, $\lambda_i=1/I_i$, and $\mathcal A_i$ for its active contacts.
+Let $\mathbf p_{ij}$ be the source impulse and $\xi_{ij}=[\mathbf r_{ij}\times\mathbf p_{ij}]_y$ its pitch torque.
+These impulses retain the installed scalar denominator; $\lambda_i$ is the true inverse pitch inertia used for the final velocity update.
+Define $q_i=(|\mathcal A_i|+10^{-8})^{-1}$ and
+\begin{align}
+ \overline{\mathbf p}_i&=q_i\sum_{j\in\mathcal A_i}\mathbf p_{ij},
+ &\overline\xi_i&=q_i\sum_{j\in\mathcal A_i}\xi_{ij},\nonumber\\
+ \Psi_i(\mathbf p,\xi)&=\widetilde{\mathbf v}_i\cdot\mathbf p+
+   \alpha\widetilde\omega_i\xi+
+   \tfrac{\eta_i}{2}\|\mathbf p\|_2^2+\tfrac{\lambda_i}{2}\xi^2.
+ \label{eq:individual_contact_energy}
+\end{align}
+The source collision increments are $\mathbf c_i=\eta_i\overline{\mathbf p}_i$ and $\zeta_i=\lambda_i\overline\xi_i$.
+The averaging defect is
+\begin{align}
+ \mathcal D_i={}&\tfrac{\eta_i}{2}\left[
+ q_i\sum_{j\in\mathcal A_i}\|\mathbf p_{ij}\|_2^2-
+ \|\overline{\mathbf p}_i\|_2^2\right]\nonumber\\
+ &+\tfrac{\lambda_i}{2}\left[
+ q_i\sum_{j\in\mathcal A_i}\xi_{ij}^2-\overline\xi_i^2\right].
+ \label{eq:contact_average_defect}
+\end{align}
+
+\begin{proposition}[Source-derived energy upper bounds]
+\label{prop:source_energy_upper}
+Under Proposition~\ref{prop:source_energy}'s conditions and nonnegative joint stiffness,
+\begin{equation}
+ C_{\rm contact}=\sum_i\left[q_i\sum_{j\in\mathcal A_i}
+ \Psi_i(\mathbf p_{ij},\xi_{ij})-\mathcal D_i\right]
+ \le\mathcal C:=\sum_iq_i\sum_{j\in\mathcal A_i}\Psi_i(\mathbf p_{ij},\xi_{ij}),
+ \qquad\mathcal D_i\ge0.
+ \label{eq:contact_energy_upper}
+\end{equation}
+For a fixed planar lever $\boldsymbol\ell$ of norm at most $B$, the actual normalized pitch update gives
+\begin{align}
+ \mathbf R_i(\boldsymbol\ell)&=R_i^+\boldsymbol\ell-R_i\boldsymbol\ell
+  -\delta\boldsymbol\omega_i^+\times R_i\boldsymbol\ell,\nonumber\\
+ \left(1+\tfrac{\delta^2(\omega_i^+)^2}{4}\right)
+  \|\mathbf R_i(\boldsymbol\ell)\|_2^2
+  &=\tfrac{\delta^4(\omega_i^+)^4}{4}\|\boldsymbol\ell\|_2^2,
+ &\|\mathbf R_i(\boldsymbol\ell)\|_2&\le\tfrac{\delta^2}{2}(\omega_i^+)^2B.
+ \label{eq:rotation_second_order}
+\end{align}
+Write $c,p$ for edge $j$'s child and parent.
+Its local levers are $\boldsymbol\ell_c=-\mathbf o_c$ and $\boldsymbol\ell_p=-\mathbf o_p+\ell_j$,
+where $\mathbf o_i$ is the source COM offset and $\ell_j$ the link offset.
+With $\mathbf L_c=R_c\boldsymbol\ell_c$ and $\mathbf L_p=R_p\boldsymbol\ell_p$, define
+\begin{equation}
+ \mathbf H_j=\Delta\mathbf v_c-\Delta\mathbf v_p+
+ \Delta\boldsymbol\omega_c\times\mathbf L_c-
+ \Delta\boldsymbol\omega_p\times\mathbf L_p.
+\end{equation}
+Then the actual anchor defect satisfies
+\begin{equation}
+ \Delta\mathbf E_j-\delta\mathbf U_j=
+ \delta\mathbf H_j+\mathbf R_c(\boldsymbol\ell_c)-\mathbf R_p(\boldsymbol\ell_p).
+ \label{eq:anchor_taylor_defect}
+\end{equation}
+For lever bounds $B_c,B_p$ and coordinate $k$, set
+\begin{equation}
+ T_{jk}=|\delta|\,|H_{jk}|+\tfrac{\delta^2}{2}
+  [B_c(\omega_c^+)^2+B_p(\omega_p^+)^2].
+\end{equation}
+Thus $|\Delta E_{jk}-\delta U_{jk}|\le T_{jk}$ and
+\begin{equation}
+ C_{\rm elastic}\le\mathcal E:=\sum_jk_j\left[
+ \sum_k|E_{jk}|T_{jk}+\tfrac12\|\Delta\mathbf E_j\|_2^2\right].
+ \label{eq:elastic_energy_upper}
+\end{equation}
+Substituting the two upper bounds into Eq.~\eqref{eq:source_mechanical_balance} gives
+\begin{equation}
+ \Delta(K+V)\le\delta\left[W_0+\sum_jD_j+\sum_im_i\mathbf g\cdot\mathbf v_i\right]
+ +C_{\rm Euler}+C_{\rm damping}+\mathcal C+\mathcal E.
+ \label{eq:source_mechanical_upper}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Since $0\le q_i|\mathcal A_i|\le1$, Cauchy--Schwarz gives
+$\|q_i\sum_j\mathbf p_{ij}\|_2^2\le q_i\sum_j\|\mathbf p_{ij}\|_2^2$ and its scalar torque analogue.
+Positive inverse masses and pitch inertias therefore imply $\mathcal D_i\ge0$.
+Expanding $\Psi_i$ cancels its linear terms and proves Eq.~\eqref{eq:contact_energy_upper}, including the empty-contact case.
+Expanding the normalized pitch quaternion gives Eq.~\eqref{eq:rotation_second_order} from unit initial rotation and the planar lever.
+The squared identity implies the stated norm bound.
+COM integration uses $\mathbf p_i^+=\mathbf p_i+\delta\mathbf v_i^+$; expanding both rotated levers proves Eq.~\eqref{eq:anchor_taylor_defect}.
+The triangle inequality gives $T_{jk}$.
+Nonnegative stiffness and $E_{jk}(\Delta E_{jk}-\delta U_{jk})\le|E_{jk}|T_{jk}$ prove Eq.~\eqref{eq:elastic_energy_upper}.
+Finally, substitute these inequalities into the exact mechanical-energy balance.
+\end{proof}
+
+The source lever bounds are $B_c=1/5$ and $B_p=7/10$.
+The 256 normal-reset substeps verify the rotation, anchor and energy formulas and all upper inequalities.
+Three additional source-resolver cases place the foot COM at $-0.3$, with downward speed $-2$ and pitch speeds $-15,0,15$.
+Both foot contacts activate, and each case has a strictly positive averaging defect.
+Maximum contact-energy identity error is $2.48\times10^{-5}$ across all cases; maximum anchor Taylor identity error is $1.57\times10^{-7}$.
+Contact-energy comparisons use absolute tolerance $2\times10^{-5}$ and relative tolerance $3\times10^{-5}$; anchor comparisons use absolute tolerance $10^{-6}$.
+
+\subsection{Current-state energy recursion and kinetic speed certificate}
+\label{app:current_energy}
+
+The energy upper bound can be evaluated before integration, eliminating its explicit dependence on successor-state pitch speeds and anchor increments.
+For the source's unit linear damping, define the current-state budgets
+\begin{align}
+ d^v_{ik}&=|\delta|\,|A_{ik}|+|c_{ik}|,\nonumber\\
+ d^\omega_i&=|\alpha-1|\,|\omega_i|+|\alpha\delta|\,|B_i|+|\zeta_i|,\nonumber\\
+ \widehat\omega_i&=|\alpha|(|\omega_i|+|\delta|\,|B_i|)+|\zeta_i|.
+ \label{eq:current_velocity_budgets}
+\end{align}
+Here acceleration and collision increments are computed at the current state and command, in the source's acceleration-before-contact order.
+They satisfy $|\Delta v_{ik}|\le d^v_{ik}$, $|\Delta\omega_i|\le d^\omega_i$, and $|\omega_i^+|\le\widehat\omega_i$.
+For edge $j=(p,c)$, define
+\begin{align}
+ \widehat H_{jk}&=d^v_{ck}+d^v_{pk}+B_cd^\omega_c+B_pd^\omega_p,\nonumber\\
+ \widehat T_{jk}&=|\delta|\widehat H_{jk}+\tfrac{\delta^2}{2}
+  [B_c\widehat\omega_c^2+B_p\widehat\omega_p^2],\nonumber\\
+ \widehat S_{jk}&=|\delta|\,|U_{jk}|+\widehat T_{jk},\nonumber\\
+ \widehat{\mathcal E}&=\sum_jk_j\left[
+ \sum_k|E_{jk}|\widehat T_{jk}+\tfrac12\sum_k\widehat S_{jk}^2\right].
+ \label{eq:current_elastic_budget}
+\end{align}
+
+\begin{proposition}[Energy recursion and all-command speed certificate]
+\label{prop:current_energy}
+Under Proposition~\ref{prop:source_energy_upper}'s conditions,
+$|H_{jk}|\le\widehat H_{jk}$, $T_{jk}\le\widehat T_{jk}$, and $|\Delta E_{jk}|\le\widehat S_{jk}$.
+Consequently $\mathcal E\le\widehat{\mathcal E}$.
+Write $\mathsf E_t=K_t+V_t$ and
+\begin{equation}
+ \Gamma_t=\delta\left[W_0+\sum_jD_j+\sum_im_i\mathbf g\cdot\mathbf v_i\right]
+ +C_{\rm Euler}+C_{\rm damping}+\mathcal C+\widehat{\mathcal E},
+ \label{eq:current_energy_gain}
+\end{equation}
+with every term evaluated at $(x_t,a_t)$.
+If planar motion and unit frames hold initially and fixed link rotations are unit, their preservation yields
+\begin{equation}
+ \mathsf E_{t+1}\le\mathsf E_t+\Gamma_t,
+ \qquad \mathsf E_T\le\overline{\mathsf E}_T:=\mathsf E_0+\sum_{t=0}^{T-1}\Gamma_t.
+ \label{eq:current_energy_prefix}
+\end{equation}
+For any chosen command $b$, define $W_t^{\rm acc}(b)=W_{\rm body}(b)+\sum_im_i\mathbf g\cdot\mathbf v_i$.
+The complete pre-contact kinetic energy satisfies
+\begin{equation}
+ K_t^{\rm pre}(b)=K_t+\delta W_t^{\rm acc}(b)+C_{{\rm Euler},t}(b)
+ \le\overline{\mathsf E}_t-V_t+\delta W_t^{\rm acc}(b)+C_{{\rm Euler},t}(b).
+ \label{eq:pre_kinetic_upper}
+\end{equation}
+If
+\begin{equation}
+ 2\eta_6\left[\overline{\mathsf E}_t-V_t+
+ \delta W_t^{\rm acc}(b)+C_{{\rm Euler},t}(b)\right]\le4096,
+ \label{eq:kinetic_speed_certificate}
+\end{equation}
+then $\widetilde v_{6,z}(a)\ge-64$ for every current motor command $a$.
+Together with the current foot height and paired-contact assumptions in Proposition~\ref{prop:paired_foot}, this supplies its barrier condition for every command.
+\end{proposition}
+
+\begin{proof}
+Expanding the source velocity update and applying the triangle inequality gives Eq.~\eqref{eq:current_velocity_budgets}.
+For axial angular motion and a rotated lever of norm at most $B$, each cross-product coordinate is bounded by $B|\Delta\omega|$.
+This gives $\widehat H_{jk}$; substituting into Proposition~\ref{prop:source_energy_upper} gives $\widehat T_{jk}$.
+Adding $|\delta U_{jk}|$ bounds the full anchor increment by $\widehat S_{jk}$.
+Nonnegative stiffness and monotonicity of squares on nonnegative arguments yield $\mathcal E\le\widehat{\mathcal E}$.
+Equation~\eqref{eq:source_mechanical_upper} then gives the energy step, and summation gives Eq.~\eqref{eq:current_energy_prefix}.
+Planarity and unit rotations propagate from the initial state by their source-step invariants; unit fixed link rotations give unit parent anchors.
+Expanding both squared pre-contact velocities proves the kinetic identity in Eq.~\eqref{eq:pre_kinetic_upper}, including the Euler correction.
+Replacing $K_t$ by $\overline{\mathsf E}_t-V_t$ proves its upper inequality.
+Positive mass and nonnegative pitch inertia give $\tfrac{m_6}{2}\widetilde v_{6,z}(b)^2\le K_t^{\rm pre}(b)$.
+Thus Eq.~\eqref{eq:kinetic_speed_certificate} implies $|\widetilde v_{6,z}(b)|\le64$.
+The instantaneous translational acceleration is action independent, so the same lower bound holds for every current command $a$.
+Proposition~\ref{prop:paired_foot} supplies the stated barrier implication.
+\end{proof}
+
+The four-reset source check passes every current-state and accumulated-energy inequality across 256 substeps.
+Using the cumulative envelope in Eq.~\eqref{eq:kinetic_speed_certificate} covers all 256 speed conditions, with minimum squared-speed budget slack $295.72$.
+Using the actual pre-contact kinetic energy gives minimum slack $3578.82$; the cumulative energy envelope overestimates actual mechanical energy by at most $1708.98$.
+These source comparisons use the existing absolute energy tolerance $0.05$ and coordinate tolerances $10^{-6}$--$2\times10^{-5}$.
+
+\subsection{Contracting energy for coupled relative translation}
+\label{app:transient_lyapunov}
+
+A quadratic cross term retains cancellation between spring displacement and velocity, instead of charging their absolute work separately.
+For the actual six-edge mass matrix $A$, choose orthonormal eigenvectors $b_j$ with eigenvalues $0<\lambda_j\le8$.
+Specialize to $\delta=1/320$, $k_J=20000$ and $d_J=10$.
+Project Eq.~\eqref{eq:anchor_transient} onto each eigenvector, defining
+\begin{align}
+ e_{j,t}&=b_j^\top E_t, & s_{j,t}&=b_j^\top(\delta r_t),\nonumber\\
+ q_{j,t}&=b_j^\top(\rho_t+\kappa_t), & u_{j,t}&=b_j^\top\kappa_t,\nonumber\\
+ c_j&=25\lambda_j/128, & \gamma_j&=\lambda_j/32=4c_j/25.
+ \label{eq:modal_energy_coordinates}
+\end{align}
+Thus $0<c_j\le25/16$ and $0<\gamma_j\le1/4$.
+Define
+\begin{equation}
+ \mathcal L_j(e,s)=c_je^2+(\gamma_j-c_j)es+(1-\gamma_j)s^2.
+ \label{eq:modal_lyapunov}
+\end{equation}
+
+\begin{proposition}[Source-derived contracting modal energy]
+\label{prop:transient_lyapunov}
+Under Proposition~\ref{prop:coupled_edges}'s mass and frame conditions, the source update gives
+\begin{align}
+ e_{j,t+1}&=(1-c_j)e_{j,t}+(1-\gamma_j)s_{j,t}+q_{j,t},\nonumber\\
+ s_{j,t+1}&=-c_je_{j,t}+(1-\gamma_j)s_{j,t}+u_{j,t}.
+ \label{eq:modal_source_step}
+\end{align}
+For every $e,s$, $\tfrac14(c_je^2+s^2)\le\mathcal L_j(e,s)\le2(c_je^2+s^2)$.
+Without input, this energy contracts exactly by $1-\gamma_j$ per physics substep.
+Set $L_{j,t}=\mathcal L_j(e_{j,t},s_{j,t})$, $I_{j,t}=\mathcal L_j(q_{j,t},u_{j,t})$ and $\theta_j=1-\gamma_j/2$.
+Then
+\begin{align}
+ L_{j,t+1}&\le\theta_jL_{j,t}+(1+2/\gamma_j)I_{j,t},\nonumber\\
+ L_{j,T}&\le\theta_j^TL_{j,0}+(1+2/\gamma_j)
+   \sum_{t=0}^{T-1}\theta_j^{T-1-t}I_{j,t}.
+ \label{eq:modal_energy_prefix}
+\end{align}
+If $I_{j,t}\le M_j$ at every substep, then
+\begin{equation}
+ L_{j,T}\le\max\{L_{j,0},(2/\gamma_j)(1+2/\gamma_j)M_j\}.
+ \label{eq:modal_uniform_input_bound}
+\end{equation}
+The source input also obeys the current-state bound
+\begin{equation}
+ \|\xi_t\|_1\le\widehat\Xi_t:=\tfrac75\delta\sum_i\widehat\omega_{i,t}
+   +\tfrac{112}5\delta^2d_J\Omega_t+16\delta\Gamma_t,
+ \label{eq:modal_current_input_bound}
+\end{equation}
+where $\Gamma_t$ denotes contact momentum support as in Eq.~\eqref{eq:anchor_forced_response}.
+\end{proposition}
+
+\begin{proof}
+Symmetry of $A$ and its eigenvector equation give Eq.~\eqref{eq:modal_source_step} from the complete source transient update.
+Suppress the index $j$ and substitute $\gamma=4c/25$.
+Completing the square gives
+\begin{equation}
+ \mathcal L(e,s)-\tfrac14(ce^2+s^2)
+ =\tfrac34c(e-14s/25)^2+(\tfrac34-247c/625)s^2\ge0.
+\end{equation}
+Similarly, $2(ce^2+s^2)-\mathcal L(e,s)=c(e+21s/50)^2+(1-41c/2500)s^2\ge0$.
+Direct expansion proves $\mathcal L((1-c)e+(1-\gamma)s,-ce+(1-\gamma)s)=(1-\gamma)\mathcal L(e,s)$.
+For any homogeneous output $(h_1,h_2)$ and input $(q,u)$, the identity
+\begin{align}
+ &\gamma(1+\gamma/2)\mathcal L(h_1,h_2)+(\gamma+2)\mathcal L(q,u)
+   -\gamma\mathcal L(h_1+q,h_2+u)\nonumber\\
+ &\hspace{2em}=2\mathcal L(\gamma h_1/2-q,\gamma h_2/2-u)\ge0
+\end{align}
+gives the step bound, since $(1+\gamma/2)(1-\gamma)\le1-\gamma/2$.
+Induction gives the geometric convolution and its invariant upper bound under $I_{j,t}\le M_j$.
+Finally, $\Omega_{t+1}\le\sum_i\widehat\omega_{i,t}$ gives Eq.~\eqref{eq:modal_current_input_bound} from Eq.~\eqref{eq:anchor_forced_response}.
+\end{proof}
+
+The fixed four-reset check passes 1536 modal updates across 256 source substeps.
+Maximum projected-update error is $7.53\times10^{-8}$; homogeneous-energy identity error is $1.63\times10^{-19}$.
+All coercivity, forced-step and geometric-prefix inequalities pass using absolute source tolerance $2\times10^{-6}$.
+
+\subsection{Modal norm response and directional foot-speed certificate}
+\label{app:modal_foot}
+
+Taking square roots preserves the same energy cancellation without the input multiplier $1+2/\gamma_j$ in Eq.~\eqref{eq:modal_energy_prefix}.
+Define $\mu_j=\sqrt{1-\gamma_j}$, $R_j=1-841c_j/2500>0$, and $\chi_j=\sqrt{(1-\gamma_j)/R_j}$.
+For $h_{j,t}=-c_je_{j,t}+(1-\gamma_j)s_{j,t}$ and $\bar w_j=b_j^\top w$, set
+\begin{align}
+ \mathcal N_{j,T}&=\mu_j^T\sqrt{L_{j,0}}+
+   \sum_{t=0}^{T-1}\mu_j^{T-1-t}\sqrt{I_{j,t}},\nonumber\\
+ \mathsf C_T&=J_0/M+(T+1)\delta g_z+
+   M^{-1}\sum_{t=0}^{T-1}\Gamma_t-
+   \sum_j\bar w_j\gamma_j b_j^\top C_T,\nonumber\\
+ \mathcal B_T&=\delta^{-1}\sum_j|\bar w_j|\chi_j\mathcal N_{j,T}.
+ \label{eq:modal_foot_budget}
+\end{align}
+Here $w=\beta/M$ is the existing foot-output row, $C_T$ is the current angular-bias vector, and $\Gamma_t$ is contact momentum support.
+The signed center $\mathsf C_T$ retains both contact-supported common momentum and current angular motion.
+
+\begin{proposition}[History-based directional certificate]
+\label{prop:modal_foot}
+Under Proposition~\ref{prop:transient_lyapunov}'s source conditions, each mode satisfies
+\begin{align}
+ \sqrt{L_{j,t+1}}&\le\mu_j\sqrt{L_{j,t}}+\sqrt{I_{j,t}},\nonumber\\
+ \sqrt{L_{j,T}}&\le\mathcal N_{j,T},
+ \qquad |h_{j,T}|\le\chi_j\sqrt{L_{j,T}}.
+ \label{eq:modal_norm_response}
+\end{align}
+The actual pre-contact foot output obeys
+\begin{equation}
+ \widetilde v_{6,z,T}=\mathsf C_T+\delta^{-1}\sum_j\bar w_jh_{j,T},
+ \qquad |\widetilde v_{6,z,T}-\mathsf C_T|\le\mathcal B_T.
+ \label{eq:modal_foot_interval}
+\end{equation}
+Consequently, $\mathsf C_T-\mathcal B_T\ge-64$ implies the foot-speed condition for every current motor command.
+With the current height floor and paired-contact conditions of Proposition~\ref{prop:paired_foot}, it supplies the corresponding all-command recovery condition.
+\end{proposition}
+
+\begin{proof}
+The quadratic form has determinant $c_j(1-\gamma_j)-(\gamma_j-c_j)^2/4=c_jR_j\ge0$.
+Its polar form therefore satisfies Cauchy's inequality, giving the triangle inequality for $\sqrt{\mathcal L_j}$.
+Combining that inequality with exact homogeneous contraction proves Eq.~\eqref{eq:modal_norm_response}'s step bound; finite induction gives its convolution.
+Completing the square gives $\mathcal L_j(e,s)=c_j(e-21s/50)^2+R_js^2$.
+Applying this identity to the homogeneous output yields $R_jh_{j,T}^2\le(1-\gamma_j)L_{j,T}$, proving the directional gain.
+The source pre-contact equation projects to
+\begin{equation}
+ b_j^\top\widetilde r_T=\delta^{-1}h_{j,T}-\gamma_jb_j^\top C_T.
+\end{equation}
+Orthonormal completeness reconstructs the foot correction, and the whole-tree momentum identity gives $\mathsf C_T$.
+Taking absolute values only after this projection proves Eq.~\eqref{eq:modal_foot_interval}.
+These quantities depend on the current state and completed history, not the current motor command.
+The lower interval endpoint thus supplies the speed condition for every command; Proposition~\ref{prop:paired_foot} gives the recovery implication.
+\end{proof}
+
+The four-reset source comparison verifies all norm-response, directional-output and interval inequalities across 256 substeps.
+Maximum foot-output identity error is $2.16\times10^{-6}$; the contact-supported center identity error is $2.57\times10^{-7}$.
+The previous energy envelope covers 189/256 speed conditions, with minimum lower bound $-120.70$.
+The norm-history certificate covers 256/256, with minimum lower bound $-57.24$.
+Norm comparisons use absolute source tolerance $2\times10^{-6}$; foot-output comparisons retain tolerance $5\times10^{-4}$.
+
+\subsection{Restarted modal certificates and finite-prefix closure}
+\label{app:modal_restart}
+
+Restarting the response at an actual source state retains cancellation already realized by the dynamics.
+For a start $s$ and a length $\ell$, define
+\begin{align}
+ \mathcal N_{j;s,\ell}&=\mu_j^\ell\sqrt{L_{j,s}}+
+   \sum_{r=0}^{\ell-1}\mu_j^{\ell-1-r}\sqrt{I_{j,s+r}},\nonumber\\
+ \mathcal B_{s,\ell}&=\delta^{-1}\sum_j|\bar w_j|\chi_j\mathcal N_{j;s,\ell}.
+ \label{eq:modal_restart_budget}
+\end{align}
+The restart uses the actual state at $s$, rather than its accumulated upper envelope.
+
+\begin{proposition}[Restart comparison and scalar-prefix closure]
+\label{prop:modal_restart}
+Under Proposition~\ref{prop:modal_foot}'s source conditions, for every $s,\ell\ge0$,
+\begin{equation}
+ \sqrt{L_{j,s+\ell}}\le\mathcal N_{j;s,\ell}\le\mathcal N_{j,s+\ell},
+ \qquad
+ \mathsf C_{s+\ell}-\mathcal B_{s,\ell}\le\widetilde v_{6,z,s+\ell}.
+ \label{eq:modal_restart_comparison}
+\end{equation}
+The lower endpoint is no smaller than the full-history endpoint, and applies to every current motor command.
+For $\ell=0$, the budget is exactly $\sqrt{L_{j,s}}$.
+Retain Proposition~\ref{prop:paired_foot}'s parameter, contact-layout and bounded planar reset conditions.
+If each substep $t<fH$ has a split $s_t+\ell_t=t$ satisfying
+\begin{equation}
+ \mathsf C_t-\mathcal B_{s_t,\ell_t}\ge-64,
+ \label{eq:modal_restart_margin}
+\end{equation}
+then the foot-height floor, unit rotations and scalar-model state radius follow throughout the prefix.
+The resulting return bound is
+\begin{equation}
+ |R_H|\le20\{M_{fH}+R+28K\}+0.6H,
+\end{equation}
+with the radius sequence of Proposition~\ref{prop:matrix_growth} at $m=1/4$.
+\end{proposition}
+
+\begin{proof}
+Apply the modal norm induction to the shifted source trajectory $x_{s+r}$.
+The full-history envelope at $s+\ell$ equals the restarted convolution initialized by $\mathcal N_{j,s}$.
+Since $\sqrt{L_{j,s}}\le\mathcal N_{j,s}$ and every power of $\mu_j$ is nonnegative, the restart budget is no larger.
+The directional output bound proves Eq.~\eqref{eq:modal_restart_comparison} for every current command.
+Equation~\eqref{eq:modal_restart_margin} therefore supplies the paired-foot speed condition at each substep.
+Induction derives subsequent heights and state radii; it does not assume their future bounds.
+The telescoping reward identity then gives the displayed return bound.
+\end{proof}
+
+A longer source check uses reset keys 90310--90313 and four bounded command sequences, each held for sixteen physics substeps.
+The sequences are zero, positive unit, negative unit, and uniform random commands from NumPy seed 90310.
+Each executes 1,000 actions, giving 64,000 source substeps in total.
+Using the action-block split $s_t=16\lfloor t/16\rfloor$, $\ell_t=t\bmod16$, the restarted intervals meet the speed condition at every checked substep.
+Their minimum lower endpoint is $-44.95$; the current-state certificate has minimum $-11.83$.
+The full-history intervals cover 47,580/64,000 substeps, with minimum $-171.52$, while actual pre-contact speed never falls below $-7.25$.
+Maximum foot-output identity error is $3.98\times10^{-6}$, below the retained $5\times10^{-4}$ tolerance.
+
+\subsection{Signed certificate drift and normal-reset initialization}
+\label{app:modal_drift}
+
+The input's polar term retains cancellation with the existing modal state.
+Define the bilinear form associated with Eq.~\eqref{eq:modal_lyapunov} by
+\begin{equation}
+ \mathcal P_j((e,s),(q,u))
+ =c_jeq+\tfrac12(\gamma_j-c_j)(eu+sq)+(1-\gamma_j)su.
+\end{equation}
+Let $\zeta_{j,t}=((1-c_j)e_{j,t}+(1-\gamma_j)s_{j,t},-c_je_{j,t}+(1-\gamma_j)s_{j,t})$ and set
+\begin{align}
+ Z_{j,t}&=-\gamma_jL_{j,t}
+   +2\mathcal P_j(\zeta_{j,t},(q_{j,t},u_{j,t}))+I_{j,t},\nonumber\\
+ \Delta N_{j,t}&=\frac{Z_{j,t}}{\sqrt{L_{j,t}}+\sqrt{L_{j,t+1}}},
+ \qquad \mathsf S_t=\mathsf C_t-\mathcal B_{t,0}.
+ \label{eq:modal_signed_gain}
+\end{align}
+The ratio is defined as zero when both energies vanish.
+For the current-state certificate $\mathsf S_t$, define
+\begin{align}
+ \mathsf D_t={}&\delta g_z+\Gamma_t/M
+   -\sum_j\bar w_j\gamma_j b_j^\top(C_{t+1}-C_t)\nonumber\\
+ &-\delta^{-1}\sum_j|\bar w_j|\chi_j\Delta N_{j,t}.
+ \label{eq:modal_local_drift}
+\end{align}
+
+\begin{proposition}[Exact local drift and initial margin]
+\label{prop:modal_drift}
+Under Proposition~\ref{prop:modal_foot}'s source conditions,
+\begin{align}
+ L_{j,t+1}-L_{j,t}&=Z_{j,t},
+ &\sqrt{L_{j,t+1}}-\sqrt{L_{j,t}}&=\Delta N_{j,t},\nonumber\\
+ \mathsf S_{t+1}-\mathsf S_t&=\mathsf D_t,
+ &\mathsf S_T&=\mathsf S_0+\sum_{t=0}^{T-1}\mathsf D_t.
+ \label{eq:modal_signed_trajectory}
+\end{align}
+For the normal planar reset, retain Proposition~\ref{prop:reset_step}'s link geometry and bounds
+$|\dot q_{i,0}|\le1/10$, $\|o_i\|_2\le1/5$, and $g_z\ge-10$.
+Then $\mathsf S_0\ge-30$ for every permitted reset, without an additional modal-margin premise.
+\end{proposition}
+
+\begin{proof}
+Expand $\mathcal L_j(\zeta_{j,t}+(q_{j,t},u_{j,t}))$ and use the exact homogeneous contraction.
+This gives the first identity, preserving the signed polar term.
+Rationalizing the square-root difference proves the second identity; both sides vanish when both energies are zero.
+The momentum update gives
+$\mathsf C_{t+1}-\mathsf C_t=\delta g_z+\Gamma_t/M-\sum_j\bar w_j\gamma_jb_j^\top(C_{t+1}-C_t)$.
+Subtract the exact change of $\mathcal B_{t,0}$ to obtain the local drift, then telescope.
+
+At reset, the source joint anchors coincide, so $E_0=0$.
+The reset motion bounds imply $|r_{j,0}|\le2$ and $|C_{j,0}|\le3$ in edge coordinates.
+Since $|w_j|\le1$, orthonormal completeness and Cauchy's inequality imply
+\begin{equation}
+ \sum_j|\bar w_j|\,|b_j^\top v|\le6R
+ \quad\text{whenever}\quad |v_j|\le R.
+\end{equation}
+The source parameter range gives $\chi_j\le2$ and $\gamma_j\le1/4$.
+With $E_0=0$, $\sqrt{L_{j,0}}\le\delta|b_j^\top r_0|$, hence $\mathcal B_{0,0}\le24$.
+The signed bias cost is at most $9/2$, while $J_0/M\ge-1$ and $\delta g_z\ge-1/32$.
+Therefore $\mathsf S_0\ge-1-1/32-9/2-24\ge-30$.
+\end{proof}
+
+The four long source rollouts check 383,976 signed modal updates, with 281,201 negative input polar terms.
+Maximum energy-gain, norm-gain and local-drift identity errors are $1.05\times10^{-9}$, $9.14\times10^{-8}$ and $1.16\times10^{-5}$, respectively.
+A separate check executes all 64 constant commands in $\{-1,+1\}^6$ from reset key 90310, totaling 1,024,000 physics substeps.
+Every checked current-state and action-block certificate meets the speed floor; their minimum lower endpoints are $-10.79$ and $-38.93$.
+These constant-command comparisons extend the source diagnostics, rather than covering arbitrary action histories.
+
+\subsection{Bounded angular-bias primitive and weighted response}
+\label{app:angular_primitive}
+
+The cached parent-lever sign also permits an exact geometric primitive of the angular bias.
+For edge $j$, with parent $p(j)$ and COM rotations $R_{i,t}$, define
+\begin{equation}
+ \Psi_{j,t}=\{R_{j+1,t}(-o_{j+1})-R_{p(j),t}(-o_{p(j)})
+                  +R_{p(j),t}\ell_j\}_z.
+ \label{eq:angular_bias_primitive}
+\end{equation}
+Unlike $H_{j,t}$, this expression has a positive parent-link contribution.
+Let $\mathcal E^{\rm rot}_{j,t}$ combine the following three lever corrections with signs $+,-,+$:
+\begin{equation}
+ e_{i,t}(v)=(\delta\omega_{i,y,t+1}/2)^2
+                \{[R_{i,t}v]_z+[R_{i,t+1}v]_z\}.
+\end{equation}
+The lever arguments are $-o_{j+1}$, $-o_{p(j)}$, and $\ell_j$, respectively.
+Set
+\begin{equation}
+ Q_{j,t}=\frac{\delta^2}{2}
+       \left(\tfrac15\omega_{j+1,y,t+1}^2+\tfrac7{10}\omega_{p(j),y,t+1}^2\right).
+\end{equation}
+For a six-coordinate row sequence $r_s$, define
+\begin{equation}
+ V_T(r)=\|r_0\|_1+\|r_T\|_1+\sum_{s=0}^{T-1}\|r_{s+1}-r_s\|_1.
+\end{equation}
+
+\begin{proposition}[Source bias integration and response bound]
+\label{prop:angular_primitive}
+Retain the planar source structure, unit initial rotations, zero joint offsets, and fixed unit link rotations.
+Assume $\|o_i\|_2\le1/5$ and $\|\ell_j\|_2\le1/2$.
+Every source substep satisfies
+\begin{equation}
+ |\Psi_{j,t}|\le9/10,\qquad
+ \delta C_{j,t+1}=\Psi_{j,t+1}-\Psi_{j,t}-\mathcal E^{\rm rot}_{j,t},
+ \qquad |\mathcal E^{\rm rot}_{j,t}|\le Q_{j,t}.
+ \label{eq:angular_primitive_step}
+\end{equation}
+For every $T\ge0$ and row sequence $r_s$,
+\begin{align}
+ \delta\sum_{s<T}r_sC_{s+1}
+  ={}&r_T\Psi_T-r_0\Psi_0
+       -\sum_{s<T}(r_{s+1}-r_s)\Psi_{s+1}
+       -\sum_{s<T}r_s\mathcal E^{\rm rot}_s,\nonumber\\
+ \left|\delta\sum_{s<T}r_sC_{s+1}\right|
+  \le{}&\tfrac9{10}V_T(r)+\sum_{s<T}\sum_j|r_{s,j}|Q_{j,s}.
+ \label{eq:angular_primitive_response}
+\end{align}
+For rows $q_s=(q_s^E,q_s^r)$, put $b_s=(q_s^E+q_s^r)A$.
+Then the complete angular-input prefix obeys
+\begin{equation}
+ \left|\sum_{s<T}q_s\xi_{s+1}^{\rm ang}\right|
+ \le\tfrac9{10}V_T(q^E)
+      +|\delta d_J|\left\{\tfrac9{10}V_T(b)+\sum_{s<T}\sum_j|b_{s,j}|Q_{j,s}\right\}.
+ \label{eq:angular_input_primitive_bound}
+\end{equation}
+These identities and bounds require no future height or uniform pitch-speed premise.
+\end{proposition}
+
+\begin{proof}
+For one normalized pitch update, write $a=\delta\omega_{y,t+1}/2$ and $v'=R_{t+1}v$.
+The horizontal and vertical update identities give
+\begin{equation}
+ -2av'_x=v'_z-v_z-a^2(v_z+v'_z).
+\end{equation}
+This is the exact right-endpoint angular derivative, including its signed correction.
+Applying it to the three levers gives Eq.~\eqref{eq:angular_primitive_step} with the source cache's parent sign.
+Unit rotations preserve each lever norm; their bounds give $|\Psi_{j,t}|\le9/10$ and $|\mathcal E^{\rm rot}_{j,t}|\le Q_{j,t}$.
+Discrete summation by parts gives Eq.~\eqref{eq:angular_primitive_response}, followed by the coordinate bounds.
+Finally, $q_s\xi_{s+1}^{\rm ang}=q_s^E(H_{s+2}-H_{s+1})-\delta^2d_Jb_sC_{s+1}$.
+Apply summation by parts to the bounded geometry $H$, and Eq.~\eqref{eq:angular_primitive_response} to the bias term.
+\end{proof}
+
+The same four 1,000-action source rollouts check 64,000 substeps, retaining the original reset keys and command sequences.
+Maximum endpoint, weighted-bias, and complete-input identity errors are $2.20\times10^{-7}$, $8.69\times10^{-7}$ and $9.22\times10^{-7}$, respectively.
+The largest observed primitive magnitude is $0.693$, and the largest endpoint correction is $7.87\times10^{-4}$.
+
+\subsection{Source pitch damping and explicit forced response}
+\label{app:pitch_damping}
+
+The quadratic rotation correction can be connected to the source angular update without assuming a future pitch-speed bound.
+Write $\omega_t=(\omega_{i,y,t})_{i=0}^6$ and $\Lambda=\operatorname{diag}(\lambda_i)$, where $\lambda_i=1/I_i$.
+Let $N$ be the six-by-seven edge-incidence matrix, with child coefficient $+1$ and parent coefficient $-1$.
+Denote the source angular-damping coefficients by $\nu_i$, including the root coefficient $\nu_0$.
+Define
+\begin{equation}
+ L_\nu=N^\top\operatorname{diag}(\nu_1,\ldots,\nu_6)N+\nu_0 e_0e_0^\top,
+ \qquad M_\omega=I-\delta\Lambda L_\nu,
+ \qquad P_\omega=\alpha M_\omega.
+\end{equation}
+The root term is retained because the installed planar-root joint damps pitch motion.
+Let $\tau^{\rm lim}_{j,t}=\tau_{j,t}-k_j^{\rm lim}\operatorname{err}(\theta_{j,t};\theta_j^{\min},\theta_j^{\max})$.
+Let $\ell_{i,t}$ be the assembled pitch torque from shifting the actual linear joint forces to child and parent COMs.
+With the source contact pitch increments $\zeta_t$, set
+\begin{equation}
+ b_t=\alpha\delta\Lambda\{N^\top\tau_t^{\rm lim}+\ell_t\}+\zeta_t.
+ \label{eq:pitch_source_input}
+\end{equation}
+
+\begin{proposition}[Pitch mixing and source-input envelope]
+\label{prop:pitch_damping}
+Retain the planar structure and fixed-frame conditions of Proposition~\ref{prop:angular_primitive}, with identity root-link rotation.
+The source step and every finite trajectory satisfy
+\begin{align}
+ \omega_{t+1}&=P_\omega\omega_t+b_t,\nonumber\\
+ \omega_T&=P_\omega^T\omega_0+\sum_{s<T}P_\omega^{T-1-s}b_s.
+ \label{eq:pitch_source_response}
+\end{align}
+If $\delta,\lambda_i,\nu_i\ge0$ and $\delta\lambda_i(L_\nu)_{ii}\le1$, then $M_\omega$ has nonnegative entries and row sums at most one.
+Consequently, $\|M_\omega w\|_\infty\le\|w\|_\infty$.
+Define
+\begin{equation}
+ \mathcal W_0=\|\omega_0\|_\infty,\qquad
+ \mathcal W_{t+1}=|\alpha|\mathcal W_t+\|b_t\|_\infty.
+\end{equation}
+Then $|\omega_{i,y,t}|\le\mathcal W_t$ and
+\begin{equation}
+ |\mathcal E^{\rm rot}_{j,t}|\le Q_{j,t}
+             \le\tfrac9{20}\delta^2\mathcal W_{t+1}^2.
+ \label{eq:pitch_source_correction}
+\end{equation}
+The source parameter ranges $\delta=1/320$, $0\le\lambda_i\le4$, and $0\le\nu_i\le10$ imply the step-size condition.
+Every normal reset with $|\dot q_k|\le1/10$ gives $\mathcal W_0\le2/5$ under the stated COM-offset bounds.
+\end{proposition}
+
+\begin{proof}
+Unit pitch rotations leave the joint-frame pitch coordinate and inverse pitch inertia unchanged.
+The revolute torque is $\tau^{\rm lim}_{j,t}-\nu_{j+1}(\omega_{j+1,y,t}-\omega_{p(j),y,t})$; the root torque is $-\nu_0\omega_{0,y,t}$.
+Wrench assembly separates these direct torques from the linear-force shift $\ell_t$, giving Eq.~\eqref{eq:pitch_source_response} after integration.
+The off-diagonal entries of $M_\omega$ are nonnegative; its diagonal entries are nonnegative by the step-size condition.
+Its row sums equal one except at the root, where the sum is $1-\delta\lambda_0\nu_0$.
+Taking the absolute value of each row product therefore proves the maximum-norm bound.
+Induction gives the forced trajectory and $\mathcal W_t$ envelope, while the two pitch-speed squares in $Q_{j,t}$ give Eq.~\eqref{eq:pitch_source_correction}.
+Every weighted degree is at most $30$, so the stated parameter ranges imply $\delta\lambda_i(L_\nu)_{ii}\le3/8<1$.
+The reset pitch-speed formula supplies $\mathcal W_0\le2/5$.
+\end{proof}
+
+Four double-precision current-source rollouts use reset keys 90310--90313 and zero, positive, negative, and random held commands for 64,000 substeps.
+The largest damping step $\delta\lambda_i(L_\nu)_{ii}$ is $0.0884$.
+Maximum torque-split, pitch-update and signed-trajectory identity errors are $4.47\times10^{-12}$, $3.29\times10^{-14}$ and $1.59\times10^{-13}$, respectively.
+
+\subsection{Composed matrix-contact growth bound}
+\label{app:matrix_growth}
+
+The separate matrix-contact model reconstructs world frames and joint caches from the center-of-mass state at every physics step.
+It also reconstructs inverse inertia and ground--capsule endpoints before evaluating joint forces.
+Contact impulses use velocities after the acceleration update, followed by damping, collision increments, and normalized rotation integration.
+
+Fix $m>0$ and $K\ge0$ bounding the absolute fixed parameters, with inverse masses in $[m,K]$ and inertia weights in $[0,K]$.
+The parameters include frame translations, capsule offsets and radii, joint coefficients, finite revolute-joint limits, gravity, stabilization, timestep, and damping factors.
+Fixed frame and inertia rotations have unit norm, and friction is nonnegative.
+At the initial step, let $R\ge0$ bound every COM position and linear/angular velocity coordinate, with unit COM rotations.
+For an arbitrary such state, define the reconstruction envelopes
+\begin{align}
+ X&=R+14K, & U&=R+28RK, & A&=X+28K,\nonumber\\
+ P_j&=14(2X+42K), & V_j&=14[2U+2R(2X+28K)], & W_j&=28R,\nonumber\\
+ C&=X+29K.
+\end{align}
+Here $C$ bounds both capsule contact-point coordinates and absolute signed distances.
+The joint-force and acceleration envelopes are
+\begin{align}
+ F&=K(P_j+V_j), & T&=28K+120+KW_j+K(\pi+2K),\nonumber\\
+ A_v&=K+42KF, & A_\omega&=9K\,14^2[42T+84(A+R)F].
+\end{align}
+Pre-contact velocity bounds are $\widehat V=R+KA_v$ and $\widehat W=R+KA_\omega$.
+The matrix-contact resolver supplies
+\begin{align}
+ B&=\frac{(1+K)\{3(1+K)[\widehat V+2\widehat W(C+R)]+KC\}}{m},\nonumber\\
+ I_v&=KB, & I_\omega&=9K\,14^2\,[2(C+R)B].
+\end{align}
+Finally, write
+\begin{equation}
+ N_v=K\widehat V+I_v,\qquad N_\omega=K\widehat W+I_\omega,\qquad
+ \Gamma_{K,m}(R)=R+KN_v+N_v+N_\omega.
+\end{equation}
+
+\begin{proposition}[Composed matrix-contact envelope]
+\label{prop:matrix_growth}
+Under the stated parameter and initial-state conditions, every COM position and linear/angular velocity coordinate after one matrix-contact physics step is bounded by $\Gamma_{K,m}(R)$.
+All updated rotations retain unit norm, uniformly over clipped actions.
+With $\mathcal M_0=R$ and $\mathcal M_{t+1}=\Gamma_{K,m}(\mathcal M_t)$, the corresponding bound holds after every finite number of physics steps.
+For $H$ environment actions, each held for $f$ physics steps, the wrapper return obeys
+\begin{equation}
+ |R_H|\le20(\mathcal M_{fH}+R+28K)+0.6H.
+\end{equation}
+Consequently, measurable initial states and measurable clipped action processes give an integrable return under any probability law supported by the initial bound.
+The experimental wrapper uses $f=16$; action energy is charged once per environment step.
+\end{proposition}
+
+\begin{proof}
+Frame composition and capsule-endpoint bounds give $X,U,A,P_j,V_j,W_j,C$.
+The local joint-force and seven-link wrench theorems give $A_v,A_\omega$ without a separate acceleration premise.
+Updating velocity before contact gives $\widehat V,\widehat W$.
+Positive inverse mass and nonnegative matrix inertia bound both contact denominators below by $m$.
+The normal-impulse and friction-cap theorems therefore give $I_v,I_\omega$ without an assumed collision-increment envelope.
+Damping and integration give $N_v,N_\omega$ and the position bound $R+KN_v$; their sum bounds every COM position and velocity coordinate.
+Normalized integration preserves unit rotations, so induction applies at subsequent physics steps.
+World-root position differs from the COM position by at most $14K$.
+The telescoping reward identity and bounded action energy give the stated return bound, while the endpoint-bound lemma supplies displacement integrability.
+\end{proof}
+
+\begin{proposition}[Measurable matrix-contact trajectories]
+\label{prop:matrix_measurable}
+Equip the matrix model's states, frame/motion caches, and contacts with the sigma-algebras generated by their finite real and quaternion coordinates.
+For fixed physical parameters, the composed physics step is jointly measurable in the state and command.
+Let $x_0$ and each environment command $a_t$ be measurable functions on a probability space.
+The recursion
+\begin{equation}
+ x_{s+1}=\mathrm{Step}_{\mathrm{matrix}}(x_s,a_{\lfloor s/f\rfloor})
+\end{equation}
+then produces measurable states, reduced positions and velocities, and 17-coordinate observations at every finite step.
+The displacement, action energy, and finite-horizon return are measurable consequences, not additional assumptions.
+Under Proposition~\ref{prop:matrix_growth}'s parameter and initial-state conditions, clipped commands give an integrable return.
+\end{proposition}
+
+\begin{proof}
+Finite coordinate arithmetic, quaternion conjugation, rotation, inertia application, and normalized integration are measurable maps.
+The complex argument used for joint angles is measurable, including its branch cut.
+Strict contact comparisons, the near-zero norm branch, and joint-limit conditions define measurable sets.
+Each finite contact sum equals its indicator-masked sum; the active-contact count equals the corresponding sum of indicators.
+These identities prove measurability of contact averaging and the complete composed step without a continuity assumption at contact switches.
+Induction proves trajectory measurability, and the reduced-coordinate formulas give measurable observations.
+Finite sums and the telescoping reward identity give measurable displacement, energy, and return.
+The deterministic return envelope in Proposition~\ref{prop:matrix_growth} then implies integrability under the probability law.
+\end{proof}
+
+\subsection{Execution-source diagnostic}
+\label{app:source_diagnostic}
+
+Frozen training signatures record the resolved interpreter paths.
+A retrospective inspection on 28 September 2026 found Brax 0.10.5 with JAX 0.4.38 in the three GPU-server virtual environments.
+The recorded shared HPC interpreter contains Brax 0.12.1 with JAX 0.5.3; the local analysis environment contains Brax 0.14.2 with JAX 0.9.2.
+Each inspected resolver retains the flattened scalar-inertia gather.
+
+A read-only diagnostic reused canonical actor seed 88003 and switching-event identifier 197201 in the current local runtime.
+Each original branch executed 1,000 actions and 16,000 physics substeps from a normal reset.
+Neither branch produced a nonpositive effective denominator, but penetrating-contact normal denominators fell below inverse mass 1,046 times with true-mode compensation and 341 times without compensation.
+A private resolver copy changes only the inertia gather to the matrix axis and expands its world-link mask over both matrix dimensions.
+On this single actor--event case, true-mode-compensated return changes from 4213.7 to 4512.0; uncompensated return changes from 1051.9 to 729.4.
+The original installed modules and prospective-result files remain unchanged.
+
+\section{Scope of the Lean formalization}
+\label{app:formalization_scope}
+
+The formal development has two dependency groups: general BAPR mechanism theorems and environment-specific sufficient-condition certificates.
+The mechanism group imports no spring-simulator module.
+Its return comparisons expose integrability and sensitivity assumptions explicitly, while the source group attempts to discharge them for a particular implementation.
+
+The companion Lean~4 development formalizes diagonal inverse-command feasibility, polarity compensation, arbitrary-switch pathwise equivalence, the action-weighted error identity, and non-expansiveness of actuator clipping. For measurable reference returns, the coupled pathwise identity also yields equality of probability laws under continuous noise.
+
+The belief-risk extension proves Proposition~\ref{prop:belief_risk}, including conditional mean squared nominal error, the clipped-action bound, the total-variation calibration term, and the local action-value consequence.
+The proof assumes normalized finite mode masses, not correctness of the learned emissions or tempered posterior.
+
+The closed-loop extension proves Theorem~\ref{thm:closed_loop_belief} using causal occupancy transport, Bellman differences, and a true conditional-mode kernel.
+It derives the finite-horizon performance-difference sum and conditional mode average, then integrates the calibrated action-value budget along the causal trajectory.
+Visited-state value-difference integrability and budget integrability remain explicit, alongside the existing Bellman assumptions.
+
+The filter extension proves Theorem~\ref{thm:filter_stability} and Proposition~\ref{prop:filter_recovery} for the implemented sticky prior and forgetting exponent.
+It derives exact log-odds updates, non-expansion under common mixing, the geometric score-error envelope, and its TV/action-risk consequences.
+A separate recovery result uses the sticky floor to handle an arbitrary stale incoming belief, with a finite-dwell evidence-separation condition.
+The frozen prior-clamp and common softmax-centering identities are proved in real arithmetic.
+Neither learned-score accuracy nor the reference filter's calibration bias is supplied by these results.
+
+The inverse-evidence extension proves Propositions~\ref{prop:inverse_score_error} and~\ref{prop:inverse_excitation} for the dimension-normalized residual score and log-mixture aggregation.
+It proves the bounds supplied by candidate clipping, hyperbolic-tangent head outputs, and the residual-variance clamp.
+It connects coordinatewise prediction errors to the filter error envelope, and derives finite-dwell recovery from prediction accuracy and actuator excitation.
+The polarity specialization retains only differing actuator coordinates, with an explicit error-dependent excitation penalty.
+These results retain prediction accuracy on causal rollouts as a hypothesis; training loss does not discharge it.
+
+The recovery-probability extension proves Theorem~\ref{thm:recovery_probability} under the actual causal rollout law.
+It combines second-moment tail bounds with a finite union bound and explicit excitation failure, without independence assumptions.
+It proves measurability of the deployed evidence, recursive filter and strict MAP event, as well as bounded-output integrability and the conditional-moment tower implication.
+The population moments and excitation probabilities remain inputs to the theorem, rather than consequences of fitted-model loss.
+
+The recovery-to-return extension proves Proposition~\ref{prop:recovery_action_error} and Theorem~\ref{thm:recovery_return}.
+It bounds actual mode-error probability by strict-dominance failure plus post-window mode change, and bounds nominal and executed mean squared errors by $4d$ times that probability.
+Along the actual occupancy flow, it derives the return budget $2\sqrt d\sum_t\overline L_t\gamma_t$ without a posterior-calibration premise.
+The deterministic sensitivity envelope and per-decision error bounds remain explicit conditions.
+
+The random-window extension proves Theorem~\ref{thm:random_window_recovery} by conditioning the actual path law on its last observed constant-mode suffix.
+It proves suffix persistence, filter restart, exact finite-fiber probability mixing, and transfer to the decision occupancy.
+Recovery bounds use cell-conditional moments and excitation; uncertified cells retain the universal failure bound one.
+An unobserved change after the last transition is charged separately.
+
+The cumulative-recovery extension proves Theorem~\ref{thm:cumulative_recovery}, retaining the sticky mixer's nonlinear margin recursion.
+It derives a mean discounted score-deficit budget from inverse-prediction second moments, without a simultaneous error tube or independence assumptions.
+Its sufficient envelope permits intermediate weak excitation but need not retain a positive certificate after a quiet final transition.
+
+The retention extension proves Theorem~\ref{thm:quiet_retention} with the exact common sticky mixer.
+It retains positive margins through flat evidence, derives the adverse-contrast recursion and finite-prefix decay bound, and proves the frozen-parameter formula.
+It also connects equal inverse candidates to flat ensemble scores and continues the actual filter without resetting its incoming belief.
+
+The measure-theoretic extension proves the performance-difference identity and action-weighted conditional bound using Bochner integrals over an arbitrary noise probability measure. It constructs independent Gaussian actuator coordinates with variance $0.02^2$ and proves that each coordinate has the specified marginal law. A product-path construction links the recursive value function to the integral of cumulative rollout reward under independent draws. Further lemmas cover a common continuous initial-state distribution and projection from controller-memory-augmented state to physical state. With measurable updates and action selection, the belief and command at step $t$ are measurable in the pre-action information sigma-algebra.
+
+The continuous information development proves the joint Radon--Nikodym factorization, shared-policy cancellation, and the complete finite-horizon controlled-trajectory KL chain rule. It retains every action and observation in the history. The extended-valued theorem uses countably generated action and observation spaces and conditional-kernel absolute continuity, without log-integrability assumptions. The earlier integrable-likelihood specialization additionally proves that the trajectory KL is finite.
+
+Additional lemmas give sufficient conditions for the return assumptions. If $|r|\le R$ uniformly, then $|V_t|\le(H-t)R$ and every cumulative rollout return has the same bound. Measurability of the corresponding integrands then implies Bellman and rollout integrability. A separate lemma transfers executed-action sensitivity through non-expansive clipping and noise averaging to the required action-value sensitivity.
+
+The HalfCheetah specialization formalizes the telescoping reward identity, control-cost bounds, and equivalence between return integrability and displacement integrability. It also proves that the normalized approach-impulse map is not globally Lipschitz.
+The Gaussian extension proves the product-density affinity and its $L^1$ shift bound, identifies the density with independent Gaussian coordinates, and connects it to the existing action-value definition.
+It establishes the constant $50B_t(x)$ without assuming continuity of the clipped-action integrand.
+The reachability extension proves the growth-envelope induction, the resulting displacement and return integrability, the rotation denominator bound, and the scalar contact-impulse bound.
+The source-component extension derives the local bounds above and positivity of the full-matrix contact denominator's angular contribution.
+A 32-step source-level check traversing all four modes verifies the reward identity, positive physical parameters, selected contact types, and unit rotations to floating-point tolerance.
+A separate 16-case test checks the translated formulas against the installed Brax/MJX routines, including all six revolute joints and the planar root.
+The seven-link extension proves the frame, wrench, acceleration, and post-integration reconstruction bounds above.
+Eight additional source/formula cases compare these compositions with the actual pipeline outputs through the reconstructed joint caches.
+The contact extension proves the actual scalar-denominator identity and conditional collision-increment bounds, alongside a separate full-matrix resolver theorem.
+It also proves that a negative gathered scalar admits a zero tangential denominator despite positive inverse mass.
+A further lemma proves that negative scalar inertia and a nonzero lever--direction cross product force the denominator strictly below inverse mass.
+The reduced-coordinate extension formalizes the root and six revolute inverse formulas and the 17-coordinate observation bound.
+Twelve additional contact cases and twelve inverse/observation cases match the installed source, including inactive contacts and near-zero friction velocities.
+The matrix-step extension proves Proposition~\ref{prop:matrix_growth}, including the explicit radius induction and wrapper-level return bound.
+Eight source/formula cases compare the private matrix pipeline with the composed capsule geometry, acceleration/contact ordering, integration, and cache reconstruction.
+The measurability extension proves Proposition~\ref{prop:matrix_measurable} for the complete matrix-contact step, reconstructed observations, and finite trajectories.
+It derives return integrability from measurable initial states and commands, without separate displacement or action-energy measurability premises.
+The scalar-margin extension proves Proposition~\ref{prop:scalar_margins}, including rotation norm preservation, the root-inertia entry bound, and the normal-impulse bound.
+The tangential result replaces a denominator premise with an explicit COM-height condition on penetrating contacts.
+The scalar-step extension proves Proposition~\ref{prop:scalar_step} for the flattened-gather model.
+It derives the complete one-step radius and finite-prefix return bound from geometry, and formalizes the action-independent vertical viability condition.
+The reset extension proves Proposition~\ref{prop:reset_step}, supplying the initial radius and height floor directly from bounded uniform reset noise.
+It also derives the initial joint-force bound and proves first-substep safety without an assumed initial force or acceleration envelope.
+The contact-barrier extension proves Proposition~\ref{prop:contact_barrier}, including multi-contact recovery, active-count averaging, and conditional finite-horizon safety and return bounds.
+The planar extension proves Proposition~\ref{prop:planar_structure}, deriving the complete structural invariant from reset and reducing the recovery obligation to body $6$.
+The paired-foot extension proves Proposition~\ref{prop:paired_foot}, eliminating angular velocity from the recovery obligation and deriving initial speed safety and conditional finite-horizon height, radius, and return bounds.
+The leaf-joint extension proves Proposition~\ref{prop:foot_joint}, including the exact signed speed update, damping convexity, reset slack, and deep-contact velocity recovery.
+The foot--parent extension proves Proposition~\ref{prop:foot_recurrence}, including the forced second-order recurrence, internal-force cancellation in common momentum, and the all-substep geometric remainder bound.
+It also proves the homogeneous root bound under the explicit parameter ranges.
+The whole-tree extension proves Proposition~\ref{prop:global_momentum}, cancelling internal joint forces and retaining accumulated contact support.
+It also proves the six-edge decomposition and its connection to the signed speed slack.
+The coupled-edge extension proves Proposition~\ref{prop:coupled_edges}, including the complete forced recurrence, spectral stability, geometry bound, angular-bias formula, and contact-input budget.
+The forced-response extension derives Proposition~\ref{prop:forced_response}'s rotation increment, anchor-state convolution, input budget, and projected pre-contact speed bounds.
+The signed-response extension proves Proposition~\ref{prop:signed_response}, including the contact kernel, its one-sided support bound, and edge-specific angular cost.
+It connects these lower bounds to the existing signed speed slack.
+The joint-work extension proves Proposition~\ref{prop:source_energy}, including cache-velocity shifts, seven-link wrench power, constant pitch inertia and discrete elastic corrections.
+The energy-bound extension proves Proposition~\ref{prop:source_energy_upper}, retaining the actual contact average and normalized rotation update.
+It combines the nonnegative averaging defect and second-order anchor bound into the scalar model's single-step mechanical-energy inequality.
+The current-energy extension proves Proposition~\ref{prop:current_energy}, including the current-state recursion, finite-prefix sum, pre-contact kinetic identity, and all-command speed certificate.
+The transient-energy extension proves Proposition~\ref{prop:transient_lyapunov}, including source-modal projection, coercivity, exact homogeneous contraction and geometric input response.
+It also derives the bounded-input invariant estimate and current-state transient-input budget.
+The modal-output extension proves Proposition~\ref{prop:modal_foot}, including the norm-history response, directional gain, complete foot-output identity and all-command recovery certificate.
+It also proves Proposition~\ref{prop:modal_restart}: restart comparison, the zero-length current-state certificate, and scalar-prefix height, radius and return closure.
+The signed-drift extension proves Proposition~\ref{prop:modal_drift}, including exact energy and norm gains, the local-margin trajectory identity, and normal-reset initialization.
+The angular-primitive extension proves Proposition~\ref{prop:angular_primitive}, retaining the source cache sign, right-endpoint correction, and complete weighted angular-input bound.
+The pitch-damping extension proves Proposition~\ref{prop:pitch_damping}, including the explicit torque split, substochastic mixing, source-input response, reset bound and quadratic-correction envelope.
+
+\paragraph{Formalization limits.}
+For the frozen scalar implementation, Eq.~\eqref{eq:spring_growth_obligation} now has a composed scalar-model proof conditional on the geometric safe region.
+The installed resolver calls \texttt{i\_inv.take(link\_idx)} without a matrix-axis argument, so gathering a seven-link inertia array produces scalar entries.
+Positive principal inertias and unit rotations do not imply positive effective denominators for this operation.
+A constructed unit-rotation maximal state has a negative tangential denominator and a friction increment aligned with velocity.
+Its reachability from experimental resets has not been established; the frozen experimental implementation and results were not changed.
+The geometric theorem now supplies a normal-denominator margin under the stated physical-parameter conditions.
+The remaining tangential obligation is preservation of $p_z\ge-1/2$ on potentially negative-gather bodies with capsule contacts, or another sufficient reachable-state bound.
+The constructed negative-denominator state's affected COM height is approximately $-3.89$, outside this sufficient region.
+Proposition~\ref{prop:reset_step} establishes the height condition at reset and after the first physics substep.
+Equation~\eqref{eq:scalar_contact_barrier} strengthens the pre-contact condition by retaining the actual multi-contact recovery lower bound.
+Under Proposition~\ref{prop:planar_structure}, only body $6$ retains this obligation; bodies $1,3$ need no height-floor invariant for their contact denominators.
+Proposition~\ref{prop:paired_foot} reduces that obligation to $\widetilde v_{6,z}\ge-64$, independently of angular velocity, and derives the bound at reset.
+Proposition~\ref{prop:foot_joint} expresses this bound exactly as Eq.~\eqref{eq:foot_joint_slack}, using anchor error, parent speed, and angular lever motion.
+Its preservation at subsequent reachable states remains open; the height floor alone does not imply it.
+Proposition~\ref{prop:foot_recurrence} closes the geometric remainder bound and separates relative joint motion from common momentum.
+Proposition~\ref{prop:global_momentum} derives whole-tree common momentum without an upstream-force envelope.
+Proposition~\ref{prop:coupled_edges} derives the complete six-edge recurrence, bounds its geometry input, and establishes stability of every homogeneous mode.
+Its angular-bias bound still depends on pitch speed, while its contact-input bound uses total support rather than an independent upper force bound.
+Proposition~\ref{prop:forced_response} supplies a finite transient bound based on actual angular and contact histories, without a uniform angular-speed premise.
+Its conservative pre-contact relative-speed bound reaches $7040.9$ in the checked prefix, too loose to certify $\widetilde v_{6,z}\ge-64$.
+For the same fixed parameters, a contact-to-prefoot impulse coefficient in the translational channel is $-0.47285$ within 64 substeps.
+This diagnoses non-monotone linear response, not a reachable-trajectory violation of the speed floor.
+Proposition~\ref{prop:signed_response} now supplies the exact signed response and its one-sided contact bound.
+Absolute angular envelopes still miss 54 of the 256 checked speed conditions, whereas retaining the actual signed angular response covers this prefix.
+Closing the speed slack requires a reachable-trajectory bound on this signed angular contribution together with contact support.
+Finite-prefix coverage does not establish their preservation across every supported reset and command sequence.
+Proposition~\ref{prop:source_energy} provides a source-correct energy account, not an unconditional dissipation inequality.
+The source comparison finds positive linear work plus elastic first variation in 76/256 substeps, and positive contact kinetic work in two.
+Thus the frame-shift and contact terms cannot simply be discarded as dissipative.
+Proposition~\ref{prop:source_energy_upper} now bounds these corrections using actual impulses, pitch speeds, velocity kicks and anchor increments.
+Proposition~\ref{prop:current_energy} removes the explicit successor-state dependence and supplies the cumulative energy envelope and kinetic speed certificate.
+This certificate covers the checked 256-substep prefix, but its uniform preservation over all supported resets and command sequences remains open.
+Closing the energy route requires sufficiently tight control of cumulative gain; its actual acceleration/contact budgets and Euler correction still depend on reachable states.
+Proposition~\ref{prop:transient_lyapunov} retains spring--velocity cancellation and replaces unweighted accumulation by a contracting modal response.
+Its uniform estimate requires bounds on the actual rotation/contact input energies, not merely spectral stability of the homogeneous update.
+Those reachable input bounds remain open for the uniform-energy route.
+Proposition~\ref{prop:modal_foot} now connects the norm response directly to foot speed, retaining signed common momentum and current angular bias.
+Its lower interval endpoint meets the speed condition on all 256 checked source substeps.
+In the longer supported-command check, full-history intervals fall below $-64$ although actual speeds remain above that floor.
+Thus that history envelope cannot serve as the proposed uniform invariant for this source execution.
+Proposition~\ref{prop:modal_restart}'s action-block certificate covers all 64,000 checked substeps without presupposing future heights.
+Proposition~\ref{prop:modal_drift} proves the initial current-state margin $\mathsf S_0\ge-30$ and its exact signed drift.
+Uniform preservation still requires control of that drift over every supported reset and action history.
+A sufficient remaining obligation is $\sum_{t<T}\mathsf D_t\ge-34$ at every prefix; the initial-margin proof does not establish this bound.
+The 64 constant-corner rollouts cover one reset and do not discharge that arbitrary-history obligation.
+Proposition~\ref{prop:angular_primitive} converts weighted angular forcing into bounded geometry, row variation, and quadratic rotation corrections.
+Its independent absolute bounds remain too loose for the required safety margin.
+For the random-command rollout at 16,000 substeps, the weighted-bias bound is $449.95$, versus $17.67$ using the actual pitch envelope.
+The complete angular-input bound at 15,999 substeps is $9030.31$, while the observed magnitude is $9.21$.
+Bounded geometry alone therefore does not close the drift obligation; joint rotation/contact control or retained cross-channel cancellation remains necessary.
+Proposition~\ref{prop:pitch_damping} derives pitch speeds from explicit source inputs rather than a separate future-speed premise.
+The shifted linear forces and contact increments in $b_t$ remain coupled to the reachable state.
+Their signed cumulative effect must still be controlled; homogeneous angular damping alone does not close the foot-speed invariant.
+In the double-precision random-command diagnostic, $\mathcal W_t$ reaches $21607.85$, versus a maximum observed pitch speed of $32.11$.
+Thus its absolute input envelope is valid but insufficiently tight for this closure.
+Batched and individual-joint float32 calculations differ by approximately $1.20\times10^{-3}$ in the torque factorization check.
+The double-precision diagnostic tests the real-arithmetic identities, not equivalence of frozen floating-point executions.
+The three double-contact formula cases exercise the averaging branch but are not asserted reachable from normal resets.
+The finite source regression excludes a uniform $1$ cm anchor-error invariant, although all tested signed speed slacks remain positive.
+One environment action contains sixteen physics substeps.
+This reachable-state obligation and universal source correspondence remain necessary to apply the scalar envelope to every experimental trajectory.
+The finite formula comparisons do not establish this correspondence universally.
+The generic Lean reachability theorem takes the complete one-step envelope as a premise; the separate matrix-contact model now derives its own envelope.
+Its fixed-parameter and initially bounded unit-rotation conditions remain explicit, together with measurability of the initial state and action processes.
+Trajectory, observation, displacement, and action-energy measurability are now derived for this matrix-contact model.
+Runtime-profile inspection does not recover an immutable historical dependency snapshot.
+The source diagnostic is not an exact historical replay: the frozen first-episode returns for the same identifiers were 4409.4 and 1086.8.
+Its current-runtime, fused-rollout comparison is a single-case sensitivity test, not a corrected-solver confirmation against the learned baselines.
+The Gaussian theorem requires measurability and a bounded continuation term; a reachable-state envelope supplies the latter, not measurability by itself.
+The general return theorems retain Bellman integrability at all states, counterfactual signals, and remaining horizons, stronger than occupancy-only conditions.
+The information theorem retains conditional-kernel absolute continuity at every history-action pair.
+The development does not verify floating-point arithmetic, estimator calibration, or empirical superiority; $50B_t(x)$ is not a numerically evaluated experimental bound.
+
+\subsection{Why the legacy contraction theory is excluded}
+
+Earlier BAPR development variants used BOCD, lower-confidence-bound critic penalties, RMDM context losses, and belief-weighted Bellman operators. The final deployment mechanism uses none of these components and performs no online actor, critic, or Bellman update. A contraction theorem for a frozen belief-weighted Bellman operator would therefore describe a different algorithm, even if the theorem were mathematically valid. The present theory concerns the implemented mechanism: feasible action-coordinate equivalence, the information required to identify a mode, causal execution, and the action-weighted effect of routing errors on finite-horizon return.
+
+\section{Estimator details}
+\label{app:estimator}
+
+The frozen inverse model has five independently parameterized heads. Every head is a three-hidden-layer MLP of width 256 with sigmoid linear unit (SiLU) activations and a final $\tanh$. It predicts the nominal pre-noise signal $v_t=\clip(\gain_{z_t}a_t,-1,1)$ rather than the sampled noisy action $u_t$. The transition feature is
+\begin{equation}
+    x_t=\left[
+      \tanh(s_t/5),
+      \tanh(s_{t+1}/5),
+      \tanh((s_{t+1}-s_t)/0.1)
+    \right].
+\end{equation}
+The released estimator has two training stages. The initialization was trained from scratch for 3,000 updates using robust and true-mode-conditioned controller trajectories from controller seeds 8 and 16. Its training set contained 96,000 transitions: 64,000 stationary and 32,000 switching transitions. The final estimator was warm-started from that model and fine-tuned for 1,500 updates using robust, four fixed-mode specialist, dynamic-oracle, and causal-router trajectories from source seed 4021. This stage contained 82,000 training transitions and 82,000 separate validation transitions. Across both fitting stages, the estimator therefore consumed 178,000 supervised training transitions, excluding the interaction cost used to train the trajectory-producing policies.
+
+The final stage uses Adam with learning rate $10^{-4}$, weight decay $10^{-5}$, and bootstrap batches of 256 per head. True mode is used offline only to construct the nominal-signal target; deployment receives no mode label. The six empirical inverse-residual variances are
+\begin{equation}
+ (0.1289,0.1030,0.1174,0.1357,0.1063,0.0967).
+\end{equation}
+Variance is clipped to $[10^{-4},0.25]$ in the model protocol.
+
+The final-stage estimator-training policy seed is 4021 and the validation policy seed is 4049. Training event seeds are 154001 and 154013; validation event seeds are 154101 and 154113. These precede and are disjoint from all pilot and prospective-confirmation policy and evaluation seeds. The prospective protocol does not refit the estimator.
+
+The frozen filter parameters are hazard $0.002$, evidence scale $1.0$, and prior exponent $0.98$. The residual variances include actuator noise and model error and are not estimates of actuator-noise variance alone. The normalized belief used for action $t$ is recorded before incorporating transition $(s_t,a_t,r_t,s_{t+1})$. This convention prevents use of the current next state to choose the current action. The exponent $0.98$ introduces forgetting, so the resulting belief is evaluated as a decision statistic rather than asserted to be a calibrated hidden Markov model posterior.
+
+\section{Prospective training and evaluation protocol}
+\label{app:v32_protocol}
+
+\subsection{Policy budgets}
+
+The canonical path has two stages. A source SAC controller trains for 1,400 iterations with 4,000 environment steps and 250 gradient updates per iteration, totaling 5.6M interactions and 350,000 updates. Its full actor, critic, target critic, and temperature state is then fine-tuned in fixed mode 0 for 700 iterations, adding 2.8M interactions and 175,000 updates. The final canonical policy therefore receives 8.4M interactions and 525,000 updates. No validation checkpoint is selected; the final policy is evaluated.
+
+SAC, recurrent ESCP, and RE-SAC each receive the same 8.4M interactions and 525,000 updates. This is an equal policy-training budget, not an equal end-to-end data or supervision budget, because BAPR also uses the separately pretrained frozen inverse model and its trajectory-producing policies described in Appendix~\ref{app:estimator}.
+
+\subsection{Seeds and event streams}
+
+The ten prospective-confirmation policy seeds are
+\begin{equation}
+\begin{split}
+\{&88003,88021,88039,88057,88079,\\
+  &88103,88121,88139,88157,88179\}.
+\end{split}
+\end{equation}
+Stationary event seeds are 197101, 197117, and 197133. Switching event seeds and their base schedules are:
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+Event seed & Base mode schedule \\
+\midrule
+197201 & $(2,0,3,1)$ \\
+197217 & $(1,3,0,2)$ \\
+197233 & $(3,2,1,0)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Each event evaluates five episodes. Episode index cyclically rotates the base schedule so the result is not tied to one starting mode. Stationary evaluation uses five episodes per mode and event seed. All policies use deterministic deployment actions; environment noise remains stochastic.
+
+\subsection{Registered decision rule}
+
+The five-seed fresh-policy pilot failed its registered confirmation rule. It was used only to estimate a sample size of ten for the prospective confirmation; no pilot return is pooled with the confirmation. Before prospective training, the algorithm, reference mode, estimator, policy budgets, seeds, event streams, and decision rule were frozen.
+
+For each comparator, the prospective confirmation requires all of the following:
+\begin{enumerate}[leftmargin=*]
+    \item positive mean paired switching-return difference;
+    \item positive lower bound of a two-sided 95\% paired $t$ interval;
+    \item at least 8 of 10 positive policy-seed differences;
+    \item at least 24 of 30 positive policy-seed--event differences.
+\end{enumerate}
+The interval is computed from the ten policy-seed mean differences using the $t_{0.975,9}=2.2622$ critical value. Event wins are consistency diagnostics rather than independent samples in the confidence interval.
+
+The mechanism ladder also checks: (i) true-mode compensation has at least 10\% headroom over equal-budget SAC; (ii) causal compensation recovers at least 70\% of the no-compensation-to-oracle gain; and (iii) causal stationary return retains at least 95\% of oracle stationary return. At least eight seeds must pass each check.
+
+\section{Additional result interpretation}
+\label{app:additional_results}
+
+\subsection{Why the registered composite decision fails}
+
+BAPR's mean switching advantages over SAC, ESCP, and RE-SAC all have positive lower 95\% confidence bounds. ESCP and RE-SAC also pass the frozen consistency counts. The composite decision has two blockers. First, the SAC comparison has 7/10 seed wins and 23/30 event wins, below 8/10 and 24/30. Second, true-mode compensation exceeds equal-budget SAC by at least 10\% for 7/10 seeds rather than the required 8/10. The mean-effect evidence is positive, while the registered uniformity and headroom requirements are not fully met.
+
+The three non-winning SAC policy seeds are 88021, 88039, and 88179. Their BAPR-minus-SAC switching differences are $-45.1$, $-228.0$, and $-1.2$. True-mode headroom over SAC is only $+2.3\%$, $-2.3\%$, and $+4.1\%$, respectively. Limited canonical-controller headroom is the dominant cause. However, the causal estimator remains below the true-mode return, and this residual loss reverses the small positive true-mode margins at seeds 88021 and 88179.
+
+For clarity, the reported compensation-recovery metric is
+\begin{equation}
+ R_{\mathrm{comp}}=
+ \frac{J_{\mathrm{causal}}-J_{\mathrm{no\text{-}comp}}}
+ {J_{\mathrm{oracle}}-J_{\mathrm{no\text{-}comp}}}.
+\end{equation}
+It measures recovery of the compensation mechanism, not recovery of oracle advantage over SAC. At the aggregate means, $R_{\mathrm{comp}}=95.9\%$, oracle headroom over SAC is 1134.9, inference loss is 124.9, and the final BAPR advantage over SAC is 1009.9.
+
+The median three-step delay is the first post-switch step at which the estimated mode is correct; it does not require the estimate to remain correct thereafter. Averaged over 30 seed--event cells, wrong-route fractions within the first 1, 2, 4, and 8 post-switch steps are 99.8\%, 99.6\%, 82.7\%, and 46.8\%, respectively. The corresponding overall Brier score is 0.0246 and the mean absolute nominal-signal deviation is 0.0104. These diagnostics expose the unavoidable causal transient more directly than aggregate accuracy alone.
+
+\subsection{Developmental evidence is not pooled}
+
+\begin{table}[ht]
+\centering
+\caption{Role of the developmental and confirmatory experiments. The first three rows are diagnostic and are not pooled with the primary ten-seed result.}
+\label{tab:development_history}
+\small
+\begin{tabular}{@{}p{0.18\textwidth}p{0.14\textwidth}p{0.27\textwidth}p{0.29\textwidth}@{}}
+\toprule
+Study & Environment & Purpose & Outcome \\
+\midrule
+Mechanism audit & HalfCheetah & reused-policy mechanism test & compensation passed \\
+Transfer audit & Ant & true-mode transfer and safety & headroom found; safety gate failed \\
+Fresh-policy pilot & HalfCheetah & five-seed sample-size pilot & confirmation failed \\
+Prospective test & HalfCheetah & ten-seed confirmatory test & mean CIs pass; SAC consistency fails \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the reused-policy mechanism audit, causal compensation obtained 4076.2 switching return, compared with 4291.8 for true-mode compensation, 3246.0 for a causally routed policy bank, and 1424.8 for robust SAC. Mode accuracy was 98.84\% and median delay was three steps. Because this audit reused policies selected during development, it establishes mechanism plausibility rather than independent confirmation.
+
+In the fresh-policy pilot, causal compensation obtained 3400.6 switching return, compared with 2594.3 for SAC, 1901.8 for ESCP, and 1916.1 for RE-SAC. The five-seed paired confidence intervals against SAC and RE-SAC crossed zero, so the pilot remained a failed confirmation and only informed the prospective sample size.
+
+\subsection{Post-confirmation controller-training diagnostic}
+
+After the ten-seed confirmation, we compared three canonical-controller recipes and an equal-budget robust SAC control on five new development policy seeds. Each recipe used 8.4M policy interactions and 525,000 updates; the frozen estimator and held-out event streams were shared. The original 5.6M multimode plus 2.8M fixed-reference warm-start obtained 3161.3 causal switching return. Training directly in reference mode 0 for 8.4M interactions obtained 3323.2, but exceeded warm-start on only 3/5 paired seeds (mean difference 162.0; 95\% CI $[-480.3,804.3]$). Canonicalized multimode training obtained 2440.1 and lost to warm-start on all five seeds. In this polarity-only family, canonicalization makes the physical training problem equivalent to fixed mode 0; the result should not be read as a test of canonicalization under additional mode-dependent physics. The equal-budget robust SAC control obtained 2085.5. Under the predeclared 4/5 paired-win rule, the warm-start recipe remained selected. These post-confirmation diagnostics are not additional confirmation seeds and do not change the frozen ten-seed decision.
+
+\section{Cross-environment evidence boundary}
+\label{app:cross_environment}
+
+The current paper does not claim a homogeneous four-environment benchmark win.
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Ant.} A three-seed true-mode action-compensation audit obtained 4510.7 switching return versus 2588.6 for robust SAC, but only one seed passed the absolute zero-termination criterion. This demonstrates privileged headroom, not a safe causal deployment result.
+    \item \textbf{Hopper and Walker2d.} In the tested structured-channel screen, every robust and oracle switching episode terminated before the first scheduled switch. The benchmark therefore lacked a valid adaptation window and cannot support a BAPR comparison.
+    \item \textbf{Swimmer.} An independent three-seed screen used all four two-actuator sign transforms, common noise standard deviation 0.02, 250-step dwell intervals, and 8.4M interactions per robust or reference actor. All audited episodes reached 1,000 steps, and true-mode compensation exactly reproduced native reference-mode returns. Nevertheless, its mean return was 50.30 versus 55.04 for robust SAC; only one of three seeds exceeded robust control by both 10\% and five points. The registered oracle-headroom screen failed, so no causal estimator was fitted for this environment.
+    \item \textbf{Bus control.} The bus domain contains persistent changes in speed and demand distributions with per-step stochastic passenger arrivals and traffic variation. RE-SAC-derived robustness is effective there, but its modes are not known invertible actuator transforms. Bus evidence is relevant motivation for stochastic non-stationarity, not direct evidence for the action-compensation mechanism.
+\end{itemize}

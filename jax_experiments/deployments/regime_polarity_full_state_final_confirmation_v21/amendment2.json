@@ -1,0 +1,11 @@
+{
+  "schema": "bapr.full-state-final-confirmation-amendment.v21.2",
+  "status": "registered_before_recovery",
+  "scope": "audit provenance loading only",
+  "parent_amendment": "amendment1.json",
+  "failure": "The reused V18 audit reads MODEL_MANIFEST and MODEL_PATH from the v5 model module, while those registered paths are owned by its protocol module.",
+  "fix": "Expose the existing v5 protocol artifact paths as process-local model-module aliases before running the unchanged audit.",
+  "training_changed": false,
+  "evaluation_protocol_changed": false,
+  "checkpoint_or_result_data_changed": false
+}

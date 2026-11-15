@@ -1,0 +1,98 @@
+{
+  "bank_gate": {
+    "maximum_no_headroom_regression": 0.05,
+    "minimum_headroom_gain": 0.1,
+    "minimum_oracle_recovery": 0.7,
+    "minimum_primary_gain": 0.1
+  },
+  "budget": {
+    "bapr_policy_count": 5,
+    "frozen_estimator_training_excluded": true,
+    "per_controller_steps": 5600000,
+    "per_controller_updates": 350000,
+    "single_baseline_policy_count": 1
+  },
+  "created_before_training": true,
+  "identity": {
+    "baseline_methods": [
+      "escp_recurrent",
+      "resac_b0"
+    ],
+    "calibration_event_seeds": [
+      156001,
+      156017,
+      156033
+    ],
+    "holdout_event_seeds": [
+      156101,
+      156117,
+      156133
+    ],
+    "primary_arm": "posterior_map_safe_utility",
+    "protocol_version": "v9-independent-posterior-map-safe-utility-confirmation",
+    "training_seeds": [
+      61003,
+      61021,
+      61039,
+      61057,
+      61079
+    ]
+  },
+  "schema": "bapr.regime-polarity-safe-utility-registration.v9",
+  "selection_rule": {
+    "minimum_calibration_gain": 0.05,
+    "require_zero_calibration_termination": true,
+    "required_calibration_event_wins": 3
+  },
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_specialist_safe_utility_confirmation_v9.py": {
+      "sha256": "b694e5cd50a0e74e9d1623818c99842700a16b143057806d0fbabb7ec8954cc1",
+      "size": 13010
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_safe_utility_confirmation_v9.py": {
+      "sha256": "84545706ee33539b1254fd28b21c3534cc49a81058679d9c10fb7c208aaf9a0a",
+      "size": 12322
+    },
+    "jax_experiments/analysis/run_regime_polarity_confirmation_source_controller_v6.py": {
+      "sha256": "d45f54388f9b5d130cbcf064531bcc41f9af7461ea974d4641f37e4f69cc80ec",
+      "size": 7332
+    },
+    "jax_experiments/analysis/run_regime_polarity_corrected_audit_v2.py": {
+      "sha256": "e5ad1865be99b787e60e8590812eb087565d118eb3c92cdf546d9ce65e8c03c4",
+      "size": 12065
+    },
+    "jax_experiments/analysis/run_regime_polarity_corrected_baseline_v2.py": {
+      "sha256": "82d01996d7b36315caf0cbbc99fde02ac9011a00ff147d091f1808e6ba1cb9eb",
+      "size": 11798
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_safe_utility_audit_v8.py": {
+      "sha256": "c88b602f9cdac5acb9f7f1a15b5c4f7fc9daddea3d0a56717ada40e8a90d5976",
+      "size": 15605
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_safe_utility_baseline_v9.py": {
+      "sha256": "81302452dc86c39fbc46cbb9c3a0079a8d15e102327c1627f96d8b8d02ec655d",
+      "size": 1152
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_safe_utility_confirmation_audit_v9.py": {
+      "sha256": "f76c95af7d73974ea9999a40517433fe96335c0441531ce05cb126be8e5876e3",
+      "size": 14556
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_safe_utility_source_v9.py": {
+      "sha256": "4bb0b766f4f1b84dd2f8af029ccfb7265f3d86207210e2fe52572b9fd7462661",
+      "size": 1136
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "reports/regime_polarity_safe_utility_confirmation_v9_preregistration_2026-08-30.md": {
+      "sha256": "4b7974c05809dde35ed4818caa426965f544594d236336ee2d67eb2e805fb650",
+      "size": 2408
+    }
+  },
+  "status": "registered"
+}

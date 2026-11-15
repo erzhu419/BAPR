@@ -1,0 +1,330 @@
+{
+  "baselines": {
+    "diagnostics": [
+      "bapr_true_mode_oracle",
+      "sac5_best_static",
+      "sac5_true_mode_oracle"
+    ],
+    "equal_total_policy_budget": "sac5_v5_posterior_map",
+    "escp_config": {
+      "alpha_lr": 0.01,
+      "bottleneck_sigma": 0.01,
+      "clip_norm": 0.0,
+      "consistency_weight": 50.0,
+      "context_lr": 0.0003,
+      "context_min_steps": 100000,
+      "context_min_tasks": 2,
+      "critic_lr": 0.001,
+      "diversity_weight": 0.025,
+      "ensemble_size": 2,
+      "ep_dim": 2,
+      "history_length": 16,
+      "policy_lr": 0.0003,
+      "prototype_tau": 0.995,
+      "rbf_radius": 80.0,
+      "target_entropy_ratio": 1.5
+    },
+    "resac_config": {
+      "anchor_lambda": 0.001,
+      "beta_end": 0.0,
+      "beta_start": -2.0,
+      "beta_warmup": 0.2,
+      "ema_tau": 0.005,
+      "ensemble_size": 5,
+      "independent_ratio": 0.75,
+      "lr": 0.0003
+    },
+    "standard": [
+      "robust_sac",
+      "escp_recurrent",
+      "resac_b0"
+    ]
+  },
+  "budget": {
+    "sac5_new_replicas": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "sac5_slot_0": "reuse matched v17 robust SAC",
+    "sac5_total_policies": 5,
+    "steps_per_policy": 5600000,
+    "updates_per_policy": 350000
+  },
+  "created_before_training": true,
+  "decision_gate": {
+    "comparators": [
+      "robust_sac",
+      "escp_recurrent",
+      "resac_b0",
+      "sac5_v5_posterior_map"
+    ],
+    "minimum_oracle_headroom": 0.1,
+    "minimum_oracle_recovery": 0.7,
+    "minimum_stationary_retention": 0.95,
+    "primary_arm": "bapr_v5_posterior_map",
+    "require_no_termination_increase": true,
+    "require_positive_paired_ci95_lower": true,
+    "require_positive_paired_mean": true,
+    "required_event_wins_of_15": 12,
+    "required_recovery_seeds": 4,
+    "required_seed_wins": 4,
+    "required_stationary_retention_seeds": 4
+  },
+  "frozen_candidate": {
+    "estimator_updates": false,
+    "policy_bank": "v17 actor-only robust-warm-start bank",
+    "router": "v5 posterior MAP"
+  },
+  "frozen_inputs": {
+    "81003": {
+      "robust_source": {
+        "sha256": "5edefb1c05651737ced0d7a1d90115956c1ef232bd80ab02cdd400b1f9f8ae00",
+        "size": 959
+      },
+      "specialists": {
+        "0": {
+          "sha256": "f53098bd6633186f010e18378af6025cd802c6e565ba65b050944770cc17b0f0",
+          "size": 1363
+        },
+        "1": {
+          "sha256": "ac5ef5d9e2025de4dd76c5686d440b7ef4e7ece2ca3191c2fd17a5ffbe3ae00d",
+          "size": 1363
+        },
+        "2": {
+          "sha256": "02cd1ea2795793b84d2eb1ee11d8ebbb502017393d71afbe476b7db7010ff89b",
+          "size": 1363
+        },
+        "3": {
+          "sha256": "0ca45476bff47c5e63ece61bc806d3001dd769eb8ccdf26598cbe87375678925",
+          "size": 1363
+        }
+      }
+    },
+    "81021": {
+      "robust_source": {
+        "sha256": "54703fb21c0fce237e84e5263a893a01f5c52fae94dc2ca333886d2732f05064",
+        "size": 959
+      },
+      "specialists": {
+        "0": {
+          "sha256": "a3840e40886e9314e5c21a0f924f175475d87aba57addcf1830049d24e3f1467",
+          "size": 1363
+        },
+        "1": {
+          "sha256": "dbeaebea1d6ff490780ff24f2268feaef3f0b3ff311596696757abc893e38996",
+          "size": 1363
+        },
+        "2": {
+          "sha256": "e1a96eea59447969f27d15529baf55c2f935587d8891ebfc12e5d3569b69c012",
+          "size": 1363
+        },
+        "3": {
+          "sha256": "b082b902c3aa7c3412a0e60957afbee0891b2bfba926a08f78f8e66b187053ec",
+          "size": 1363
+        }
+      }
+    },
+    "81039": {
+      "robust_source": {
+        "sha256": "655805ce9b903698e769f0054918cc20a787692f96b080f2a247b34b23f31867",
+        "size": 959
+      },
+      "specialists": {
+        "0": {
+          "sha256": "7ce5cc8b7cd1851192eae82021a98855264d8c0520d321de9c3d6076fde88b86",
+          "size": 1363
+        },
+        "1": {
+          "sha256": "c0b60c156d110759f0068b388628f314a11e4b74c7bd0385fbb48a3866ad8abd",
+          "size": 1363
+        },
+        "2": {
+          "sha256": "9c4e032c3f6cb71cf8a0a1de3d1104cca6db46a391fd8c3b11e0bd8ea11c8bf2",
+          "size": 1363
+        },
+        "3": {
+          "sha256": "41fa2e9cb9cd78455b90bdc7bc1417fb25bcfc49e356bdf6cf709a5b341d52f9",
+          "size": 1363
+        }
+      }
+    },
+    "81057": {
+      "robust_source": {
+        "sha256": "0afd51b942643889c491e9a2369f1b4193c21cc9697368525faf82946960e2e0",
+        "size": 959
+      },
+      "specialists": {
+        "0": {
+          "sha256": "753a08d231cef5df2f0ae0fb28c2feca57ec5976a3a970ef0a811a52353f50a9",
+          "size": 1363
+        },
+        "1": {
+          "sha256": "0559d6c85d29149227bee0f4f653a97458d2a53cf4601d37f82598ec3df6a5a8",
+          "size": 1363
+        },
+        "2": {
+          "sha256": "2d6650de53894908663364e34ae9ee707787b0c90520ccb8c3de83a3e385fce6",
+          "size": 1363
+        },
+        "3": {
+          "sha256": "75bb413b5e4b93a51fa0c7ff28627a6c8078e2b67e5ecd7eea34dc906c8566fc",
+          "size": 1363
+        }
+      }
+    },
+    "81079": {
+      "robust_source": {
+        "sha256": "a6cd3bc287f6018d96923c5175043d36875e246e04d27cfb064f7e0fb9c55463",
+        "size": 959
+      },
+      "specialists": {
+        "0": {
+          "sha256": "01cc1a8a26ce49a2681c79488242c92296ec085228b484086a8fabf7782a3ee5",
+          "size": 1363
+        },
+        "1": {
+          "sha256": "6ac0b8c10b3471f15ed980228dd39f057bf674a5a99e265290081d60ae049e40",
+          "size": 1363
+        },
+        "2": {
+          "sha256": "90ed1b9c577f33ee198f83261580fbfef973fc621c0d82b008149316fd41c005",
+          "size": 1363
+        },
+        "3": {
+          "sha256": "623f2358b181e942a263cd66bb7e05f0c408fe9f686bbefdac9318853581863e",
+          "size": 1363
+        }
+      }
+    }
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      182001,
+      182017,
+      182033
+    ],
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v18-v5-final-equal-policy-budget-comparison",
+    "stationary_holdout_event_seeds": [
+      182101,
+      182117,
+      182133
+    ],
+    "switching_event_seeds": [
+      182201,
+      182217,
+      182233
+    ],
+    "switching_schedules": {
+      "182201": [
+        2,
+        0,
+        3,
+        1
+      ],
+      "182217": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "182233": [
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    "training_seeds": [
+      81003,
+      81021,
+      81039,
+      81057,
+      81079
+    ]
+  },
+  "schema": "bapr.regime-polarity-v5-final-comparison-registration.v18",
+  "source_records": {
+    "jax_experiments/algos/escp.py": {
+      "sha256": "3fd49e3fe1680b01db474698133bd378f97c1d64e6297001b77c64985c0523c7",
+      "size": 38868
+    },
+    "jax_experiments/algos/resac.py": {
+      "sha256": "bc7ca0cc587ce2193043b237888fba610db96838e26d505dded93aa5c267fcea",
+      "size": 16247
+    },
+    "jax_experiments/algos/sac_base.py": {
+      "sha256": "4bbdd0874454ca7a09b3b28fd798aa2f5f8256a4fd005b889364385bbd7b354e",
+      "size": 7835
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_v5_final_comparison_v18.py": {
+      "sha256": "ddbb8a628a8cdcc0635b8d27f9255a148c1574426baebc35e6cd29122f9e7448",
+      "size": 11504
+    },
+    "jax_experiments/analysis/regime_polarity_v5_final_comparison_v18.py": {
+      "sha256": "6db7b1dbdc1e22fb1640aca5d8bb3dd3a33fae986e19b5479900f8ef394dbe43",
+      "size": 15926
+    },
+    "jax_experiments/analysis/run_regime_polarity_v5_final_baseline_v18.py": {
+      "sha256": "9ad47401cbd2046ee370881fa3b1eaa8febc2be8c78faf8a292f5f4a2e6f08b4",
+      "size": 17264
+    },
+    "jax_experiments/analysis/run_regime_polarity_v5_final_comparison_audit_v18.py": {
+      "sha256": "d7ca298a089c69c9199c399553aff281317118a8062b6dec6d04649df8853cf7",
+      "size": 39072
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/deployments/regime_polarity_fresh_bank_estimator_confirmation_v17/registration.json": {
+      "sha256": "b90af23d6792b1a307a7c89681014274235b8da2dff19fb2b154f16b0f01a46e",
+      "size": 8849
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/results_regime_polarity_fresh_bank_estimator_confirmation_analysis_v17/analysis.json": {
+      "sha256": "3a219060bf6d660c361fa3078987f219105ce2a179234e07e9b4e9f300178263",
+      "size": 30064
+    },
+    "jax_experiments/results_regime_polarity_fresh_bank_estimator_confirmation_analysis_v17/analysis.md": {
+      "sha256": "49e6d3ba7aa452c0b270377a6260395ba68530a0385b7a03bb6daea92a25dab3",
+      "size": 1055
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_polarity_fresh_bank_estimator_confirmation_v17_2026-09-01.md": {
+      "sha256": "49e6d3ba7aa452c0b270377a6260395ba68530a0385b7a03bb6daea92a25dab3",
+      "size": 1055
+    },
+    "reports/regime_polarity_v5_final_comparison_v18_preregistration_2026-09-01.md": {
+      "sha256": "8ea9fa9922f20300dab0b957f20bb390b9731f6bc57b6c4141f5755a7568df89",
+      "size": 2774
+    },
+    "scripts/submit_regime_polarity_v5_final_comparison_v18.py": {
+      "sha256": "7cac80b11ee0321b91b5e11f5de97cc479892b192bdece8326cd9d69e1e391df",
+      "size": 13295
+    }
+  },
+  "status": "registered",
+  "sync_policy": "JSON, protocol signature, and evaluation-only parameters; never sync replay or full checkpoints"
+}

@@ -1,0 +1,142 @@
+{
+  "created_before_training": true,
+  "gate": {
+    "all_switching_events_win": true,
+    "all_three_policy_seeds_pass": true,
+    "dynamic_oracle_must_beat_every_fixed_controller": true,
+    "minimum_stationary_mode_gain": 0.05,
+    "minimum_stationary_mode_wins_per_seed": 4,
+    "minimum_switching_gain": 0.1
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      188001,
+      188017
+    ],
+    "modes": [
+      "normal",
+      "congestion_severe",
+      "demand_surge",
+      "extreme_weather",
+      "partial_closure"
+    ],
+    "protocol_version": "bus-policy-bank-headroom-v1-development",
+    "stationary_holdout_event_seeds": [
+      188101,
+      188117,
+      188133
+    ],
+    "switching_event_seeds": [
+      188201,
+      188217,
+      188233
+    ],
+    "training_seeds": [
+      86003,
+      86021,
+      86039
+    ]
+  },
+  "schema": "bapr.bus-policy-bank-registration.v1",
+  "scope": {
+    "estimator_training": false,
+    "next_action": "train the frozen causal mode estimator only if this true-mode policy-bank upper bound passes"
+  },
+  "source_records": {
+    "bus_experiments/analyze_policy_bank_headroom_v1.py": {
+      "path": "bus_experiments/analyze_policy_bank_headroom_v1.py",
+      "sha256": "d0e58d2336af6802f07b7fe4ce20d22828b09ca2da8b4062ff9358e437ec7fbe",
+      "size": 3423
+    },
+    "bus_experiments/frozen_policy_bank_core.py": {
+      "path": "bus_experiments/frozen_policy_bank_core.py",
+      "sha256": "8dfd1df56e33bc06bb09faf18cccc8ed43267989db0287e017db244a4fbd7240",
+      "size": 31585
+    },
+    "bus_experiments/policy_bank_headroom_v1.py": {
+      "path": "bus_experiments/policy_bank_headroom_v1.py",
+      "sha256": "6d08381a37332a547ed009e76eff94865c290f0ae809c6dbd2e9692cb5e7ce5f",
+      "size": 9420
+    },
+    "bus_experiments/run_policy_bank_audit_v1.py": {
+      "path": "bus_experiments/run_policy_bank_audit_v1.py",
+      "sha256": "2d77ea68b9df1aae656c1ad69c68437586427a1d2bf9ae9e31d57daba2c0caa1",
+      "size": 12103
+    },
+    "bus_experiments/run_policy_bank_train_v1.py": {
+      "path": "bus_experiments/run_policy_bank_train_v1.py",
+      "sha256": "c2a5d4eff63793ea12034537a2f347f057792376f02fe0d87c93a22fa7a94967",
+      "size": 2223
+    },
+    "env/bus.py": {
+      "path": "env/bus.py",
+      "sha256": "3c4a2cd22805c4a61d68dbaadff65fffd04f622a31c7616351e9a6724acbb1ef",
+      "size": 22532
+    },
+    "env/config.json": {
+      "path": "env/config.json",
+      "sha256": "dad70eba76992070e9498afcd6fe2e1b7cf13b7fb32579c65e1b040fbf5e1040",
+      "size": 95
+    },
+    "env/data/passenger_OD.xlsx": {
+      "path": "env/data/passenger_OD.xlsx",
+      "sha256": "a3f19134c14e0930cf8ed0da500b1d7ebfacc2b88676df56049817a10badc59b",
+      "size": 47419
+    },
+    "env/data/route_news.xlsx": {
+      "path": "env/data/route_news.xlsx",
+      "sha256": "64b834622655060e749c8990634ef7822020999ede0eed24d1c578d5c27b922b",
+      "size": 16191
+    },
+    "env/data/stop_news.xlsx": {
+      "path": "env/data/stop_news.xlsx",
+      "sha256": "fd5e83e64a1320294e0f7221e40a97fb873a403564eac50a7b77c9ea15afc9d6",
+      "size": 10227
+    },
+    "env/data/time_table.xlsx": {
+      "path": "env/data/time_table.xlsx",
+      "sha256": "f70185306a48ba52b264026706980cd5b7e66b9096c43b57718081e9a54fd1f8",
+      "size": 13039
+    },
+    "env/passenger.py": {
+      "path": "env/passenger.py",
+      "sha256": "d4a8ed241cc21dfc3d0e1d59be756217b523c1f40cb3f9bd12828cca55b4a7e6",
+      "size": 642
+    },
+    "env/route.py": {
+      "path": "env/route.py",
+      "sha256": "19401d7d5f8f9d742dbf645a0d57ce5153f1b84519900a204a0cbda17b9f32c8",
+      "size": 1511
+    },
+    "env/sim.py": {
+      "path": "env/sim.py",
+      "sha256": "c14f96b3ca6a7bfe5107a790f0b12f32899fba07e948c869b073e701b695c72d",
+      "size": 17669
+    },
+    "env/station.py": {
+      "path": "env/station.py",
+      "sha256": "0b70c4c276c7e9afdf49ff0e483010967b17a0cd3120b37512d2e296900cb226",
+      "size": 2359
+    },
+    "mode_profiles.py": {
+      "path": "mode_profiles.py",
+      "sha256": "dd6034c0145e5f7bd6e6dcadaea03a39b5699669ffc548f0c189358da6914e08",
+      "size": 2245
+    },
+    "scripts/submit_bus_policy_bank_headroom_v1.py": {
+      "path": "scripts/submit_bus_policy_bank_headroom_v1.py",
+      "sha256": "87ac0db7d6b565fe42d34145551a8f134105924b09e2c9ffedd0c26bf0e70770",
+      "size": 11434
+    }
+  },
+  "status": "registered",
+  "sync_policy": "sync compact controller bundles and JSON only; keep replay and training checkpoints on remote nodes",
+  "training": {
+    "regularization_sign": "+ weight_reg * reg_norm",
+    "robust_source_environment": "persistent MODE_PROFILES with random initial mode and 1800-7200 second switches; within-mode route and passenger stochasticity remains active",
+    "robust_source_episodes": 500,
+    "specialist_additional_episodes": 200,
+    "specialist_initialization": "copy policy, critic, target critic, and alpha from the matched robust source; reset optimizers and replay",
+    "weight_reg": 0.01
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "identity": {
+    "env": "HalfCheetah-v2",
+    "event_seeds": [
+      107503,
+      107537,
+      107579,
+      107621,
+      107659
+    ],
+    "family": "actuator_polarity",
+    "protocol_version": "v1-final-stack-mechanism-audit",
+    "selection_forbidden": true,
+    "student_seeds": [
+      2009,
+      2113,
+      2213,
+      2311,
+      2417
+    ]
+  },
+  "schema": "bapr.regime-polarity-final-mechanism-registration.v1",
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_final_mechanism_audit_v1.py": {
+      "sha256": "8efce449c10588d66d7bbac524d19f78e8567c3f8cf1c68009ad5ab36676d9f3",
+      "size": 12735
+    },
+    "jax_experiments/analysis/regime_polarity_final_mechanism_audit_v1.py": {
+      "sha256": "872e4c947b2a6b740e2df276edfb3465399624df44179b1509f40462583aa9d4",
+      "size": 9593
+    },
+    "jax_experiments/analysis/run_regime_polarity_final_mechanism_audit_v1.py": {
+      "sha256": "944a2aefb0470207174b805779dc26e041bc9b8a42e7c14ccb395dc84e0f5d75",
+      "size": 21745
+    },
+    "jax_experiments/common/causal_fallback.py": {
+      "sha256": "1904e17eeda3719b4ef11d8e398bfce5694276b3f327a700ef94c3e0ac57e9be",
+      "size": 9508
+    },
+    "jax_experiments/deployments/regime_polarity_fallback_final_v1/registration.json": {
+      "sha256": "e58b3ccfe947702d65dfff076cb3dde3d6d4bca767c4f778286009a9bb671b0f",
+      "size": 23314
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/bundle_manifest.json": {
+      "sha256": "6ff2a58d903db1d900a91405f57a4884ce55c39dae249d765b186c14aa5fc4a8",
+      "size": 970
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/checkpoints/params.pkl": {
+      "sha256": "5b0d783989eb9cf19e617c87692595a8bc7ec06ac8ee1070cb6015e858bf9ee4",
+      "size": 23140155
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/checkpoints/train_state.pkl": {
+      "sha256": "4318607407285db6047d33f37dc7116e15e5ad847fb15ebdc8d37919df4077f1",
+      "size": 143969
+    },
+    "jax_experiments/eval_bundles_regime_polarity_final_confirmation_v5/HalfCheetah/robust/seed_719/logs/protocol_signature.json": {
+      "sha256": "e7c06aa6f061b99e6c106833a18bf7be2071d8aa08d287db0ab14328e324d895",
+      "size": 15087
+    },
+    "jax_experiments/results_regime_polarity_corrected_baseline_analysis_v2/analysis.json": {
+      "sha256": "8f20fbba708365ee3a27f3e02f34eaacbfc9009877a1f8471307cee94fbcb290",
+      "size": 14639
+    },
+    "jax_experiments/results_regime_polarity_expected_action_system_id_model_v4/inverse_params.npz": {
+      "sha256": "c1ff9021a3d3684116464c421c852eb16cd7ab286b2fd53bcd764d9a50393af1",
+      "size": 2712127
+    },
+    "jax_experiments/results_regime_polarity_expected_action_system_id_model_v4/model_manifest.json": {
+      "sha256": "fc4b28662ac1f38081aab02723ebcbea2fa47fbe37eea27bb4e1a564b8d571d0",
+      "size": 56089
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_analysis_v1/analysis.json": {
+      "sha256": "330357b34b7b84bc336959ad9e34991949edad1a64bb787a794938e15ee161b1",
+      "size": 8872
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2009/model_manifest.json": {
+      "sha256": "786be772984760cbb68e632fe18b5c96de2276d5bc258beddd9ee1af9fd404c8",
+      "size": 27070
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2009/student_params.npz": {
+      "sha256": "5b0032a9f4a629598a6bde16be65d264b40544ccecfd17a4ae2f261f4f63e877",
+      "size": 287313
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2113/model_manifest.json": {
+      "sha256": "6ce5ac907647b2646cc77c069ebbeccfd0df4ccbd7bf2a45c3d432fec2809a0b",
+      "size": 27067
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2113/student_params.npz": {
+      "sha256": "54fe27faaf04c38d6da7b514c660db5db38bd8ff51c75f5614c50496caf3a1ca",
+      "size": 287349
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2213/model_manifest.json": {
+      "sha256": "bdf8899bec01147e14e289cf00b426a2e056241a586a815d2cae66371acd2bea",
+      "size": 27079
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2213/student_params.npz": {
+      "sha256": "42fbaf66621435a2402820266380420bb14f3456f5ecdcbe7c9e768105185f83",
+      "size": 286820
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2311/model_manifest.json": {
+      "sha256": "41c991e7b0ce52dba0b8e3b66352f70a49220045585291f9e5dd57f85364af94",
+      "size": 27059
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2311/student_params.npz": {
+      "sha256": "4952ebc573890a7ed7dad833f791c33e1665049e318acf72c4453ee15f7f3d48",
+      "size": 287438
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2417/model_manifest.json": {
+      "sha256": "46a666a873831e416469b14a5d321f2eff603ad8e1481fcb9ef2a5b917a99f74",
+      "size": 27073
+    },
+    "jax_experiments/results_regime_polarity_fallback_final_student_model_v1/mode_heads/student_seed_2417/student_params.npz": {
+      "sha256": "a16e4803085ed1085bea4b400667e17a43ee3d0b1418fea86d33277785787cd1",
+      "size": 287441
+    }
+  },
+  "status": "frozen"
+}

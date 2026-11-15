@@ -1,0 +1,173 @@
+{
+  "budget": {
+    "max_iters": 1400,
+    "samples_per_iter": 4000,
+    "total_steps": 5600000,
+    "update_count": 350000,
+    "updates_per_iter": 250
+  },
+  "created_before_new_training": true,
+  "decision_rule": "compare frozen BAPR against the strongest of unchanged SAC, recurrent ESCP, and released-B0 RE-SAC on identical event streams",
+  "environment": {
+    "dwell_steps": 250,
+    "env": "HalfCheetah-v2",
+    "family": "actuator_polarity",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "escp_config": {
+    "alpha_lr": 0.01,
+    "bottleneck_sigma": 0.01,
+    "clip_norm": 0.0,
+    "consistency_weight": 50.0,
+    "context_lr": 0.0003,
+    "context_min_steps": 100000,
+    "context_min_tasks": 2,
+    "critic_lr": 0.001,
+    "diversity_weight": 0.025,
+    "ensemble_size": 2,
+    "ep_dim": 2,
+    "history_length": 16,
+    "policy_lr": 0.0003,
+    "prototype_tau": 0.995,
+    "rbf_radius": 80.0,
+    "target_entropy_ratio": 1.5
+  },
+  "event_seeds": [
+    106301,
+    106331,
+    106367,
+    106399,
+    106451
+  ],
+  "protocol_version": "v2-recurrent-escp-released-b0-corrected-baselines",
+  "resac_config": {
+    "anchor_lambda": 0.001,
+    "beta_end": 0.0,
+    "beta_start": -2.0,
+    "beta_warmup": 0.2,
+    "ema_tau": 0.005,
+    "ensemble_size": 5,
+    "independent_ratio": 0.75,
+    "lr": 0.0003
+  },
+  "reused_results": {
+    "bapr/seed_2009": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/bapr/seed_2009/results.json",
+      "sha256": "3fb58a41a561c6ba0d515ae8fc5f192bfd0c28f289435b9e386b7acf1ff70210",
+      "size": 10908
+    },
+    "bapr/seed_2113": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/bapr/seed_2113/results.json",
+      "sha256": "958ca9f0442608087e3c00eb7f75bc81bf081e108935816814cc4b19006fb0f6",
+      "size": 10983
+    },
+    "bapr/seed_2213": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/bapr/seed_2213/results.json",
+      "sha256": "dd6aa3b1456712a7cd4c63b950e576833c1fbd534395727d5f91cad9403bd786",
+      "size": 10858
+    },
+    "bapr/seed_2311": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/bapr/seed_2311/results.json",
+      "sha256": "cb643fea82ff47d82b0393ac2a49e0ce5ebdc0a493c4289c598ae461e73f45df",
+      "size": 10902
+    },
+    "bapr/seed_2417": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/bapr/seed_2417/results.json",
+      "sha256": "11ec68363117871011b80f1644459e9e42bfca7643f0e2b31ad7b4698ba49fa5",
+      "size": 10916
+    },
+    "sac/seed_2009": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/sac/seed_2009/results.json",
+      "sha256": "d84de7ecb7852925dcf7f6fcc0880730e0a42942e7eeb7615de763c6e0fd0b1c",
+      "size": 9441
+    },
+    "sac/seed_2113": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/sac/seed_2113/results.json",
+      "sha256": "5bd7123e90933e243807d0086c67be67dd33b4ff339efc6ca4a0a9e8904e477d",
+      "size": 9470
+    },
+    "sac/seed_2213": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/sac/seed_2213/results.json",
+      "sha256": "8ca2b538777e4713b3892cc8195a8295ad512a2231835200facf4f70fe91b517",
+      "size": 9432
+    },
+    "sac/seed_2311": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/sac/seed_2311/results.json",
+      "sha256": "b91e066d263fb998c62e55cdd293c1e04b1c02d8f17ba020a95666aef15ce7c5",
+      "size": 9411
+    },
+    "sac/seed_2417": {
+      "path": "jax_experiments/results_regime_polarity_fallback_final_audit_v1/sac/seed_2417/results.json",
+      "sha256": "9ba21cd251b0189c6d189ac35681074c66c41c9b4b42c4873c28c9fefb0b39a1",
+      "size": 9392
+    }
+  },
+  "schema": "bapr.regime-polarity-corrected-baseline-registration.v2",
+  "source_files": {
+    "jax_experiments/algos/escp.py": {
+      "sha256": "3fd49e3fe1680b01db474698133bd378f97c1d64e6297001b77c64985c0523c7",
+      "size": 38868
+    },
+    "jax_experiments/algos/resac.py": {
+      "sha256": "bc7ca0cc587ce2193043b237888fba610db96838e26d505dded93aa5c267fcea",
+      "size": 16247
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_corrected_baselines_v2.py": {
+      "sha256": "04041a842c3ff08fcb76030d6f25d15ac78bf8d171e347f1875ae6136686adce",
+      "size": 11075
+    },
+    "jax_experiments/analysis/regime_polarity_corrected_baselines_v2.py": {
+      "sha256": "039500da143a5e73cdf87d80679c3cfb3817df9cab83cd359c64935e5e7c0d08",
+      "size": 11896
+    },
+    "jax_experiments/analysis/run_regime_polarity_corrected_audit_v2.py": {
+      "sha256": "e5ad1865be99b787e60e8590812eb087565d118eb3c92cdf546d9ce65e8c03c4",
+      "size": 12065
+    },
+    "jax_experiments/analysis/run_regime_polarity_corrected_baseline_v2.py": {
+      "sha256": "82d01996d7b36315caf0cbbc99fde02ac9011a00ff147d091f1808e6ba1cb9eb",
+      "size": 11798
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/common/replay_buffer.py": {
+      "sha256": "b8f86ac4ed013797d681e5b070222004fd319fd63e06604cf33ffbe374cc97e2",
+      "size": 17329
+    },
+    "jax_experiments/configs/default.py": {
+      "sha256": "4ddbe406e95ce1be008b231296f1d9fda93b54f98bd65acb44264d30a33b72b7",
+      "size": 27848
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/networks/escp_recurrent.py": {
+      "sha256": "ebcc132782fd59e074f8534fac307a3be4308b3f284d6e7a56b4b43c9a7603a5",
+      "size": 6548
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "scripts/submit_regime_polarity_corrected_baselines_v2.py": {
+      "sha256": "d48784352cfbad822c03a7c41df9455ac4019345a06395e0d075066bdd79c785",
+      "size": 11314
+    }
+  },
+  "status": "registered",
+  "training_seeds": [
+    2009,
+    2113,
+    2213,
+    2311,
+    2417
+  ]
+}

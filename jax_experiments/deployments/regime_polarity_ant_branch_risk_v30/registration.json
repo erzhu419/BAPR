@@ -1,0 +1,166 @@
+{
+  "created_before_evaluation": true,
+  "decision_gate": {
+    "authorization": "train a new finite-horizon continuation-risk model only if full robust continuation has preregistered rescue headroom",
+    "maximum_harm_fraction_given_candidate_survival": 0.1,
+    "minimum_absolute_candidate_minus_fallback_risk": 0.02,
+    "minimum_actual_mode_wins": 3,
+    "minimum_informative_seeds": 2,
+    "minimum_rescue_fraction_given_candidate_failure": 0.5,
+    "minimum_unique_candidate_failures_per_informative_seed": 4,
+    "primary_horizon": 250
+  },
+  "frozen_boundary": {
+    "candidate_and_fallback_are_full_continuations": true,
+    "common_action_noise_within_each_pair": true,
+    "horizon_end_is_truncation_not_termination": true,
+    "new_event_streams": true,
+    "no_parameter_training": true,
+    "no_risk_critic_or_estimator_is_trained": true,
+    "physical_termination_stops_each_branch": true,
+    "same_simulator_state_for_each_paired_branch": true,
+    "v29_reference_selection_reused_without_reselection": true
+  },
+  "identity": {
+    "arms": [
+      "selected_reference_true_mode_compensation",
+      "robust_sac_full_continuation"
+    ],
+    "environment": "Ant-v2",
+    "family": "actuator_polarity",
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v30-ant-finite-horizon-branch-risk-development",
+    "risk_horizons": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      250
+    ],
+    "selected_reference_modes": {
+      "85003": 3,
+      "85021": 3,
+      "85039": 2
+    },
+    "source_event_seeds": [
+      203001,
+      203017,
+      203033
+    ],
+    "training_seeds": [
+      85003,
+      85021,
+      85039
+    ]
+  },
+  "schema": "bapr.regime-polarity-ant-branch-risk-registration.v30",
+  "scope": {
+    "development_mechanism_audit": true,
+    "does_not_claim_a_safety_guarantee": true,
+    "does_not_reopen_v29_estimator_gate": true,
+    "paired_mode_interventions_are_not_independent_policy_seeds": true
+  },
+  "snapshot_design": {
+    "actual_mode_interventions": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "behavior": "selected_reference_true_mode_compensation",
+    "continuations_per_snapshot": 8,
+    "fixed_steps": [
+      0,
+      25,
+      50,
+      100,
+      200,
+      400,
+      600,
+      800
+    ],
+    "pretermination_offsets": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "source_max_steps": 1000
+  },
+  "source_records": {
+    "jax_experiments/analysis/analyze_regime_polarity_ant_branch_risk_v30.py": {
+      "sha256": "7a81665aee8fece94abb49a894b7f1a31f0b199fb93fe2a038b288b24b89fbe3",
+      "size": 9699
+    },
+    "jax_experiments/analysis/regime_polarity_ant_action_compensation_v29.py": {
+      "sha256": "153351b1ad3a12a4681ec9167e21f293ef9fb1feb4c0cbe2d850c368bedf5c86",
+      "size": 12912
+    },
+    "jax_experiments/analysis/regime_polarity_ant_branch_risk_v30.py": {
+      "sha256": "6e5ee6a5b35ea9cc42b815e0ddb1f442c15502af6f96d7c1413c836ef146f813",
+      "size": 10767
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_action_compensation_audit_v29.py": {
+      "sha256": "a360e56eda1e7c00c2a2d0c2e425ec2b22f30e60f339b54c561577c090ddd9f1",
+      "size": 20804
+    },
+    "jax_experiments/analysis/run_regime_polarity_ant_branch_risk_audit_v30.py": {
+      "sha256": "8ddf3cc45e8fad759a82bdf69ed8e59788d915a24dce7abb4f5d68ef6deb350e",
+      "size": 23838
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_safe_utility_audit_v8.py": {
+      "sha256": "c88b602f9cdac5acb9f7f1a15b5c4f7fc9daddea3d0a56717ada40e8a90d5976",
+      "size": 15605
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_audit_v19.py": {
+      "sha256": "cf8469a22f6a8baff7de7ebd14051907fa72fb1ec5213070f51b3ebbb72b3c07",
+      "size": 10146
+    },
+    "jax_experiments/deployments/regime_polarity_ant_action_compensation_v29/registration.json": {
+      "sha256": "0971f595f7d31584c6b1cfc018fcdc5e763193d39f0dac909dfac01e15fa47dd",
+      "size": 6294
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/results_regime_polarity_ant_action_compensation_analysis_v29/analysis.json": {
+      "sha256": "683f0158b04bf4458141216ec685489fb8bf7cc6a5b752a8b48e4a9aad481485",
+      "size": 4507
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "markdown/GPT_diagnosis.md": {
+      "sha256": "5e76d6fc86a3c47a3abcb7e5f7b7bea9abba4f251c1bec2912ad8ae8c1e8da9f",
+      "size": 26291
+    },
+    "reports/regime_polarity_ant_branch_risk_v30_preregistration_2026-09-12.md": {
+      "sha256": "f342644e07fda88f67904322a6f96b442f3efe0a4478b8ed3dbfa2a44205ddc2",
+      "size": 2085
+    },
+    "scripts/submit_regime_polarity_ant_branch_risk_v30.py": {
+      "sha256": "806e0c239d96debff4c37ec7cd34e52bceda583ef401603297af21ffd03a74af",
+      "size": 8096
+    }
+  },
+  "status": "registered",
+  "sync_policy": "compact JSON audits and aggregate only; simulator states, branch trajectories, checkpoints, and replay buffers remain unsynchronized"
+}

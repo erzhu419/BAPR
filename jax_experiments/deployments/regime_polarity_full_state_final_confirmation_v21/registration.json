@@ -1,0 +1,248 @@
+{
+  "budgets": {
+    "bapr_specialists": {
+      "additional_steps_per_policy": 2800000,
+      "final_updates_per_policy": 525000,
+      "policies": 4
+    },
+    "causal_sac5": {
+      "policies": 5,
+      "steps_per_policy": 5600000,
+      "updates_per_policy": 350000
+    },
+    "robust_source": {
+      "policies": 1,
+      "steps_per_policy": 5600000,
+      "updates_per_policy": 350000
+    },
+    "standard_baselines": {
+      "policies_per_method": 1,
+      "steps_per_policy": 5600000,
+      "updates_per_policy": 350000
+    }
+  },
+  "created_before_training": true,
+  "decision_gate": {
+    "comparators": [
+      "robust_sac",
+      "escp_recurrent",
+      "resac_b0",
+      "sac5_v5_posterior_map"
+    ],
+    "minimum_oracle_headroom": 0.1,
+    "minimum_oracle_recovery": 0.7,
+    "minimum_stationary_retention": 0.95,
+    "no_higher_termination": true,
+    "positive_paired_mean_and_ci95": true,
+    "required_event_wins_of_15": 12,
+    "required_oracle_recovery_seeds": 4,
+    "required_seed_wins_of_5": 4,
+    "required_stationary_retention_seeds": 4
+  },
+  "development_basis": {
+    "selection_arm_execution_deviation_recorded": true,
+    "v20_mean_safe_switching_return": 3182.29160171383,
+    "v20_minimum_stationary_relative_gain": 0.27833017038095687,
+    "v20_registered_candidate_selected": null,
+    "v20_seed_passes": 3,
+    "v20_stationary_mode_passes": 12,
+    "v20_switching_event_wins": 9
+  },
+  "execution_boundary": {
+    "environment_unchanged": true,
+    "fresh_policy_and_event_seeds": true,
+    "frozen_estimator": "v5 executed-action posterior MAP",
+    "frozen_specialist_recipe": "copy actor, critic, target critic, and alpha; reset all Adam states and replay; fixed-mode train to the final 2.8M-step endpoint with actor period 1",
+    "no_checkpoint_selection": true,
+    "v20_best_selection_arms_not_used": true,
+    "v20_registered_result_not_rewritten": true
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      186001,
+      186017,
+      186033
+    ],
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v21-full-state-final-equal-policy-budget-confirmation",
+    "stationary_holdout_event_seeds": [
+      186101,
+      186117,
+      186133
+    ],
+    "switching_event_seeds": [
+      186201,
+      186217,
+      186233
+    ],
+    "switching_schedules": {
+      "186201": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "186217": [
+        2,
+        1,
+        3,
+        0
+      ],
+      "186233": [
+        3,
+        0,
+        2,
+        1
+      ]
+    },
+    "training_seeds": [
+      84003,
+      84021,
+      84039,
+      84057,
+      84079
+    ]
+  },
+  "schema": "bapr.full-state-final-confirmation-registration.v21",
+  "source_records": {
+    "jax_experiments/algos/escp.py": {
+      "sha256": "3fd49e3fe1680b01db474698133bd378f97c1d64e6297001b77c64985c0523c7",
+      "size": 38868
+    },
+    "jax_experiments/algos/resac.py": {
+      "sha256": "bc7ca0cc587ce2193043b237888fba610db96838e26d505dded93aa5c267fcea",
+      "size": 16247
+    },
+    "jax_experiments/algos/sac_base.py": {
+      "sha256": "4bbdd0874454ca7a09b3b28fd798aa2f5f8256a4fd005b889364385bbd7b354e",
+      "size": 7835
+    },
+    "jax_experiments/algos/sac_policy_stability.py": {
+      "sha256": "ab2d66f1899b33d3c78fb3a46e319333efe6075c1f7eb7d40cb8c89b24a81af4",
+      "size": 14010
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_full_state_confirmation_v21.py": {
+      "sha256": "0b5a75c3d4fffde4221094ba98b4d4c542fb437a860923d9a1105f1f213bffba",
+      "size": 2379
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_v5_final_comparison_v18.py": {
+      "sha256": "ddbb8a628a8cdcc0635b8d27f9255a148c1574426baebc35e6cd29122f9e7448",
+      "size": 11504
+    },
+    "jax_experiments/analysis/regime_polarity_full_state_final_confirmation_v21.py": {
+      "sha256": "a923cc79848eab2e4406ce24b98743fee2d876573602273162afb4c68b1e7814",
+      "size": 24089
+    },
+    "jax_experiments/analysis/regime_polarity_full_state_specialist_v21.py": {
+      "sha256": "2cd273b75d167a476f76fb8de79cc267ef01ec5120924326458db9b51c848e96",
+      "size": 4191
+    },
+    "jax_experiments/analysis/run_regime_polarity_full_state_confirmation_audit_v21.py": {
+      "sha256": "e6300d42971f9ca9ad2ecbceb32635a53364c38a391e5f20228daa2f70128a30",
+      "size": 2085
+    },
+    "jax_experiments/analysis/run_regime_polarity_full_state_confirmation_baseline_v21.py": {
+      "sha256": "e69a031bc0c74fdf256b9b66573b8a78e85347a39b1a20a54f031102ec90ca86",
+      "size": 1819
+    },
+    "jax_experiments/analysis/run_regime_polarity_full_state_specialist_v21.py": {
+      "sha256": "86bc6d2946bdcb66e700de40ecbcfdfb1c5a6536a83f76c12e0f97bc9896a309",
+      "size": 2203
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v19.py": {
+      "sha256": "c7b718c1c6b7f525bc94d539bef2fc9286e17188a55d7cc8c9f2ad7a72945481",
+      "size": 7074
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v21.py": {
+      "sha256": "5652b4758911feca225f62b44ec07b954141bd222a532fb2b44c2ddbdca133c1",
+      "size": 1286
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "dd8e55eab65bb276b3df7ec5d2ec005ac559cd576a32b7022b5d0276232ab56e",
+      "size": 19338
+    },
+    "jax_experiments/analysis/run_regime_polarity_v5_final_baseline_v18.py": {
+      "sha256": "9ad47401cbd2046ee370881fa3b1eaa8febc2be8c78faf8a292f5f4a2e6f08b4",
+      "size": 17264
+    },
+    "jax_experiments/analysis/run_regime_polarity_v5_final_comparison_audit_v18.py": {
+      "sha256": "d7ca298a089c69c9199c399553aff281317118a8062b6dec6d04649df8853cf7",
+      "size": 39072
+    },
+    "jax_experiments/analysis/train_regime_polarity_sac_policy_stability_v20.py": {
+      "sha256": "458001c562b300eed087431afaf94099ebc5f3038e3cf5c6f6172f469614a6b5",
+      "size": 1096
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/deployments/regime_polarity_specialist_policy_stability_v20/registration.json": {
+      "sha256": "6028c8597d603cd6554bce5c7ec8c4a2920edf3b19af1c01aee860c357ab4c83",
+      "size": 6225
+    },
+    "jax_experiments/deployments/regime_polarity_v5_final_comparison_v18/registration.json": {
+      "sha256": "9a44ea37b44cc8088956ecc2fa16364edd9084347492bdfe1bb8de9b04832240",
+      "size": 10057
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/inverse_params.npz": {
+      "sha256": "3300e2b4edf3684a8ced9d8666f679cdd3777ec621986e513c29f9525c758b13",
+      "size": 2713311
+    },
+    "jax_experiments/results_regime_polarity_specialist_expected_action_model_v5/model_manifest.json": {
+      "sha256": "327ab84f249f2af7af61e826b1f744afa285ee654e0e990fa88923dfe94243fb",
+      "size": 111777
+    },
+    "jax_experiments/results_regime_polarity_specialist_policy_stability_analysis_v20/analysis.json": {
+      "sha256": "cab6824f3807fdf3ec50a2226eb198dfc18f126b42590621ad681a7f59df334d",
+      "size": 35173
+    },
+    "jax_experiments/results_regime_polarity_specialist_policy_stability_analysis_v20/analysis.md": {
+      "sha256": "527917eff3ccb9f6f92b9b8c217f5c15bcd29f965533f88d13510b8906ff6450",
+      "size": 1548
+    },
+    "jax_experiments/results_regime_polarity_v5_final_comparison_analysis_v18/analysis.json": {
+      "sha256": "c850c847639b11374cf75e640898b148b0e8caa6e0b99b11d82584403badbe53",
+      "size": 27566
+    },
+    "jax_experiments/results_regime_polarity_v5_final_comparison_analysis_v18/analysis.md": {
+      "sha256": "61efcbe4721b04efcc7e7aae5b71d5bac217c42fab12aa08a820ffe97d8f8fae",
+      "size": 1297
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_polarity_full_state_final_confirmation_v21_preregistration_2026-09-09.md": {
+      "sha256": "9199f241ed002655b7fd7658acbd66acec14162fa14a645194dc303cd84787d6",
+      "size": 4311
+    },
+    "reports/regime_polarity_specialist_policy_stability_v20_2026-09-08.md": {
+      "sha256": "527917eff3ccb9f6f92b9b8c217f5c15bcd29f965533f88d13510b8906ff6450",
+      "size": 1548
+    },
+    "reports/regime_polarity_specialist_policy_stability_v20_diagnostic_2026-09-09.md": {
+      "sha256": "97ad189501300109006cbf11ecb79ad5243bae95e2e55dbc9651f7c7b3b89ed3",
+      "size": 3277
+    },
+    "reports/regime_polarity_v5_final_comparison_v18_2026-09-01.md": {
+      "sha256": "61efcbe4721b04efcc7e7aae5b71d5bac217c42fab12aa08a820ffe97d8f8fae",
+      "size": 1297
+    },
+    "scripts/submit_regime_polarity_full_state_confirmation_v21.py": {
+      "sha256": "04c33ba62897cbc54977e1dc30c4154eef23c360f4d9f22a048ee0540a9e5c9f",
+      "size": 16976
+    }
+  },
+  "status": "registered",
+  "sync_policy": "compact policy/controller parameters, protocol signatures, JSON provenance, and audit results only; never sync replay buffers or full checkpoints"
+}

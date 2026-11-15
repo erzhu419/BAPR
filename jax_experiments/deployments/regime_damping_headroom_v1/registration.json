@@ -1,0 +1,127 @@
+{
+  "identity": {
+    "audit_event_seeds": [
+      132011,
+      132117,
+      132233
+    ],
+    "environment_design_frozen_before_training": true,
+    "envs": [
+      "HalfCheetah-v2",
+      "Ant-v2",
+      "Hopper-v2",
+      "Walker2d-v2"
+    ],
+    "family": "joint_damping_fault",
+    "protocol_version": "v1-untouched-persistent-damping-headroom",
+    "roles": [
+      "robust",
+      "oracle"
+    ],
+    "training_seeds": [
+      32011,
+      32117,
+      32233
+    ]
+  },
+  "schema": "bapr.regime-damping-headroom-registration.v1",
+  "source_records": {
+    "jax_experiments/algos/regime_sac.py": {
+      "sha256": "5bd625594f72e3b887a1340fb9ce97db2b38f04627c9fe993ddfb11c7e3bed3e",
+      "size": 17881
+    },
+    "jax_experiments/analysis/analyze_regime_control_headroom.py": {
+      "sha256": "c38a6e989ca91311d1d83894ac299d68064f7715966d235a615926cc300b30d8",
+      "size": 13321
+    },
+    "jax_experiments/analysis/analyze_regime_damping_headroom.py": {
+      "sha256": "347aac1286732c050be329357b19facf90ddbbf36aad6a9a14d5e29188ab6086",
+      "size": 930
+    },
+    "jax_experiments/analysis/final_task_sweep.py": {
+      "sha256": "e0c886c1530c01e3a7b8ae6105d1327ea7ec0fe7596c135c0bf390792de3b24d",
+      "size": 39594
+    },
+    "jax_experiments/analysis/final_task_sweep_regime_damping.py": {
+      "sha256": "fbc5dac9ef508c6c3cc248ea62b7470ba34d0d05ca497ed817ae4be339805ee5",
+      "size": 410
+    },
+    "jax_experiments/analysis/regime_control_headroom.py": {
+      "sha256": "4e61df281c6be0bef10074c1d12599b2baeacfc4fbf159ad044d0c4d0fba83f9",
+      "size": 6127
+    },
+    "jax_experiments/analysis/regime_damping_headroom.py": {
+      "sha256": "d45e805603b51c42e4c345ab4aaf72aef48a04626841d5645832f26964ca23b3",
+      "size": 8756
+    },
+    "jax_experiments/analysis/run_regime_control_headroom_audit.py": {
+      "sha256": "a6f70eb53c237f4ade8f4657a49f1429135e92019c94309b7bd4082b75f17dea",
+      "size": 9511
+    },
+    "jax_experiments/analysis/run_regime_control_headroom_controller.py": {
+      "sha256": "b344ec56576a5ca53a653bcf30e5e3e95c01cd9cd753d65c6552660d4c6916a8",
+      "size": 7883
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_audit.py": {
+      "sha256": "7ece3b0e967a28a8ae7ef0f2e5347658e269b5d5e4e351808fcdf2b6ddd6d6b4",
+      "size": 1594
+    },
+    "jax_experiments/analysis/run_regime_damping_headroom_controller.py": {
+      "sha256": "47248be9a84865fe9a048bfb805a22b1e2286d69cb349305ec9428ab16bfe40f",
+      "size": 1363
+    },
+    "jax_experiments/analysis/train_regime_damping_headroom_entry.py": {
+      "sha256": "5b5e04dc5f041b8b254177261de5a15960f7c569e85ed3b9119c74ba14a15705",
+      "size": 349
+    },
+    "jax_experiments/common/checkpoint.py": {
+      "sha256": "6dafac19592482d994360e644203de02bdbdcf0c2d725b5efa8166cb8ea4c5de",
+      "size": 24981
+    },
+    "jax_experiments/common/logging.py": {
+      "sha256": "cabca30405ea73456de25ccfbbb29b20d11fb0c71ab63f06fbc24709d7630d3b",
+      "size": 2051
+    },
+    "jax_experiments/common/replay_buffer.py": {
+      "sha256": "b8f86ac4ed013797d681e5b070222004fd319fd63e06604cf33ffbe374cc97e2",
+      "size": 17329
+    },
+    "jax_experiments/configs/default.py": {
+      "sha256": "4ddbe406e95ce1be008b231296f1d9fda93b54f98bd65acb44264d30a33b72b7",
+      "size": 27848
+    },
+    "jax_experiments/envs/brax_env.py": {
+      "sha256": "b39a5997b18b3394210e9eae6e2fe420d7efffc942e1be8e8ed35b218d93b9fb",
+      "size": 53280
+    },
+    "jax_experiments/envs/persistent_damping_mode_env.py": {
+      "sha256": "7e11bb63cd5c14f95cd458c7cbc0298a3e1a45b858123bb3d6e9a4bb50a84202",
+      "size": 6073
+    },
+    "jax_experiments/envs/stochastic_mode_env.py": {
+      "sha256": "770b39b8725cb4a7cf82e6a975b954c79c6dc66e88c5015b9063455e3e5e0af1",
+      "size": 15716
+    },
+    "jax_experiments/networks/ensemble_critic.py": {
+      "sha256": "57cf94dc38b9d54ff99cc64669101635622fe2ea5834ece596c939cbf2f290ee",
+      "size": 3638
+    },
+    "jax_experiments/networks/policy.py": {
+      "sha256": "33a7d5de27a4e8ca78aa6658cbcc5b543398b742f953028d1210153eee7b72e0",
+      "size": 2439
+    },
+    "jax_experiments/train.py": {
+      "sha256": "ab25e289519de0d030c0edc5895c11174ad26ecf339bc797d5126f3ccdc5567e",
+      "size": 151443
+    },
+    "reports/regime_damping_headroom_protocol_2026-08-09.md": {
+      "sha256": "65a72369385c55250d4f647ed357823033204f71ae8b5e83213566bf738f2182",
+      "size": 2005
+    },
+    "scripts/submit_regime_damping_headroom.py": {
+      "sha256": "fe5263fe40de844a13858268073a9e7efd699f4f91e77e36f31a307979ed7d89",
+      "size": 12214
+    }
+  },
+  "status": "frozen"
+}

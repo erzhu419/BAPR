@@ -1,0 +1,174 @@
+{
+  "created_before_training": true,
+  "development_gate": {
+    "paired_against_full_state_final": {
+      "do_not_reduce_total_holdout_mode_passes": true,
+      "minimum_stationary_return_retention": 0.95,
+      "require_better_worst_seed_safe_gain": true,
+      "require_positive_mean_switching_delta": true,
+      "required_event_wins_of_9": 6,
+      "required_seed_wins_of_3": 2
+    },
+    "robust_relative_cell": {
+      "minimum_holdout_mode_gain": 0.05,
+      "minimum_holdout_mode_wins": 3,
+      "minimum_safe_switching_gain": 0.1,
+      "require_zero_termination": true,
+      "required_cell_passes": 3
+    },
+    "selection": "highest mean safe switching return among passing candidates; prefer full_state_best when within 2 percent"
+  },
+  "frozen_boundary": {
+    "all_specialists_copy_full_controller_state": true,
+    "development_question": "whether validation checkpoint selection and a lower actor update frequency prevent post-fork policy erosion",
+    "environment_posterior_router_unchanged": true,
+    "v18_and_v19_holdouts_untouched": true
+  },
+  "identity": {
+    "calibration_event_seeds": [
+      185001,
+      185017,
+      185033
+    ],
+    "modes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "protocol_version": "v20-full-state-policy-stability-development",
+    "stationary_holdout_event_seeds": [
+      185101,
+      185117,
+      185133
+    ],
+    "switching_event_seeds": [
+      185201,
+      185217,
+      185233
+    ],
+    "switching_schedules": {
+      "185201": [
+        1,
+        0,
+        3,
+        2
+      ],
+      "185217": [
+        2,
+        3,
+        1,
+        0
+      ],
+      "185233": [
+        3,
+        2,
+        0,
+        1
+      ]
+    },
+    "training_seeds": [
+      83003,
+      83021,
+      83039
+    ],
+    "variants": [
+      "full_state_final",
+      "full_state_best",
+      "period2_best"
+    ]
+  },
+  "schema": "bapr.specialist-policy-stability-registration.v20",
+  "source_records": {
+    "jax_experiments/algos/sac_policy_stability.py": {
+      "sha256": "ab2d66f1899b33d3c78fb3a46e319333efe6075c1f7eb7d40cb8c89b24a81af4",
+      "size": 14010
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "4b574dfcf263b09bbdfe40370cfb7c0dfe8284266b7257acb7c78ebc15975684",
+      "size": 5258
+    },
+    "jax_experiments/analysis/analyze_regime_polarity_specialist_stability_v19.py": {
+      "sha256": "9154981489b4f572250772cc6214c23a60910ed092f9df612dbdfd5e963a36c4",
+      "size": 13077
+    },
+    "jax_experiments/analysis/regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "5827b0414aab30df495da92aa3d01cb394a5d9d0c8de016366675e0598e25262",
+      "size": 17128
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v19.py": {
+      "sha256": "c7b718c1c6b7f525bc94d539bef2fc9286e17188a55d7cc8c9f2ad7a72945481",
+      "size": 7074
+    },
+    "jax_experiments/analysis/run_regime_polarity_robust_source_v20.py": {
+      "sha256": "4cd3c63e9bf6e5f66d05c391ff70362a2a063913269bfb5d1c965fb380ea51c1",
+      "size": 1290
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_policy_stability_audit_v20.py": {
+      "sha256": "cc4186ac05b71e3149f0482494d25bbbe0d14c552f54ece9d210dd8fcc51a297",
+      "size": 1119
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "dd8e55eab65bb276b3df7ec5d2ec005ac559cd576a32b7022b5d0276232ab56e",
+      "size": 19338
+    },
+    "jax_experiments/analysis/run_regime_polarity_specialist_stability_audit_v19.py": {
+      "sha256": "cf8469a22f6a8baff7de7ebd14051907fa72fb1ec5213070f51b3ebbb72b3c07",
+      "size": 10146
+    },
+    "jax_experiments/analysis/train_regime_polarity_sac_policy_stability_v20.py": {
+      "sha256": "458001c562b300eed087431afaf94099ebc5f3038e3cf5c6f6172f469614a6b5",
+      "size": 1096
+    },
+    "jax_experiments/deployments/regime_polarity_specialist_stability_v19/registration.json": {
+      "sha256": "886cf66576175ade7bf50f4e8f9bb6d539f0cbbe5174012aa4d5eb2f5a2c3bd7",
+      "size": 7078
+    },
+    "jax_experiments/results_regime_polarity_specialist_stability_analysis_v19/analysis.json": {
+      "sha256": "2f3b74eed5b0f1a397f386ba3d9ed182d14c69bef330b84a6bf93fd388a971c4",
+      "size": 35147
+    },
+    "jax_experiments/results_regime_polarity_specialist_stability_analysis_v19/analysis.md": {
+      "sha256": "173b32057fdb0ab67c56c6167793028e4fcfa66787c684ff14f7b240ad29be3e",
+      "size": 1557
+    },
+    "reports/regime_polarity_specialist_policy_stability_v20_preregistration_2026-09-08.md": {
+      "sha256": "30fc23c80d42a7d60adb2a18f84bf1f10903bd74f462f2df890051555985f1e3",
+      "size": 2932
+    },
+    "reports/regime_polarity_specialist_stability_v19_2026-09-07.md": {
+      "sha256": "173b32057fdb0ab67c56c6167793028e4fcfa66787c684ff14f7b240ad29be3e",
+      "size": 1557
+    },
+    "reports/regime_polarity_specialist_stability_v19_diagnostic_2026-09-08.md": {
+      "sha256": "f918b3718e211618a1bb23984a7ba0600e8dcd549b4ac0a8c1f60ebda78d60c8",
+      "size": 2258
+    },
+    "scripts/submit_regime_polarity_specialist_policy_stability_v20.py": {
+      "sha256": "b9fe5ba83933a709cf014bc1cab9790c02de9acb3550cf5dc11d19152db6b8b0",
+      "size": 13523
+    }
+  },
+  "status": "registered",
+  "sync_policy": "JSON, protocol signature, policy parameters, selection record, and compact source controller state only; never sync replay or full checkpoints",
+  "training": {
+    "common": "copy actor, critic, target critic, and alpha; reset Adam states and replay",
+    "robust_source_steps": 5600000,
+    "specialist_finetune_steps": 2800000,
+    "validation": "fixed-mode trainer evaluation stream with seed offset 1000; never reused for utility calibration or holdout reporting",
+    "variants": {
+      "full_state_best": {
+        "actor_update_period": 1,
+        "policy_selection": "best independent training-validation evaluation"
+      },
+      "full_state_final": {
+        "actor_update_period": 1,
+        "policy_selection": "final"
+      },
+      "period2_best": {
+        "actor_update_period": 2,
+        "policy_selection": "best independent training-validation evaluation"
+      }
+    }
+  }
+}
