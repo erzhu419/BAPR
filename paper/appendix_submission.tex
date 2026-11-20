@@ -66,13 +66,25 @@ For any $g\in\{-1,+1\}^d$, $\phi_i(g_i)\le \max_{s\in\{-1,+1\}}\phi_i(s)=\phi_i(
 \subsection{Causal Execution and Mode Distinguishability}
 \label{app:causal_identification}
 
-Before selecting $a_t$, the pre-action $\sigma$-algebra available to the agent is $\mathcal{H}_t=\sigma(s_0,(a_\tau,r_\tau,s_{\tau+1})_{\tau=0}^{t-1})$. Because $\pi_r$, $\{f_j\}_{j=1}^K$, emission scoring, and both filter updates~\eqref{eq:posterior}--\eqref{eq:factored_filter} are deterministic Borel-measurable maps, $(b_t,s_t)$ determines $\hat z_t$ and $a_t$ prior to step-$t$ execution, while $(s_t,a_t,s_{t+1})$ updates $b_{t+1}$ only afterward; induction confirms $\mathcal{H}_t$-measurability of $a_t$. Conversely, if two modes $z\ne z'$ satisfy $\clip(\gain_z a_t,-1,1)=\clip(\gain_{z'} a_t,-1,1)$ along all reachable histories under a mode-blind $\mathcal{H}_t$-measurable policy, they induce identical trajectory laws $P_z=P_{z'}$, capping equal-prior binary classification accuracy at $1/2$.
+Before selecting $a_t$, the pre-action $\sigma$-algebra available to the agent is $\mathcal{H}_t=\sigma(s_0,(a_\tau,r_\tau,s_{\tau+1})_{\tau=0}^{t-1})$. Because $\pi_r$, $\{f_j\}_{j=1}^K$, emission scoring, and both filter updates~\eqref{eq:posterior}--\eqref{eq:factored_filter} are deterministic Borel-measurable maps, $(b_t,s_t)$ determines $\hat z_t$ and $a_t$ prior to step-$t$ execution, while $(s_t,a_t,s_{t+1})$ updates $b_{t+1}$ only afterward; induction confirms $\mathcal{H}_t$-measurability of $a_t$. Conversely, if two modes $z\ne z'$ satisfy $\gain_z a_t=\gain_{z'} a_t$ along all reachable histories under a mode-blind $\mathcal{H}_t$-measurable policy, shared initial states and noise give identical executed actions after clipping and hence identical trajectory laws $P_z=P_{z'}$. Under equal priors this caps binary classification accuracy at $1/2$.
 
 \subsection{Generalized Return Decomposition, Filter Recovery, and Lean 4 Formalization}
 \label{app:return_proof}
 
 \begin{proofof}{Theorem~\ref{thm:return_gap}}
-Linearity of expectation under integrable finite-horizon returns gives $J_C-J_{\mathrm{ref}}=(J_P-J_{\mathrm{ref}})+(J_C-J_P)$. Define projected-oracle values backward from $V_H^P(x)=0$ via $Q_t^P(x,v)=\mathbb{E}[r_t+V_{t+1}^P(x_{t+1})\mid x_t=x,\,u_t=\clip(v+\varepsilon_t,-1,1)]$ and $V_t^P(x)=Q_t^P(x,v_t^P(x))$. Because $P$ depends only on physical state $x_t$, conditioning step $t$ of causal rollout $C$ on $(x_t,b_t)$ gives $\mathbb{E}_C[Q_t^P(x_t,v_t^C)-V_t^P(x_t)]=\mathbb{E}_C[r_t+V_{t+1}^P(x_{t+1})-V_t^P(x_t)]$. Summing over $t=0,\ldots,H-1$ telescopes $\sum_{t=0}^{H-1}\mathbb{E}_C[V_{t+1}^P(x_{t+1})-V_t^P(x_t)]=-\mathbb{E}[V_0^P(x_0)]=-J_P$~\citep{Kakade2002PDL}, yielding Eq.~\eqref{eq:causal_return_identity}. When $\gain_{z_t}$ is box-preserving, Proposition~\ref{prop:equivalence} gives $J_P=J_O=J_{\mathrm{ref}}$, and substituting $|Q_t^O(x_t,v_t^C)-Q_t^O(x_t,v_t^O)|\le L_t^{\mathrm{loc}}(x_t)\|v_t^C-v_t^O\|_2$ together with Proposition~\ref{prop:mode_error} yields Eq.~\eqref{eq:causal_return_bound}.
+Let $\mu_t$ be the law of the fresh disturbances $(\varepsilon,\xi)$ at step $t$, with $\varepsilon$ denoting actuator noise and $\xi$ the remaining exogenous randomness. Write $u(v,\varepsilon)=\clip(v+\varepsilon,-1,1)$ and let $R_t(x,u,\xi)$ and $F_t(x,u,\xi)$ be the common reward and next-state maps. The absorbing state has zero reward and transitions to itself. Starting with $V_H^P=0$, define
+\begin{align*}
+ Q_t^P(x,v) &= \int \bigl[R_t(x,u(v,\varepsilon),\xi)
+    + V_{t+1}^P(F_t(x,u(v,\varepsilon),\xi))\bigr]\,d\mu_t(\varepsilon,\xi),\\
+ V_t^P(x) &= Q_t^P(x,v_t^P(x)).
+\end{align*}
+Here $v$ is fixed before integrating, not selected by conditioning on an executed action. On a causal rollout, $x_t$ and $v_t^C$ are measurable with respect to the full pre-action history (including the physical state). By freshness of the noise and the stated integrability, the conditional expectation of $r_t+V_{t+1}^P(x_{t+1})$ given that history is $Q_t^P(x_t,v_t^C)$. Thus
+\begin{align*}
+ \sum_{t=0}^{H-1}\mathbb{E}_C[Q_t^P(x_t,v_t^C)-Q_t^P(x_t,v_t^P)]
+ &= \sum_{t=0}^{H-1}\mathbb{E}_C[r_t+V_{t+1}^P(x_{t+1})-V_t^P(x_t)]\\
+ &= J_C-\mathbb{E}_C[V_0^P(x_0)] = J_C-J_P.
+\end{align*}
+The last equality uses the common initial-state law and the Bellman recursion along $P$~\citep{Kakade2002PDL}. Adding $J_P-J_{\mathrm{ref}}$ gives Eq.~\eqref{eq:causal_return_identity}. When $\gain_{z_t}$ is box-preserving, Proposition~\ref{prop:equivalence} gives $J_P=J_O=J_{\mathrm{ref}}$. For polarities, taking absolute values, applying the assumed local sensitivity, and using Proposition~\ref{prop:mode_error} gives Eq.~\eqref{eq:causal_return_bound}.
 \end{proofof}
 
 \begin{proofof}{Theorem~\ref{thm:filter_recovery}}
@@ -248,7 +260,7 @@ Source RE-SAC, no shift ($\texttt{weight\_reg}=0$) & 2010.1 & $+1622.5$ & $[615.
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:source_trainer_comparison} isolates why the full arm degraded ($-195.5$) while removing only $\texttt{weight\_reg}$ restored SAC-level return ($2010.1$). In the original RE-SAC formulation developed for strictly negative-reward bus headway control~\citep{Zhang2026RESAC}, adding $+\texttt{weight\_reg}\cdot\|\theta_{\mathrm{target}}\|_1$ directly to the Bellman target acts as a conservative penalty because shrinking network weights pulls negative Q-estimates upward toward zero while pessimistic $\beta<0$ pulls them downward. On positive-reward HalfCheetah locomotion, however, adding a positive $\ell_1$ target-norm bonus inflates Bellman targets, encouraging larger critic weights and positive-feedback Q-value runaway (reaching mean Q-prediction 9735.2 with inter-head SD 134.1 on seed 109003, versus 141.0 and 0.9 with $\texttt{weight\_reg}=0$). BAPR exceeded the stabilized no-shift native trainer by $+1622.5$ across all five seeds.
+In this HalfCheetah transfer, dropping the configured norm shift from the critic target and actor objective raised the mean switching return from $-195.5$ to $2010.1$ (Table~\ref{tab:source_trainer_comparison}). On seed 109003 the full arm recorded mean Q-prediction 9735.2 with inter-head SD 134.1, versus 141.0 and 0.9 without the shift. The ablation measures the effect of dropping this term in the tested configuration; it does not isolate reward sign or re-evaluate the original bus result~\citep{Zhang2026RESAC}. BAPR exceeded the no-shift native trainer by $+1622.5$ on average, winning all five paired seeds.
 
 \section{Independent Information-Matched Reacher Protocol}
 \label{app:reacher_protocol}
@@ -314,6 +326,8 @@ Each learner collects 500,000 transitions across eight vectorized environments w
     \item \textbf{RMA adaptation~\citep{Kumar2021RMA}:} uses a SAC base learner and GRU adapter. It allocates 400k steps to Phase~1 (jointly training the \texttt{[256, 256]} base policy, twin critics, and privileged gain-vector encoder $E(\operatorname{diag}(\gain_{z_t}))\in\mathbb{R}^8$) and 100k steps to Phase~2 (training the online 16-step history adapter $\hat e_t=A(h_t)\in\mathbb{R}^8$ via MSE regression to $E(\operatorname{diag}(\gain_{z_t}))$ under on-policy adapter rollouts), totaling exactly 500k steps.
     \item \textbf{Belief-conditioned SAC:} collects 500k multimode transitions and conditions actor and critic on $[s_t,b_t]$. The frozen inverse ensemble and filter $(0.002,1,0.98)$ are shared with the paired BAPR run. The estimator was fitted on that run's additional 500k reference transitions, reused by both routes. This controls the supplied estimator, while training curricula and access to the analytic action map differ.
 \end{itemize}
+
+The RMA and ESCP-256 adaptations use the current transition's mode context in the next-state target critic, including at dwell boundaries. RMA Phase~1 also uses that context for the next-action sample, while ESCP-256 uses the next history for its actor. These critic targets approximate continuation within a dwell rather than explicitly incorporating the next regime at a switch.
 
 The sign-product decoder scores the entire Boolean action-sign space even when the evaluation environment uses four modes. Its independent binary priors and per-channel mixture evidence differ from those of the four-mode joint filter. In particular, the initial tie can select a sign vector outside the environment's four-mode set.
 

@@ -17,13 +17,42 @@ This package contains the 10-seed frozen-policy evaluation (`seeds/seed_*.json` 
 3. **`0.5x` Gain Attenuation**:
    - Weighted box projection $\Pi_{[-1,1]^d}^W(G_{\hat z_t}^{-1} G_r a_t^{\mathrm{ref}})$ reaches `2334.9` vs. `482.9` uncompensated (`+1852.0`, `[1639.2, 2064.8]`, `10/10` wins) and tracks `95.8%` of the lossy projected true-mode oracle (`2437.4`; unattenuated reference `3416.3`; exact saturation infeasibility energy `240.605`).
 
-## Episode Diagnostics and Matched Filter Settings
+## Frozen-Model Replay
 
-Re-evaluate a frozen seed with
-`python -m jax_experiments.analysis.run_jmlr_brax_mechanism_v50 seed --seed 88003 --episode-dir OUTPUT`.
-The replay uses the pinned versions above on CUDA and does not replace the
-original seed audit. It exports episode schedule, steps, reward, per-switch
-errors and delays, the joint filter's probability-floor count, and the
+The results supplement suffices to recompute reported aggregates, but not to
+run new rollouts. From the checkout root, create a separate Python 3.11
+environment and retrieve one frozen actor plus the shared inverse from the
+[archived public source snapshot](https://github.com/erzhu419/BAPR/tree/40b320db9dc68b9ac2d68af31deb6095060eb3fb/reproducibility/v32):
+
+```sh
+python3.11 -m venv .venv-brax
+. .venv-brax/bin/activate
+python -m pip install -r reproducibility/jmlr_brax_mechanism_v50/requirements-replay.txt
+
+seed=88003
+snapshot=https://raw.githubusercontent.com/erzhu419/BAPR/40b320db9dc68b9ac2d68af31deb6095060eb3fb
+base=reproducibility/v32
+actor=reference_policies/seed_${seed}/mode_0/policy/policy_params.pkl
+for input in estimator/model_manifest.json estimator/inverse_params.npz "$actor"; do
+    mkdir -p "$(dirname "$base/$input")"
+    curl -fLsS "$snapshot/$base/$input" -o "$base/$input" || exit 1
+done
+
+output=$(mktemp -d)
+JAX_PLATFORMS=cpu python -m jax_experiments.analysis.run_jmlr_brax_mechanism_v50 smoke \
+    --seed "$seed" --episode-dir "$output"
+```
+
+These are inference parameters and metadata, about 3.1 MB for the first
+seed, not training checkpoints. The estimator files are shared across seeds.
+Use `seed` instead of `smoke` for full-length evaluation. The
+`--episode-dir` argument writes a separate diagnostic JSON rather than
+returning or replacing the original seed summary. This CPU replay checks
+execution; the original seed audits used CUDA, and individual trajectories
+can differ across devices.
+
+The replay exports episode schedule, steps, reward, per-switch errors and
+delays, the joint filter's probability-floor count, and the
 matched-hazard and evidence-scale variants on the 64-mode hypercube.
 For the four-mode audit, the first eight completed transitions after a
 switch are used to check the sufficient excitation and prediction-error

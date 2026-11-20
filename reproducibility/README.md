@@ -2,9 +2,12 @@
 
 The code and manuscript are on the `codex/code-paper` branch. Download the
 [versioned results supplement](https://github.com/erzhu419/BAPR/raw/refs/tags/jmlr-results-v2/BAPR_JMLR_results.zip)
-to the checkout root. Extract it without overwriting the checkout's
-instructions. The following commands use Python 3.11 and the verified
-audit dependencies:
+to the checkout root.
+
+## Recompute published statistics
+
+Extract the supplement without overwriting files in the checkout. The
+following commands use Python 3.11 and do not require a simulator or weights:
 
 ```sh
 unzip -nq BAPR_JMLR_results.zip
@@ -32,8 +35,13 @@ and gain-mismatch experiments. No full state/action trajectories are
 included. The episode checker recomputes the matched Walker2d switch
 counts and paired gain-oracle intervals from these records.
 
-To rerun an experiment, follow the corresponding protocol and runtime
-instructions. See [V50](jmlr_brax_mechanism_v50/README.md) and
-[V51](jmlr_mujoco_v51/README.md). Model weights, replay buffers and checkpoints
-are not included. To check the formal results, run `lake build` from
-`reproducibility/lean`.
+## Run fresh rollouts
+
+The supplement contains no model weights, replay buffers, or training
+checkpoints. The [Brax replay guide](jmlr_brax_mechanism_v50/README.md)
+identifies the three previously published frozen inputs needed to run one
+seed. The [MuJoCo suite guide](jmlr_mujoco_v51/README.md) explains how to train
+the required bundles and evaluate them separately from the published audits.
+Each simulator uses its own Python environment.
+
+To check the formal results, run `lake build` from `reproducibility/lean`.

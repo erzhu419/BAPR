@@ -1,4 +1,4 @@
-\begin{thebibliography}{27}
+\begin{thebibliography}{28}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -25,6 +25,15 @@ Finale Doshi-Velez and George Konidaris.
   regression approach for discovering latent task parametrizations.
 \newblock In \emph{Proceedings of the Twenty-Fifth International Joint
   Conference on Artificial Intelligence (IJCAI)}, pages 1432--1440, 2016.
+
+\bibitem[Freeman et~al.(2021)Freeman, Frey, Raichuk, Girgin, Mordatch, and
+  Bachem]{Freeman2021Brax}
+C.~Daniel Freeman, Erik Frey, Anton Raichuk, Sertan Girgin, Igor Mordatch, and
+  Olivier Bachem.
+\newblock {Brax}: A differentiable physics engine for large scale rigid body
+  simulation.
+\newblock \emph{arXiv preprint arXiv:2106.13281}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2106.13281}.
 
 \bibitem[Haarnoja et~al.(2018)Haarnoja, Zhou, Abbeel, and
   Levine]{Haarnoja2018SAC}

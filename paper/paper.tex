@@ -64,7 +64,7 @@ BAPR separates mode inference from control. It trains one canonical policy in fi
 
 Our specific contribution is to combine transition-only inverse identification with analytic action compensation for hidden, recurring actuator maps. The estimator learns to predict nominal actuation, not a mode label. Since a known candidate map converts a command to a candidate physical signal, an inverse model fitted only on reference-mode data can also score maps absent from calibration, provided it transfers to the evaluation states and commands supply enough excitation. We test reference-only calibration in MuJoCo. The Brax Reacher polarity and signed-permutation studies instead use separate calibration rollouts through all four modes and test compensation with a shared estimator.
 
-We compare compensation with a policy that receives the same belief, using MuJoCo HalfCheetah and Brax Reacher as the main positive cases. That comparison evaluates full training and deployment pipelines. A complementary frozen-policy study changes only the belief-to-command rule and measures when posterior averaging helps or hurts. We also test gain mismatch, report failures on legged tasks, and distinguish exact signal-level statements from conditional closed-loop recovery and return bounds.
+We compare compensation with a belief-conditioned policy, using MuJoCo HalfCheetah and Brax Reacher~\citep{Freeman2021Brax} as the main positive cases. Both routes use the same frozen inverse estimator and filter rule on their own trajectories, so their computed beliefs can differ. This comparison evaluates full training and deployment pipelines. A complementary frozen-policy study changes only the belief-to-command rule and measures when posterior averaging helps or hurts. We also test gain mismatch, report failures on legged tasks, and distinguish exact signal-level statements from conditional closed-loop recovery and return bounds.
 
 \section{Related Work}
 
@@ -241,13 +241,17 @@ For any coordinate-additive channel score $\Phi(g)=\sum_{i=1}^d \phi_i(g_i)$ ove
 \end{proposition}
 
 \begin{algorithm}[t]
-\caption{BAPR deployment (joint $O(M)$ or channel-factored $O(d)$)}
+\caption{BAPR deployment with joint or channel-factored filtering}
 \label{alg:bapr}
 \begin{algorithmic}[1]
 \STATE Initialize uniform belief ($b_0(z)=1/M$ or $p_{0,i}=1/2$ for $i=1,\ldots,d$) and observe $s_0$
 \FOR{$t=0,1,\ldots$}
-    \STATE Select $\gain_{\hat z_t}$ via $\hat z_t\leftarrow\arg\max_z b_t(z)$ (joint) or $\operatorname{diag}(\operatorname{sign}(p_t-\tfrac12))$ (factored)
-    \STATE $a_t\leftarrow\clip\!\left(\gain_{\hat z_t}^{-1}\gain_r\pi_r(s_t),-1,1\right)$
+    \IF{joint filter}
+        \STATE $\hat z_t\leftarrow \min\arg\max_z b_t(z)$ and $\widehat{\gain}_t\leftarrow\gain_{\hat z_t}$
+    \ELSE
+        \STATE $\widehat{\gain}_t\leftarrow\operatorname{diag}(\hat g_{t,1},\ldots,\hat g_{t,d})$ with $\hat g_{t,i}=2\mathbb{I}[p_{t,i}\ge\tfrac12]-1$
+    \ENDIF
+    \STATE $a_t\leftarrow\clip\!\left(\widehat{\gain}_t^{-1}\gain_r\pi_r(s_t),-1,1\right)$
     \STATE Execute $a_t$, observe $(r_t,s_{t+1})$, and predict $\{\hat v_t^{(j)}\}_{j=1}^{K}$ from $(s_t,s_{t+1})$
     \STATE Update $b_{t+1}$ via Eq.~\eqref{eq:posterior} (joint) or $p_{t+1}$ via Eq.~\eqref{eq:factored_filter} (factored)
 \ENDFOR
@@ -256,11 +260,11 @@ For any coordinate-additive channel score $\Phi(g)=\sum_{i=1}^d \phi_i(g_i)$ ove
 
 \subsection{Closed-Loop Filter Recovery and Generalized Return Decomposition}
 
-We next connect filter dynamics, action excitation, and physical saturation to closed-loop finite-horizon return. Fix horizon $H$, mode schedule $z_{0:H-1}$, reference target $v_t^{\mathrm{ref}}=\gain_r\pi_r(s_t)$, projected true-mode controller $P$ with command $a_t^P=\clip(\gain_{z_t}^{-1}v_t^{\mathrm{ref}},-1,1)$, and causal BAPR controller $C$ with command $a_t^C=\clip(\gain_{\hat z_t}^{-1}v_t^{\mathrm{ref}},-1,1)$. For the action values in this section, $v_t^P=\gain_{z_t}a_t^P$ and $v_t^C=\gain_{z_t}a_t^C$ are the signals before noise and clipping, in the order used by Eq.~\eqref{eq:executed_action}.
+Fix horizon $H$ and a mode schedule $z_{0:H-1}$. Write $x_t$ for the simulator state and $s_t$ for its observation. A terminated trajectory stays in an absorbing state and receives zero reward for the remaining steps. Let $v_t^{\mathrm{ref}}=\gain_r\pi_r(s_t)$, $a_t^P=\clip(\gain_{z_t}^{-1}v_t^{\mathrm{ref}},-1,1)$ be the projected true-mode command, and $a_t^C=\clip(\gain_{\hat z_t}^{-1}v_t^{\mathrm{ref}},-1,1)$ be the causal command. The corresponding signals $v_t^P=\gain_{z_t}a_t^P$ and $v_t^C=\gain_{z_t}a_t^C$ enter the simulator before noise and clipping as in Eq.~\eqref{eq:executed_action}.
 
 \begin{theorem}[Two-term return decomposition and sensitivity bound]
 \label{thm:return_gap}
-Under shared dynamics, reward map, initial-state distribution, and actuator noise~\eqref{eq:executed_action}, assume integrable per-step rewards and projected-oracle action values $Q_t^P(x,v)$. Then expected return relative to unattenuated reference execution $J_{\mathrm{ref}}$ decomposes into
+Use shared dynamics, reward map, initial-state distribution, and the noise law in Eq.~\eqref{eq:executed_action}. Define $Q_t^P(x,v)$ by applying the fixed signal $v$ with fresh noise and continuing with the projected oracle $P$. Assume the Bellman integrands are measurable and integrable under the step law for the signals used in the comparison, including the counterfactual signal $v_t^P$ at states visited by $C$. Assume the stage rewards and resulting Bellman terms along the compared rollouts are integrable. Then expected return relative to execution in the reference mode decomposes into
 \begin{equation}
  J_C - J_{\mathrm{ref}}
  = \underbrace{\left(J_P - J_{\mathrm{ref}}\right)}_{\text{fixed-policy projection contrast}}
@@ -268,7 +272,9 @@ Under shared dynamics, reward map, initial-state distribution, and actuator nois
    Q_t^P(x_t,v_t^C)-Q_t^P(x_t,v_t^P)\right]}_{\text{causal inference gap } (J_C - J_P)},
  \label{eq:causal_return_identity}
 \end{equation}
-where $J_P=J_{\mathrm{ref}}$ whenever $\gain_{z_t}$ is box-preserving. For box-preserving polarity regimes ($P=O$), if $L_t^{\mathrm{loc}}(x_t)$ bounds the local chord sensitivity $|Q_t^O(x_t,v_t^C)-Q_t^O(x_t,v_t^O)|/\|v_t^C-v_t^O\|_2$ along states visited by $C$, then
+where $J_P=J_{\mathrm{ref}}$ whenever the regime sequence is box-preserving. For polarity regimes ($P=O$), if
+$|Q_t^O(x_t,v_t^C)-Q_t^O(x_t,v_t^O)|\leq L_t^{\mathrm{loc}}(x_t)\|v_t^C-v_t^O\|_2$
+along states visited by $C$, then
 \begin{equation}
  |J_C-J_O|\leq 2\sum_{t=0}^{H-1}\mathbb{E}_C\!\left[
  L_t^{\mathrm{loc}}(x_t)\left(\sum_{i:\,g_{z_t,i}\ne g_{\hat z_t,i}}
@@ -333,12 +339,12 @@ In all protocols, BAPR performs zero policy, critic, or estimator updates during
 
 We first compare reinforcement-learning pipelines with the same causal estimator and then change only the command rule with the actor and estimator frozen. We examine which results transfer across morphologies, whether the projected action interface tolerates gain error, and how filter and identification alternatives trade off return, recovery and compute. We report the preregistered Brax HalfCheetah comparison separately from the later diagnostic studies.
 
-\subsection{Independent Same-Information Comparison on Reacher}
+\subsection{Independent Shared-Estimator Comparison on Reacher}
 \label{sec:reacher_confirmation}
 
-To test whether analytic compensation improves upon supplying the exact same causal belief to a learned policy, we conducted an independent preregistered confirmation on native Brax Reacher (\texttt{generalized} backend) with four two-actuator polarity modes, 200-step episodes, 50-step dwell intervals, and $\sigma=0.02$ Gaussian actuator noise. Five new policy seeds and fresh evaluation streams were registered following a disjoint three-seed development screen.
+To compare analytic compensation and belief conditioning with a common estimator and filter rule, we conducted an independent preregistered confirmation on native Brax Reacher (\texttt{generalized} backend) with four two-actuator polarity modes, 200-step episodes, 50-step dwell intervals, and $\sigma=0.02$ Gaussian actuator noise. Five new policy seeds and fresh evaluation streams were registered following a disjoint three-seed development screen.
 
-Each seed trained four controllers from scratch for 1.6M interactions and 100,000 updates: fixed-reference SAC, memoryless multimode robust SAC, filtered-belief-conditioned SAC, and instantaneous-belief-conditioned SAC. BAPR wrapped the fixed-reference policy with analytic compensation, whereas the conditioned-SAC policies received $(s_t,b_t)$ directly as actor--critic inputs during training and deployment. Within each pair, both routes shared a frozen inverse ensemble fitted on separate four-mode calibration rollouts and the same causal pre-action belief update (Appendix~\ref{app:reacher_protocol}).
+Each seed trained four controllers from scratch for 1.6M interactions and 100,000 updates: fixed-reference SAC, memoryless multimode robust SAC, filtered-belief-conditioned SAC, and instantaneous-belief-conditioned SAC. BAPR wrapped the fixed-reference policy with analytic compensation, whereas conditioned SAC used $(s_t,b_t)$ as actor--critic inputs. Within each pair, the routes used the same frozen inverse ensemble fitted on separate four-mode calibration rollouts and the same pre-action belief rule on their own histories (Appendix~\ref{app:reacher_protocol}).
 
 \begin{table}[t]
 \centering
@@ -363,7 +369,7 @@ The primary contrast---filtered compensation minus filtered belief-conditioned S
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_reacher_confirmation.pdf}
-\caption{Independent information-matched Reacher confirmation. \textbf{a}, Switching returns across five new policy seeds (circles: seed means over 15 episodes; diamonds and bars: group mean and two-sided 95\% $t$ interval over $n=5$ seeds; thin lines pair filtered belief-conditioned SAC with BAPR). \textbf{b}, Paired seed-level differences and 95\% confidence intervals for the primary filtered and secondary instantaneous contrasts.}
+\caption{Independent Reacher confirmation with a shared estimator. \textbf{a}, Switching returns across five new policy seeds (circles: seed means over 15 episodes; diamonds and bars: group mean and two-sided 95\% $t$ interval over $n=5$ seeds; thin lines pair filtered belief-conditioned SAC with BAPR). \textbf{b}, Paired seed-level differences and 95\% confidence intervals for the primary filtered and secondary instantaneous contrasts.}
 \label{fig:reacher_confirmation}
 \end{figure}
 
@@ -652,9 +658,9 @@ BAPR learns a mode-independent inverse predictor and uses known actuator maps to
 
 \section*{Code and Data Availability}
 
-The \href{https://github.com/erzhu419/BAPR/tree/codex/code-paper}{source release} includes experiment code, analysis, and Lean proofs. The \href{https://github.com/erzhu419/BAPR/raw/refs/tags/jmlr-results-v2/BAPR_JMLR_results.zip}{versioned results supplement} contains the original seed audits and separate frozen-model replays with episode returns, termination steps, planned and reached switches, and detection delays. Replays may differ from original audit rollouts across runtimes or hardware. The supplement includes neither model weights nor replay buffers.
+The \href{https://github.com/erzhu419/BAPR/tree/codex/code-paper}{source release} includes experiment code, analysis, and Lean proofs. The \href{https://github.com/erzhu419/BAPR/raw/refs/tags/jmlr-results-v2/BAPR_JMLR_results.zip}{versioned results supplement} contains original seed audits and separate episode summaries from frozen-model replays. These records let readers recompute statistics without model weights. Fresh rollouts require frozen inputs or newly trained models. The \href{https://github.com/erzhu419/BAPR/blob/codex/code-paper/reproducibility/README.md}{reproduction guide} distinguishes the two workflows. Replays can differ across runtimes or hardware.
 
-\acks{The authors thank the developers of JAX, Brax, Flax, PyTorch, Gymnasium, MuJoCo, and the Lean/Mathlib community for the open-source tools used in this research. The authors declare no competing financial interests or external funding specific to this submission.}
+\acks{The authors thank the developers of JAX, Brax, Flax, PyTorch, Gymnasium, MuJoCo, and Lean/Mathlib for the tools used in this work. The authors received no third-party funding or support for this work within the 36 months before submission and declare no relevant competing financial interests.}
 
 \newpage
 \appendix
