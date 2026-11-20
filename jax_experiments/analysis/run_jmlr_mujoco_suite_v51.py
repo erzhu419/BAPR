@@ -1420,6 +1420,7 @@ def load_trained_bundle(env_key: str, arm: str, seed: int, device: torch.device)
 
 BELIEF_ROUTES = {
     "bapr_selfcal",
+    "bapr_soft",
     "bapr_factored",
     "bapr_d100_lockin",
     "bapr_instantaneous",
@@ -1427,6 +1428,11 @@ BELIEF_ROUTES = {
     "bapr_noburst_selfcal",
     "belief_sac",
 }
+
+
+def polarity_mean_command(belief, gains, target):
+    """Box-feasible posterior expected-error minimizer for sign gains."""
+    return (belief @ gains) * target
 
 
 def rollout_episode(
@@ -1439,6 +1445,8 @@ def rollout_episode(
     device: torch.device,
     horizon: int = EPISODE_HORIZON,
     dwell: int = DWELL_STEPS,
+    *,
+    physical_gains: np.ndarray | None = None,
 ) -> dict:
     obs, _ = env.reset(seed=ep_seed)
     obs = obs.astype(np.float32)
@@ -1447,6 +1455,7 @@ def rollout_episode(
     n_modes = gains_np.shape[0]
     gains_t = torch.as_tensor(gains_np, device=device)
     ref_gain = gains_np[0]
+    plant_gains = gains_np if physical_gains is None else physical_gains
     noise_rng = np.random.default_rng(ep_seed * 31 + 7)
 
     belief = torch.full((1, n_modes), 1.0 / n_modes, dtype=torch.float32, device=device)
@@ -1457,6 +1466,7 @@ def rollout_episode(
     true_modes = []
     exact_matches = []
     sq_errors = []
+    sq_commands = []
     terminated_early = False
 
     bapr_actor, _, inv_model, inv_var, fwd_model, fwd_var = models["bapr"]
@@ -1484,10 +1494,12 @@ def rollout_episode(
                 q = bapr_actor.deterministic(obs_t)[0].cpu().numpy()
                 cmd = q
                 exact = (true_mode == 0)
-            elif route in ("bapr_selfcal", "bapr_d100_lockin", "bapr_instantaneous", "bapr_forward_shared"):
+            elif route in ("bapr_selfcal", "bapr_soft", "bapr_d100_lockin", "bapr_instantaneous", "bapr_forward_shared"):
                 q = bapr_actor.deterministic(obs_t)[0].cpu().numpy()
                 est_mode = int(torch.argmax(belief[0]).item())
                 cmd = np.clip((ref_gain * q) / gains_np[est_mode], -1.0, 1.0)
+                if route == "bapr_soft" and step > 0:
+                    cmd = polarity_mean_command(belief[0].cpu().numpy(), gains_np, ref_gain * q)
                 exact = (est_mode == true_mode)
             elif route == "bapr_noburst_selfcal":
                 q = nb_actor.deterministic(obs_t)[0].cpu().numpy()
@@ -1518,20 +1530,21 @@ def rollout_episode(
                 raise ValueError(f"unknown route {route}")
 
         noise = noise_rng.normal(0.0, NOISE_STD, size=cmd.shape).astype(np.float32)
-        exec_act = np.clip(gains_np[phys_mode] * cmd + noise, -1.0, 1.0)
+        exec_act = np.clip(plant_gains[phys_mode] * cmd + noise, -1.0, 1.0)
         next_obs, rew, term, trunc, _ = env.step(exec_act)
         next_obs = next_obs.astype(np.float32)
 
-        realized_nom = np.clip(gains_np[phys_mode] * cmd, -1.0, 1.0)
+        realized_nom = np.clip(plant_gains[phys_mode] * cmd, -1.0, 1.0)
         ref_nom = ref_gain * q
         sq_errors.append(float(np.sum((realized_nom - ref_nom) ** 2)))
+        sq_commands.append(float(np.dot(cmd, cmd)))
         rewards.append(float(rew))
         true_modes.append(true_mode)
         exact_matches.append(bool(exact))
 
         cmd_t = torch.as_tensor(cmd[None, :], device=device)
         nobs_t = torch.as_tensor(next_obs[None, :], device=device)
-        if route in ("bapr_selfcal", "belief_sac"):
+        if route in ("bapr_selfcal", "bapr_soft", "belief_sac"):
             sc = joint_emission_scores(inv_model, inv_var, gains_t, obs_t, cmd_t, nobs_t)
             belief = update_sticky_belief(belief, sc, hazard=0.002, scale=1.0, decay=0.98, temporal=True)
         elif route == "bapr_noburst_selfcal":
@@ -1562,29 +1575,44 @@ def rollout_episode(
     tm_arr = np.asarray(true_modes, dtype=np.int64)
     em_arr = np.asarray(exact_matches, dtype=bool)
     switched = np.flatnonzero(tm_arr[1:] != tm_arr[:-1]) + 1 if len(tm_arr) > 1 else np.asarray([], dtype=np.int64)
-    scheduled_switches = [s for s in range(dwell, horizon, dwell)]
+    scheduled_switches = [
+        s for s in range(dwell, horizon, dwell)
+        if schedule[(s // dwell) % len(schedule)] != schedule[(s // dwell - 1) % len(schedule)]
+    ]
 
     has_belief = route in BELIEF_ROUTES
     d1_list, d8_list = [], []
     unres_1 = unres_8 = 0
     post_switch_exact = 0
     post_switch_steps = 0
+    records = []
     if has_belief:
         if len(em_arr) > dwell:
             post_switch_exact = int(np.sum(em_arr[dwell:]))
             post_switch_steps = int(len(em_arr) - dwell)
-        for idx, st in enumerate(switched):
-            en = int(switched[idx + 1]) if idx + 1 < len(switched) else len(tm_arr)
-            d1 = next((s - int(st) for s in range(int(st), en) if em_arr[s]), None)
+    for idx, st in enumerate(scheduled_switches):
+        en = min(len(tm_arr), scheduled_switches[idx + 1] if idx + 1 < len(scheduled_switches) else horizon)
+        reached = st < en
+        d1 = d8 = None
+        if has_belief and reached:
+            d1 = next((s - st for s in range(st, en) if em_arr[s]), None)
             if d1 is None:
                 unres_1 += 1
             else:
                 d1_list.append(int(d1))
-            d8 = next((s - int(st) for s in range(int(st), en - 7) if np.all(em_arr[s:s + 8])), None)
+            d8 = next((s - st for s in range(st, en - 7) if np.all(em_arr[s:s + 8])), None)
             if d8 is None:
                 unres_8 += 1
             else:
                 d8_list.append(int(d8))
+        stop = min(st + 32, en)
+        records.append({
+            "step": st, "reached": reached, "first_delay": d1, "sustained_delay": d8,
+            "steps_32": max(stop - st, 0),
+            "reward_32": float(rew_arr[st:stop].sum()),
+            "action_error_32": float(sum(sq_errors[st:stop])),
+            "command_energy_32": float(sum(sq_commands[st:stop])),
+        })
 
     return {
         "return": float(rew_arr.sum()),
@@ -1593,6 +1621,11 @@ def rollout_episode(
         "scheduled_switches": scheduled_switches,
         "steps": len(rewards),
         "terminated_early": terminated_early,
+        "terminated": bool(term),
+        "truncated": bool(trunc),
+        "switch_records": records,
+        "episode_seed": ep_seed,
+        "schedule": schedule.tolist(),
         "switches_scheduled": len(scheduled_switches),
         "switches_observed": len(switched),
         "switched": switched,
@@ -1663,10 +1696,15 @@ def reduce_episode_group(rows: list[dict], oracle_rows: list[dict] | None = None
     }
 
 
-def audit_seed(env_key: str, seed: int, smoke: bool = False) -> dict:
+def compact_episodes(group: dict) -> dict:
+    return {route: [{k: v for k, v in row.items() if k not in ("rewards", "switched")}
+                    for row in rows] for route, rows in group.items()}
+
+
+def audit_seed(env_key: str, seed: int, smoke: bool = False, episode_dir: Path | None = None) -> dict:
     runtime = runtime_info(strict=not smoke)
     out_path = RELEASE_DIR / "audits" / env_key / f"seed_{seed}.json"
-    if not smoke and out_path.is_file():
+    if not smoke and episode_dir is None and out_path.is_file():
         existing = json.loads(out_path.read_text())
         if existing.get("protocol") == PROTOCOL:
             print(f"Audit already exists: {out_path}", flush=True)
@@ -1702,6 +1740,7 @@ def audit_seed(env_key: str, seed: int, smoke: bool = False) -> dict:
             "sac", "escp256", "rma", "belief_sac",
         )
     }
+    stationary_records = {r: [] for r in st_rows}
 
     for ev_seed in ev_seeds:
         base = np.asarray(SWITCH_BASE_SCHEDULES[ev_seed], dtype=np.int64)
@@ -1718,6 +1757,8 @@ def audit_seed(env_key: str, seed: int, smoke: bool = False) -> dict:
             for r in st_rows:
                 res = rollout_episode(env, sched, gains_4, ep_seed, r, models, device, horizon, dwell)
                 st_rows[r].append(res["return"])
+                if episode_dir is not None:
+                    stationary_records[r].append(res)
 
     primary_summary = {
         r: reduce_episode_group(sw_rows[r], sw_rows["oracle"] if r != "oracle" else None, st_rows.get(r))
@@ -1726,6 +1767,7 @@ def audit_seed(env_key: str, seed: int, smoke: bool = False) -> dict:
 
     # Hypercube 2^d evaluation on HalfCheetah (M=64) and Ant (M=256)
     hypercube_summary = None
+    hc_rows = {}
     if env_key in ("halfcheetah", "ant"):
         gains_hc = hypercube_polarity_gains(act_dim)
         m_total = gains_hc.shape[0]
@@ -1796,7 +1838,17 @@ def audit_seed(env_key: str, seed: int, smoke: bool = False) -> dict:
         "elapsed_seconds": time.monotonic() - started,
     }
     emit_progress(1, 1, started, unit="audit")
-    if not smoke:
+    if episode_dir is not None:
+        write_json(episode_dir / env_key / f"seed_{seed}.json", {
+            **payload,
+            "episodes": {
+                "primary_4mode": compact_episodes(sw_rows),
+                "stationary_4mode": compact_episodes(stationary_records),
+                "hypercube_2d": compact_episodes(hc_rows),
+                "lossy_projection": compact_episodes(lossy_rows),
+            },
+        })
+    elif not smoke:
         write_json(out_path, payload)
     print(f"Completed audit {env_key}/seed_{seed} in {payload['elapsed_seconds']:.1f}s", flush=True)
     return payload
@@ -1947,6 +1999,7 @@ def main() -> None:
     parser.add_argument("--env", choices=ENV_NAMES, default="halfcheetah")
     parser.add_argument("--arm", choices=ARMS, default="bapr")
     parser.add_argument("--seed", type=int, default=SEEDS[0])
+    parser.add_argument("--episode-dir", type=Path, help="Replay the frozen audit and export compact episode diagnostics.")
     args = parser.parse_args()
 
     if args.mode == "smoke":
@@ -1962,7 +2015,7 @@ def main() -> None:
     elif args.mode == "train":
         train_arm(args.env, args.arm, args.seed, smoke=False)
     elif args.mode == "audit":
-        audit_seed(args.env, args.seed, smoke=False)
+        audit_seed(args.env, args.seed, smoke=False, episode_dir=args.episode_dir)
     else:
         analyze_all()
 

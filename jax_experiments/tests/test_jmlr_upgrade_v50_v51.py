@@ -133,3 +133,23 @@ def test_v50_v51_scheduler_dag_invariants():
                        for w in r["wait_for_files"])
         if "-audit-" in r["signature"]:
             assert len(r["wait_for_files"]) == 7  # PREREG + 6 arm bundles
+
+
+def test_posterior_mean_polarity_command_minimizes_single_step_error():
+    tree = ast.parse(V51_SOURCE.read_text())
+    func = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
+                and node.name == "polarity_mean_command")
+    namespace = {}
+    exec(compile(ast.Module(body=[func], type_ignores=[]), str(V51_SOURCE), "exec"), namespace)
+    command_rule = namespace["polarity_mean_command"]
+
+    gains = np.array([[1., -1.], [-1., 1.]])
+    target = np.array([.75, -.5])
+    for belief in (np.array([.5, .5]), np.array([.85, .15]), np.array([0., 1.])):
+        command = command_rule(belief, gains, target)
+        expected = (2 * belief[0] - 1) * target * gains[0]
+        np.testing.assert_allclose(command, expected, atol=1e-12)
+        def risk(a):
+            return belief @ np.sum((gains * a - target) ** 2, axis=1)
+
+        assert risk(command) < min(risk(command + .01), risk(command - .01))

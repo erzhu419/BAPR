@@ -1,0 +1,60 @@
+\FloatBarrier
+\subsection{Changing Only the Belief-to-Action Rule}
+\label{sec:frozen_interface}
+
+The shared-estimator comparisons change more than the action interface: the reference policy learns on one mode, while Belief-SAC learns control on multiple modes. We isolate a deployment choice without retraining either the reference actor or the inverse model. For polarity gains \(g_{z,i}\in\{-1,+1\}\) and a reference target \(v_i^\star\), posterior-averaged compensation chooses
+\begin{equation}
+    a_i^{\mathrm{soft}} =
+    v_i^\star \sum_z b_t(z)g_{z,i} =
+    (2\Pr_{b_t}(g_{z,i}=+1)-1)v_i^\star .
+    \label{eq:soft_polarity}
+\end{equation}
+Indeed, the belief-averaged squared pre-noise error is \(a_i^2-2a_i v_i^\star \mathbb{E}_{b_t}[g_{z,i}]+(v_i^\star)^2\) in the command box, so this solution is feasible and minimizes that error. This one-step criterion accounts for neither future identification nor control. Uniform belief cancels the command in the tested mode sets. Both routes therefore use the same reference-mode tie-break at reset for the first command; the soft route averages from the second command onward. Neither route gets a switch signal. The filters have identical parameters, but their subsequent beliefs need not agree because their actions produce different transitions.
+
+We pair five existing MuJoCo policy seeds and 15 episodes per seed on HalfCheetah and Walker2d, with matched reset, noise and regime sequence for hard, soft and true-mode control. This evaluation uses the frozen models and the original MuJoCo version, with the CPU build of PyTorch 2.5.1. On HalfCheetah, soft minus hard was \(+48.4\), with a paired 95\% interval of \([-16.8,113.6]\). Both resolved all 225 switches. On Walker2d, hard minus soft was \(+472.3\) \([-225.6,1170.2]\), with 5/5 seed wins but a wide interval. Soft commands had lower squared command magnitude in observed post-switch steps and more unresolved switches; their nominal action error was higher. This is consistent with reduced excitation, but cannot separate that effect from the changed state and survival distribution.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Frozen-policy polarity evaluation. Error and command energy are averaged over observed steps in the first 32 steps of each reached switch. Unresolved counts include switches reached without eight consecutive correct MAP estimates. These are counts of recovery \emph{of the estimate} even on the soft route, not a criterion for motor or reward recovery.}
+\label{tab:frozen_interface}
+\begin{tabular}{llrrrrr}
+\toprule
+Task & Rule & Return & Falls/75 & Reached/225 & Unresolved & Error / Cmd. energy \\
+\midrule
+HalfCheetah & Hard MAP & 7920.1 & 0 & 225 & 0 & 0.339 / 4.221 \\
+ & Soft & 7968.5 & 0 & 225 & 0 & 0.341 / 4.232 \\
+ & True mode & 8011.7 & 0 & 225 & --- & 0.000 / 4.308 \\
+Walker2d & Hard MAP & 1249.4 & 72 & 94 & 11 & 1.397 / 3.366 \\
+ & Soft & 777.1 & 75 & 70 & 41 & 2.857 / 2.691 \\
+ & True mode & 1765.5 & 64 & 115 & --- & 0.000 / 3.128 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In Walker2d, the hard and true-mode controllers both fell on 62 paired episodes. Hard alone fell on ten, and true mode alone on two. These are paired outcomes, not a causal attribution of individual falls. The 64 true-mode falls show that late or incorrect inference cannot account for all failures, even when the action transform is exactly known. The released records include per-switch first and sustained detection delays and indicate which scheduled switches were never reached.
+
+\subsection{Sensitivity to Misspecified Attenuation}
+\label{sec:gain_mismatch}
+
+On the same five frozen HalfCheetah policies, we keep the nominal map fixed at \(0.50\) on weakened channels and vary the true magnitude to \(0.35\), \(0.50\), or \(0.65\) without changing signs, the affected channels or the paired noise and switch schedules. The causal route uses the nominal maps for scoring and control. Two privileged routes receive the correct mode and compensate with either the nominal or actual gain. This separates the map held by the controller from access to the mode; none of the routes learns a new policy. At a fixed command, clipping is nonexpansive, so the nominal executed-signal perturbation under gain error is at most \(\|(\gain_z-\tilde{\gain}_z)a\|_2\), where \(\tilde{\gain}_z\) denotes the assumed map. This does not bound trajectory return under arbitrary map error.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{HalfCheetah gain-mismatch audit. All rows use the same actor and episode seeds. The last column gives paired 95\% intervals for hard MAP minus uncompensated execution across five policy seeds.}
+\label{tab:gain_mismatch}
+\begin{tabular}{rrrrrl}
+\toprule
+True gain & Hard MAP & Nominal oracle & Matched oracle & Uncomp. & Paired gain [95\% CI] \\
+\midrule
+0.35 & 4264.3 & 4344.0 & 4350.5 & 1134.3 & \(+3129.9\) \([2514.6,3745.3]\) \\
+0.50 & 5176.9 & 5265.4 & 5265.4 & 1052.7 & \(+4124.2\) \([3687.7,4560.7]\) \\
+0.65 & 6374.6 & 6467.5 & 6496.8 & 890.3 & \(+5484.4\) \([5003.3,5965.5]\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Compensation won all five seeds against no correction at each tested gain, and the causal route sustained recovery on all 225 switches per gain. Commands that saturate under both gain assumptions receive the same correction. The result tests bounded magnitude errors with correct signs and channel assignments on HalfCheetah; it does not establish robustness to sign errors or unseen map families.

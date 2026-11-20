@@ -1,0 +1,25 @@
+\paragraph{Filter settings with matched marginal hazards.}
+We replay the same ten frozen actors, estimator, and schedules with the joint and product filters. On a uniform jump among the 63 alternative six-bit modes, any specified bit flips in 32 of them. The joint hazard of \(0.002\) therefore induces a marginal bit-flip probability of \(0.002(32/63)\). We use that value for the matched product filter and cross it with channel multipliers \(0.5\) and \(1.0\). We also test a multiplier of \(1/6\) to match the factor from per-channel averaging inside the joint score. Neither this normalization nor marginal hazard matching makes the two models identical: one mixes ensemble heads after channel aggregation and couples bit transitions, while the other mixes evidence separately by channel and uses independent transitions.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Brax hypercube filter sensitivity on frozen-policy replays, ten paired seeds. The joint filter returns 3157.6 in this replay. The bit hazard in the matched rows is the marginal induced by the joint filter. Each interval is a marginal paired 95\% interval relative to this same joint replay.}
+\label{tab:brax_filter_replay}
+\begin{tabular}{lrrrl}
+\toprule
+Product-filter setting & Bit hazard & Multiplier & Return & Paired difference [95\% CI] \\
+\midrule
+Original & 0.002 & 0.5 & 2813.2 & \(-344.4\) \([-635.8,-53.0]\) \\
+Multiplier only & 0.002 & 1.0 & 2166.9 & \(-990.7\) \([-1432.2,-549.1]\) \\
+Marginal hazard only & \(0.002(32/63)\) & 0.5 & 2935.7 & \(-221.9\) \([-486.4,42.6]\) \\
+Both & \(0.002(32/63)\) & 1.0 & 2229.9 & \(-927.7\) \([-1342.5,-513.0]\) \\
+Per-channel normalization & \(0.002(32/63)\) & \(1/6\) & 3157.9 & \(+0.3\) \([-151.7,152.2]\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The coupled and factorized filters do not have a fixed return ordering across these settings (Table~\ref{tab:brax_filter_replay}). In particular, the normalized product filter has no resolved return deficit at this sample size. The original gap therefore cannot be assigned to lost inter-channel dependence alone. These are sensitivity tests on the same frozen cohort, not independent validation of a new default.
+
+\paragraph{Checking the sufficient conditions for recovery.}
+For the four-mode replay at \(h=0.002\), \(c=1\), and \(\delta=0.98\), we inspect the first \(N=8\) transitions after each switch at the fixed diagnostic tolerance \(\epsilon_i=0.1\). The required all-competitor margin from Eq.~\eqref{eq:recovery_window_condition} is greater than 0.8337 on every transition; 181 of 450 windows satisfy this excitation test. No window keeps all five heads within tolerance in every channel and transition, so none satisfies both pathwise sufficient conditions at these settings. This does not estimate the theorem's population error moments or certify a recovery probability. In the zero-hazard untempered replay, the numerical prior floor is active for at least one candidate on 144,760 of 150,000 steps. It cannot be ignored when interpreting the finite-dwell comparison.

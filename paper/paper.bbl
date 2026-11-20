@@ -1,4 +1,4 @@
-\begin{thebibliography}{23}
+\begin{thebibliography}{27}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -35,6 +35,15 @@ Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, and Sergey Levine.
   Learning (ICML)}, volume~80 of \emph{Proceedings of Machine Learning
   Research}, pages 1861--1870, 2018.
 
+\bibitem[Hanna et~al.(2021)Hanna, Desai, Karnan, Warnell, and
+  Stone]{Hanna2021GAT}
+Josiah~P. Hanna, Siddharth Desai, Haresh Karnan, Garrett Warnell, and Peter
+  Stone.
+\newblock Grounded action transformation for sim-to-real reinforcement
+  learning.
+\newblock \emph{Machine Learning}, 110:\penalty0 2469--2499, 2021.
+\newblock URL \url{https://doi.org/10.1007/s10994-021-05982-z}.
+
 \bibitem[Iyengar(2005)]{Iyengar2005RobustDP}
 Garud~N. Iyengar.
 \newblock Robust dynamic programming.
@@ -66,6 +75,13 @@ Erwan Lecarpentier and Emmanuel Rachelson.
   using model-based reinforcement learning.
 \newblock In \emph{Advances in Neural Information Processing Systems},
   volume~32, pages 7214--7223, 2019.
+
+\bibitem[Lunze and Steffen(2003)]{LunzeSteffen2003VirtualActuator}
+Jan Lunze and Thomas Steffen.
+\newblock Control reconfiguration by means of a virtual actuator.
+\newblock \emph{IFAC Proceedings Volumes}, 36\penalty0 (5):\penalty0 131--136,
+  2003.
+\newblock URL \url{https://doi.org/10.1016/S1474-6670(17)36482-0}.
 
 \bibitem[Luo et~al.(2022)Luo, Jiang, Yu, Zhang, and Zhang]{Luo2022ESCP}
 Fan-Ming Luo, Shengyi Jiang, Yang Yu, Zongzhang Zhang, and Yi-Feng Zhang.
@@ -107,6 +123,22 @@ Kate Rakelly, Aurick Zhou, Chelsea Finn, Sergey Levine, and Deirdre Quillen.
 \newblock In \emph{Proceedings of the 36th International Conference on Machine
   Learning (ICML)}, volume~97 of \emph{Proceedings of Machine Learning
   Research}, pages 5331--5340, 2019.
+
+\bibitem[Sagar and Senanayake(2026)]{Sagar2026TeAR}
+Som Sagar and Ransalu Senanayake.
+\newblock Test-time adaptation of manipulation policies under actuator
+  degradation.
+\newblock arXiv preprint arXiv:2609.36182, 2026.
+\newblock URL \url{https://arxiv.org/abs/2609.36182}.
+
+\bibitem[Seron et~al.(2011)Seron, De~Don{\'a}, and
+  Richter]{Seron2011VirtualActuatorBank}
+Mar{\'i}a~M. Seron, Jos{\'e}~A. De~Don{\'a}, and Jan~H. Richter.
+\newblock Bank of virtual actuators for fault tolerant control.
+\newblock \emph{IFAC Proceedings Volumes}, 44\penalty0 (1):\penalty0
+  5436--5441, 2011.
+\newblock URL
+  \url{https://skoge.folk.ntnu.no/prost/proceedings/ifac11-proceedings/data/html/papers/2699.pdf}.
 
 \bibitem[Todorov et~al.(2012)Todorov, Erez, and Tassa]{Todorov2012MuJoCo}
 Emanuel Todorov, Tom Erez, and Yuval Tassa.

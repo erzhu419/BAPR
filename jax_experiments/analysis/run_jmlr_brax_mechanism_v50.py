@@ -31,6 +31,8 @@ V32_BASE_SCHEDULES = {
     197233: (3, 2, 1, 0),
 }
 V32_STATIONARY_SEED = 197101
+WINDOW_EPSILON = 0.1
+WINDOW_STEPS = 8
 
 OUT_DIR = ROOT / "reproducibility/jmlr_brax_mechanism_v50"
 
@@ -133,7 +135,18 @@ def build_batched_joint_runner(world, actor_graph, model_graph, model_params, va
             realized_nominal = jnp.clip(gains_padded[phys_mode] * command, -1.0, 1.0)
             sq_err = jnp.sum(jnp.square(realized_nominal - ref_target))
             infeas_sq = jnp.sum(jnp.square(jnp.maximum(0.0, jnp.abs(ref_target) - jnp.abs(gains_padded[phys_mode]))))
-            return (following, after), (following.reward, true_mode, est_mode, sq_err, infeas_sq)
+            delta_v = jnp.abs(gains_padded * command - gains_padded[true_mode] * command)
+            gamma = 0.5 * jnp.mean(
+                (delta_v ** 2 - 2.0 * WINDOW_EPSILON * delta_v) / jnp.clip(variance, 1e-6, 1.0),
+                axis=1,
+            )
+            min_gamma = jnp.min(jnp.where(active_mask & (mode_idx != true_mode), gamma, jnp.inf))
+            within_error = jnp.all(jnp.abs(pred5[:, 0, :] - realized_nominal) <= WINDOW_EPSILON)
+            floored = jnp.any(active_mask & (prior <= 1e-30))
+            return (following, after), (
+                following.reward, true_mode, est_mode, sq_err, infeas_sq,
+                min_gamma, within_error, floored,
+            )
 
         return jax.lax.scan(
             body,
@@ -214,30 +227,36 @@ def build_batched_factored_runner(world, actor_graph, model_graph, model_params,
     return run_batch
 
 
+def switch_record(start, end, exact, rewards, errors):
+    first = sustained = None
+    if exact is not None:
+        start, end = int(start), int(end)
+        first = next((s - start for s in range(start, end) if exact[s]), None)
+        sustained = next((s - start for s in range(start, end - 7) if np.all(exact[s:s + 8])), None)
+    stop = min(start + 32, end)
+    return {"step": int(start), "reached": True, "first_delay": first, "sustained_delay": sustained,
+            "reward_32": float(rewards[start:stop].sum()), "action_error_32": float(errors[start:stop].sum())}
+
+
 def summarize_joint_batch(batch_vals, oracle_rewards_batch=None, causal: bool = True) -> list[dict]:
-    rewards_b, true_b, est_b, sq_b, inf_b = map(np.asarray, batch_vals)
+    rewards_b, true_b, est_b, sq_b, inf_b, margin_b, error_b, floor_b = map(np.asarray, batch_vals)
     rows = []
     for ep_i in range(rewards_b.shape[0]):
         rewards = rewards_b[ep_i]
         true_modes = true_b[ep_i]
         est_modes = est_b[ep_i]
         switched = np.flatnonzero(true_modes[1:] != true_modes[:-1]) + 1
-        d1_list, d8_list = [], []
-        u1 = u8 = 0
-        if causal:
-            for idx, start in enumerate(switched):
-                end = int(switched[idx + 1]) if idx + 1 < len(switched) else len(true_modes)
-                tgt = true_modes[start]
-                d1 = next((s - int(start) for s in range(int(start), end) if est_modes[s] == tgt), None)
-                if d1 is None:
-                    u1 += 1
-                else:
-                    d1_list.append(int(d1))
-                d8 = next((s - int(start) for s in range(int(start), end - 7) if np.all(est_modes[s:s + 8] == tgt)), None)
-                if d8 is None:
-                    u8 += 1
-                else:
-                    d8_list.append(int(d8))
+        records = []
+        for idx, start in enumerate(switched):
+            end = int(switched[idx + 1]) if idx + 1 < len(switched) else len(true_modes)
+            rec = switch_record(start, end, est_modes == true_modes if causal else None, rewards, sq_b[ep_i])
+            if causal:
+                stop = start + WINDOW_STEPS
+                rec["min_margin_8"] = float(margin_b[ep_i, start:stop].min())
+                rec["all_heads_within_epsilon_8"] = bool(error_b[ep_i, start:stop].all())
+            records.append(rec)
+        d1_list = [r["first_delay"] for r in records if r["first_delay"] is not None]
+        d8_list = [r["sustained_delay"] for r in records if r["sustained_delay"] is not None]
         reg32 = None
         if oracle_rewards_batch is not None:
             mask = np.zeros(len(rewards), dtype=bool)
@@ -250,11 +269,14 @@ def summarize_joint_batch(batch_vals, oracle_rewards_batch=None, causal: bool = 
             "action_error_energy": float(sq_b[ep_i].sum()),
             "infeasibility_energy": float(inf_b[ep_i].sum()),
             "first_delays": d1_list,
-            "unresolved_first": u1,
+            "unresolved_first": len(records) - len(d1_list) if causal else 0,
             "sustained_delays": d8_list,
-            "unresolved_sustained": u8,
+            "unresolved_sustained": len(records) - len(d8_list) if causal else 0,
             "switches": len(switched),
             "post_switch_regret_32": reg32,
+            "steps": len(rewards), "terminated_early": False,
+            "switch_records": records,
+            "floored_prior_steps": int(floor_b[ep_i].sum()) if causal else None,
         })
     return rows
 
@@ -267,20 +289,12 @@ def summarize_factored_batch(batch_vals, oracle_rewards_batch, dwell: int) -> li
         exact = exact_b[ep_i]
         H = len(rewards)
         switched = [dwell, 2 * dwell, 3 * dwell]
-        d1_list, d8_list = [], []
-        u1 = u8 = 0
+        records = []
         for idx, start in enumerate(switched):
             end = switched[idx + 1] if idx + 1 < len(switched) else H
-            d1 = next((s - start for s in range(start, end) if exact[s]), None)
-            if d1 is None:
-                u1 += 1
-            else:
-                d1_list.append(int(d1))
-            d8 = next((s - start for s in range(start, max(start, end - 7)) if np.all(exact[s:s + 8])), None)
-            if d8 is None:
-                u8 += 1
-            else:
-                d8_list.append(int(d8))
+            records.append(switch_record(start, end, exact, rewards, sq_b[ep_i]))
+        d1_list = [r["first_delay"] for r in records if r["first_delay"] is not None]
+        d8_list = [r["sustained_delay"] for r in records if r["sustained_delay"] is not None]
         mask = np.zeros(H, dtype=bool)
         for start in switched:
             mask[start:min(start + 32, H)] = True
@@ -292,11 +306,12 @@ def summarize_factored_batch(batch_vals, oracle_rewards_batch, dwell: int) -> li
             "action_error_energy": float(sq_b[ep_i].sum()),
             "infeasibility_energy": 0.0,
             "first_delays": d1_list,
-            "unresolved_first": u1,
+            "unresolved_first": len(records) - len(d1_list),
             "sustained_delays": d8_list,
-            "unresolved_sustained": u8,
+            "unresolved_sustained": len(records) - len(d8_list),
             "switches": len(switched),
             "post_switch_regret_32": reg32,
+            "steps": H, "terminated_early": False, "switch_records": records,
         })
     return rows
 
@@ -345,11 +360,11 @@ def reduce_arm(rows: list[dict], stat_returns: list[float] | None = None) -> dic
     }
 
 
-def run_seed(seed: int, smoke: bool = False) -> dict:
+def run_seed(seed: int, smoke: bool = False, episode_dir: Path | None = None) -> dict:
     started = time.monotonic()
     runtime = check_runtime()
     out_path = OUT_DIR / "seeds" / f"seed_{seed}.json"
-    if not smoke and out_path.is_file():
+    if not smoke and episode_dir is None and out_path.is_file():
         print(f"Seed {seed} already completed: {out_path}", flush=True)
         return json.loads(out_path.read_text())
 
@@ -410,12 +425,14 @@ def run_seed(seed: int, smoke: bool = False) -> dict:
     gains_4_p = pad_gains_64(world.gains)
     ev_seeds = V32_SWITCH_SEEDS[:1] if smoke else V32_SWITCH_SEEDS
     ep_per_ev = 2 if smoke else 5
-    sw_keys_list, sw_scheds_list = [], []
+    sw_keys_list, sw_scheds_list, sw_seed_ids = [], [], []
     for ev_seed in ev_seeds:
         base = np.asarray(V32_BASE_SCHEDULES[ev_seed], dtype=np.int32)
         for ep_idx in range(ep_per_ev):
             sw_scheds_list.append(np.roll(base, ep_idx % 4))
-            sw_keys_list.append(jax.random.PRNGKey(ev_seed * 100 + ep_idx))
+            ep_seed = ev_seed * 100 + ep_idx
+            sw_seed_ids.append(ep_seed)
+            sw_keys_list.append(jax.random.PRNGKey(ep_seed))
     sw_keys = jnp.stack(sw_keys_list)
     sw_scheds = jnp.asarray(sw_scheds_list, dtype=jnp.int32)
     n_sw = int(sw_keys.shape[0])
@@ -448,6 +465,8 @@ def run_seed(seed: int, smoke: bool = False) -> dict:
     oracle_rew_4 = oracle_comb_4[0][:n_sw]
 
     part1_summary = {}
+    phase1_rows = {}
+    stationary_rows = {}
     stat_arms = {"oracle", "bapr_d098", "sticky_hmm_d100", "untempered_lockin_h0_d100", "instantaneous", "single_head_d098"}
     for name, (kind_c, h, sc, dec, temp, sh, causal) in ablation_cfgs.items():
         if name == "oracle":
@@ -462,13 +481,16 @@ def run_seed(seed: int, smoke: bool = False) -> dict:
             b_sw = call_joint(gains_4_p, 4, sw_keys, sw_scheds, kind_c, h, sc, dec, temp, sh)
             st_rets = None
         rows = summarize_joint_batch(b_sw, None if name == "oracle" else oracle_rew_4, causal=causal)
+        phase1_rows[name] = rows
+        if st_rets is not None:
+            stationary_rows[name] = st_rets
         part1_summary[name] = reduce_arm(rows, st_rets)
 
     f4_all = call_factored(gains_4_p, comb_keys, comb_scheds, 0.002, 0.5, 0.98)
-    part1_summary["factored_d098"] = reduce_arm(
-        summarize_factored_batch(tuple(x[:n_sw] for x in f4_all), oracle_rew_4, world.dwell),
-        [float(x) for x in f4_all[0][n_sw:].sum(axis=1)],
-    )
+    phase1_rows["factored_d098"] = summarize_factored_batch(
+        tuple(x[:n_sw] for x in f4_all), oracle_rew_4, world.dwell)
+    stationary_rows["factored_d098"] = [float(x) for x in f4_all[0][n_sw:].sum(axis=1)]
+    part1_summary["factored_d098"] = reduce_arm(phase1_rows["factored_d098"], stationary_rows["factored_d098"])
 
     emit_progress(1, 3, started)
 
@@ -491,6 +513,17 @@ def run_seed(seed: int, smoke: bool = False) -> dict:
         "joint_64": summarize_joint_batch(j64_vals, o64_rew, causal=True),
         "factored_64": summarize_factored_batch(f64_vals, o64_rew, world.dwell),
     }
+    matching_configs = {
+        "factored_scale_matched": (0.002, 1.0),
+        "factored_hazard_matched": (0.002 * 32 / 63, 0.5),
+        "factored_both_matched": (0.002 * 32 / 63, 1.0),
+        "factored_channel_normalized": (0.002 * 32 / 63, 1.0 / 6),
+    }
+    matched_rows = {}
+    if episode_dir is not None:
+        for label, (h, scale) in matching_configs.items():
+            outputs = call_factored(gains_64_j, k64, sch64, h, scale, 0.98)
+            matched_rows[label] = summarize_factored_batch(outputs, o64_rew, world.dwell)
 
     emit_progress(2, 3, started)
 
@@ -506,11 +539,11 @@ def run_seed(seed: int, smoke: bool = False) -> dict:
     caus_vals = call_joint(gains_lossy_p, 4, klossy, sw_scheds, KIND_CAUSAL, 0.002, 1.0, 0.98, True, False)
     unc_vals = call_joint(gains_lossy_p, 4, klossy, sw_scheds, KIND_UNCOMP, 0.002, 1.0, 0.98, True, False)
 
-    part3_summary = {
-        "native_reference": reduce_arm(summarize_joint_batch(nat_vals, proj_rew, causal=False)),
-        "projected_oracle": reduce_arm(summarize_joint_batch(proj_vals, None, causal=False)),
-        "causal_projected_bapr": reduce_arm(summarize_joint_batch(caus_vals, proj_rew, causal=True)),
-        "uncompensated": reduce_arm(summarize_joint_batch(unc_vals, proj_rew, causal=False)),
+    phase3_rows = {
+        "native_reference": summarize_joint_batch(nat_vals, proj_rew, causal=False),
+        "projected_oracle": summarize_joint_batch(proj_vals, None, causal=False),
+        "causal_projected_bapr": summarize_joint_batch(caus_vals, proj_rew, causal=True),
+        "uncompensated": summarize_joint_batch(unc_vals, proj_rew, causal=False),
     }
 
     payload = {
@@ -522,11 +555,30 @@ def run_seed(seed: int, smoke: bool = False) -> dict:
             "all_15_episodes": {k: reduce_arm(v) for k, v in rows_64.items()},
             "single_joint_flip_episodes": {k: reduce_arm(v[split_1j:]) for k, v in rows_64.items()},
         },
-        "part3_lossy_projection": part3_summary,
+        "part3_lossy_projection": {k: reduce_arm(v) for k, v in phase3_rows.items()},
         "elapsed_seconds": time.monotonic() - started,
     }
     emit_progress(3, 3, started)
-    if not smoke:
+    if episode_dir is not None:
+        def with_keys(group, schedules, episode_seeds):
+            return {name: [{**r, "episode_seed": int(ep), "schedule": list(map(int, seq))}
+                           for r, ep, seq in zip(rows, episode_seeds, schedules, strict=True)]
+                    for name, rows in group.items()}
+
+        common.write_json(episode_dir / f"seed_{seed}.json", {
+            **payload, "backend": jax.default_backend(),
+            "switch_window_epsilon": WINDOW_EPSILON, "switch_window_steps": WINDOW_STEPS,
+            "matched_filter_parameters": matching_configs, "single_joint_group_starts_at": split_1j,
+            "episodes": {
+                "primary_4mode": with_keys(phase1_rows, sw_scheds_list, sw_seed_ids),
+                "stationary_4mode_returns": stationary_rows,
+                "hypercube_64": with_keys(rows_64 | matched_rows, [s for _, s in s64],
+                                          [ep + seed % 97 for ep, _ in s64]),
+                "lossy_projection": with_keys(phase3_rows, sw_scheds_list,
+                                               [ep + 5000000 for ep in sw_seed_ids]),
+            },
+        })
+    elif not smoke:
         common.write_json(out_path, payload)
     print(f"Completed {PROTOCOL} seed={seed} in {payload['elapsed_seconds']:.1f}s", flush=True)
     return payload
@@ -629,12 +681,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("smoke", "seed", "analyze"))
     parser.add_argument("--seed", type=int, default=SEEDS[0])
+    parser.add_argument("--episode-dir", type=Path, help="Replay the frozen audit and export compact episode diagnostics.")
     args = parser.parse_args()
     if args.mode == "smoke":
-        res = run_seed(args.seed, smoke=True)
-        common.write_json(OUT_DIR / "smoke/ready.json", {"ok": True, "runtime_versions": res["runtime_versions"]})
+        res = run_seed(args.seed, smoke=True, episode_dir=args.episode_dir)
+        if args.episode_dir is None:
+            common.write_json(OUT_DIR / "smoke/ready.json", {"ok": True, "runtime_versions": res["runtime_versions"]})
     elif args.mode == "seed":
-        run_seed(args.seed, smoke=False)
+        run_seed(args.seed, smoke=False, episode_dir=args.episode_dir)
     else:
         analyze()
 
