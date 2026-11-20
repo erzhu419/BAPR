@@ -1,97 +1,184 @@
-% Generated bibliography for BAPR paper (manual reconstruction)
-\begin{thebibliography}{99}
-\providecommand{\url}[1]{#1}
-\csname url@samestyle\endcsname
-\providecommand{\newblock}{\relax}
-\providecommand{\bibinfo}[2]{#2}
-\providecommand{\BIBdecl}{\relax}
-\BIBdecl
+\begin{thebibliography}{23}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem{Adams2007BOCD}
-{Adams Ryan P.} and {MacKay David J.C.}, ``Bayesian online changepoint detection,'' \emph{arXiv preprint arXiv:0710.3742}, 2007.
+\bibitem[Adams and MacKay(2007)]{Adams2007BOCD}
+Ryan~Prescott Adams and David J.~C. MacKay.
+\newblock Bayesian online changepoint detection.
+\newblock \emph{arXiv preprint arXiv:0710.3742}, 2007.
 
-\bibitem{Benjamins2021CARL}
-{Benjamins Carolin}, {Eimer Theresa}, {Schubert Frederik}, {Biedenkapp Andr\'e}, {Rosenhahn Bodo}, {Hutter Frank}, and {Lindauer Marius}, ``CARL: A benchmark for contextual and adaptive reinforcement learning,'' \emph{NeurIPS Workshop on Ecological Theory of RL}, 2021.
+\bibitem[Benjamins et~al.(2021)Benjamins, Eimer, Schubert, Biedenkapp,
+  Rosenhahn, Hutter, and Lindauer]{Benjamins2021CARL}
+Carolin Benjamins, Theresa Eimer, Frederik Schubert, Andr{\'e} Biedenkapp, Bodo
+  Rosenhahn, Frank Hutter, and Marius Lindauer.
+\newblock {CARL}: A benchmark for contextual and adaptive reinforcement
+  learning.
+\newblock In \emph{NeurIPS Workshop on Ecological Theory of Reinforcement
+  Learning}, 2021.
 
-\bibitem{Chen2021ContextAware}
-{Chen Baiming}, {Liu Zuxin}, {Zhu Jiacheng}, {Xu Mengdi}, {Ding Wenhao}, {Li Liang}, and {Zhao Ding}, ``Context-aware safe reinforcement learning for non-stationary environments,'' in \emph{Proc. IEEE Int. Conf. Robotics and Automation (ICRA)}, 2021, pp. 10\,689--10\,695.
+\bibitem[Doshi-Velez and Konidaris(2016)]{Doshi-Velez2016HiPMDP}
+Finale Doshi-Velez and George Konidaris.
+\newblock Hidden parameter {M}arkov decision processes: A semiparametric
+  regression approach for discovering latent task parametrizations.
+\newblock In \emph{Proceedings of the Twenty-Fifth International Joint
+  Conference on Artificial Intelligence (IJCAI)}, pages 1432--1440, 2016.
 
-\bibitem{Doshi-Velez2016HiPMDP}
-{Doshi-Velez Finale} and {Konidaris George}, ``Hidden parameter Markov decision processes: A semiparametric regression approach for discovering latent task parametrizations,'' in \emph{Proc. Int. Joint Conf. Artificial Intelligence (IJCAI)}, 2016, pp. 1432--1440.
+\bibitem[Haarnoja et~al.(2018)Haarnoja, Zhou, Abbeel, and
+  Levine]{Haarnoja2018SAC}
+Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, and Sergey Levine.
+\newblock Soft actor-critic: Off-policy maximum entropy deep reinforcement
+  learning with a stochastic actor.
+\newblock In \emph{Proceedings of the 35th International Conference on Machine
+  Learning (ICML)}, volume~80 of \emph{Proceedings of Machine Learning
+  Research}, pages 1861--1870, 2018.
 
-\bibitem{Finn2017MAML}
-{Finn Chelsea}, {Abbeel Pieter}, and {Levine Sergey}, ``Model-agnostic meta-learning for fast adaptation of deep networks,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2017, pp. 1126--1135.
+\bibitem[Iyengar(2005)]{Iyengar2005RobustDP}
+Garud~N. Iyengar.
+\newblock Robust dynamic programming.
+\newblock \emph{Mathematics of Operations Research}, 30\penalty0 (2):\penalty0
+  257--280, 2005.
 
-\bibitem{GarivierMoulines2011}
-{Garivier Aur\'elien} and {Moulines Eric}, ``On upper-confidence bound policies for switching bandit problems,'' in \emph{Proc. Algorithmic Learning Theory (ALT)}, 2011, pp. 174--188.
+\bibitem[Kakade and Langford(2002)]{Kakade2002PDL}
+Sham~M. Kakade and John Langford.
+\newblock Approximately optimal approximate reinforcement learning.
+\newblock In \emph{Proceedings of the Nineteenth International Conference on
+  Machine Learning (ICML)}, pages 267--274, 2002.
 
-\bibitem{Haarnoja2018SAC}
-{Haarnoja Tuomas}, {Zhou Aurick}, {Abbeel Pieter}, and {Levine Sergey}, ``Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2018, pp. 1856--1865.
+\bibitem[Khetarpal et~al.(2022)Khetarpal, Riemer, Rish, and
+  Precup]{Khetarpal2020ContinualRL}
+Khimya Khetarpal, Matthew Riemer, Irina Rish, and Doina Precup.
+\newblock Towards continual reinforcement learning: A review and perspectives.
+\newblock \emph{Journal of Artificial Intelligence Research}, 75:\penalty0
+  1401--1476, 2022.
 
-\bibitem{Hadoux2014Sequential}
-{Hadoux Emmanuel}, {Beynier Aur\'elie}, and {Weng Paul}, ``Sequential decision-making under non-stationary environments via sequential change-point detection,'' in \emph{ECML/PKDD Workshop on Learning over Multiple Contexts}, 2014.
+\bibitem[Kumar et~al.(2021)Kumar, Fu, Pathak, and Malik]{Kumar2021RMA}
+Ashish Kumar, Zipeng Fu, Deepak Pathak, and Jitendra Malik.
+\newblock {RMA}: Rapid motor adaptation for legged robots.
+\newblock In \emph{Proceedings of Robotics: Science and Systems (RSS)}, 2021.
+\newblock \doi{10.15607/RSS.2021.XVII.011}.
 
-\bibitem{Iyengar2005RobustDP}
-{Iyengar Garud N.}, ``Robust dynamic programming,'' \emph{Mathematics of Operations Research}, vol.~30, no.~2, pp. 257--280, 2005.
+\bibitem[Lecarpentier and Rachelson(2019)]{Lecarpentier2019NonStationary}
+Erwan Lecarpentier and Emmanuel Rachelson.
+\newblock Non-stationary {M}arkov decision processes: A worst-case approach
+  using model-based reinforcement learning.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~32, pages 7214--7223, 2019.
 
-\bibitem{Khetarpal2020ContinualRL}
-{Khetarpal Khimya}, {Riemer Matthew}, {Rish Irina}, and {Precup Doina}, ``Towards continual reinforcement learning: A review and perspectives,'' \emph{Journal of Artificial Intelligence Research}, vol.~75, pp. 1401--1476, 2022.
+\bibitem[Luo et~al.(2022)Luo, Jiang, Yu, Zhang, and Zhang]{Luo2022ESCP}
+Fan-Ming Luo, Shengyi Jiang, Yang Yu, Zongzhang Zhang, and Yi-Feng Zhang.
+\newblock Adapt to environment sudden changes by learning a context sensitive
+  policy.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial
+  Intelligence}, volume~36, pages 7637--7646, 2022.
 
-\bibitem{Killick2012Changepoint}
-{Killick Rebecca}, {Fearnhead Paul}, and {Eckley Idris A.}, ``Optimal detection of changepoints with a linear computational cost,'' \emph{Journal of the American Statistical Association}, vol.~107, no.~500, pp. 1590--1598, 2012.
+\bibitem[Nagabandi et~al.(2019)Nagabandi, Clavera, Liu, Fearing, Abbeel,
+  Levine, and Finn]{Nagabandi2019MAML}
+Anusha Nagabandi, Ignasi Clavera, Simin Liu, Ronald~S. Fearing, Pieter Abbeel,
+  Sergey Levine, and Chelsea Finn.
+\newblock Learning to adapt in dynamic, real-world environments through
+  meta-reinforcement learning.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2019.
 
-\bibitem{Lecarpentier2019NonStationary}
-{Lecarpentier Erwan} and {Rachelson Emmanuel}, ``Non-stationary Markov decision processes: A worst-case approach using model-based reinforcement learning,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~32, 2019, pp. 7214--7223.
+\bibitem[Padakandla(2021)]{Padakandla2020Survey}
+Sindhu Padakandla.
+\newblock A survey of reinforcement learning algorithms for dynamically varying
+  environments.
+\newblock \emph{ACM Computing Surveys}, 54\penalty0 (6):\penalty0
+  127:1--127:25, 2021.
 
-\bibitem{Luo2022ESCP}
-{Luo Fan-Ming}, {Jiang Shengyi}, {Yu Yang}, {Zhang Zongzhang}, and {Zhang Yi-Feng}, ``Adapt to environment sudden changes by learning a context sensitive policy,'' in \emph{Proc. AAAI Conf. Artificial Intelligence}, 2022, pp. 7637--7646.
+\bibitem[Panaganti et~al.(2024)Panaganti, Wierman, and
+  Mazumdar]{Panaganti2024RobustF}
+Kishan Panaganti, Adam Wierman, and Eric Mazumdar.
+\newblock Model-free robust $\phi$-divergence reinforcement learning using both
+  offline and online data.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine
+  Learning (ICML)}, volume 235 of \emph{Proceedings of Machine Learning
+  Research}, pages 39324--39363, 2024.
 
-\bibitem{Mellor2013Thompson}
-{Mellor Joseph} and {Shapiro Jonathan}, ``Thompson sampling in switching environments with Bayesian online change detection,'' in \emph{Proc. Int. Conf. Artificial Intelligence and Statistics (AISTATS)}, 2013, pp. 442--450.
+\bibitem[Rakelly et~al.(2019)Rakelly, Zhou, Finn, Levine, and
+  Quillen]{Rakelly2019PEARL}
+Kate Rakelly, Aurick Zhou, Chelsea Finn, Sergey Levine, and Deirdre Quillen.
+\newblock Efficient off-policy meta-reinforcement learning via probabilistic
+  context variables.
+\newblock In \emph{Proceedings of the 36th International Conference on Machine
+  Learning (ICML)}, volume~97 of \emph{Proceedings of Machine Learning
+  Research}, pages 5331--5340, 2019.
 
-\bibitem{Nagabandi2019MAML}
-{Nagabandi Anusha}, {Clavera Ignasi}, {Liu Simin}, {Fearing Ronald S.}, {Abbeel Pieter}, {Levine Sergey}, and {Finn Chelsea}, ``Learning to adapt in dynamic, real-world environments through meta-reinforcement learning,'' in \emph{Proc. Int. Conf. Learning Representations (ICLR)}, 2019.
+\bibitem[Todorov et~al.(2012)Todorov, Erez, and Tassa]{Todorov2012MuJoCo}
+Emanuel Todorov, Tom Erez, and Yuval Tassa.
+\newblock {MuJoCo}: A physics engine for model-based control.
+\newblock In \emph{Proceedings of the IEEE/RSJ International Conference on
+  Intelligent Robots and Systems (IROS)}, pages 5026--5033, 2012.
 
-\bibitem{Osogami2012Robustness}
-{Osogami Takayuki}, ``Robustness and risk-sensitivity in Markov decision processes,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~25, 2012, pp. 233--241.
+\bibitem[Towers et~al.(2024)Towers, Kwiatkowski, Terry, Balis, De~Cola, Deleu,
+  Goul{\~a}o, Kallinteris, Krimmel, KG, Perez-Vicente, Pierr{\'e}, Schulhoff,
+  Tai, Tan, and Younis]{Towers2024Gymnasium}
+Mark Towers, Ariel Kwiatkowski, Jordan Terry, John~U. Balis, Gianluca De~Cola,
+  Tristan Deleu, Manuel Goul{\~a}o, Andreas Kallinteris, Markus Krimmel, Arjun
+  KG, Rodrigo Perez-Vicente, Andrea Pierr{\'e}, Sander Schulhoff, Jun~Jet Tai,
+  Hannah Tan, and Omar~G. Younis.
+\newblock Gymnasium: A standard interface for reinforcement learning
+  environments.
+\newblock \emph{arXiv preprint arXiv:2407.17032}, 2024.
 
-\bibitem{Padakandla2020Survey}
-{Padakandla Sindhu}, ``A survey of reinforcement learning algorithms for dynamically varying environments,'' \emph{ACM Computing Surveys}, vol.~54, no.~6, pp. 1--25, 2021.
+\bibitem[van~der Pol et~al.(2020)van~der Pol, Worrall, van Hoof, Oliehoek, and
+  Welling]{VanderPol2020MDPHomomorphic}
+Elise van~der Pol, Daniel~E. Worrall, Herke van Hoof, Frans~A. Oliehoek, and
+  Max Welling.
+\newblock {MDP} homomorphic networks: Group symmetries in reinforcement
+  learning.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~33, pages 4199--4210, 2020.
 
-\bibitem{Panaganti2024RobustF}
-{Panaganti Kishan}, {Wierman Adam}, and {Mazumdar Eric}, ``Model-free robust $\phi$-divergence reinforcement learning using both offline and online data,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2024.
+\bibitem[Wiesemann et~al.(2013)Wiesemann, Kuhn, and
+  Rustem]{Wiesemann2013RobustMDP}
+Wolfram Wiesemann, Daniel Kuhn, and Ber{\c{c}} Rustem.
+\newblock Robust {M}arkov decision processes.
+\newblock \emph{Mathematics of Operations Research}, 38\penalty0 (1):\penalty0
+  153--183, 2013.
 
-\bibitem{Rakelly2019PEARL}
-{Rakelly Kate}, {Zhou Aurick}, {Finn Chelsea}, {Levine Sergey}, and {Quillen Deirdre}, ``Efficient off-policy meta-reinforcement learning via probabilistic context variables,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2019, pp. 5331--5340.
+\bibitem[Yu et~al.(2017)Yu, Tan, Liu, and Turk]{Yu2017UPOSI}
+Wenhao Yu, Jie Tan, C.~Karen Liu, and Greg Turk.
+\newblock Preparing for the unknown: Learning a universal policy with online
+  system identification.
+\newblock In \emph{Proceedings of Robotics: Science and Systems (RSS)}, 2017.
+\newblock \doi{10.15607/RSS.2017.XIII.048}.
 
-\bibitem{Sodhani2021MultiTaskRL}
-{Sodhani Shagun}, {Zhang Amy}, and {Pineau Joelle}, ``Multi-task reinforcement learning with context-based representations,'' in \emph{Proc. Int. Conf. Machine Learning (ICML)}, 2021, pp. 9767--9779.
+\bibitem[Zhang et~al.(2026{\natexlab{a}})Zhang, Zheng, and
+  Zhang]{Zhang2026RESAC}
+Yifan Zhang, Liang Zheng, and Qifan Zhang.
+\newblock {RE-SAC}: Disentangling aleatoric and epistemic risks in bus fleet
+  control: A stable and robust ensemble {DRL} approach.
+\newblock \emph{arXiv preprint arXiv:2603.18396}, 2026{\natexlab{a}}.
 
-\bibitem{Wiesemann2013RobustMDP}
-{Wiesemann Wolfram}, {Kuhn Daniel}, and {Rustem Ber\c c}, ``Robust Markov decision processes,'' \emph{Mathematics of Operations Research}, vol.~38, no.~1, pp. 153--183, 2013.
+\bibitem[Zhang et~al.(2026{\natexlab{b}})Zhang, Zheng, Zhang, and
+  Tang]{Zhang2026SingleAgentBus}
+Yifan Zhang, Liang Zheng, Qifan Zhang, and Hewei Tang.
+\newblock Single agent robust deep reinforcement learning for bus fleet
+  control.
+\newblock \emph{Transportation Safety and Environment}, 8\penalty0
+  (2):\penalty0 tdag005, 2026{\natexlab{b}}.
+\newblock \doi{10.1093/tse/tdag005}.
 
-\bibitem{Xu2008RobustLasso}
-{Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robust regression and Lasso,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~21, 2008, pp. 1801--1808.
+\bibitem[Zhou et~al.(2023)Zhou, Liu, Cheng, Kalathil, Kumar, and
+  Tian]{Zhou2023NaturalActorCritic}
+Ruida Zhou, Tao Liu, Min Cheng, Dileep Kalathil, P.~R. Kumar, and Chao Tian.
+\newblock Natural actor-critic for robust reinforcement learning with function
+  approximation.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~36, pages 97--133, 2023.
 
-\bibitem{Xu2009RobustSVM}
-{Xu Huan}, {Caramanis Constantine}, and {Mannor Shie}, ``Robustness and regularization of support vector machines,'' \emph{Journal of Machine Learning Research}, vol.~10, pp. 1485--1510, 2009.
-
-\bibitem{Zhang2026RESAC}
-{Zhang Yifan} and {Zheng Liang}, ``RE-SAC: Disentangling aleatoric and epistemic risks in bus fleet control: A stable and robust ensemble DRL approach,'' \emph{arXiv preprint arXiv:2603.18396}, 2026.
-
-\bibitem{Zhang2026SingleAgentBus}
-{Zhang Yifan}, ``Single Agent Robust Deep Reinforcement Learning for Bus Fleet Control,'' \emph{Transportation Safety and Environment}, tdag005, 2026, doi:10.1093/tse/tdag005.
-
-\bibitem{Zhou2023NaturalActorCritic}
-{Zhou Ruida}, {Liu Tao}, {Cheng Min}, {Kalathil Dileep}, {Kumar P. R.}, and {Tian Chao}, ``Natural actor-critic for robust reinforcement learning with function approximation,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~36, 2023.
-
-\bibitem{Zintgraf2020VariBAD}
-{Zintgraf Luisa}, {Shiarlis Kyriacos}, {Igl Maximilian}, {Schulze Sebastian}, {Gal Yarin}, {Hofmann Katja}, and {Whiteson Shimon}, ``VariBAD: A very good method for Bayes-adaptive deep RL via meta-learning,'' in \emph{Proc. Int. Conf. Learning Representations (ICLR)}, 2020.
-
-\bibitem{Fei2020RiskSensitive}
-{Fei Yingjie}, {Yang Zhuoran}, {Chen Yudong}, {Wang Zhaoran}, and {Xie Qiaomin}, ``Risk-sensitive reinforcement learning: Near-optimal risk-sample tradeoff in regret,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~33, 2020, pp. 22\,384--22\,395.
-
-\bibitem{Blackwell1965DiscountedDP}
-{Blackwell David}, ``Discounted dynamic programming,'' \emph{The Annals of Mathematical Statistics}, vol.~36, no.~1, pp. 226--235, 1965.
+\bibitem[Zintgraf et~al.(2020)Zintgraf, Shiarlis, Igl, Schulze, Gal, Hofmann,
+  and Whiteson]{Zintgraf2020VariBAD}
+Luisa Zintgraf, Kyriacos Shiarlis, Maximilian Igl, Sebastian Schulze, Yarin
+  Gal, Katja Hofmann, and Shimon Whiteson.
+\newblock {VariBAD}: A very good method for {B}ayes-adaptive deep {RL} via
+  meta-learning.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2020.
 
 \end{thebibliography}

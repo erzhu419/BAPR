@@ -121,3 +121,45 @@ def test_extension_package_rejects_inconsistent_records(change):
         summary["suites"]["source"]["audits"][0]["source_metadata"]["full"]["optimizer_counts"]["actor"] -= 1
     with pytest.raises(ValueError):
         check.validate_extension_package(summary)
+
+
+@pytest.mark.parametrize("change", ["fwd_mean", "fwd_ci", "cls_mean", "cls_ci"])
+def test_identification_baselines_rejects_inconsistent_records(change):
+    summary = check.read(check.ID_BASELINES_PACKAGE)
+    if change == "fwd_mean":
+        summary["forward_vs_inverse_same_split"]["forward_dynamics"]["switching_means"]["learned_soft"] += 1.0
+    elif change == "fwd_ci":
+        summary["forward_vs_inverse_same_split"]["paired_inverse_minus_forward"]["soft_routing"]["ci95"][0] += 1.0
+    elif change == "cls_mean":
+        summary["direct_classifier_vs_inverse_same_data"]["means"]["classifier_94103"] += 1.0
+    else:
+        summary["direct_classifier_vs_inverse_same_data"]["paired_comparisons"]["inverse_minus_classifier_94103"]["ci95"][0] += 1.0
+    with pytest.raises(ValueError):
+        check.validate_identification_baselines(summary)
+
+
+def test_jmlr_v50_and_v51_reject_tampering_when_present():
+    v50_path = check.V50_PACKAGE / "analysis.json"
+    if v50_path.is_file():
+        agg = check.read(v50_path)
+        seeds = [check.read(check.V50_PACKAGE / "seeds" / f"seed_{s}.json") for s in check.V50_SEEDS]
+        bad = copy.deepcopy(agg)
+        bad["part1_paired_comparisons"]["bapr_d098_minus_untempered_lockin_h0_d100"]["ci95"][0] += 1.0
+        with pytest.raises(ValueError):
+            check.validate_jmlr_v50(bad, seeds)
+
+    v51_path = check.V51_PACKAGE / "analysis.json"
+    if v51_path.is_file():
+        agg51 = check.read(v51_path)
+        auds = {
+            e: [check.read(check.V51_PACKAGE / "audits" / e / f"seed_{s}.json") for s in check.V51_SEEDS]
+            for e in check.V51_ENVS
+        }
+        bad51 = copy.deepcopy(agg51)
+        bad51["environments"]["halfcheetah"]["comparisons"]["bapr_selfcal_minus_sac"]["ci95"][0] += 1.0
+        with pytest.raises(ValueError):
+            check.validate_jmlr_v51(bad51, auds)
+        bad_auds = copy.deepcopy(auds)
+        bad_auds["halfcheetah"][0]["external_interactions_bapr"] = 100
+        with pytest.raises(ValueError):
+            check.validate_jmlr_v51(agg51, bad_auds)

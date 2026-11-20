@@ -1,0 +1,6 @@
+# Install torch==2.5.1 separately using the cu121 wheel index.
+gymnasium[mujoco]==1.2.0
+mujoco==3.2.7
+numpy==2.1.3
+scipy==1.14.1
+tqdm==4.67.1

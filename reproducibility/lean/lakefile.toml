@@ -1,6 +1,6 @@
 name = "baprMechanism"
 version = "0.1.0"
-defaultTargets = ["ActionCompensation", "ActionCompensationBelief", "ActionCompensationClosedLoop", "ActionCompensationFilter", "ActionCompensationEvidence", "ActionCompensationRecovery", "ActionCompensationReturn", "ActionCompensationWindows", "ActionCompensationCumulative", "ActionCompensationRetention", "ActionCompensationMeasure", "ActionCompensationKL", "ActionCompensationKLExtended", "GaussianSmoothing"]
+defaultTargets = ["ActionCompensation", "ActionCompensationBelief", "ActionCompensationClosedLoop", "ActionCompensationFilter", "ActionCompensationEvidence", "ActionCompensationRecovery", "ActionCompensationReturn", "ActionCompensationWindows", "ActionCompensationCumulative", "ActionCompensationRetention", "ActionCompensationMeasure", "ActionCompensationKL", "ActionCompensationKLExtended", "GaussianSmoothing", "LossyProjectionAndFactoredFilter"]
 
 [[require]]
 name = "mathlib"
@@ -48,3 +48,6 @@ name = "ActionCompensationKLExtended"
 
 [[lean_lib]]
 name = "GaussianSmoothing"
+
+[[lean_lib]]
+name = "LossyProjectionAndFactoredFilter"

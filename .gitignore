@@ -39,6 +39,9 @@ paper/*.pdf
 !paper/fig_v32_results.pdf
 !paper/fig_v32_diagnostics.pdf
 !paper/fig_reacher_confirmation.pdf
+!paper/fig_jmlr_mechanism_generalization.pdf
+!paper/fig_jmlr_mujoco_multimorphology.pdf
+paper/BAPR_JMLR_results.zip
 paper/*.png
 paper/*.aux
 paper/*.log

@@ -23,6 +23,13 @@ TRAIN_ARMS = ("source", "reference", "sac", "escp", "resac_zero", "resac_full")
 EVAL_ARMS = ("source", "sac", "escp", "resac_zero", "resac_full", "no_compensation", "oracle", "bapr")
 SWITCH_SCHEDULES = {"197201": [2, 0, 3, 1], "197217": [1, 3, 0, 2], "197233": [3, 2, 1, 0]}
 EXTENSION_PACKAGE = ROOT / "reproducibility/submission_extensions_v47/summary.json"
+ID_BASELINES_PACKAGE = ROOT / "reproducibility/identification_baselines/summary.json"
+V50_PACKAGE = ROOT / "reproducibility/jmlr_brax_mechanism_v50"
+V50_SEEDS = [88003, 88021, 88039, 88057, 88079, 88103, 88121, 88139, 88157, 88179]
+V51_PACKAGE = ROOT / "reproducibility/jmlr_mujoco_v51"
+V51_SEEDS = [51003, 51021, 51039, 51057, 51079]
+V51_ENVS = ("halfcheetah", "ant", "walker2d", "hopper")
+V51_RUNTIME = {"torch": "2.5.1+cu121", "gymnasium": "1.2.0", "mujoco": "3.2.7"}
 
 
 def read(path):
@@ -241,11 +248,222 @@ def check_submission_extensions():
                       f"wins={row['wins']}/{row['n_policy_seeds']}")
 
 
+def validate_identification_baselines(summary):
+    if summary["protocol"] != "bapr-identification-baselines-summary" or summary["historical_cohorts_pooled"] is not False:
+        raise ValueError("identification baselines protocol or pooling flag differs")
+    fi = summary["forward_vs_inverse_same_split"]
+    seeds_5 = [101, 211, 307, 419, 523]
+    for side in ("forward_dynamics", "inverse_dynamics"):
+        block = fi[side]
+        if block["test_controller_seeds"] != seeds_5:
+            raise ValueError(f"{side} test seeds differ")
+        for arm in ("robust", "oracle", "learned_map", "learned_soft"):
+            vals = np.asarray([block["per_seed"][str(s)]["switching"][arm] for s in seeds_5])
+            if not np.isclose(vals.mean(), block["switching_means"][arm], atol=1e-9, rtol=0):
+                raise ValueError(f"{side} switching mean differs for {arm}")
+    for route, key in (("learned_map", "map_routing"), ("learned_soft", "soft_routing")):
+        inv_v = np.asarray([fi["inverse_dynamics"]["per_seed"][str(s)]["switching"][route] for s in seeds_5])
+        fwd_v = np.asarray([fi["forward_dynamics"]["per_seed"][str(s)]["switching"][route] for s in seeds_5])
+        mean, radius = reacher.interval(inv_v - fwd_v)
+        rec = fi["paired_inverse_minus_forward"][key]
+        if (rec["n_seeds"] != 5 or rec["wins"] != int(np.sum(inv_v > fwd_v))
+                or not np.allclose([mean, mean - radius, mean + radius], [rec["mean"], *rec["ci95"]], atol=1e-8, rtol=0)):
+            raise ValueError(f"forward vs inverse paired CI differs for {key}")
+
+    dc = summary["direct_classifier_vs_inverse_same_data"]
+    if dc["policy_seeds"] != V50_SEEDS[1:] or dc["estimator_seeds"] != [94103, 94121, 94139]:
+        raise ValueError("direct classifier seed roster differs")
+    for arm, vals in dc["seed_means"].items():
+        arr = np.asarray(vals)
+        if arr.shape != (9,) or not np.isclose(arr.mean(), dc["means"][arm], atol=1e-8, rtol=0):
+            raise ValueError(f"direct classifier mean differs for {arm}")
+    for est in (94103, 94121, 94139):
+        delta = np.asarray(dc["seed_means"][f"inverse_{est}"]) - np.asarray(dc["seed_means"][f"classifier_{est}"])
+        mean, radius = reacher.interval(delta)
+        rec = dc["paired_comparisons"][f"inverse_minus_classifier_{est}"]
+        if (rec["n_policy_seeds"] != 9 or rec["wins"] != int(np.sum(delta > 0))
+                or not np.allclose([mean, mean - radius, mean + radius], [rec["mean"], *rec["ci95"]], atol=1e-8, rtol=0)):
+            raise ValueError(f"inverse minus classifier CI differs for {est}")
+
+
+def check_identification_baselines():
+    summary = read(ID_BASELINES_PACKAGE)
+    validate_identification_baselines(summary)
+    fi = summary["forward_vs_inverse_same_split"]
+    soft = fi["paired_inverse_minus_forward"]["soft_routing"]
+    print(f"Identification baselines: inverse minus forward soft={soft['mean']:.3f} "
+          f"[{soft['ci95'][0]:.3f},{soft['ci95'][1]:.3f}], wins={soft['wins']}/5; "
+          f"3 paired classifier contrasts verified (n=9)")
+
+
+def _check_paired_dict(left_vals, right_vals, recorded, label):
+    delta = np.asarray(left_vals, dtype=np.float64) - np.asarray(right_vals, dtype=np.float64)
+    mean, radius = reacher.interval(delta)
+    if (recorded["n_seeds"] != len(delta) or recorded["wins"] != int(np.sum(delta > 0))
+            or not np.allclose([mean, mean - radius, mean + radius], [recorded["mean"], *recorded["ci95"]], atol=1e-8, rtol=0)):
+        raise ValueError(f"paired comparison mismatch for {label}")
+
+
+def validate_jmlr_v50(aggregate, seed_rows):
+    if (aggregate["protocol"] != "jmlr-brax-mechanism-v50"
+            or aggregate["policy_seeds"] != V50_SEEDS
+            or aggregate["runtime_versions"] != RUNTIME_VERSIONS):
+        raise ValueError("v50 aggregate metadata mismatch")
+    if [r["seed"] for r in seed_rows] != V50_SEEDS or any(r["runtime_versions"] != RUNTIME_VERSIONS for r in seed_rows):
+        raise ValueError("v50 per-seed identity or runtime mismatch")
+
+    def verify_group(agg_dict, getter, group_name):
+        for arm, saved in agg_dict.items():
+            vals = [getter(r)[arm]["switching_mean"] for r in seed_rows]
+            if (not np.allclose(vals, saved["switching_seed_means"], atol=1e-9, rtol=0)
+                    or not np.isclose(np.mean(vals), saved["switching_mean"], atol=1e-9, rtol=0)):
+                raise ValueError(f"v50 switching mean mismatch in {group_name}/{arm}")
+
+    p1 = aggregate["part1_primary_ablations"]
+    verify_group(p1, lambda r: r["part1_primary_ablations"], "part1")
+    for cname, left, right in (
+        ("bapr_d098_minus_instantaneous", "bapr_d098", "instantaneous"),
+        ("bapr_d098_minus_untempered_lockin_h0_d100", "bapr_d098", "untempered_lockin_h0_d100"),
+        ("tempered_h0_d098_minus_untempered_lockin_h0_d100", "tempered_h0_d098", "untempered_lockin_h0_d100"),
+        ("bapr_d098_minus_sticky_hmm_d100", "bapr_d098", "sticky_hmm_d100"),
+        ("bapr_d098_minus_single_head_d098", "bapr_d098", "single_head_d098"),
+        ("bapr_d098_minus_factored_d098", "bapr_d098", "factored_d098"),
+    ):
+        _check_paired_dict(
+            p1[left]["switching_seed_means"],
+            p1[right]["switching_seed_means"],
+            aggregate["part1_paired_comparisons"][cname],
+            f"v50/{cname}",
+        )
+
+    p2_meta = aggregate["part2_hypercube_64"]
+    if p2_meta.get("candidate_modes_scored_online") != 64 or p2_meta.get("distinct_modes_sampled") != 43:
+        raise ValueError("v50 hypercube mode coverage metadata mismatch")
+    p2_all = p2_meta["all_15_episodes"]
+    p2_1j = p2_meta["single_joint_flip_episodes"]
+    verify_group(p2_all, lambda r: r["part2_hypercube_64"]["all_15_episodes"], "part2_all")
+    verify_group(p2_1j, lambda r: r["part2_hypercube_64"]["single_joint_flip_episodes"], "part2_1j")
+    for cname, src_d, left, right in (
+        ("factored_64_minus_uncompensated_64", p2_all, "factored_64", "uncompensated_64"),
+        ("factored_64_minus_joint_64", p2_all, "factored_64", "joint_64"),
+        ("single_joint_factored_64_minus_uncompensated_64", p2_1j, "factored_64", "uncompensated_64"),
+        ("single_joint_factored_64_minus_joint_64", p2_1j, "factored_64", "joint_64"),
+    ):
+        _check_paired_dict(
+            src_d[left]["switching_seed_means"],
+            src_d[right]["switching_seed_means"],
+            p2_meta["paired_comparisons"][cname],
+            f"v50/{cname}",
+        )
+
+    p3 = aggregate["part3_lossy_projection"]["arms"]
+    verify_group(p3, lambda r: r["part3_lossy_projection"], "part3")
+    decomp = aggregate["part3_lossy_projection"]["two_term_decomposition"]
+    _check_paired_dict(p3["projected_oracle"]["switching_seed_means"], p3["native_reference"]["switching_seed_means"],
+                       decomp["infeasibility_gap_projected_minus_native"], "v50/infeasibility_gap")
+    _check_paired_dict(p3["causal_projected_bapr"]["switching_seed_means"], p3["projected_oracle"]["switching_seed_means"],
+                       decomp["inference_loss_causal_minus_projected"], "v50/inference_loss")
+
+
+def check_jmlr_brax_mechanism_v50():
+    aggregate = read(V50_PACKAGE / "analysis.json")
+    seed_rows = [read(V50_PACKAGE / "seeds" / f"seed_{s}.json") for s in V50_SEEDS]
+    validate_jmlr_v50(aggregate, seed_rows)
+    c_lock = aggregate["part1_paired_comparisons"]["bapr_d098_minus_untempered_lockin_h0_d100"]
+    c_64 = aggregate["part2_hypercube_64"]["paired_comparisons"]["factored_64_minus_uncompensated_64"]
+    c_fj = aggregate["part2_hypercube_64"]["paired_comparisons"]["factored_64_minus_joint_64"]
+    print(f"JMLR Brax mechanism v50: 10 policy seeds; BAPR minus h=0 lock-in={c_lock['mean']:.3f} "
+          f"(wins={c_lock['wins']}/10); M=64 factored minus uncomp={c_64['mean']:.3f} "
+          f"(factored minus joint={c_fj['mean']:.3f}, 43/64 modes sampled)")
+
+
+def validate_jmlr_v51(aggregate, audits_by_env):
+    expected_recipe = {
+        "total_steps": 500000,
+        "num_envs": 8,
+        "warmup_steps": 4800,
+        "burst_length": 4,
+        "burst_trigger_prob": 0.0125,
+        "inverse_updates": 4500,
+        "escp_objective": "luo2022_rmdm_consistency_plus_rbf_logdet",
+    }
+    if (aggregate["protocol"] != "jmlr-mujoco-v5-multimorphology-v51-samestep"
+            or aggregate.get("autoreset_mode") != "SAME_STEP"
+            or aggregate["seeds"] != V51_SEEDS
+            or aggregate.get("recipe") != expected_recipe):
+        raise ValueError("v51 protocol, SAME_STEP autoreset, seed list, or recipe mismatch")
+    rt_agg = {k: v for k, v in aggregate["runtime_versions"].items() if k in V51_RUNTIME}
+    if rt_agg != V51_RUNTIME:
+        raise ValueError("v51 runtime mismatch")
+    expected_arms = ("bapr", "bapr_noburst", "sac", "escp256", "rma", "belief_sac")
+    for env_key in V51_ENVS:
+        rows = audits_by_env[env_key]
+        if [r["seed"] for r in rows] != V51_SEEDS:
+            raise ValueError(f"v51 seed order mismatch in {env_key}")
+        for r in rows:
+            rt_r = {k: v for k, v in r["runtime_versions"].items() if k in V51_RUNTIME}
+            step_map = r.get("real_physics_steps_by_arm", {})
+            if (r["protocol"] != "jmlr-mujoco-v5-multimorphology-v51-samestep"
+                    or r.get("autoreset_mode") != "SAME_STEP"
+                    or r["env"] != env_key
+                    or rt_r != V51_RUNTIME
+                    or r["online_budget_per_arm"] != 500000
+                    or r["external_interactions_bapr"] != 0
+                    or any(step_map.get(a) != 500000 for a in expected_arms)):
+                raise ValueError(f"v51 SAME_STEP/budget/runtime/zero-external check failed for {env_key}/{r['seed']}")
+        env_agg = aggregate["environments"][env_key]
+        prim = env_agg["primary_4mode"]
+        if prim["bapr_selfcal"]["switches_scheduled_total"] != 225:
+            raise ValueError(f"v51 scheduled switches != 225 in {env_key}")
+        for route, saved in prim.items():
+            vals = [r["primary_4mode"][route]["switching_mean"] for r in rows]
+            if (not np.allclose(vals, saved["switching_seed_means"], atol=1e-8, rtol=0)
+                    or not np.isclose(np.mean(vals), saved["switching_mean"], atol=1e-8, rtol=0)):
+                raise ValueError(f"v51 primary mean mismatch for {env_key}/{route}")
+        for comp in (
+            "sac", "escp256", "rma", "belief_sac", "uncompensated",
+            "bapr_instantaneous", "bapr_d100_lockin", "bapr_forward_shared", "bapr_noburst_selfcal",
+        ):
+            _check_paired_dict(
+                prim["bapr_selfcal"]["switching_seed_means"],
+                prim[comp]["switching_seed_means"],
+                env_agg["comparisons"][f"bapr_selfcal_minus_{comp}"],
+                f"v51/{env_key}/bapr_minus_{comp}",
+            )
+        _check_paired_dict(
+            prim["oracle"]["switching_seed_means"],
+            prim["bapr_noburst_oracle"]["switching_seed_means"],
+            env_agg["comparisons"]["oracle_burst_minus_oracle_noburst"],
+            f"v51/{env_key}/oracle_burst_minus_noburst",
+        )
+
+
+def check_jmlr_mujoco_v51():
+    aggregate = read(V51_PACKAGE / "analysis.json")
+    audits_by_env = {
+        env_key: [read(V51_PACKAGE / "audits" / env_key / f"seed_{s}.json") for s in V51_SEEDS]
+        for env_key in V51_ENVS
+    }
+    validate_jmlr_v51(aggregate, audits_by_env)
+    print("JMLR MuJoCo v5 multi-morphology suite v51 (SAME_STEP): 4 morphologies x 5 seeds; all 6 arms 500k real steps (0 external)")
+    for env_key in V51_ENVS:
+        prim = aggregate["environments"][env_key]["primary_4mode"]["bapr_selfcal"]
+        csac = aggregate["environments"][env_key]["comparisons"]["bapr_selfcal_minus_sac"]
+        cbs = aggregate["environments"][env_key]["comparisons"]["bapr_selfcal_minus_belief_sac"]
+        print(f"  {env_key}: BAPR minus SAC={csac['mean']:.2f} (wins={csac['wins']}/5); "
+              f"minus Belief-SAC={cbs['mean']:.2f} (wins={cbs['wins']}/5); "
+              f"switches={prim['switches_observed_total']}/{prim['switches_scheduled_total']} "
+              f"(seeds_w_sw={prim['seeds_with_observed_switches']}/5)")
+
+
 def main():
     check_halfcheetah()
     check_reacher()
     check_runtime_comparison()
     check_submission_extensions()
+    check_identification_baselines()
+    check_jmlr_brax_mechanism_v50()
+    check_jmlr_mujoco_v51()
     print("Released statistics and budget records agree; this is not a new performance decision.")
 
 

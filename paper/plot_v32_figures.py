@@ -330,7 +330,17 @@ def draw_box(ax, xy, width, height, text, facecolor, edgecolor="#686875"):
     return box
 
 
-def arrow(ax, start, end, *, connectionstyle="arc3", text=None, text_xy=None):
+def arrow(
+    ax,
+    start,
+    end,
+    *,
+    connectionstyle="arc3",
+    linestyle="-",
+    color=None,
+    text=None,
+    text_xy=None,
+):
     ax.add_patch(
         FancyArrowPatch(
             start,
@@ -338,7 +348,8 @@ def arrow(ax, start, end, *, connectionstyle="arc3", text=None, text_xy=None):
             arrowstyle="-|>",
             mutation_scale=8,
             linewidth=0.9,
-            color=COLORS["ink"],
+            linestyle=linestyle,
+            color=COLORS["ink"] if color is None else color,
             connectionstyle=connectionstyle,
             shrinkA=2,
             shrinkB=2,
@@ -351,13 +362,13 @@ def arrow(ax, start, end, *, connectionstyle="arc3", text=None, text_xy=None):
             text,
             ha="center",
             va="center",
-            fontsize=5.8,
+            fontsize=5.7,
             color=COLORS["muted"],
         )
 
 
 def make_method_figure() -> None:
-    fig = plt.figure(figsize=(6.0, 3.1))
+    fig = plt.figure(figsize=(6.0, 3.2))
     grid = fig.add_gridspec(1, 2, width_ratios=(1.05, 1.95), wspace=0.26)
 
     ax_a = fig.add_subplot(grid[0, 0])
@@ -386,9 +397,11 @@ def make_method_figure() -> None:
     ax_a.set_xticks(range(6), [f"$u_{i}$" for i in range(1, 7)])
     ax_a.set_yticks(range(4), [f"mode {i}" for i in range(4)])
     ax_a.tick_params(length=0, pad=2)
-    ax_a.set_xticks(np.arange(-0.5, 6, 1), minor=True)
-    ax_a.set_yticks(np.arange(-0.5, 4, 1), minor=True)
-    ax_a.grid(which="minor", color="white", linewidth=1.2)
+    ax_a.set_xticks(np.arange(0.5, 5.5, 1), minor=True)
+    ax_a.set_yticks(np.arange(0.5, 3.5, 1), minor=True)
+    ax_a.set_xlim(-0.5, 5.5)
+    ax_a.set_ylim(3.5, -0.5)
+    ax_a.grid(which="minor", color="white", linewidth=1.3)
     ax_a.tick_params(which="minor", bottom=False, left=False)
     for spine in ax_a.spines.values():
         spine.set_visible(False)
@@ -409,82 +422,104 @@ def make_method_figure() -> None:
     # Leave symmetric data-space margins so the outer box strokes are not
     # clipped at the axes boundary after tight PDF export.
     ax_b.set_xlim(-0.025, 1.025)
-    ax_b.set_ylim(0, 1)
+    ax_b.set_ylim(-0.02, 1.0)
     ax_b.axis("off")
     ax_b.set_title("Causal action reparameterization", loc="left", pad=7)
     add_panel_label(ax_b, "b", x=-0.05, y=1.05)
 
     draw_box(
         ax_b,
-        (0.00, 0.60),
-        0.25,
-        0.22,
-        "Frozen policy\n$\pi_r(s_t)$",
+        (0.00, 0.63),
+        0.24,
+        0.21,
+        "Frozen policy\n$\\pi_r(s_t)$",
         COLORS["soft_blue"],
     )
     draw_box(
         ax_b,
-        (0.33, 0.60),
+        (0.32, 0.63),
         0.31,
-        0.22,
-        "Mode\ncompensation\n$a_t=G_{\hat z_t}^{-1}G_r\pi_r(s_t)$",
+        0.21,
+        "Mode\ncompensation\n$a_t=G_{\\hat z_t}^{-1}G_r\\pi_r(s_t)$",
         COLORS["soft_rose"],
         edgecolor=COLORS["bapr"],
     )
     draw_box(
         ax_b,
-        (0.69, 0.60),
-        0.31,
-        0.22,
+        (0.70, 0.63),
+        0.30,
+        0.21,
         "Actuator regime\n" r"$u_t=\mathrm{clip}(G_{z_t}a_t+\varepsilon_t)$",
         "#EFEFF2",
     )
     draw_box(
         ax_b,
-        (0.68, 0.15),
-        0.32,
-        0.21,
+        (0.71, 0.22),
+        0.29,
+        0.19,
         "Completed\ntransition\n$(s_t,a_t,r_t,s_{t+1})$",
         "#F3F3F5",
     )
     draw_box(
         ax_b,
-        (0.35, 0.15),
-        0.29,
-        0.21,
-        "Inverse\nensemble\n$\{f_j(s_t,s_{t+1})\}$",
+        (0.36, 0.22),
+        0.27,
+        0.19,
+        "Inverse\nensemble\n$\\{f_j(s_t,s_{t+1})\\}$",
         COLORS["soft_blue"],
     )
     draw_box(
         ax_b,
-        (0.00, 0.15),
-        0.28,
-        0.21,
+        (0.00, 0.22),
+        0.26,
+        0.19,
         "Tempered\nmode belief\n$b_{t+1}(z)$",
         COLORS["soft_green"],
         edgecolor=COLORS["oracle"],
     )
 
-    arrow(ax_b, (0.25, 0.71), (0.33, 0.71))
-    arrow(ax_b, (0.64, 0.71), (0.69, 0.71), text="command", text_xy=(0.665, 0.86))
-    arrow(ax_b, (0.845, 0.60), (0.845, 0.36), text="observe", text_xy=(0.95, 0.48))
-    arrow(ax_b, (0.68, 0.255), (0.64, 0.255))
-    arrow(ax_b, (0.35, 0.255), (0.28, 0.255), text="evidence", text_xy=(0.315, 0.42))
+    arrow(ax_b, (0.24, 0.735), (0.32, 0.735))
+    arrow(ax_b, (0.63, 0.735), (0.70, 0.735), text="command $a_t$", text_xy=(0.665, 0.88))
+    arrow(ax_b, (0.855, 0.63), (0.855, 0.41), text="observe", text_xy=(0.945, 0.52))
     arrow(
         ax_b,
-        (0.14, 0.36),
-        (0.48, 0.60),
+        (0.71, 0.315),
+        (0.63, 0.315),
+        text="$(s_t,s_{t+1})$",
+        text_xy=(0.67, 0.46),
+    )
+    arrow(
+        ax_b,
+        (0.36, 0.315),
+        (0.26, 0.315),
+        text="evidence $\\ell_t(z)$",
+        text_xy=(0.31, 0.46),
+    )
+    arrow(
+        ax_b,
+        (0.76, 0.20),
+        (0.28, 0.23),
+        connectionstyle="arc3,rad=-0.22",
+        linestyle="--",
+        color=COLORS["muted"],
+        text="$a_t$ scores modes",
+        text_xy=(0.53, 0.085),
+    )
+    arrow(
+        ax_b,
+        (0.13, 0.41),
+        (0.47, 0.63),
         connectionstyle="arc3,rad=-0.12",
         text="use at $t+1$",
-        text_xy=(0.10, 0.52),
+        text_xy=(0.17, 0.55),
     )
     ax_b.text(
         0.5,
-        0.04,
+        0.00,
         "$a_t$ uses only $b_t$ and $s_t$; the true mode and $s_{t+1}$ are unavailable until after execution.",
         ha="center",
         va="bottom",
-        fontsize=6.1,
+        fontsize=6.0,
         color=COLORS["muted"],
     )
 
@@ -604,10 +639,25 @@ def make_results_figure(aggregate: dict, seeds: list[int], audits: dict[int, dic
     ax_c.axvline(1.0, color=COLORS["ink"], linewidth=0.85, linestyle="--")
     ax_c.set_yticks(ypos, ("SAC", "ESCP", "RE-SAC-0"))
     ax_c.set_xlim(0.82, 1.18)
-    ax_c.set_ylim(-0.55, 2.55)
+    ax_c.set_ylim(-0.55, 2.58)
     ax_c.set_xlabel("Achieved / required wins")
     ax_c.grid(axis="x", color=COLORS["grid"], linewidth=0.6)
     ax_c.set_title("Preregistered consistency", loc="left")
+    legend_handles = [
+        plt.Line2D([0], [0], marker="o", linestyle="none", markersize=3.8, color=COLORS["muted"], label="seeds / 8 req."),
+        plt.Line2D([0], [0], marker="s", linestyle="none", markersize=3.6, color=COLORS["muted"], label="events / 24 req."),
+    ]
+    ax_c.legend(
+        handles=legend_handles,
+        loc="upper left",
+        bbox_to_anchor=(0.51, 0.99),
+        frameon=False,
+        fontsize=5.1,
+        handletextpad=0.25,
+        borderpad=0.1,
+        labelspacing=0.25,
+        labelcolor=COLORS["muted"],
+    )
     add_panel_label(ax_c, "c")
 
     fig.subplots_adjust(left=0.075, right=0.985, top=0.88, bottom=0.24)
