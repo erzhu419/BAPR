@@ -445,7 +445,8 @@ def check_jmlr_mujoco_v51():
         for env_key in V51_ENVS
     }
     validate_jmlr_v51(aggregate, audits_by_env)
-    print("JMLR MuJoCo v5 multi-morphology suite v51 (SAME_STEP): 4 morphologies x 5 seeds; all 6 arms 500k real steps (0 external)")
+    print("JMLR MuJoCo v5 v51 (SAME_STEP): 4 morphologies x 5 seeds; 500k direct steps per arm. "
+          "BAPR uses its own replay for calibration; Belief-SAC reuses the paired BAPR estimator.")
     for env_key in V51_ENVS:
         prim = aggregate["environments"][env_key]["primary_4mode"]["bapr_selfcal"]
         csac = aggregate["environments"][env_key]["comparisons"]["bapr_selfcal_minus_sac"]

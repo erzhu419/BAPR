@@ -10,6 +10,16 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 import check_manuscript_results as check
+from check_jmlr_episode_results import paired_switch_recovery
+
+
+def test_paired_switch_recovery_requires_a_complete_eight_step_run():
+    def switch(step, steps, delay):
+        return dict(step=step, reached=steps > 0, steps_32=steps, sustained_delay=delay)
+
+    hard = {"switch_records": [switch(250, 32, 24), switch(500, 31, 3), switch(750, 32, 1)]}
+    soft = {"switch_records": [switch(250, 32, 25), switch(500, 32, None), switch(750, 0, None)]}
+    assert paired_switch_recovery([hard], [soft]) == (2, [0, 1], 1, [1, 0])
 
 
 def test_released_statistics_and_budgets(capsys):

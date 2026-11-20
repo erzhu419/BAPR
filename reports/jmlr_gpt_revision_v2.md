@@ -32,3 +32,14 @@ diagnostics reuse frozen checkpoints. None adds a trained policy or estimator.
    interface experiments. Only compact returns, episode diagnostics and
    scientific metadata are released. The checkers independently recompute
    counts and paired statistics from those records.
+
+## Second Review Follow-Up
+
+The abstract and introduction now distinguish reference-only MuJoCo
+calibration from the four-mode Reacher datasets. The MuJoCo budget matches
+direct collection, not access to the shared estimator's fitting data.
+The episode checker reproduces the same-opportunity Walker2d counts
+(5/59 vs. 35/59 unresolved), equal-window recovery (20/20 vs. 13/20), and
+matched-minus-nominal oracle intervals at gains 0.35 and 0.65. These are
+reanalyses of the unchanged versioned records. The public audit environment
+pins SciPy 1.15.3 and the other direct analysis dependencies.

@@ -35,6 +35,28 @@ def verify_pair(rows, oracle):
             raise ValueError("Episode or schedule differs between paired routes")
 
 
+def paired_switch_recovery(hard_rows, soft_rows):
+    """Compare matched switch opportunities and complete 32-step windows."""
+    reached = complete = 0
+    unresolved = [0, 0]
+    recovered_32 = [0, 0]
+    for hard, soft in zip(hard_rows, soft_rows, strict=True):
+        for a, b in zip(hard["switch_records"], soft["switch_records"], strict=True):
+            if a["step"] != b["step"]:
+                raise ValueError("Switch time differs between paired routes")
+            if not (a["reached"] and b["reached"]):
+                continue
+            reached += 1
+            full_window = a["steps_32"] == b["steps_32"] == 32
+            complete += full_window
+            for i, record in enumerate((a, b)):
+                delay = record["sustained_delay"]
+                unresolved[i] += delay is None
+                # A run starting at delay 24 occupies steps 24 through 31.
+                recovered_32[i] += full_window and delay is not None and delay + 8 <= 32
+    return reached, unresolved, complete, recovered_32
+
+
 def check_mujoco_group(routes, saved, label):
     oracle = routes["oracle"]
     for arm, rows in routes.items():
@@ -179,6 +201,19 @@ def check_frozen():
                                    ("both", (True, True))):
                 check_number(pair.count(values), analysis["paired_falls_vs_matched_oracle"][arm][metric],
                              f"{key}/{arm}/{metric}")
+
+        if key == "walker2d/polarity":
+            reached, unresolved, complete, recovered = paired_switch_recovery(
+                pooled["bapr_selfcal"], pooled["bapr_soft"])
+            print(f"Walker2d matched reached switches, unresolved: hard {unresolved[0]}/{reached}, "
+                  f"soft {unresolved[1]}/{reached}")
+            print(f"Walker2d matched full 32-step windows, recovered within window: "
+                  f"hard {recovered[0]}/{complete}, soft {recovered[1]}/{complete}")
+        if group.startswith("attenuation_"):
+            delta = np.asarray(arms["matched_oracle"]) - np.asarray(arms["nominal_oracle"])
+            mean, radius = reacher.interval(delta)
+            print(f"{key} matched minus nominal oracle: "
+                  f"{mean:+.1f} [{mean-radius:.1f}, {mean+radius:.1f}]")
 
 
 if __name__ == "__main__":

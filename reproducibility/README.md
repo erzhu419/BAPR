@@ -2,11 +2,15 @@
 
 The code and manuscript are on the `codex/code-paper` branch. Download the
 [versioned results supplement](https://github.com/erzhu419/BAPR/raw/refs/tags/jmlr-results-v2/BAPR_JMLR_results.zip)
-and extract it at the checkout root. To recompute the original seed-level
-results and the new episode diagnostics:
+to the checkout root. Extract it without overwriting the checkout's
+instructions. The following commands use Python 3.11 and the verified
+audit dependencies:
 
 ```sh
-python -m pip install numpy scipy matplotlib
+unzip -nq BAPR_JMLR_results.zip
+python3.11 -m venv .venv-audit
+. .venv-audit/bin/activate
+python -m pip install -r reproducibility/requirements-audit.txt
 python scripts/check_manuscript_results.py
 python scripts/check_jmlr_episode_results.py
 ```
@@ -25,7 +29,8 @@ termination and switch records. Replays on different hardware or
 runtime builds need not produce identical trajectories. The
 `jmlr_frozen_interface/` records contain the paired hard/soft/true-mode
 and gain-mismatch experiments. No full state/action trajectories are
-included.
+included. The episode checker recomputes the matched Walker2d switch
+counts and paired gain-oracle intervals from these records.
 
 To rerun an experiment, follow the corresponding protocol and runtime
 instructions. See [V50](jmlr_brax_mechanism_v50/README.md) and

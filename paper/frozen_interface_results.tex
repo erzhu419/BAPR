@@ -33,7 +33,9 @@ Walker2d & Hard MAP & 1249.4 & 72 & 94 & 11 & 1.397 / 3.366 \\
 \end{tabular}
 \end{table}
 
-In Walker2d, the hard and true-mode controllers both fell on 62 paired episodes. Hard alone fell on ten, and true mode alone on two. These are paired outcomes, not a causal attribution of individual falls. The 64 true-mode falls show that late or incorrect inference cannot account for all failures, even when the action transform is exactly known. The released records include per-switch first and sustained detection delays and indicate which scheduled switches were never reached.
+To compare the same Walker2d switch opportunities, we match by policy seed, episode, and switch time. Of the 59 switches both routes reached, hard selection left 5 unresolved and soft selection left 35 unresolved over their respective observed dwells. Of the 20 switches for which both routes executed all 32 post-switch steps, hard selection sustained eight correct estimates within those steps on 20/20, versus 13/20 for soft selection. These are descriptive comparisons conditional on survival; they do not identify why a given episode terminated.
+
+The hard and true-mode controllers both fell on 62 of the 75 paired Walker2d episodes. Hard alone fell on ten, and true mode alone on two. The 64 true-mode falls show that late or incorrect inference cannot account for all failures. The released records include per-switch first and sustained detection delays and identify unreached switches.
 
 \subsection{Sensitivity to Misspecified Attenuation}
 \label{sec:gain_mismatch}
@@ -44,17 +46,27 @@ On the same five frozen HalfCheetah policies, we keep the nominal map fixed at \
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{HalfCheetah gain-mismatch audit. All rows use the same actor and episode seeds. The last column gives paired 95\% intervals for hard MAP minus uncompensated execution across five policy seeds.}
+\caption{HalfCheetah gain-mismatch audit. The top panel gives mean returns. The bottom panel gives differences and paired 95\% intervals across five policy seeds. All routes are paired on actor and episode seeds. Both oracles know the true mode and differ only in the magnitude used for compensation.}
 \label{tab:gain_mismatch}
-\begin{tabular}{rrrrrl}
+\begin{tabular}{rrrrr}
 \toprule
-True gain & Hard MAP & Nominal oracle & Matched oracle & Uncomp. & Paired gain [95\% CI] \\
+True gain & Hard MAP & Nominal oracle & Matched oracle & Uncompensated \\
 \midrule
-0.35 & 4264.3 & 4344.0 & 4350.5 & 1134.3 & \(+3129.9\) \([2514.6,3745.3]\) \\
-0.50 & 5176.9 & 5265.4 & 5265.4 & 1052.7 & \(+4124.2\) \([3687.7,4560.7]\) \\
-0.65 & 6374.6 & 6467.5 & 6496.8 & 890.3 & \(+5484.4\) \([5003.3,5965.5]\) \\
+0.35 & 4264.3 & 4344.0 & 4350.5 & 1134.3 \\
+0.50 & 5176.9 & 5265.4 & 5265.4 & 1052.7 \\
+0.65 & 6374.6 & 6467.5 & 6496.8 & 890.3 \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\begin{tabular}{rll}
+\toprule
+True gain & Hard MAP minus uncompensated & Matched minus nominal oracle \\
+\midrule
+0.35 & \(+3129.9\) \([2514.6,3745.3]\) & \(+6.4\) \([-31.8,44.7]\) \\
+0.50 & \(+4124.2\) \([3687.7,4560.7]\) & \(0.0\) \([0.0,0.0]\) \\
+0.65 & \(+5484.4\) \([5003.3,5965.5]\) & \(+29.3\) \([-18.5,77.1]\) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Compensation won all five seeds against no correction at each tested gain, and the causal route sustained recovery on all 225 switches per gain. Commands that saturate under both gain assumptions receive the same correction. The result tests bounded magnitude errors with correct signs and channel assignments on HalfCheetah; it does not establish robustness to sign errors or unseen map families.
+Compensation won all five seeds against no correction at each tested gain, and the causal route sustained recovery on all 225 switches per gain. The uncorrected route also lacks polarity correction, so that contrast does not isolate the value of knowing the gain magnitude. With the true mode given to both oracles, the paired intervals at 0.35 and 0.65 cross zero: the test did not resolve a return benefit from knowing the exact magnitude. The oracles coincide at 0.50. These results cover magnitude errors with correct signs and channel assignments on HalfCheetah, not sign errors or unseen map families.
